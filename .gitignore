@@ -1,0 +1,16 @@
+node_modules/
+.wrangler/
+.dev.vars*
+!.dev.vars.example
+public/
+src/generated/
+private/
+test-results/
+
+# Secrets & Credentials
+*.json.key
+client_secret*.json
+key*.json
+*.pem
+.oauth_tokens.json
+

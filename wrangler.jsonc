@@ -1,0 +1,70 @@
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "electrical-maintenance",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-09-20",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "electrical-maintenance-local",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "local",
+    "DEV_AUTH": "local-admin",
+    "MAINTENANCE_MODE": "false",
+    "MACHINE_IMAGE_FOLDER_ID": "1zhjsMPg5SNiDkOqJrhQ9eE036rT2Fm3U",
+    "PART_IMAGE_FOLDER_ID": "1zhjsMPg5SNiDkOqJrhQ9eE036rT2Fm3U"
+  },
+  "env": {
+    "staging": {
+      "name": "electrical-maintenance-staging",
+      "workers_dev": true,
+      "preview_urls": false,
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "DEV_AUTH": "",
+        "MAINTENANCE_MODE": "false",
+        "MACHINE_IMAGE_FOLDER_ID": "1zhjsMPg5SNiDkOqJrhQ9eE036rT2Fm3U",
+        "PART_IMAGE_FOLDER_ID": "1zhjsMPg5SNiDkOqJrhQ9eE036rT2Fm3U"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "electrical-maintenance-staging",
+          "database_id": "e7de11dd-aed3-4437-81f1-8c2ef8abe297",
+          "migrations_dir": "migrations"
+        }
+      ]
+    },
+    "production": {
+      "name": "electrical-maintenance",
+      "workers_dev": true,
+      "preview_urls": false,
+      "vars": {
+        "ENVIRONMENT": "production",
+        "DEV_AUTH": "",
+        "MAINTENANCE_MODE": "false",
+        "MACHINE_IMAGE_FOLDER_ID": "1zhjsMPg5SNiDkOqJrhQ9eE036rT2Fm3U",
+        "PART_IMAGE_FOLDER_ID": "1zhjsMPg5SNiDkOqJrhQ9eE036rT2Fm3U"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "electrical-maintenance",
+          "database_id": "4201d512-3b78-4a4f-9199-1269aba838bf",
+          "migrations_dir": "migrations"
+        }
+      ]
+    }
+  }
+}

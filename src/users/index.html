@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จัดการผู้ใช้งาน - Electrical Maintenance</title>
+  <link rel="icon" type="image/png" href="__APP_FAVICON__">
+  <!-- APP_STYLE -->
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cc681c" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          จัดการผู้ใช้งาน (User Management)
+        </h1>
+        <p class="page-subtitle">กำหนดสิทธิ์รายโมดูล บัญชีชั่วคราว และรีเซ็ตรหัสผ่าน</p>
+      </div>
+      <div class="header-right">
+        <button id="btn-create-user" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          เพิ่มผู้ใช้งานใหม่
+        </button>
+      </div>
+    </header>
+
+    <!-- Stat Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">ผู้ใช้งานทั้งหมด</div>
+        <div class="stat-value" id="stat-total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">ผู้ใช้งานถาวร</div>
+        <div class="stat-value" id="stat-perm">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">ผู้ใช้ชั่วคราว</div>
+        <div class="stat-value" id="stat-temp">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">ผู้ดูแลระบบ (Admin)</div>
+        <div class="stat-value" id="stat-admin">0</div>
+      </div>
+    </div>
+
+    <!-- Search & Filter Rail -->
+    <div class="filter-bar">
+      <div class="search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="input-search" placeholder="ค้นหาชื่อผู้ใช้ หรือชื่อ-นามสกุล...">
+      </div>
+      <div class="filter-group">
+        <select id="select-type-filter">
+          <option value="">ทุกประเภทบัญชี</option>
+          <option value="permanent">ถาวร</option>
+          <option value="temporary">ชั่วคราว</option>
+        </select>
+        <select id="select-status-filter">
+          <option value="">ทุกสถานะ</option>
+          <option value="active">ใช้งาน</option>
+          <option value="inactive">ระงับ</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- User Table -->
+    <div class="table-card">
+      <table class="user-table" id="table-users">
+        <thead>
+          <tr>
+            <th>ชื่อผู้ใช้</th>
+            <th>ชื่อแสดงผล</th>
+            <th>ประเภทบัญชี</th>
+            <th>สิทธิ์การเข้าถึง</th>
+            <th>สิทธิ์ลบ</th>
+            <th>สถานะ</th>
+            <th style="text-align:right">การจัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="user-table-body">
+          <tr><td colspan="7" class="loading-state">กำลังโหลดข้อมูลผู้ใช้...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- User Modal (Create / Edit) -->
+  <div id="modal-user" class="modal-backdrop" style="display:none">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="modal-user-title" class="modal-title">เพิ่มผู้ใช้งานใหม่</h2>
+        <button id="modal-user-close" class="modal-close-btn">&times;</button>
+      </div>
+      <form id="form-user">
+        <input type="hidden" id="user-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="u-username">ชื่อผู้ใช้ (Username) <span class="req">*</span></label>
+            <input type="text" id="u-username" required placeholder="เช่น somchai" pattern="[a-zA-Z0-9_.-]{3,30}">
+            <small class="field-hint">ภาษาอังกฤษหรือตัวเลข 3-30 ตัวอักษร</small>
+          </div>
+          <div class="form-group" id="group-password">
+            <label for="u-password">รหัสผ่านเริ่มต้น <span class="req">*</span></label>
+            <input type="password" id="u-password" placeholder="อย่างน้อย 5 ตัวอักษร" minlength="5">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="u-display-name">ชื่อ-นามสกุล / ตำแหน่งแสดงผล <span class="req">*</span></label>
+          <input type="text" id="u-display-name" required placeholder="เช่น สมชาย มีสุข (ช่างซ่อมบำรุง)">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="u-type">ประเภทผู้ใช้งาน</label>
+            <select id="u-type">
+              <option value="permanent">ถาวร (ไม่มีวันหมดอายุ)</option>
+              <option value="temporary">ชั่วคราว (มีกำหนดวันหมดอายุ)</option>
+            </select>
+          </div>
+          <div class="form-group" id="group-expiry" style="display:none">
+            <label for="u-expires-at">วัน-เวลาหมดอายุ <span class="req">*</span></label>
+            <input type="datetime-local" id="u-expires-at">
+          </div>
+        </div>
+
+        <!-- Permissions Matrix -->
+        <div class="perms-section">
+          <h3 class="perms-title">กำหนดสิทธิ์การใช้งาน (Granular Permissions)</h3>
+          
+          <div class="perm-row">
+            <div class="perm-name">
+              <strong>โมดูลเครื่องจักร (Machines)</strong>
+              <small>ทะเบียนเครื่องจักร แผนก ไลน์ผลิต</small>
+            </div>
+            <div class="perm-control">
+              <select id="perm-machines">
+                <option value="none">❌ เข้าไม่ได้</option>
+                <option value="read">👁️ ดูได้อย่างเดียว</option>
+                <option value="write" selected>✏️ บันทึก/แก้ไขได้</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="perm-row">
+            <div class="perm-name">
+              <strong>โมดูล Master อะไหล่ (Parts)</strong>
+              <small>แค็ตตาล็อกอะไหล่ ราคา และยี่ห้อ</small>
+            </div>
+            <div class="perm-control">
+              <select id="perm-parts">
+                <option value="none">❌ เข้าไม่ได้</option>
+                <option value="read">👁️ ดูได้อย่างเดียว</option>
+                <option value="write" selected>✏️ บันทึก/แก้ไขได้</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="perm-row">
+            <div class="perm-name">
+              <strong>โมดูล Equipment BOM</strong>
+              <small>อะไหล่ประจำเครื่องจักร ประวัติการเปลี่ยน</small>
+            </div>
+            <div class="perm-control">
+              <select id="perm-bom">
+                <option value="none">❌ เข้าไม่ได้</option>
+                <option value="read">👁️ ดูได้อย่างเดียว</option>
+                <option value="write" selected>✏️ บันทึก/แก้ไขได้</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="perm-row">
+            <div class="perm-name">
+              <strong>จัดการผู้ใช้งาน (User Admin)</strong>
+              <small>เพิ่ม ลบ แก้ไขสิทธิ์ และรีเซ็ตรหัสผ่าน</small>
+            </div>
+            <div class="perm-control">
+              <select id="perm-users">
+                <option value="none" selected>❌ ไม่มีสิทธิ์</option>
+                <option value="admin">⭐ ผู้ดูแลระบบ (Admin)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="perm-row" style="border-bottom:none">
+            <div class="perm-name">
+              <strong>สิทธิ์ลบข้อมูล (Can Delete)</strong>
+              <small>อนุญาตให้ลบเครื่องจักร อะไหล่ หรือถอด BOM</small>
+            </div>
+            <div class="perm-control">
+              <label class="toggle-label">
+                <input type="checkbox" id="perm-can-delete">
+                <span>อนุญาตให้ลบได้</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="btn-cancel-user" class="btn btn-secondary">ยกเลิก</button>
+          <button type="submit" id="btn-save-user" class="btn btn-primary">บันทึกข้อมูล</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Reset Password Modal -->
+  <div id="modal-reset" class="modal-backdrop" style="display:none">
+    <div class="modal-card modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">ยืนยันรีเซ็ตรหัสผ่าน</h2>
+        <button id="modal-reset-close" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:16px 0">
+        <p>คุณต้องการรีเซ็ตรหัสผ่านของ <strong id="reset-target-user"></strong> เป็น:</p>
+        <div class="reset-preview-code">1234</div>
+        <p class="reset-note">⚠️ เมื่อผู้ใช้เข้าสู่ระบบด้วยรหัส <strong>1234</strong> (ความยาวต่ำกว่า 5 ตัวอักษร) ระบบจะ <strong>บังคับให้ผู้ใช้ตั้งรหัสผ่านใหม่ทันที</strong> ก่อนเข้าใช้งาน</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btn-cancel-reset" class="btn btn-secondary">ยกเลิก</button>
+        <button type="button" id="btn-confirm-reset" class="btn btn-danger">ยืนยันรีเซ็ตเป็น 1234</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" style="display:none"></div>
+
+  <!-- APP_SCRIPT -->
+</body>
+</html>

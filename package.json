@@ -1,0 +1,17 @@
+{
+  "name": "electrical-maintenance",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "test": "node --test --test-isolation=none tests/*.test.mjs",
+    "dev": "wrangler dev --local --port 8791",
+    "db:local": "wrangler d1 migrations apply DB --local",
+    "seed:local": "node scripts/seed-local.mjs",
+    "deploy:staging": "node scripts/deploy.mjs staging",
+    "deploy:production": "node scripts/deploy.mjs production",
+    "user-admin": "node scripts/user-admin.mjs"
+  }
+}
