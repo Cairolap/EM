@@ -16,8 +16,10 @@ export const isRead=(scope,method)=>(scope==='machines'?machineReads:scope==='pa
 const publicMachine=({requestId,photoFileId,...m})=>({...m,hasPhoto:!!photoFileId});
 const publicPart=({requestId,...p})=>p;
 
-async function bomContext(repo){
- const ref=await repo.references(),rawMachines=await repo.catalog('machines'),rawParts=await repo.catalog('parts');
+async function bomContext(repo,{partIds=null}={}){
+ const [ref,rawMachines,rawParts]=await Promise.all([
+  repo.references(),repo.catalog('machines'),partIds?repo.partsByIds(partIds):repo.catalog('parts')
+ ]);
  const bomRef={
   departments:ref.departments.map(d=>({DeptID:d.deptId,DeptName:d.deptName,Code:d.deptId,IsActive:d.isActive})),
   lines:ref.lines.map(l=>({LineID:l.lineId,DeptID:l.deptId,LineName:l.lineName,IsActive:l.isActive})),
@@ -54,27 +56,27 @@ export async function dispatch(env,actor,scope,method,args,key){
    return args[0]?.all?{all:true,allTotal:rows.length,total:rows.length,items:rows.map(publicPart)}:{...PartCore.query(rows,args[0]||{}),items:PartCore.query(rows,args[0]||{}).items.map(publicPart)};
   }
   if(scope==='bom'){
-   const {bomRef,bomParts}=await bomContext(repo);
-   if(method==='references')return bomRef;
+   if(method==='references')return (await bomContext(repo,{partIds:new Set()})).bomRef;
    if(method==='searchParts'){
+    const {bomParts}=await bomContext(repo);
     const query=args[0]||{};if(query.all)return {items:bomParts,total:bomParts.length};
     const words=BomCore.normalized(query.query).split(/\s+/).filter(Boolean);
     return BomCore.page(bomParts.filter(p=>words.every(w=>BomCore.normalized([p.ID,p['Part number'],p.Description,p.Brand].join(' ')).includes(w))),query);
    }
    if(method==='lineMachineStats'){
-    const query=args[0]||{},records=await repo.bomLineRecords(query.deptId,query.lineId);
+    const query=args[0]||{},records=await repo.bomLineRecords(query.deptId,query.lineId),{bomRef,bomParts}=await bomContext(repo,{partIds:records.map(r=>r.PartID)});
     const bomRepo={references:()=>bomRef,parts:()=>bomParts,lineLocation:(dept,line)=>({code:dept.DeptID,sheet:'LINE_'+line.LineID}),assertReady:()=>{},records:()=>records};
     const service=new BomService(bomRepo,()=>new Date(),()=>crypto.randomUUID());
     return service.lineMachineStats(query);
    }
    if(method==='list'){
-    const query=args[0]||{},records=await repo.bomRecords(query.machineId);
+    const query=args[0]||{},records=await repo.bomRecords(query.machineId),{bomRef,bomParts}=await bomContext(repo,{partIds:records.map(r=>r.PartID)});
     const bomRepo={references:()=>bomRef,parts:()=>bomParts,location:(m)=>({code:m.DeptID,sheet:'LINE_'+m.LineID}),assertReady:()=>{},records:()=>records};
     const service=new BomService(bomRepo,()=>new Date(),()=>crypto.randomUUID());
     return service.list(query);
    }
    if(method==='history'){
-    const query=args[0]||{},records=await repo.bomRecords(query.machineId),events=await repo.bomEvents(query.machineId,query.equipmentId);
+    const query=args[0]||{},records=await repo.bomRecords(query.machineId),events=await repo.bomEvents(query.machineId,query.equipmentId),{bomRef,bomParts}=await bomContext(repo,{partIds:records.filter(r=>r.EquipmentID===query.equipmentId).map(r=>r.PartID)});
     const bomRepo={references:()=>bomRef,parts:()=>bomParts,location:(m)=>({code:m.DeptID,sheet:'LINE_'+m.LineID}),assertReady:()=>{},records:()=>records,events:()=>events};
     const service=new BomService(bomRepo,()=>new Date(),()=>crypto.randomUUID());
     return service.history(query);

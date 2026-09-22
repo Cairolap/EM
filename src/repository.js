@@ -7,6 +7,12 @@ export class Repository {
  async brands(){return (await this.all('SELECT * FROM brands')).map(b=>({id:b.id,name:b.name,active:!!b.is_active,version:b.version}));}
  async machine(id){return machineRecord(await this.db.prepare(MACHINE_SELECT+' WHERE m.id=?').bind(id).first());}
  async part(id){return partRecord(await this.db.prepare(PART_SELECT+' WHERE p.id=?').bind(id).first());}
+ async partsByIds(ids){
+   const unique=[...new Set([...ids].map(id=>String(id||'').trim()).filter(Boolean))];
+   if(!unique.length)return [];
+   const placeholders=unique.map(()=>'?').join(',');
+   return (await this.all(PART_SELECT+' WHERE p.id IN ('+placeholders+')',...unique)).map(partRecord);
+ }
  async catalog(kind){
    // Retains existing Thai natural collation and bulk-image workflow. Fail explicitly rather than truncate.
    const rows=await this.all((kind==='machines'?MACHINE_SELECT:PART_SELECT)+' ORDER BY '+(kind==='machines'?'m':'p')+'.id LIMIT 10001');
@@ -45,7 +51,7 @@ export class Repository {
   return rows.map(bomRecord);
  }
  async bomLineRecords(deptId,lineId){
-  const rows=await this.all('SELECT r.* FROM equipment_records r JOIN machines m ON r.machine_id=m.id WHERE m.department_id=? AND m.line_id=? ORDER BY r.created_at ASC',deptId,lineId);
+  const rows=await this.all("SELECT r.* FROM equipment_records r JOIN machines m ON r.machine_id=m.id WHERE m.department_id=? AND m.line_id=? AND r.record_status='ACTIVE' ORDER BY r.created_at ASC",deptId,lineId);
   return rows.map(bomRecord);
  }
  async bomOperation(opId){

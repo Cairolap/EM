@@ -16,9 +16,9 @@ function run(cmd, args) {
 }
 
 console.log(`=== Pre-deployment checks for ${env} ===`);
+run('node', ['scripts/build.mjs', env]);
 run('node', ['scripts/check.mjs']);
 run('npm', ['test']);
-run('node', ['scripts/build.mjs']);
 
 console.log(`=== Deploying to Cloudflare Workers (${env}) ===`);
 run('wrangler', ['deploy', '--env', env]);

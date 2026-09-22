@@ -4,6 +4,7 @@ node_modules/
 !.dev.vars.example
 private/
 test-results/
+.production-snapshot/
 
 # Secrets & Credentials
 *.json.key
@@ -11,4 +12,3 @@ client_secret*.json
 key*.json
 *.pem
 .oauth_tokens.json
-

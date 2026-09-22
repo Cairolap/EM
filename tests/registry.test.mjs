@@ -338,3 +338,43 @@ test('user management: granular permissions, temporary expiry, reset to 1234 and
  assert.equal(expiredLogin.status,401);
 });
 
+test('production baseline parity: lineOrder sorting/validation, bom pageSize all, and partsByIds optimization', async () => {
+ const env = setup();
+ const { MachineCore } = await import('../src/generated/machine-core.js');
+ const { BomCore } = await import('../src/generated/bom-core.js');
+ const { Repository } = await import('../src/repository.js');
+
+ // 1. MachineCore lineOrder validation
+ const valid = MachineCore.validate({ ...machine, lineOrder: '12' });
+ assert.equal(valid.value.lineOrder, 12);
+ assert.equal(Object.keys(valid.errors).length, 0);
+
+ const invalid = MachineCore.validate({ ...machine, lineOrder: '0' });
+ assert.ok(invalid.errors.lineOrder);
+
+ const empty = MachineCore.validate({ ...machine, lineOrder: '' });
+ assert.equal(empty.value.lineOrder, '');
+
+ // 2. Sorting by lineOrder
+ const sorted = MachineCore.query([
+  { machineId: 'M1', machineCode: 'A', lineOrder: 20 },
+  { machineId: 'M2', machineCode: 'B', lineOrder: 5 },
+  { machineId: 'M3', machineCode: 'C', lineOrder: '' }
+ ], { sortBy: 'lineOrder', sortOrder: 'asc' });
+ assert.equal(sorted.items[0].machineId, 'M2');
+ assert.equal(sorted.items[1].machineId, 'M1');
+ assert.equal(sorted.items[2].machineId, 'M3');
+
+ // 3. BomCore pageSize === 'all'
+ const pagedAll = BomCore.page([1, 2, 3, 4, 5], { pageSize: 'all' });
+ assert.equal(pagedAll.pageSize, 'all');
+ assert.equal(pagedAll.items.length, 5);
+
+ // 4. Repository partsByIds
+ const repo = new Repository(env.DB);
+ await rpc(env, 'parts', 'createPart', [{ partNumber: 'PX-1', description: 'P1', brandId: 'B01', price: 10, lifespan: 1, requestId: crypto.randomUUID() }]);
+ const p2 = await rpc(env, 'parts', 'createPart', [{ partNumber: 'PX-2', description: 'P2', brandId: 'B01', price: 20, lifespan: 2, requestId: crypto.randomUUID() }]);
+ const fetched = await repo.partsByIds([p2.data.id]);
+ assert.equal(fetched.length, 1);
+ assert.equal(fetched[0].partNumber, 'PX-2');
+});

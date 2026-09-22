@@ -1,0 +1,2460 @@
+<!--
+  AUTO-GENERATED FILE. DO NOT MODIFY DIRECTLY.
+  Source files are in src/ and gas/.
+  Rebuild using: npm run build
+-->
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ทะเบียนอะไหล่ — Part Register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --color-primary:#176487; --color-ink:#19374a; --color-muted:#536a78; --color-background:#edf2f5; --color-surface:#ffffff; --color-border:#cdd9e0; --color-tint:#e5f0f5; --color-danger:#a73539; --color-warning:#845111;
+  --scroll-thumb:#91a5b2; --scroll-track:#edf2f5; --scroll-hover:#657f90; --scroll-active:#19374a;
+  --font-body:"Prompt","Plus Jakarta Sans",system-ui,-apple-system,sans-serif; --font-display:"Plus Jakarta Sans","Prompt",sans-serif; --font-mono:"JetBrains Mono",Consolas,monospace;
+  --radius-control:8px; --radius-panel:14px; --space-unit:8px; --motion:150ms;
+}
+* {box-sizing:border-box; scrollbar-width:thin; scrollbar-color:var(--scroll-thumb) var(--scroll-track)}
+*::-webkit-scrollbar{width:10px;height:10px} *::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border-radius:8px} *::-webkit-scrollbar-track{background:var(--scroll-track)} *::-webkit-scrollbar-thumb:hover{background:var(--scroll-hover)} *::-webkit-scrollbar-thumb:active{background:var(--scroll-active)}
+body{margin:0;background:var(--color-background);color:var(--color-ink);font:16px/1.6 var(--font-body)}
+button,input,select,textarea{font:inherit} button,a,select{touch-action:manipulation} button:not(:disabled),a,select:not(:disabled){cursor:pointer} button:disabled,select:disabled{cursor:default;opacity:.55}
+button,input,select,textarea{border-radius:var(--radius-control)} input,select,textarea{width:100%;min-height:44px;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-ink);padding:10px 12px}
+input:hover,select:hover,textarea:hover{border-color:var(--scroll-hover)} input[aria-invalid=true],textarea[aria-invalid=true],select[aria-invalid=true]{border-color:var(--color-danger)}
+textarea{resize:none;min-height:86px;max-height:260px} :focus-visible{outline:3px solid var(--color-primary);outline-offset:3px} input:focus-visible,textarea:focus-visible,select:focus-visible{outline-offset:1px}
+[hidden]{display:none !important} /* Native hidden must override flex/grid component layout. */
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:9px 16px;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-ink);font-size:14px;font-weight:600;white-space:nowrap;transition:background var(--motion),border-color var(--motion)}
+.button:hover:not(:disabled){background:var(--color-tint);border-color:var(--color-primary)} .button:active:not(:disabled){transform:translateY(1px)} .button.primary{background:var(--color-primary);color:var(--color-surface);border-color:var(--color-primary)} .button.primary:hover:not(:disabled){background:var(--color-ink)}
+.button.ghost{background:transparent;border-color:transparent}.button.danger{background:var(--color-danger);color:var(--color-surface);border-color:var(--color-danger)}.button.warning{background:var(--color-warning);color:var(--color-surface)} .button.icon{width:44px;padding:0;font-size:24px}
+.topbar{min-height:80px;background:var(--color-surface);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;padding:16px max(24px,calc((100vw - 1400px)/2));gap:12px}
+.wordmark{display:flex;align-items:center;gap:12px;font:700 20px var(--font-display);letter-spacing:1px}.brand-icon{display:grid;place-items:center;width:38px;height:38px;border:2px solid var(--color-primary);color:var(--color-primary);border-radius:5px;font-size:28px}.wordmark-light{font-weight:400;margin-left:5px}.privacy{font-size:12px;color:var(--color-muted)}.privacy span{color:var(--color-primary);margin-right:5px}
+
+/* Topbar Navigation */
+.main-nav{display:flex;align-items:center;gap:6px;background:var(--color-background);padding:4px;border-radius:10px;border:1px solid var(--color-border)}
+.nav-tab{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:0;background:transparent;color:var(--color-muted);font-size:13px;font-weight:600;border-radius:7px;transition:all var(--motion);cursor:pointer}
+.nav-tab:hover{color:var(--color-ink);background:rgba(255,255,255,0.6)}
+.nav-tab.active{background:var(--color-surface);color:var(--color-primary);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.nav-badge{display:inline-flex;align-items:center;justify-content:center;padding:2px 7px;font-size:11px;font-family:var(--font-mono);font-weight:700;border-radius:12px;background:var(--color-warning);color:#ffffff}
+
+/* Batch Image Uploader */
+.batch-section{display:flex;flex-direction:column;gap:18px}
+.batch-header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);padding:24px}
+.batch-headline{max-width:720px}
+.batch-title{font-size:clamp(22px,2.5vw,30px);font-weight:700;letter-spacing:-0.5px;margin:0 0 8px;line-height:1.3}
+.batch-sub{color:var(--color-muted);font-size:14px;margin:0;line-height:1.6}
+.batch-sub kbd{background:var(--color-tint);border:1px solid var(--color-border);padding:2px 6px;border-radius:4px;font-family:var(--font-mono);font-size:12px;color:var(--color-primary);font-weight:600}
+.batch-stats{display:flex;gap:12px;flex-shrink:0}
+.batch-stat-card{background:var(--color-background);border:1px solid var(--color-border);border-radius:10px;padding:12px 18px;min-width:110px;text-align:center;display:flex;flex-direction:column;gap:4px}
+.stat-label{font-size:11px;font-weight:600;color:var(--color-muted)}
+.stat-val{font-size:22px;font-weight:800;font-family:var(--font-mono);line-height:1.2}
+.stat-missing .stat-val{color:var(--color-warning)}
+.stat-pending .stat-val{color:var(--color-primary)}
+.stat-success .stat-val{color:#198754}
+
+.batch-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);padding:14px 20px;flex-wrap:wrap}
+.batch-filter-group{display:flex;align-items:center;gap:16px;flex:1;flex-wrap:wrap}
+.batch-pills{display:flex;gap:6px;background:var(--color-background);padding:4px;border-radius:8px;border:1px solid var(--color-border)}
+.batch-pill{border:0;background:transparent;color:var(--color-muted);padding:6px 12px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;transition:all var(--motion)}
+.batch-pill:hover{color:var(--color-ink)}
+.batch-pill.active{background:var(--color-surface);color:var(--color-primary);box-shadow:0 1px 2px rgba(0,0,0,0.06)}
+.batch-search-control{display:flex;align-items:center;border:1px solid var(--color-border);border-radius:8px;padding-left:10px;gap:6px;min-height:38px;background:var(--color-surface);min-width:260px;flex:1;max-width:380px}
+.batch-search-control .search-icon{color:var(--color-muted);font-size:18px}
+.batch-search-control input{border:0;background:transparent;min-height:36px;padding:4px 8px;font-size:13px}
+.batch-cta-group{display:flex;gap:8px;align-items:center}
+
+/* Batch Progress Bar */
+.batch-progress-card{background:var(--color-surface);border:1px solid var(--color-primary);border-radius:10px;padding:14px 20px;box-shadow:0 4px 14px rgba(23,100,135,0.12)}
+.batch-progress-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.progress-title-row{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--color-primary)}
+.progress-count-badge{font-family:var(--font-mono);font-size:12px;background:var(--color-tint);padding:2px 8px;border-radius:4px;font-weight:700}
+.progress-bar-bg{background:var(--color-background);border-radius:6px;height:10px;overflow:hidden;border:1px solid var(--color-border)}
+.progress-bar-fill{background:linear-gradient(90deg,var(--color-primary),#2a8bb8);height:100%;transition:width 0.2s ease}
+
+/* Batch Items List */
+.batch-content-wrap{min-height:300px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);padding:16px;overflow:clip}
+.batch-items-list{display:flex;flex-direction:column;gap:10px}
+.batch-row{display:grid;grid-template-columns:minmax(220px,1.2fr) minmax(180px,1.4fr) 90px minmax(260px,1.8fr) 130px;gap:16px;align-items:center;padding:12px 16px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:10px;transition:all var(--motion);outline:none}
+.batch-row:hover{border-color:var(--scroll-hover);background:rgba(237,242,245,0.4)}
+.batch-row.row-focused{border-color:var(--color-primary);box-shadow:0 0 0 2px rgba(23,100,135,0.25);background:var(--color-tint)}
+.batch-row.row-has-pending{border-left:4px solid var(--color-primary)}
+.batch-row.row-success{border-left:4px solid #198754;background:rgba(25,135,84,0.03)}
+.batch-row.row-uploading{border-left:4px solid var(--color-warning);opacity:0.85}
+
+.part-meta-col{display:flex;flex-direction:column;gap:4px;min-width:0}
+.part-code-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.batch-part-num{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--color-primary);word-break:break-all}
+.batch-copy-btn{border:1px solid var(--color-border);background:var(--color-background);color:var(--color-ink);font-size:11px;padding:3px 8px;min-height:26px;border-radius:5px;font-weight:600;display:inline-flex;align-items:center;gap:4px;transition:all var(--motion)}
+.batch-copy-btn:hover{background:var(--color-surface);border-color:var(--color-primary);color:var(--color-primary)}
+.batch-copy-btn.copied{background:#198754;color:#ffffff;border-color:#198754}
+
+.batch-info-col{min-width:0}
+.batch-desc-text{font-size:12px;color:var(--color-ink);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 4px}
+.batch-tag-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.batch-brand-pill{font-size:11px;background:var(--color-tint);color:var(--color-ink);padding:2px 6px;border-radius:4px;font-weight:500}
+.batch-store-pill{font-size:10px;font-family:var(--font-mono);background:var(--color-background);color:var(--color-muted);padding:2px 5px;border-radius:3px;border:1px solid var(--color-border)}
+
+.batch-curr-pic-col{display:flex;flex-direction:column;align-items:center;gap:4px}
+.batch-curr-thumb{width:46px;height:46px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-background);display:grid;place-items:center;overflow:hidden;font-size:18px;color:var(--color-muted)}
+.batch-curr-thumb img{width:100%;height:100%;object-fit:contain}
+.batch-pic-tag{font-size:10px;padding:1px 5px;border-radius:3px;font-weight:600}
+.tag-missing{background:#fff3cd;color:#856404}
+.tag-has{background:#d1e7dd;color:#0f5132}
+
+.batch-paste-col{min-width:0}
+.paste-target-box{border:1.5px dashed var(--color-border);background:var(--color-background);border-radius:8px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;transition:all var(--motion)}
+.paste-target-box.has-image{border-style:solid;border-color:var(--color-primary);background:var(--color-surface)}
+.paste-prompt-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:0;flex-wrap:wrap}
+.paste-action-btn{padding:5px 10px;min-height:30px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;border-radius:6px}
+.paste-action-btn.paste-btn{background:var(--color-tint);color:var(--color-primary);border:1px solid var(--color-primary)}
+.paste-action-btn.paste-btn:hover{background:var(--color-primary);color:#ffffff}
+.paste-shortcut-hint{font-size:11px;color:var(--color-muted);white-space:nowrap}
+
+.pending-image-preview{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.pending-thumb{width:46px;height:46px;border-radius:6px;border:1px solid var(--color-primary);object-fit:contain;background:#000;flex-shrink:0}
+.pending-details{min-width:0;display:flex;flex-direction:column;gap:2px}
+.pending-size{font-size:11px;font-family:var(--font-mono);color:var(--color-ink);font-weight:600}
+.pending-ratio{font-size:10px;color:#198754;font-weight:600}
+.pending-cancel-btn{border:0;background:transparent;color:var(--color-danger);font-size:12px;padding:4px 6px;cursor:pointer;border-radius:4px}
+.pending-cancel-btn:hover{background:rgba(167,53,57,0.1)}
+
+.batch-action-col{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.batch-item-upload-btn{min-height:34px;padding:5px 12px;font-size:12px;font-weight:600;width:100%}
+.batch-status-badge{font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.status-done{color:#198754}
+.status-error{color:var(--color-danger)}
+.status-uploading{color:var(--color-warning)}
+
+/* Bulk Table Add & Excel Import */
+.bulk-section{display:flex;flex-direction:column;gap:18px}
+.bulk-header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);padding:24px}
+.bulk-headline{max-width:740px}
+.bulk-title{font-size:clamp(22px,2.5vw,30px);font-weight:700;letter-spacing:-0.5px;margin:0 0 8px;line-height:1.3}
+.bulk-sub{color:var(--color-muted);font-size:14px;margin:0;line-height:1.6}
+.bulk-sub kbd{background:var(--color-tint);border:1px solid var(--color-border);padding:2px 6px;border-radius:4px;font-family:var(--font-mono);font-size:12px;color:var(--color-primary);font-weight:600}
+.bulk-stats{display:flex;gap:12px;flex-shrink:0;flex-wrap:wrap}
+.bulk-stat-card{background:var(--color-background);border:1px solid var(--color-border);border-radius:10px;padding:12px 18px;min-width:110px;text-align:center;display:flex;flex-direction:column;gap:4px}
+.bulk-stat-card.stat-total .stat-val{color:var(--color-ink)}
+.bulk-stat-card.stat-ready .stat-val{color:#198754}
+.bulk-stat-card.stat-dup .stat-val{color:var(--color-warning)}
+.bulk-stat-card.stat-invalid .stat-val{color:var(--color-danger)}
+
+.bulk-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);padding:14px 20px;flex-wrap:wrap}
+.bulk-actions-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1}
+.bulk-pills{display:flex;gap:6px;background:var(--color-background);padding:4px;border-radius:8px;border:1px solid var(--color-border)}
+.bulk-pill{border:0;background:transparent;color:var(--color-muted);padding:6px 12px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;transition:all var(--motion)}
+.bulk-pill:hover{color:var(--color-ink)}
+.bulk-pill.active{background:var(--color-surface);color:var(--color-primary);box-shadow:0 1px 2px rgba(0,0,0,0.06)}
+.bulk-cta-group{display:flex;gap:10px;align-items:center}
+
+.bulk-table-wrap{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);overflow:auto;max-height:calc(var(--visual-height,100dvh) - 340px);position:relative;scrollbar-gutter:stable}
+.bulk-table{width:100% !important;display:table !important;border-collapse:collapse;table-layout:fixed;font-size:13px;min-width:980px}
+.bulk-table thead{position:sticky;top:0;z-index:2;background:var(--color-background);box-shadow:0 1px 0 var(--color-border)}
+.bulk-table th{padding:10px 12px;font-size:11px;font-weight:700;color:var(--color-muted);letter-spacing:0.5px;text-align:left;border-bottom:1px solid var(--color-border)}
+.bulk-table td{padding:8px 10px;border-bottom:1px solid var(--color-border);vertical-align:middle}
+.bulk-table tbody tr:hover{background:rgba(237,242,245,0.45)}
+.bulk-table tr.row-ready{border-left:4px solid #198754}
+.bulk-table tr.row-dup{border-left:4px solid var(--color-warning);background:rgba(255,248,225,0.45)}
+.bulk-table tr.row-invalid{border-left:4px solid var(--color-danger);background:rgba(253,238,238,0.4)}
+
+.bulk-input{width:100%;min-height:36px;padding:6px 10px;border:1px solid var(--color-border);border-radius:6px;background:var(--color-surface);font-size:13px;color:var(--color-ink);transition:border-color var(--motion)}
+.bulk-input:hover{border-color:var(--scroll-hover)}
+.bulk-input:focus{border-color:var(--color-primary);outline:2px solid rgba(23,100,135,0.2)}
+.bulk-input.mono{font-family:var(--font-mono);font-weight:600}
+.bulk-input.is-invalid{border-color:var(--color-danger);background:rgba(167,53,57,0.03)}
+.bulk-select{width:100%;min-height:36px;padding:6px 8px;border:1px solid var(--color-border);border-radius:6px;background:var(--color-surface);font-size:13px;color:var(--color-ink);cursor:pointer}
+.bulk-select.unmatched{border-color:var(--color-warning);background:#fffdf7;color:var(--color-warning);font-weight:600}
+.bulk-select.unmatched:focus{border-color:var(--color-primary);color:var(--color-ink)}
+
+.bulk-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+.bulk-badge.ready{background:#d1e7dd;color:#0f5132;border:1px solid #badbcc}
+.bulk-badge.dup{background:#fff3cd;color:#856404;border:1px solid #ffeeba}
+.bulk-badge.invalid{background:#f8d7da;color:#842029;border:1px solid #f5c2c7}
+
+.bulk-col-num{width:46px;text-align:center;color:var(--color-muted);font-family:var(--font-mono);font-size:11px}
+.bulk-col-status{width:160px}
+.bulk-col-part{width:210px}
+.bulk-col-brand{width:180px}
+.bulk-col-desc{min-width:200px}
+.bulk-col-store{width:130px}
+.bulk-col-life{width:105px}
+.bulk-col-action{width:56px;text-align:center}
+
+.bulk-del-row{width:32px;height:32px;min-height:32px;padding:0;border:0;background:transparent;color:var(--color-muted);font-size:18px;border-radius:6px;cursor:pointer;display:grid;place-items:center;transition:all var(--motion)}
+.bulk-del-row:hover{background:rgba(167,53,57,0.1);color:var(--color-danger)}
+
+/* Bulk Paste Modal */
+.paste-textarea{width:100%;min-height:220px;font-family:var(--font-mono);font-size:12px;line-height:1.6;white-space:pre;overflow-x:auto;padding:12px;border:1px solid var(--color-border);border-radius:8px;background:var(--color-surface)}
+.col-guide-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 16px}
+.col-guide-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:6px;background:var(--color-background);border:1px solid var(--color-border);font-size:11px;font-weight:600;color:var(--color-ink)}
+.col-guide-pill.required{border-color:var(--color-primary);color:var(--color-primary);background:var(--color-tint)}
+
+main{max-width:1448px;margin:auto;padding:40px 24px 20px}.intro{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:8px 0 34px}.eyebrow{font:600 11px/1.6 var(--font-mono);letter-spacing:1.5px;color:var(--color-primary);margin:0 0 12px}h1{font-size:clamp(26px,3vw,39px);font-weight:600;line-height:1.4;letter-spacing:-1px;margin:0}.accent-dot{color:var(--color-primary)}.intro p{margin:9px 0 0;color:var(--color-muted);font-size:14px}.intro>.button{padding-inline:24px;min-height:48px}
+.catalog{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);overflow:clip}.catalog-top{padding:20px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--color-border);gap:12px}.catalog h2{margin:0;font-size:18px;font-weight:600;display:flex;align-items:center;gap:12px}.badge{font:12px var(--font-mono);padding:5px 8px;border:1px solid var(--color-border);border-radius:5px}.toolbar-actions{display:flex;gap:6px}.filters{display:flex;gap:24px;padding:24px 24px 8px;align-items:flex-start}.search-block{flex:1}.sort-block{width:205px}label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}.search-control{display:flex;align-items:center;border:1px solid var(--color-border);border-radius:8px;padding-left:14px;gap:8px;min-height:48px}.search-control>span{font-size:28px;color:var(--color-muted)}.search-control input{border:0;min-width:0;background:transparent}.search-control input::-webkit-search-cancel-button{display:none}.hint{color:var(--color-muted);font-size:12px;margin:8px 0;line-height:1.65}.sample{font-family:var(--font-mono);background:var(--color-tint);padding:2px 6px;border-radius:4px}.list-meta{padding:4px 24px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--color-muted);min-height:52px}.list-meta p{margin:0}.table-frame{position:relative;min-height:340px;max-height:640px;overflow:auto;scrollbar-gutter:stable}.table-frame[aria-busy=true] tbody,.table-frame[aria-busy=true] .cards{opacity:.5;pointer-events:none}table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}thead{position:sticky;top:0;z-index:1;background:var(--color-background)}th{text-align:left;font-size:11px;color:var(--color-muted);font-weight:600;padding:10px 12px;border-block:1px solid var(--color-border)}th button{border:0;background:transparent;color:inherit;min-height:44px;padding:0;font:inherit}th:nth-child(1){width:84px}th:nth-child(2){width:16%}th:nth-child(3){width:22%}th:nth-child(4){width:11%}th:nth-child(5){width:10%}th:nth-child(6){width:11%}th:nth-child(7){width:11%}th:nth-child(8){width:112px}td{border-bottom:1px solid var(--color-border);padding:16px 12px;vertical-align:middle;overflow-wrap:anywhere}tbody tr:hover{background:var(--color-tint)}tbody tr:last-child td{border-bottom:0}.numeric{text-align:right;font-variant-numeric:tabular-nums}.part-code{font:600 14px/1.5 var(--font-mono);color:var(--color-primary);text-align:left;white-space:normal;word-break:break-word}.part-id{font:10px var(--font-mono);letter-spacing:.5px;color:var(--color-muted);margin-top:4px}.row-note{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:11px;color:var(--color-muted);margin-top:6px}.row-description{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.mono{font-family:var(--font-mono)}.brand-tag{display:inline-block;padding:3px 7px;border-radius:4px;background:var(--color-tint);font-size:12px;max-width:100%;overflow-wrap:anywhere}.row-actions{display:flex;gap:2px}.row-actions .button{padding:6px;font-size:12px;min-width:44px}.picture-thumb{display:grid;place-items:center;background:var(--color-background);border:1px solid var(--color-border);width:56px;height:56px;overflow:hidden;border-radius:7px;color:var(--color-muted);font-size:25px}.picture-thumb img{width:100%;height:100%;object-fit:contain}.picture-thumb.image-failed{font-size:9px}.compact td{padding-block:7px}.cards{display:none}.empty{min-height:340px;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:32px;text-align:center}.empty h3{font-size:20px;font-weight:600;margin:12px 0 4px}.empty p{color:var(--color-muted);font-size:14px;max-width:400px;margin:0 0 20px}.empty-symbol{font-size:40px;width:74px;height:74px;display:grid;place-items:center;background:var(--color-tint);border-radius:16px;color:var(--color-primary)}.loading{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--color-surface);border:1px solid var(--color-border);padding:10px 18px;border-radius:30px;display:flex;align-items:center;gap:10px;font-size:13px;z-index:2}.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--color-border);border-top-color:var(--color-primary);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.pagination{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--color-border);font-size:12px;min-height:78px;flex-wrap:wrap}.pagination nav,.page-size{display:flex;align-items:center;gap:12px}.page-size label{margin:0;font-size:12px}.page-size select{width:76px;font-size:13px}.pagination nav span{font-family:var(--font-mono)}.page-footer{display:flex;justify-content:space-between;gap:12px;font-size:10px;color:var(--color-muted);padding:20px 0}.footer-divider{padding:0 8px;color:var(--color-border)}
+dialog{border:1px solid var(--color-border);border-radius:var(--radius-panel);padding:0;background:var(--color-surface);color:var(--color-ink);width:min(600px,calc(100% - 32px));max-height:calc(var(--visual-height,100dvh) - 32px);overflow:auto;scrollbar-gutter:stable}dialog::backdrop{background:rgba(19,43,59,.5)}dialog.editor-dialog{width:min(800px,calc(100% - 32px))}dialog.small-dialog{max-width:440px}.dialog-header{display:flex;align-items:center;justify-content:space-between;padding:24px;border-bottom:1px solid var(--color-border);gap:16px}.dialog-header h2{font-size:23px;margin:0;overflow-wrap:anywhere}.dialog-header .eyebrow{margin:0 0 4px}.dialog-body{padding:24px}.dialog-footer{display:flex;justify-content:flex-end;gap:12px;padding:16px 24px;border-top:1px solid var(--color-border);background:var(--color-surface)}.dialog-footer button{min-width:110px}.form-layout{display:grid;grid-template-columns:1fr 240px;gap:24px;margin-top:20px}.field{margin-bottom:8px}.field-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field-error{color:var(--color-danger);font-size:12px;min-height:20px;margin:3px 0;overflow-wrap:anywhere}.required{color:var(--color-danger)}.optional{font-size:11px;font-weight:400;color:var(--color-muted);margin-left:5px}.drop-zone{border:1px dashed var(--scroll-hover);border-radius:10px;padding:18px;text-align:center;background:var(--color-background)}.drop-zone.drag-over{border:2px solid var(--color-primary);background:var(--color-tint)}.preview{height:160px;display:grid;place-items:center;margin-bottom:16px;overflow:hidden}.preview>span{font-size:60px;color:var(--scroll-hover)}.preview img{width:100%;height:100%;object-fit:contain}.drop-zone .button{margin:4px auto}.notice{padding:12px 16px;background:var(--color-tint);border-left:3px solid var(--color-primary);font-size:13px;margin:12px 0;overflow-wrap:anywhere}.notice.error{color:var(--color-danger);border-color:var(--color-danger)}.catalog>.notice{margin:0 24px 16px}.inline-form{display:flex;gap:10px}.inline-form input{min-width:0}.brand-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--color-border);padding:10px 0}.brand-row span{overflow-wrap:anywhere;min-width:0}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--color-ink);color:var(--color-surface);border-radius:8px;padding:14px 24px;z-index:10;max-width:calc(100% - 32px);font-size:14px}.detail-picture{min-height:180px;background:var(--color-background);display:grid;place-items:center;border-radius:8px}.detail-picture img{max-width:100%;max-height:320px;object-fit:contain}.detail-picture button{white-space:normal}.detail-picture:empty{display:none}dl{display:grid;grid-template-columns:120px 1fr;gap:14px 20px}dt{color:var(--color-muted);font-size:13px}dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.external-link-card{margin-top:20px;padding:14px 16px;background:var(--color-tint);border-radius:var(--radius-control);border:1px solid var(--color-border)}.external-link-card label{font-size:12px;font-weight:600;color:var(--color-ink);margin-bottom:6px}.link-input-row{display:flex;gap:8px;align-items:center}.link-input-row input{font-size:12px;height:38px;min-height:38px;padding:6px 10px;background:var(--color-surface);font-family:var(--font-mono);cursor:pointer}.link-input-row .button{min-height:38px;padding:6px 14px;font-size:13px}.part-id-btn{background:transparent;border:0;padding:2px 4px;font-family:var(--font-mono);font-size:10px;letter-spacing:.5px;color:var(--color-muted);margin-top:2px;border-radius:3px;cursor:pointer;display:inline-block;transition:background var(--motion),color var(--motion)}.part-id-btn:hover{background:var(--color-tint);color:var(--color-primary);text-decoration:underline}body.modal-open{overflow:hidden}
+@media(min-width:1024px){
+  .topbar{min-height:50px;padding:6px 24px}
+  .brand-icon{width:32px;height:32px;font-size:22px}
+  .wordmark{font-size:17px}
+  main{max-width:100%;padding:6px 24px 6px}
+  .intro{margin:0 0 8px;gap:16px;align-items:center}
+  .intro .eyebrow,.intro p{display:none}
+  .intro h1{font-size:18px;font-weight:700;letter-spacing:-0.5px}
+  .intro>.button{padding-inline:16px;min-height:34px;font-size:13px}
+  .catalog{border-radius:10px}
+  .catalog-top{padding:6px 20px;min-height:38px}
+  .catalog h2{font-size:15px}
+  .toolbar-actions .button{min-height:30px;padding:3px 10px;font-size:12px}
+  .filters{padding:6px 20px 4px;gap:14px;align-items:center}
+  .search-block{display:flex;align-items:center;gap:8px}
+  .search-block label{display:none}
+  .search-control{min-height:36px;padding-left:12px}
+  .search-control>span{font-size:18px}
+  .search-control input{font-size:13px}
+  .filters .hint{display:none}
+  .sort-block{width:190px;display:flex;align-items:center;gap:6px}
+  .sort-block label{display:none}
+  .sort-block select{min-height:36px;font-size:13px;padding:4px 10px}
+  .list-meta{padding:2px 20px 4px;min-height:24px;font-size:12px}
+  .list-meta #density{font-size:11px;min-height:24px;padding:2px 8px}
+  .table-frame{min-height:180px;max-height:calc(100vh - 315px);max-height:calc(100dvh - 315px)}
+  th{padding:7px 12px;font-size:11px}
+  th button{min-height:26px}
+  td{padding:5px 12px}
+  .picture-thumb{width:36px;height:36px;border-radius:6px;font-size:15px}
+  .part-code{font-size:13px;line-height:1.3}
+  .part-id{font-size:9px;margin-top:1px}
+  .row-description{font-size:12px;line-height:1.35;-webkit-line-clamp:1}
+  .row-note{font-size:11px;margin-top:2px;-webkit-line-clamp:1}
+  .brand-tag{font-size:11px;padding:2px 6px}
+  .mono{font-size:12px}
+  td.numeric{font-size:13px;font-weight:500}
+  .row-actions .button{padding:3px 8px;font-size:11px;min-height:26px;min-width:34px}
+  .pagination{padding:6px 20px;min-height:40px;font-size:12px}
+  .page-size select{min-height:28px;height:28px;padding:2px 6px;font-size:12px}
+  .pagination nav button{min-height:28px;padding:3px 12px;font-size:12px}
+  .compact td{padding-block:3px}
+  .compact .picture-thumb{width:28px;height:28px;font-size:12px}
+  .page-footer{padding:3px 4px;font-size:10px}
+}
+@media(max-width:1023px){
+  table{display:none}.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px}.part-card{border:1px solid var(--color-border);border-radius:10px;padding:16px;min-width:0}.card-top{display:flex;gap:12px;align-items:center;margin-bottom:14px}.card-top>div:last-child{min-width:0}.part-card .card-price{display:flex;justify-content:space-between;margin:16px 0 10px;gap:10px}.part-card .row-actions{justify-content:flex-end;border-top:1px solid var(--color-border);padding-top:8px}.part-card .row-actions .button{padding:8px 12px}.table-frame{max-height:none;overflow:visible}.part-card p{font-size:13px;margin:8px 0;overflow-wrap:anywhere}.list-meta #density{display:none}
+  .batch-row{grid-template-columns:1fr;gap:12px;padding:14px}
+  .batch-header{flex-direction:column}
+  .batch-stats{width:100%;justify-content:space-between}
+  .batch-stat-card{flex:1}
+  .batch-toolbar{flex-direction:column;align-items:stretch}
+  .batch-filter-group{flex-direction:column;align-items:stretch}
+  .batch-search-control{max-width:none}
+  .batch-action-col{align-items:stretch}
+}
+@media(max-width:767px){
+  .topbar{padding:16px;min-height:68px;flex-wrap:wrap;gap:12px}
+  .main-nav{order:3;width:100%;justify-content:center}
+  .wordmark{font-size:15px;gap:8px}.brand-icon{width:32px;height:32px}.privacy{font-size:10px}main{padding:24px 12px 10px}.intro{align-items:stretch;flex-direction:column;gap:20px;margin:0 4px 24px}.intro h1{font-size:28px}.intro>.button{width:100%}.catalog-top{padding:14px 16px;align-items:flex-start;flex-wrap:wrap}.catalog h2{font-size:16px}.toolbar-actions{margin-left:auto}.toolbar-actions .button{padding-inline:8px;font-size:12px}.filters{flex-direction:column;gap:12px;padding:16px}.search-block,.sort-block{width:100%}.list-meta{padding:0 16px 12px}.cards{grid-template-columns:1fr;padding:12px;gap:12px}.pagination{padding:12px;gap:12px}.pagination nav{width:100%;justify-content:space-between}.pagination #range{margin-left:auto}.page-footer{flex-direction:column;gap:2px;padding:16px 4px}.form-layout{grid-template-columns:1fr}.upload-column{grid-row:1}.drop-zone{padding:12px}.preview{height:120px}.dialog-header,.dialog-body{padding:20px 16px}.editor-dialog{width:100%;max-width:none;max-height:var(--visual-height,100dvh);border-radius:0;margin:0 auto}.dialog-footer{padding:16px;position:static}.field-pair{grid-template-columns:1fr 1fr;gap:12px}input,textarea,select{font-size:16px}.dialog-header h2{font-size:21px}dl{grid-template-columns:1fr;gap:4px}dd{margin-bottom:12px}.toast{bottom:12px}.inline-form{flex-wrap:wrap}.inline-form input{flex:1}.intro .eyebrow{font-size:10px}
+  .batch-pills{flex-wrap:wrap}
+  .batch-stats{flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none;transition:none;scroll-behavior:auto}}
+@media(forced-colors:active){*{scrollbar-color:auto}.button{border:1px solid ButtonText}.badge,.brand-tag{border:1px solid CanvasText}}
+
+</style>
+</head>
+<body><nav aria-label="ระบบซ่อมบำรุงไฟฟ้า" style="padding:12px 24px;background:#18313d;display:flex;gap:24px;align-items:center;flex-wrap:wrap"><a style="color:white;text-decoration:none;font-weight:normal;border-bottom:none;padding-bottom:2px" href="/machines/">เครื่องจักร</a><a style="color:white;text-decoration:none;font-weight:bold;border-bottom:2px solid #cc681c;padding-bottom:2px" href="/parts/" aria-current="page">Master อะไหล่</a><a style="color:white;text-decoration:none;font-weight:normal;border-bottom:none;padding-bottom:2px" href="/bom/">อุปกรณ์ประจำเครื่องจักร</a><a id="em-nav-users" style="color:white;text-decoration:none;font-weight:normal;border-bottom:none;padding-bottom:2px;display:none" href="/users/">จัดการผู้ใช้งาน</a><span id="em-user-badge" style="margin-left:auto;color:#cbd5e1;font-size:13px;display:flex;align-items:center;gap:12px"></span></nav>
+  <header class="topbar">
+    <div class="wordmark"><span class="brand-icon" aria-hidden="true">▤</span><span>PART<span class="wordmark-light">REGISTER</span></span></div>
+    <nav class="main-nav" aria-label="เมนูหลัก">
+      <button id="nav-catalog" class="nav-tab active" type="button"><span class="nav-icon" aria-hidden="true">▤</span> รายการอะไหล่</button>
+      <button id="nav-bulk" class="nav-tab" type="button"><span class="nav-icon" aria-hidden="true">📋</span> เพิ่มแบบตาราง <span id="bulk-ready-count" class="nav-badge" style="background:#198754" hidden>0</span></button>
+      <button id="nav-batch" class="nav-tab" type="button"><span class="nav-icon" aria-hidden="true">🖼</span> อัปโหลดรูปชุด <span id="batch-missing-count" class="nav-badge" hidden>0</span></button>
+    </nav>
+    <span class="privacy"><span aria-hidden="true">●</span> พื้นที่ส่วนตัว</span>
+  </header>
+  <main>
+    <section id="intro-catalog" class="intro" aria-labelledby="page-title">
+      <div><div class="eyebrow">ทะเบียนอะไหล่ / PARTS CATALOG</div><h1 id="page-title" tabindex="-1">ทุกรหัส ค้นเจอในที่เดียว<span class="accent-dot">.</span></h1><p>จัดเก็บรายละเอียด รูปภาพ และรหัสทดแทนของอะไหล่</p></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button id="bulk-add-btn" class="button" type="button"><span aria-hidden="true">📋</span> เพิ่มแบบตาราง</button>
+        <button id="add-part" class="button primary"><span aria-hidden="true">＋</span> เพิ่ม Part</button>
+      </div>
+    </section>
+    <div id="connection" class="notice" role="status" hidden></div>
+    <section id="catalog-section" class="catalog" aria-label="รายการอะไหล่">
+      <div class="catalog-top"><h2>รายการอะไหล่ <span id="total-badge" class="badge">—</span></h2><div class="toolbar-actions"><button id="brands-open" class="button ghost">จัดการ Brand</button><button id="reload" class="button ghost">รีเฟรช</button></div></div>
+      <div class="filters">
+        <div class="search-block"><label for="search">ค้นหาอะไหล่</label><div class="search-control"><span aria-hidden="true">⌕</span><input id="search" type="search" maxlength="300" placeholder="Part number, Brand, Store code, อายุอุปกรณ์ หรือหมายเหตุ" autocomplete="off"><button id="clear-search" class="button ghost icon" aria-label="ล้างคำค้น" hidden>×</button></div><p class="hint">เว้นวรรคเพื่อค้นหาหลายคำ เช่น <span class="sample">delta 24v</span></p></div>
+        <div class="sort-block"><label for="sort">เรียงรายการ</label><select id="sort"><option value="id:desc">เพิ่มล่าสุด</option><option value="partNumber:asc">Part number ก–ฮ</option><option value="price:asc">ราคา ต่ำ–สูง</option><option value="price:desc">ราคา สูง–ต่ำ</option><option value="lifespan:asc">อายุอุปกรณ์ น้อย–มาก</option><option value="lifespan:desc">อายุอุปกรณ์ มาก–น้อย</option><option value="brand:asc">Brand ก–ฮ</option></select></div>
+      </div>
+      <div class="list-meta"><p id="result-status" role="status" aria-live="polite">กำลังเชื่อมต่อข้อมูล…</p><button id="density" class="button ghost" aria-pressed="false">มุมมองกระชับ</button></div>
+      <div id="list-error" class="notice error" role="alert" hidden></div>
+      <div class="table-frame" id="list-surface" aria-busy="true">
+        <table aria-label="ทะเบียนอะไหล่"><thead><tr><th scope="col">รูป</th><th scope="col" data-sort="partNumber"><button data-sort="partNumber">Part number ↕</button></th><th scope="col">รายละเอียด / หมายเหตุ</th><th scope="col" data-sort="brand"><button data-sort="brand">Brand ↕</button></th><th scope="col">Store code</th><th scope="col" data-sort="lifespan" class="numeric"><button data-sort="lifespan">อายุ (ปี) ↕</button></th><th scope="col" data-sort="price" class="numeric"><button data-sort="price">ราคา ↕</button></th><th scope="col">จัดการ</th></tr></thead><tbody id="rows"></tbody></table>
+        <div id="cards" class="cards"></div>
+        <div id="empty" class="empty"><div class="empty-symbol" aria-hidden="true">▤</div><h3 id="empty-title">กำลังโหลดรายการ</h3><p id="empty-copy">รอสักครู่ ระบบกำลังอ่านข้อมูลของคุณ</p><button id="empty-action" class="button primary" hidden>เพิ่ม Part แรก</button></div>
+        <div id="loading" class="loading" role="status" hidden><span class="spinner" aria-hidden="true"></span> กำลังโหลด…</div>
+      </div>
+      <footer class="pagination"><div class="page-size"><label for="page-size">แสดงต่อหน้า</label><select id="page-size"><option>25</option><option selected>50</option><option>100</option></select></div><span id="range">—</span><nav aria-label="เปลี่ยนหน้ารายการ"><button id="previous" class="button" disabled>← ก่อนหน้า</button><span id="page-label">1 / 1</span><button id="next" class="button" disabled>ถัดไป →</button></nav></footer>
+    </section>
+
+    <!-- Batch Image Uploader Section -->
+    <section id="batch-section" class="batch-section" aria-label="อัปโหลดรูปภาพ Part หลายรายการ" hidden>
+      <div class="batch-header">
+        <div class="batch-headline">
+          <div class="eyebrow">BATCH IMAGE UPLOADER / เพิ่มรูปภาพชุด</div>
+          <h1 class="batch-title">อัปโหลดรูปภาพ Part หลายรายการ<span class="accent-dot">.</span></h1>
+          <p class="batch-sub">ช่วยให้อัปโหลดรูปภาพอะไหล่จำนวนมากได้อย่างรวดเร็ว คัดลอกรหัส วางรูปภาพด้วย <kbd>Ctrl+V</kbd> ระบบจะย่อขนาดอัตโนมัติก่อนส่งบันทึก</p>
+        </div>
+        <div class="batch-stats">
+          <div class="batch-stat-card stat-missing">
+            <span class="stat-label">ยังไม่มีรูปภาพ</span>
+            <span id="stat-missing-val" class="stat-val">—</span>
+          </div>
+          <div class="batch-stat-card stat-pending">
+            <span class="stat-label">มีรูปรออัปโหลด</span>
+            <span id="stat-pending-val" class="stat-val">0</span>
+          </div>
+          <div class="batch-stat-card stat-success">
+            <span class="stat-label">อัปโหลดสำเร็จแล้ว</span>
+            <span id="stat-done-val" class="stat-val">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="batch-toolbar">
+        <div class="batch-filter-group">
+          <div class="batch-pills" role="tablist" aria-label="ตัวกรองสถานะรูปภาพ">
+            <button id="batch-tab-missing" class="batch-pill active" type="button" role="tab" aria-selected="true">ยังไม่มีรูป (<span id="pill-count-missing">0</span>)</button>
+            <button id="batch-tab-pending" class="batch-pill" type="button" role="tab" aria-selected="false">รูปรออัปโหลด (<span id="pill-count-pending">0</span>)</button>
+            <button id="batch-tab-all" class="batch-pill" type="button" role="tab" aria-selected="false">ทั้งหมด (<span id="pill-count-all">0</span>)</button>
+            <button id="batch-tab-has" class="batch-pill" type="button" role="tab" aria-selected="false">มีรูปแล้ว (<span id="pill-count-has">0</span>)</button>
+          </div>
+          <div class="batch-search-control">
+            <span aria-hidden="true" class="search-icon">⌕</span>
+            <input id="batch-search" type="search" placeholder="ค้นหา Part number หรือ Brand ในหน้านี้..." autocomplete="off">
+            <button id="batch-clear-search" type="button" class="button ghost icon" aria-label="ล้างคำค้น" hidden>×</button>
+          </div>
+        </div>
+        <div class="batch-cta-group">
+          <button id="batch-upload-all" type="button" class="button primary" disabled>
+            <span aria-hidden="true">↑</span> อัปโหลดทั้งหมด (<span id="batch-upload-num">0</span>)
+          </button>
+          <button id="batch-clear-all" type="button" class="button ghost" disabled>ล้างรูปที่รอ</button>
+        </div>
+      </div>
+
+      <!-- Live Upload Progress Card -->
+      <div id="batch-progress" class="batch-progress-card" hidden>
+        <div class="batch-progress-head">
+          <div class="progress-title-row">
+            <span class="spinner" aria-hidden="true"></span>
+            <span id="batch-progress-label">กำลังอัปโหลดรูปภาพ...</span>
+          </div>
+          <span id="batch-progress-count" class="progress-count-badge">0 / 0</span>
+        </div>
+        <div class="progress-bar-bg" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+          <div id="batch-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div id="batch-alert" class="notice" role="status" hidden></div>
+
+      <!-- Batch Items List -->
+      <div class="batch-content-wrap">
+        <div id="batch-items" class="batch-items-list" aria-live="polite"></div>
+        <div id="batch-empty" class="empty" hidden>
+          <div class="empty-symbol" aria-hidden="true">🖼</div>
+          <h3 id="batch-empty-title">ไม่พบรายการ</h3>
+          <p id="batch-empty-copy">ไม่มี Part ที่ตรงกับเงื่อนไขการกรองนี้</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bulk Table Import Section -->
+    <section id="bulk-section" class="bulk-section" aria-label="เพิ่มแบบตารางหลายรายการ" hidden>
+      <div class="bulk-header">
+        <div class="bulk-headline">
+          <div class="eyebrow">BULK TABLE ADD / เพิ่มแบบตารางหลายรายการ</div>
+          <h1 class="bulk-title">เพิ่มอะไหล่แบบตาราง (Excel Paste)<span class="accent-dot">.</span></h1>
+          <p class="bulk-sub">คัดลอกจาก Excel หรือ ทะเบียนกลาง แล้วกด <kbd>Ctrl+V</kbd> เพื่อวางข้อมูลลงในตารางได้ทันที หรือกดปุ่ม "วางจาก Excel" พร้อมระบบตรวจสอบ Part number ซ้ำอัตโนมัติ (ห้ามซ้ำ หากซ้ำจะไม่ถูกบันทึก)</p>
+        </div>
+        <div class="bulk-stats">
+          <div class="bulk-stat-card stat-total">
+            <span class="stat-label">ทั้งหมดในตาราง</span>
+            <span id="bulk-stat-total" class="stat-val">0</span>
+          </div>
+          <div class="bulk-stat-card stat-ready">
+            <span class="stat-label">พร้อมบันทึก</span>
+            <span id="bulk-stat-ready" class="stat-val">0</span>
+          </div>
+          <div class="bulk-stat-card stat-dup">
+            <span class="stat-label">ซ้ำ/จะข้าม</span>
+            <span id="bulk-stat-dup" class="stat-val">0</span>
+          </div>
+          <div class="bulk-stat-card stat-invalid">
+            <span class="stat-label">ข้อมูลไม่ครบ</span>
+            <span id="bulk-stat-invalid" class="stat-val">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bulk-toolbar">
+        <div class="bulk-actions-left">
+          <button id="bulk-paste-open-btn" class="button primary" type="button">
+            <span aria-hidden="true">📋</span> วางข้อมูลจาก Excel (Ctrl+V)
+          </button>
+          <button id="bulk-add-row-btn" class="button" type="button">
+            <span aria-hidden="true">＋</span> เพิ่มแถว
+          </button>
+          <button id="bulk-sample-btn" class="button ghost" type="button">
+            ตัวอย่างข้อมูล
+          </button>
+          <button id="bulk-clear-btn" class="button ghost" type="button">
+            ล้างตาราง
+          </button>
+          <div class="bulk-pills" role="tablist" aria-label="ตัวกรองสถานะตาราง">
+            <button id="bulk-filter-all" class="bulk-pill active" type="button" role="tab" aria-selected="true">ทั้งหมด (<span id="bulk-count-all">0</span>)</button>
+            <button id="bulk-filter-ready" class="bulk-pill" type="button" role="tab" aria-selected="false">พร้อมบันทึก (<span id="bulk-count-ready">0</span>)</button>
+            <button id="bulk-filter-dup" class="bulk-pill" type="button" role="tab" aria-selected="false">ซ้ำ/จะข้าม (<span id="bulk-count-dup">0</span>)</button>
+            <button id="bulk-filter-invalid" class="bulk-pill" type="button" role="tab" aria-selected="false">ไม่ถูกต้อง (<span id="bulk-count-invalid">0</span>)</button>
+          </div>
+        </div>
+        <div class="bulk-cta-group">
+          <button id="bulk-save-btn" class="button primary" type="button" disabled>
+            <span aria-hidden="true">💾</span> บันทึกรายการ (<span id="bulk-save-num">0</span>)
+          </button>
+        </div>
+      </div>
+
+      <div id="bulk-alert" class="notice" role="status" hidden></div>
+
+      <div class="bulk-table-wrap" id="bulk-table-surface">
+        <table class="bulk-table" aria-label="ตารางเพิ่มอะไหล่หลายรายการ">
+          <thead>
+            <tr>
+              <th scope="col" class="bulk-col-num">#</th>
+              <th scope="col" class="bulk-col-status">สถานะ</th>
+              <th scope="col" class="bulk-col-part">Part number * <span class="required">(ห้ามซ้ำ)</span></th>
+              <th scope="col" class="bulk-col-brand">Brand <span class="optional">(เลือกจากระบบ)</span></th>
+              <th scope="col" class="bulk-col-desc">Description</th>
+              <th scope="col" class="bulk-col-store">Store Code</th>
+              <th scope="col" class="bulk-col-life">อายุ (ปี)</th>
+              <th scope="col" class="bulk-col-action">ลบ</th>
+            </tr>
+          </thead>
+          <tbody id="bulk-table-body"></tbody>
+        </table>
+        <div id="bulk-empty" class="empty">
+          <div class="empty-symbol" aria-hidden="true">📋</div>
+          <h3 id="bulk-empty-title">ยังไม่มีข้อมูลในตาราง</h3>
+          <p id="bulk-empty-copy">คัดลอกแถวจาก Excel 5 คอลัมน์: Part number, Brand, Description, Store Code, Lifespan แล้วกด Ctrl+V เพื่อวาง หรือกดปุ่มด้านล่าง</p>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <button id="bulk-empty-paste" class="button primary" type="button">📋 วางข้อมูลจาก Excel</button>
+            <button id="bulk-empty-add" class="button" type="button">＋ เพิ่มแถวเปล่า</button>
+            <button id="bulk-empty-sample" class="button ghost" type="button">ใส่ตัวอย่างทดสอบ</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer class="page-footer"><span>PART REGISTER <span class="footer-divider">/</span> ทะเบียนอะไหล่</span><span id="sync-label">ข้อมูลส่วนตัว · ทะเบียนกลาง</span></footer>
+  </main>
+  <dialog id="editor" aria-labelledby="editor-title" class="editor-dialog">
+    <form id="part-form" novalidate>
+      <header class="dialog-header"><div><p class="eyebrow" id="editor-code">NEW PART</p><h2 id="editor-title">เพิ่ม Part</h2></div><button type="button" class="button ghost icon" id="editor-close" aria-label="ปิดฟอร์ม">×</button></header>
+      <div class="dialog-body">
+        <p class="hint">กรอก Part number และ Description ส่วนข้อมูลอื่นเพิ่มภายหลังได้</p>
+        <div id="form-error" class="notice error" role="alert" hidden></div>
+        <div class="form-layout">
+          <div class="fields">
+            <div class="field"><label for="part-number">Part number <span class="required">*</span></label><input id="part-number" name="partNumber" maxlength="160" required aria-describedby="partNumber-error"><p id="partNumber-error" class="field-error"></p></div>
+            <div class="field"><label for="description">Description <span class="required">*</span></label><textarea id="description" name="description" rows="2" maxlength="2000" required class="resize-none" aria-describedby="description-error"></textarea><p id="description-error" class="field-error"></p></div>
+            <div class="field"><label for="brand-filter">ค้นหาตัวเลือก Brand</label><input id="brand-filter" type="search" placeholder="พิมพ์ชื่อเพื่อกรองตัวเลือก" autocomplete="off"><button id="brand-filter-clear" type="button" class="button ghost" hidden>ล้างคำค้น Brand</button></div>
+            <div class="field"><label for="brand">Brand <span class="optional">ไม่บังคับ</span></label><select id="brand" name="brandId" aria-describedby="brandId-error"><option value="">ไม่ระบุ</option></select><p id="brandId-error" class="field-error"></p><button type="button" id="form-brands" class="button ghost">＋ เพิ่ม / จัดการ Brand</button></div>
+            <div class="field-pair"><div class="field"><label for="store-code">Store code</label><input id="store-code" name="storeCode" maxlength="160" aria-describedby="storeCode-error"><p id="storeCode-error" class="field-error"></p></div><div class="field"><label for="lifespan">อายุอุปกรณ์ (ปี) <span class="optional">ไม่บังคับ</span></label><input id="lifespan" name="lifespan" inputmode="decimal" placeholder="เช่น 1, 2, 5 หรือ 0.5" aria-describedby="lifespan-error"><p id="lifespan-error" class="field-error"></p></div></div>
+            <div class="field"><label for="price">ราคา <span class="optional">ไม่บังคับ</span></label><input id="price" name="price" inputmode="decimal" placeholder="ยังไม่ระบุ" aria-describedby="price-error"><p id="price-error" class="field-error"></p></div>
+          </div>
+          <div class="upload-column"><label for="picture-input">รูปภาพ</label><div id="drop-zone" class="drop-zone"><div id="preview" class="preview"><span aria-hidden="true">▧</span></div><button type="button" id="choose-file" class="button">เลือกรูปภาพ</button><input id="picture-input" type="file" accept="image/jpeg,image/png,image/webp" class="visually-hidden"><button type="button" id="choose-camera" class="button ghost">ถ่ายรูป</button><input id="camera-input" type="file" accept="image/*" capture="environment" class="visually-hidden" aria-label="ถ่ายรูปอะไหล่"><p class="hint">ลากรูปมาวาง หรือกด Ctrl+V<br>JPG, PNG, WebP · ไม่เกิน 10 MB</p><p id="image-status" class="hint" role="status">ย่อและบีบอัดก่อนอัปโหลดอัตโนมัติ</p><button type="button" id="remove-image" class="button ghost" hidden>นำรูปออก</button></div><p id="image-error" class="field-error" role="alert"></p></div>
+        </div>
+        <div class="field"><label for="notes">หมายเหตุ / รหัสทดแทน <span class="optional">ไม่บังคับ</span></label><textarea id="notes" name="notes" rows="3" maxlength="4000" class="resize-none" placeholder="เช่น รหัสเดิม ABC-1234 เปลี่ยนไปใช้ XYZ-5678" aria-describedby="notes-error"></textarea><p id="notes-error" class="field-error"></p></div>
+      </div>
+      <footer class="dialog-footer"><button type="button" id="editor-copy-link" class="button ghost" hidden>คัดลอกลิงก์แก้ไข</button><button type="button" id="cancel-part" class="button">ยกเลิก</button><button id="save-part" class="button primary" type="submit">บันทึก Part</button></footer>
+    </form>
+  </dialog>
+  <dialog id="detail" aria-labelledby="detail-title"><header class="dialog-header"><div><p class="eyebrow" id="detail-id"></p><h2 id="detail-title">รายละเอียด Part</h2></div><button id="detail-close" class="button ghost icon" aria-label="ปิดรายละเอียด">×</button></header><div class="dialog-body"><div id="detail-picture" class="detail-picture"></div><dl id="detail-values"></dl><div class="external-link-card"><label for="detail-link-input">ลิงก์แก้ไขจากภายนอก (สำหรับเชื่อมต่อเว็บอื่น)</label><div class="link-input-row"><input id="detail-link-input" type="text" readonly class="mono" aria-label="ลิงก์แก้ไขภายนอก"><button type="button" id="detail-copy-link" class="button">คัดลอกลิงก์</button></div></div></div><footer class="dialog-footer"><button id="detail-edit" class="button primary">แก้ไข Part</button></footer></dialog>
+  <dialog id="brands-dialog" aria-labelledby="brands-title"><header class="dialog-header"><div><p class="eyebrow">BRAND DIRECTORY</p><h2 id="brands-title">จัดการ Brand</h2></div><button id="brands-close" class="button ghost icon" aria-label="ปิดจัดการ Brand">×</button></header><div class="dialog-body"><form id="brand-form" novalidate><label for="brand-name">เพิ่มชื่อ Brand</label><div class="inline-form"><input id="brand-name" maxlength="100" aria-describedby="brandName-error"><button type="submit" id="brand-save" class="button primary">เพิ่ม Brand</button></div><p id="brandName-error" class="field-error"></p></form><div id="brand-error" class="notice error" role="alert" hidden></div><div id="brand-list"></div></div></dialog>
+  <dialog id="confirmation" aria-labelledby="confirmation-title" class="small-dialog"><header class="dialog-header"><h2 id="confirmation-title"></h2></header><div class="dialog-body"><p id="confirmation-copy"></p><p id="confirmation-error" class="field-error" role="alert"></p></div><footer class="dialog-footer"><button id="confirmation-cancel" class="button" autofocus>ยกเลิก</button><button id="confirmation-accept" class="button danger">ลบรายการ</button></footer></dialog>
+  <dialog id="bulk-paste-dialog" aria-labelledby="bulk-paste-title" class="editor-dialog">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow">EXCEL CLIPBOARD IMPORT</p>
+        <h2 id="bulk-paste-title">วางข้อมูลจาก Excel</h2>
+      </div>
+      <button id="bulk-paste-close" class="button ghost icon" aria-label="ปิดหน้าต่างวางข้อมูล" type="button">×</button>
+    </header>
+    <div class="dialog-body">
+      <p class="hint">จัดลำดับข้อมูล 5 คอลัมน์ใน Excel แล้วคัดลอก (Ctrl+C) มาวาง (Ctrl+V) ในช่องด้านล่างนี้:</p>
+      <div class="col-guide-row">
+        <span class="col-guide-pill required">1. Part number * (บังคับ ห้ามซ้ำ)</span>
+        <span class="col-guide-pill">2. Brand (เลือกจากระบบ)</span>
+        <span class="col-guide-pill">3. Description</span>
+        <span class="col-guide-pill">4. Store Code</span>
+        <span class="col-guide-pill">5. Lifespan (ปี)</span>
+      </div>
+      <textarea id="bulk-paste-input" class="paste-textarea" rows="8" placeholder="ตัวอย่างการวาง (คั่นด้วย Tab จาก Excel):
+PN-001	SIEMENS	Contactor 24VDC 5A	ST-A01	5
+PN-002	ABB	Circuit Breaker 3P 32A	ST-B04	10
+PN-003	OMRON	Relay Module 8CH	ST-C12	3"></textarea>
+      <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="bulk-skip-header" checked style="width:auto;min-height:auto"> ข้ามบรรทัดแรกหากเป็นหัวตาราง (Header)
+        </label>
+        <span id="bulk-paste-preview-count" class="hint">0 บรรทัดที่ตรวจพบ</span>
+      </div>
+    </div>
+    <footer class="dialog-footer">
+      <button id="bulk-paste-cancel" class="button" type="button">ยกเลิก</button>
+      <button id="bulk-paste-confirm" class="button primary" type="button">นำเข้าสู่ตาราง</button>
+    </footer>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script>
+(() => {
+ 'use strict';
+ const scope = location.pathname.startsWith('/parts') ? 'parts' : location.pathname.startsWith('/bom') ? 'bom' : 'machines';
+ const inFlight = new Map();
+
+ let loginPromise = null;
+ let currentUser = null;
+
+ function ensureLoginModal() {
+  let modal = document.getElementById('em-auth-overlay');
+  if (modal) return modal;
+
+  const style = document.createElement('style');
+  style.textContent = `
+   #em-auth-overlay {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; z-index: 99999;
+   }
+   .em-auth-card {
+    background: #ffffff; color: #1e293b; border-radius: 12px; width: 100%; max-width: 380px;
+    padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    font-family: inherit;
+   }
+   .em-auth-title { font-size: 18px; font-weight: 700; color: #18313d; margin-bottom: 6px; }
+   .em-auth-sub { font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.4; }
+   .em-auth-field { margin-bottom: 14px; text-align: left; }
+   .em-auth-label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; }
+   .em-auth-input {
+    width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;
+    box-sizing: border-box; transition: border-color 0.2s;
+   }
+   .em-auth-input:focus { outline: none; border-color: #cc681c; box-shadow: 0 0 0 3px rgba(204, 104, 28, 0.15); }
+   .em-auth-btn {
+    width: 100%; padding: 10px; background: #cc681c; color: #ffffff; border: none; border-radius: 6px;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 8px;
+   }
+   .em-auth-btn:hover { background: #b25814; }
+   .em-auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+   .em-auth-err { font-size: 13px; color: #dc2626; margin-top: 10px; min-height: 18px; text-align: center; }
+  `;
+  document.head.appendChild(style);
+
+  modal = document.createElement('div');
+  modal.id = 'em-auth-overlay';
+  modal.style.display = 'none';
+  modal.innerHTML = `
+   <div class="em-auth-card">
+    <div class="em-auth-title">เข้าสู่ระบบ Electrical Maintenance</div>
+    <div class="em-auth-sub">กรุณาเข้าสู่ระบบเพื่อใช้งานระบบทะเบียนและอุปกรณ์<br><small style="color:#94a3b8">(บัญชีเริ่มต้น: admin / admin1234)</small></div>
+    <form id="em-auth-form">
+     <div class="em-auth-field">
+      <label class="em-auth-label" for="em-auth-user">ชื่อผู้ใช้ (Username)</label>
+      <input class="em-auth-input" id="em-auth-user" type="text" autocomplete="username" required placeholder="admin">
+     </div>
+     <div class="em-auth-field">
+      <label class="em-auth-label" for="em-auth-pass">รหัสผ่าน (Password)</label>
+      <input class="em-auth-input" id="em-auth-pass" type="password" autocomplete="current-password" required placeholder="••••••••">
+     </div>
+     <button class="em-auth-btn" id="em-auth-submit" type="submit">เข้าสู่ระบบ</button>
+     <div class="em-auth-err" id="em-auth-error"></div>
+    </form>
+   </div>
+  `;
+  document.body.appendChild(modal);
+
+  const form = modal.querySelector('#em-auth-form');
+  const errEl = modal.querySelector('#em-auth-error');
+  const btn = modal.querySelector('#em-auth-submit');
+
+  form.onsubmit = async (e) => {
+   e.preventDefault();
+   errEl.textContent = '';
+   btn.disabled = true;
+   btn.textContent = 'กำลังเข้าสู่ระบบ...';
+
+   const username = modal.querySelector('#em-auth-user').value.trim();
+   const password = modal.querySelector('#em-auth-pass').value;
+
+   try {
+    const res = await fetch('/api/v1/auth/login', {
+     method: 'POST',
+     credentials: 'same-origin',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({ username, password })
+    });
+    const result = await res.json();
+    if (!result.ok) throw new Error(result.error?.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+    currentUser = result.data;
+    updateBadge();
+    modal.style.display = 'none';
+
+    if (result.data.mustChangePassword) {
+     await promptForceChangePassword();
+    }
+
+    if (loginPromise) {
+     const resolve = loginPromise.resolve;
+     loginPromise = null;
+     resolve(currentUser);
+    }
+   } catch (err) {
+    errEl.textContent = err.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่';
+   } finally {
+    btn.disabled = false;
+    btn.textContent = 'เข้าสู่ระบบ';
+   }
+  };
+
+  return modal;
+ }
+
+ function promptForceChangePassword() {
+  return new Promise((resolve) => {
+   let modal = document.getElementById('em-force-pass-overlay');
+   if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'em-force-pass-overlay';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.8);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:100000;';
+    modal.innerHTML = `
+     <div class="em-auth-card">
+      <div class="em-auth-title" style="color:#dc2626">⚠️ บังคับตั้งรหัสผ่านใหม่</div>
+      <div class="em-auth-sub">รหัสผ่านปัจจุบันต่ำกว่า 5 ตัวอักษร หรือได้รับการรีเซ็ต เพื่อความปลอดภัยกรุณาตั้งรหัสผ่านใหม่ (อย่างน้อย 5 ตัวอักษร)</div>
+      <form id="em-force-pass-form">
+       <div class="em-auth-field">
+        <label class="em-auth-label" for="em-new-pass">รหัสผ่านใหม่</label>
+        <input class="em-auth-input" id="em-new-pass" type="password" required minlength="5" placeholder="อย่างน้อย 5 ตัวอักษร">
+       </div>
+       <div class="em-auth-field">
+        <label class="em-auth-label" for="em-conf-pass">ยืนยันรหัสผ่านใหม่</label>
+        <input class="em-auth-input" id="em-conf-pass" type="password" required minlength="5" placeholder="พิมพ์ซ้ำอีกครั้ง">
+       </div>
+       <button class="em-auth-btn" id="em-force-submit" type="submit">บันทึกรหัสผ่านใหม่</button>
+       <div class="em-auth-err" id="em-force-err"></div>
+      </form>
+     </div>
+    `;
+    document.body.appendChild(modal);
+   }
+
+   modal.style.display = 'flex';
+   const form = modal.querySelector('#em-force-pass-form');
+   const errEl = modal.querySelector('#em-force-err');
+   const btn = modal.querySelector('#em-force-submit');
+   errEl.textContent = '';
+
+   form.onsubmit = async (e) => {
+    e.preventDefault();
+    errEl.textContent = '';
+    const p1 = modal.querySelector('#em-new-pass').value;
+    const p2 = modal.querySelector('#em-conf-pass').value;
+    if (p1 !== p2) {
+     errEl.textContent = 'รหัสผ่านทั้งสองช่องไม่ตรงกัน';
+     return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'กำลังบันทึก...';
+    try {
+     const res = await fetch('/api/v1/auth/change-password', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newPassword: p1 })
+     });
+     const r = await res.json();
+     if (!r.ok) throw new Error(r.error?.message || 'เปลี่ยนรหัสผ่านไม่สำเร็จ');
+     modal.style.display = 'none';
+     if (currentUser) currentUser.mustChangePassword = false;
+     resolve();
+    } catch (err) {
+     errEl.textContent = err.message || 'บันทึกรหัสผ่านไม่สำเร็จ';
+    } finally {
+     btn.disabled = false;
+     btn.textContent = 'บันทึกรหัสผ่านใหม่';
+    }
+   };
+  });
+ }
+
+ function promptLogin() {
+  if (loginPromise) return loginPromise.promise;
+  const modal = ensureLoginModal();
+  modal.style.display = 'flex';
+  const errEl = modal.querySelector('#em-auth-error');
+  if (errEl) errEl.textContent = '';
+  const userInput = modal.querySelector('#em-auth-user');
+  if (userInput) { userInput.value = ''; userInput.focus(); }
+  const passInput = modal.querySelector('#em-auth-pass');
+  if (passInput) passInput.value = '';
+
+  let resolve, reject;
+  const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
+  loginPromise = { promise, resolve, reject };
+  return promise;
+ }
+
+ function updateBadge() {
+  const badge = document.getElementById('em-user-badge');
+  const navUsers = document.getElementById('em-nav-users');
+  if (navUsers) {
+   const canManageUsers = currentUser && (currentUser.role === 'admin' || currentUser.permissions?.users === 'admin');
+   navUsers.style.display = canManageUsers ? 'inline-block' : 'none';
+  }
+  if (!badge) return;
+  if (!currentUser) {
+   badge.innerHTML = `<button id="em-open-login" style="background:#cc681c;color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:13px;cursor:pointer">เข้าสู่ระบบ</button>`;
+   const btn = document.getElementById('em-open-login');
+   if (btn) btn.onclick = () => promptLogin();
+   return;
+  }
+  const roleTh = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : currentUser.role === 'editor' ? 'แก้ไขได้' : 'ดูอย่างเดียว';
+  badge.innerHTML = `
+   <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:6px">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+    ${currentUser.displayName || currentUser.username} (${roleTh})
+   </span>
+   <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:4px;padding:3px 8px;font-size:12px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
+  `;
+  const logoutBtn = document.getElementById('em-btn-logout');
+  if (logoutBtn) {
+   logoutBtn.onclick = async () => {
+    try {
+     await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+    } catch (_) {}
+    location.reload();
+   };
+  }
+ }
+
+ // Check initial session state on load
+ if (typeof window !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => {
+   fetch('/api/v1/auth/me', { credentials: 'same-origin' })
+    .then(r => r.json())
+    .then(async res => {
+     if (res.ok && res.data) {
+      currentUser = res.data;
+      updateBadge();
+      if (res.data.mustChangePassword) {
+       await promptForceChangePassword();
+      }
+     } else {
+      updateBadge();
+     }
+    })
+    .catch(() => updateBadge());
+  });
+ }
+
+ window.EM_RPC = async (method, ...args) => {
+  const signature = JSON.stringify([method, args]);
+  const payload = args.findLast(a => a && typeof a === 'object' && !Array.isArray(a));
+  const requestId = payload?.requestId || payload?.operationId || inFlight.get(signature) || crypto.randomUUID();
+  inFlight.set(signature, requestId);
+
+  const doRequest = async () => {
+   const controller = new AbortController();
+   const timer = setTimeout(() => controller.abort(), 60000);
+   try {
+    const response = await fetch(`/api/v1/${scope}/rpc`, {
+     method: 'POST',
+     credentials: 'same-origin',
+     headers: { 'Content-Type': 'application/json', 'Idempotency-Key': requestId },
+     body: JSON.stringify({ method, args }),
+     signal: controller.signal
+    });
+
+    if (response.status === 401) {
+     // Wait for user to log in via modal dialog
+     await promptLogin();
+     // Retry the request after successful login
+     return await doRequest();
+    }
+
+    if (response.redirected || !response.headers.get('Content-Type')?.includes('application/json')) {
+     throw Object.assign(new Error('กรุณาเข้าสู่ระบบใหม่ แล้วลองคำขอเดิมอีกครั้ง'), { code: 'AUTH' });
+    }
+
+    const result = await response.json();
+    if (!result.ok) {
+     if (result.error?.code === 'AUTH') {
+      await promptLogin();
+      return await doRequest();
+     }
+     throw Object.assign(new Error(result.error?.message || 'เชื่อมต่อไม่สำเร็จ'), result.error);
+    }
+
+    inFlight.delete(signature);
+    return result.data;
+   } catch (error) {
+    if (error.name === 'AbortError') {
+     throw Object.assign(new Error('ยังยืนยันผลไม่ได้ กรุณาตรวจข้อมูลล่าสุดหรือลองคำขอเดิมอีกครั้ง'), { code: 'TIMEOUT' });
+    }
+    if (!error.code) error.message = 'เชื่อมต่อไม่สำเร็จ ข้อมูลที่กรอกยังอยู่ กรุณาลองใหม่';
+    throw error;
+   } finally {
+    clearTimeout(timer);
+   }
+  };
+
+  return doRequest();
+ };
+
+  if (typeof window !== 'undefined' && (!window.google || !window.google.script)) {
+    window.google = window.google || {};
+    window.google.script = {
+      run: (function createRunner(successFn, failureFn) {
+        return new Proxy({}, {
+          get(_, prop) {
+            if (prop === 'withSuccessHandler') return fn => createRunner(fn, failureFn);
+            if (prop === 'withFailureHandler') return fn => createRunner(successFn, fn);
+            if (prop === 'rpc') {
+              return (method, token, payload) => {
+                window.EM_RPC(method, payload).then(
+                  data => (successFn ? successFn({ ok: true, data }) : null),
+                  err => (failureFn ? failureFn(err) : null)
+                );
+              };
+            }
+            return (...args) => {
+              window.EM_RPC(prop, ...args).then(
+                data => (successFn ? successFn({ ok: true, data }) : null),
+                err => (failureFn ? failureFn(err) : null)
+              );
+            };
+          }
+        });
+      })()
+    };
+  }
+})();
+
+</script>
+<script>
+/* Pure domain rules shared with the local verification suite. */
+const PartCore = (() => {
+  const fields = ['id', 'partNumber', 'description', 'brand', 'storeCode', 'notes'];
+  const normalize = value => String(value == null ? '' : value).normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('th-TH');
+  function validate(input) {
+    const errors = {};
+    const value = {};
+    for (const [key, max] of Object.entries({partNumber: 160, description: 2000, storeCode: 160, notes: 4000})) {
+      value[key] = String(input[key] == null ? '' : input[key]).trim();
+      if (value[key].length > max) errors[key] = 'กรอกได้ไม่เกิน ' + max + ' ตัวอักษร';
+    }
+    if (!value.partNumber) errors.partNumber = 'กรุณากรอก Part number';
+    if (!value.description) errors.description = 'กรุณากรอก Description';
+    const raw = input.price == null ? '' : String(input.price).replace(/,/g, '').trim();
+    value.price = raw === '' ? null : Number(raw);
+    if (raw && (!/^\d+(\.\d{1,2})?$/.test(raw) || !Number.isFinite(value.price) || value.price > 999999999999)) errors.price = 'กรอกราคา 0 ขึ้นไป ทศนิยมไม่เกิน 2 ตำแหน่ง';
+    const rawLifespan = input.lifespan == null ? '' : String(input.lifespan).replace(/,/g, '').replace(/ปี/g, '').trim();
+    value.lifespan = rawLifespan === '' ? null : Number(rawLifespan);
+    if (rawLifespan && (!/^\d+(\.\d{1,2})?$/.test(rawLifespan) || !Number.isFinite(value.lifespan) || value.lifespan < 0 || value.lifespan > 999)) errors.lifespan = 'กรอกอายุอุปกรณ์เป็นตัวเลขปี 0 ขึ้นไป (เช่น 1, 2, 5 หรือ 0.5)';
+    value.brandId = input.brandId || null;
+    return {value, errors};
+  }
+  function query(rows, params) {
+    const tokens = [...new Set(normalize(params.query).split(' ').filter(Boolean))];
+    if (tokens.length > 20 || String(params.query || '').length > 300) throw new Error('คำค้นยาวเกินไป กรุณาใช้ไม่เกิน 20 คำ / 300 ตัวอักษร');
+    const sortBy = [...fields, 'price', 'lifespan'].includes(params.sortBy) ? params.sortBy : 'id';
+    const direction = params.sortOrder === 'asc' ? 1 : -1;
+    const size = [25, 50, 100].includes(Number(params.pageSize)) ? Number(params.pageSize) : 50;
+    const filtered = rows.filter(row => {
+      if (!tokens.length) return true;
+      const haystacks = [...fields.map(key => normalize(row[key])), row.lifespan != null ? String(row.lifespan) + ' ' + String(row.lifespan) + 'ปี' : ''];
+      return tokens.every(token => haystacks.some(text => text.includes(token)));
+    });
+    filtered.sort((a,b) => {
+      if (sortBy === 'price' || sortBy === 'lifespan') {
+        if (a[sortBy] == null && b[sortBy] != null) return 1;
+        if (b[sortBy] == null && a[sortBy] != null) return -1;
+        const cmp = (a[sortBy] || 0) - (b[sortBy] || 0);
+        return cmp * direction || a.id.localeCompare(b.id);
+      }
+      const cmp = String(a[sortBy] || '').localeCompare(String(b[sortBy] || ''), 'th', {numeric:true});
+      return cmp * direction || a.id.localeCompare(b.id);
+    });
+    const total = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total / size));
+    const page = Math.min(totalPages, Math.max(1, Math.floor(Number(params.page) || 1)));
+    return {items: filtered.slice((page-1)*size, page*size), page, pageSize:size, total, totalPages, allTotal:rows.length};
+  }
+  return {normalize, validate, query};
+})();
+if (typeof module !== 'undefined') module.exports = PartCore;
+
+const PartImage = (() => {
+  const TYPES = ['image/jpeg','image/png','image/webp'];
+  const blobData = blob => new Promise((resolve,reject) => {
+    const reader=new FileReader(); reader.onload=()=>resolve({mime:blob.type,base64:String(reader.result).split(',')[1]}); reader.onerror=()=>reject(new Error('อ่านไฟล์รูปไม่สำเร็จ')); reader.readAsDataURL(blob);
+  });
+  async function compress(file) {
+    if(!TYPES.includes(file.type)) throw new Error('เลือกรูป JPG, PNG หรือ WebP; หากเป็น HEIC ให้แปลงเป็น JPG ก่อน');
+    if(!file.size || file.size>10000000) throw new Error('เลือกไฟล์รูปที่มีข้อมูลและขนาดไม่เกิน 10 MB');
+    const url=URL.createObjectURL(file), img=new Image();
+    try {
+      await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('ไฟล์เสียหรืออ่านรูปไม่ได้ กรุณาเลือกรูปอื่น'));img.src=url;});
+      if(img.naturalWidth*img.naturalHeight>50000000) throw new Error('รูปมีความละเอียดสูงเกินไป กรุณาย่อให้ไม่เกิน 50 ล้านพิกเซล');
+      async function encode(longSide,maxBytes) {
+        const canvas=document.createElement('canvas');
+        const scale=Math.min(1,longSide/Math.max(img.naturalWidth,img.naturalHeight));
+        canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+        const ctx=canvas.getContext('2d');
+        if(!ctx) throw new Error('เบราว์เซอร์นี้ย่อรูปไม่ได้ กรุณาใช้ Chrome, Edge หรือ Safari รุ่นปัจจุบัน');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        let blob;
+        for(const quality of [.82,.76,.68,.60]) {
+          blob=await new Promise(r=>canvas.toBlob(r,'image/webp',quality));
+          if(!blob || blob.type!=='image/webp') {
+            ctx.globalCompositeOperation='destination-over';ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);
+            blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',quality));
+          }
+          if(blob && blob.size<=maxBytes) return blob;
+        }
+        throw new Error('ย่อรูปแล้วยังใหญ่เกินกำหนด กรุณาเลือกรูปอื่น');
+      }
+      let full=await encode(1600,1500000);
+      if(file.size<full.size && file.size<=1500000 && Math.max(img.naturalWidth,img.naturalHeight)<=1600) full=file;
+      const thumb=await encode(320,100000);
+      return {image:await blobData(full),thumbnail:await blobData(thumb),url:URL.createObjectURL(full),size:full.size,originalSize:file.size,name:file.name || 'รูปจาก Clipboard'};
+    } finally { URL.revokeObjectURL(url); }
+  }
+  return {compress};
+})();
+
+/* One UI controller: native controls, safe text rendering, bounded data and requests. */
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const CACHE_KEY='part-register-cache-v1';
+  function saveCache(data){try{sessionStorage.setItem(CACHE_KEY,JSON.stringify(data));}catch(_){}}
+  function getCache(){try{const raw=sessionStorage.getItem(CACHE_KEY);return raw?JSON.parse(raw):null;}catch(_){return null;}}
+  function clearCache(){try{sessionStorage.removeItem(CACHE_KEY);}catch(_){}}
+
+  const state={params:{query:'',page:1,pageSize:50,sortBy:'id',sortOrder:'desc'},allParts:[],items:[],brands:[],chosenBrandId:'',webAppUrl:'',request:0,loading:false,editing:null,detail:null,dirty:false,saving:false,imageBusy:false,image:null,removeImage:false,imageGeneration:0,booted:false,view:'catalog',batchFilter:'missing',batchSearch:'',batchPending:new Map(),batchUploading:false,batchActiveRowId:null,batchSuccessCount:0,bulkRows:[],bulkFilter:'all',bulkSaving:false};
+  let searchTimer,composing=false,toastTimer,confirmAction,confirmParent,confirmReturn,brandParent,editorReturn,detailGeneration=0,initialEditHandled=false;
+  const fields={partNumber:'part-number',description:'description',brandId:'brand',storeCode:'store-code',lifespan:'lifespan',price:'price',notes:'notes'};
+  const number=new Intl.NumberFormat('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+  function uuid(){return (typeof crypto!=='undefined'&&typeof crypto.randomUUID==='function')?crypto.randomUUID():'req-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)+'-'+Math.random().toString(36).slice(2,10);}
+  function node(tag,className,text) { const el=document.createElement(tag);if(className)el.className=className;if(text!=null)el.textContent=text;return el; }
+  function button(label,fn,className='button ghost') {const el=node('button',className,label);el.type='button';el.addEventListener('click',fn);return el;}
+  function setError(id,text) {$(id).textContent=text || '';$(id).hidden=!text;}
+  function toast(message) {clearTimeout(toastTimer);$('toast').textContent=message;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,5000);}
+  function title(label) {document.title=label+' — Part Register';}
+  function syncModal() {document.body.classList.toggle('modal-open',!!document.querySelector('dialog[open]'));}
+  function openDialog(id,focus) {$(id).showModal();syncModal();if(focus)$(focus).focus();}
+  function closeDialog(id) {$(id).close();syncModal();}
+  function rpc(method,...args) {
+    if (window.EM_RPC) return window.EM_RPC(method, ...args);
+    return new Promise((resolve,reject)=>{
+      let complete=false;
+      const timeout=setTimeout(()=>{complete=true;reject(Object.assign(new Error('ยังยืนยันผลไม่ได้ ตรวจสอบการเชื่อมต่อแล้วลองคำขอเดิมอีกครั้ง'),{code:'TIMEOUT'}));},60000);
+      const success=result=>{if(complete)return;clearTimeout(timeout);complete=true;if(result.ok)resolve(result.data);else reject(Object.assign(new Error(result.error.message),result.error));};
+      const failure=()=>success({ok:false,error:{code:'CONNECTION',message:'เชื่อมต่อไม่สำเร็จ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง'}});
+      if(window.google && google.script && google.script.run) google.script.run.withSuccessHandler(success).withFailureHandler(failure)[method](...args);
+      else if(location.hostname==='127.0.0.1' || location.hostname==='localhost') fetch('/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method,args})}).then(r=>r.json()).then(success,failure);
+      else failure();
+    });
+  }
+  function persist() {try{sessionStorage.setItem('part-register-list',JSON.stringify(state.params));}catch(_){/* Privacy mode: navigation state stays in memory. */}}
+  function restore() {try{const value=JSON.parse(sessionStorage.getItem('part-register-list') || 'null');if(value)state.params={...state.params,...value};}catch(_){/* Start at defaults when storage is unavailable. */}}
+
+  async function copyToClipboard(text) {
+    try {
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch(_) {}
+    try {
+      const input=document.createElement('textarea');
+      input.value=text;input.style.position='fixed';input.style.left='-9999px';input.style.top='-9999px';
+      document.body.appendChild(input);input.focus();input.select();
+      const ok=document.execCommand('copy');
+      document.body.removeChild(input);
+      if(ok)return true;
+    } catch(_) {}
+    return false;
+  }
+  function getBaseUrl() {
+    if(state.webAppUrl)return state.webAppUrl;
+    try {
+      const loc=window.location;
+      if(loc && loc.origin && loc.origin!=='null') return loc.origin+loc.pathname;
+    } catch(_) {}
+    return '';
+  }
+  function getEditLink(part) {
+    if(!part || !part.id)return '';
+    const base=getBaseUrl();
+    if(!base)return '?id='+encodeURIComponent(part.id);
+    const sep=base.includes('?')?'&':'?';
+    return base+sep+'id='+encodeURIComponent(part.id);
+  }
+  async function copyPartLink(part) {
+    if(!part)return;
+    const link=getEditLink(part);
+    const ok=await copyToClipboard(link);
+    if(ok)toast('คัดลอกลิงก์แก้ไขแล้ว: '+link);
+    else window.prompt('คัดลอกลิงก์แก้ไขสำหรับเชื่อมต่อกับเว็บอื่น:',link);
+  }
+
+  const imageObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
+    if(entry.isIntersecting){imageObserver.unobserve(entry.target);imageQueue.push(entry.target);pumpImages();}
+  }),{rootMargin:'100px'});
+  const imageQueue=[];let activeImages=0;
+  function pumpImages() {
+    while(activeImages<3 && imageQueue.length){const el=imageQueue.shift();if(!el.isConnected)continue;activeImages++;
+      rpc('getPicture',el.dataset.id,'thumbnail').then(data=>{if(data && el.isConnected){const img=node('img');img.alt='';img.loading='lazy';img.width=56;img.height=56;img.src='data:'+data.mime+';base64,'+data.base64;el.replaceChildren(img);}}).catch(()=>{if(el.isConnected){el.classList.add('image-failed');el.textContent='ดูรูป';}}).finally(()=>{activeImages--;pumpImages();});
+    }
+  }
+  function picture(part) {const el=button('▧',()=>openDetail(part),'picture-thumb');el.setAttribute('aria-label','ดูรายละเอียดและรูป '+part.partNumber);if(part.picture)el.dataset.id=part.id;return el;}
+  function actionButtons(part) {const box=node('div','row-actions');box.append(button('แก้ไข',()=>editPart(part)),button('ลบ',()=>deletePart(part)));return box;}
+  function codeBlock(part) {
+    const wrap=node('div');
+    const codeBtn=button(part.partNumber,()=>openDetail(part),'button ghost part-code');
+    const idBtn=node('button','part-id-btn',part.id);
+    idBtn.type='button';
+    idBtn.title='คลิกเพื่อคัดลอกลิงก์แก้ไขสำหรับเว็บอื่น ('+part.id+')';
+    idBtn.onclick=e=>{e.stopPropagation();copyPartLink(part);};
+    wrap.append(codeBtn,idBtn);
+    return wrap;
+  }
+  function render() {
+    imageObserver.disconnect();imageQueue.length=0;
+    $('rows').replaceChildren();$('cards').replaceChildren();
+    const mobile=matchMedia('(max-width: 1023px)').matches;
+    for(const part of state.items) {
+      if(mobile) {
+        const card=node('article','part-card'),top=node('div','card-top');top.append(picture(part),codeBlock(part));
+        const price=node('div','card-price');price.append(node('span','brand-tag',part.brand || 'ไม่ระบุ Brand'),node('span','numeric',part.price==null?'ยังไม่ระบุราคา':number.format(part.price)));
+        card.append(top,node('p','row-description',part.description),price);
+        if(part.storeCode)card.append(node('p','mono','Store · '+part.storeCode));
+        if(part.lifespan!=null)card.append(node('p','mono','อายุอุปกรณ์ · '+part.lifespan+' ปี'));
+        if(part.notes)card.append(node('p','row-note','หมายเหตุ · '+part.notes));
+        card.append(actionButtons(part));$('cards').append(card);
+      } else {
+        const row=node('tr'),desc=node('div');desc.append(node('div','row-description',part.description));if(part.notes)desc.append(node('div','row-note','↳ '+part.notes));
+        const values=[picture(part),codeBlock(part),desc,node('span','brand-tag',part.brand || 'ไม่ระบุ'),node('span','mono',part.storeCode || '—'),node('span','',part.lifespan==null?'—':part.lifespan+' ปี'),node('span','',part.price==null?'ยังไม่ระบุ':number.format(part.price)),actionButtons(part)];
+        values.forEach((value,i)=>{const td=node('td',(i===5||i===6)?'numeric':'');td.append(value);row.append(td);});$('rows').append(row);
+      }
+    }
+    document.querySelectorAll('.picture-thumb[data-id]').forEach(el=>imageObserver.observe(el));
+    $('empty').hidden=state.items.length>0;
+    if(!state.items.length){$('empty-title').textContent=state.params.query?'ไม่พบรายการที่ตรงทุกคำ':'เริ่มเก็บอะไหล่ชิ้นแรก';$('empty-copy').textContent=state.params.query?'ลองลดคำค้น หรือค้นหาจากรหัสและ Brand':'เพิ่มรหัส รายละเอียด และรูปภาพ เพื่อค้นหาได้ง่ายในครั้งถัดไป';$('empty-action').textContent=state.params.query?'ล้างคำค้น':'เพิ่ม Part แรก';$('empty-action').hidden=false;}
+    document.querySelectorAll('th[data-sort]').forEach(th=>{if(th.dataset.sort===state.params.sortBy)th.setAttribute('aria-sort',state.params.sortOrder==='asc'?'ascending':'descending');else th.removeAttribute('aria-sort');});
+  }
+  function applyLocalQuery() {
+    persist();
+    if(!state.allParts.length){
+      state.items=[];render();
+      $('total-badge').textContent='0';
+      $('result-status').textContent=state.params.query?'ไม่พบรายการที่ตรงทุกคำ':'ยังไม่มีรายการ';
+      $('range').textContent='0 รายการ';$('page-label').textContent='1 / 1';
+      $('previous').disabled=true;$('next').disabled=true;
+      return;
+    }
+    try {
+      const data=PartCore.query(state.allParts,state.params);
+      state.items=data.items;state.params.page=data.page;state.params.pageSize=data.pageSize;persist();render();
+      $('total-badge').textContent=data.allTotal.toLocaleString('th-TH');
+      $('result-status').textContent=state.params.query?'ผลค้นหา '+data.total.toLocaleString('th-TH')+' รายการ · ตรงทุกคำ':'ทั้งหมด '+data.total.toLocaleString('th-TH')+' รายการ';
+      $('range').textContent=data.total?'แสดง '+((data.page-1)*data.pageSize+1)+'–'+Math.min(data.page*data.pageSize,data.total)+' จาก '+data.total.toLocaleString('th-TH'):'0 รายการ';
+      $('page-label').textContent=data.page+' / '+data.totalPages;$('previous').disabled=data.page<=1;$('next').disabled=data.page>=data.totalPages;
+    } catch(err) {
+      setError('list-error',err.message);
+    }
+  }
+
+  function getInitialTargetId() {
+    if(window.__INITIAL_EDIT_ID__)return window.__INITIAL_EDIT_ID__;
+    try {
+      const search=new URLSearchParams(window.location.search);
+      const val=search.get('id')||search.get('edit')||search.get('partId')||search.get('part');
+      if(val)return val;
+      if(window.location.search){
+        const match=/(?:PART-\d+|[A-Za-z0-9_-]+)/i.exec(decodeURIComponent(window.location.search));
+        if(match && match[0].toUpperCase().startsWith('PART-'))return match[0];
+      }
+      if(window.location.hash){
+        const match=/(?:PART-\d+|[A-Za-z0-9_-]+)/i.exec(decodeURIComponent(window.location.hash));
+        if(match && match[0].toUpperCase().startsWith('PART-'))return match[0];
+      }
+    } catch(_) {}
+    return null;
+  }
+  function checkAndOpenExternalEdit(targetId) {
+    if(!targetId || initialEditHandled)return;
+    const target=PartCore.normalize(targetId);
+    if(!target || !state.allParts || !state.allParts.length)return;
+    let found=state.allParts.find(p=>PartCore.normalize(p.id)===target);
+    if(!found)found=state.allParts.find(p=>PartCore.normalize(p.partNumber)===target);
+    if(!found)found=state.allParts.find(p=>PartCore.normalize(p.id).includes(target)||PartCore.normalize(p.partNumber).includes(target));
+    if(found){
+      initialEditHandled=true;
+      state.params.query=found.partNumber;
+      $('search').value=found.partNumber;
+      $('clear-search').hidden=false;
+      applyLocalQuery();
+      editPart(found);
+      toast('เปิดฟอร์มแก้ไข '+found.partNumber+' ('+found.id+') จากลิงก์ภายนอก');
+    }
+  }
+
+  async function fetchFreshData(showToast=false) {
+    const generation=++state.request;state.loading=true;$('list-surface').setAttribute('aria-busy','true');$('loading').hidden=false;setError('list-error','');
+    try {
+      const result=await rpc('bootstrap');if(generation!==state.request)return;
+      state.brands=result.brands || [];
+      renderBrandSelect();
+      state.allParts=result.parts || [];
+      if(result.webAppUrl)state.webAppUrl=result.webAppUrl;
+      saveCache({brands:state.brands,parts:state.allParts,webAppUrl:state.webAppUrl});
+      state.booted=true;
+      applyLocalQuery();
+      renderBatchStats();
+      if(state.view==='batch')renderBatchList();
+      if(state.view==='bulk'){revalidateBulkRows();renderBulkTable();}
+      const targetId=getInitialTargetId();
+      if(targetId && !initialEditHandled)checkAndOpenExternalEdit(targetId);
+      $('sync-label').textContent='อัปเดต '+new Intl.DateTimeFormat('th-TH',{hour:'2-digit',minute:'2-digit'}).format(new Date())+' · ทะเบียนกลาง';
+      if(showToast)toast('รีเฟรชข้อมูลล่าสุดแล้ว ('+state.allParts.length.toLocaleString('th-TH')+' รายการ)');
+    } catch(error) {
+      if(generation===state.request){
+        setError('list-error',error.message+' · กดรีเฟรชเพื่อลองอีกครั้ง');
+        if(!state.allParts.length){
+          $('result-status').textContent='ยังโหลดรายการล่าสุดไม่ได้';
+          $('empty-title').textContent='โหลดข้อมูลไม่สำเร็จ';
+          $('empty-copy').textContent='ตรวจสอบการเชื่อมต่อแล้วกดรีเฟรช';
+          $('empty-action').hidden=true;
+        }
+      }
+    } finally {
+      if(generation===state.request){
+        state.loading=false;$('list-surface').setAttribute('aria-busy','false');$('loading').hidden=true;
+        $('add-part').disabled=!state.booted;$('brands-open').disabled=!state.booted;
+      }
+    }
+  }
+  function runSearch() {clearTimeout(searchTimer);state.params.query=$('search').value;state.params.page=1;applyLocalQuery();}
+  function clearSearch() {$('search').value='';$('clear-search').hidden=true;runSearch();$('search').focus();}
+  function renderBrandSelect() {
+    const filter = PartCore.normalize($('brand-filter').value);
+    const brands = state.brands.slice();
+    if (state.editing && state.editing.brandId && !brands.some(b => b.id === state.editing.brandId)) {
+      brands.push({id: state.editing.brandId, name: state.editing.brand, active: false});
+    }
+
+    $('brand').replaceChildren();
+
+    if (!filter) {
+      $('brand').add(new Option('ไม่ระบุ', ''));
+      brands.sort((a,b) => a.name.localeCompare(b.name, 'th'))
+        .forEach(b => $('brand').add(new Option(b.name + (b.active === false ? ' (ยกเลิกใช้งาน)' : ''), b.id)));
+      $('brand').value = state.chosenBrandId || '';
+      $('brand-filter-clear').hidden = true;
+      $('brand-filter-clear').textContent = 'ล้างคำค้น Brand';
+      return;
+    }
+
+    $('brand-filter-clear').hidden = false;
+    const matched = brands.filter(b => PartCore.normalize(b.name).includes(filter))
+      .sort((a,b) => a.name.localeCompare(b.name, 'th'));
+
+    if (matched.length === 0) {
+      $('brand').add(new Option('ไม่พบ Brand ที่ค้นหา', ''));
+      $('brand').value = '';
+      $('brand-filter-clear').textContent = 'ล้างคำค้น Brand (ไม่พบ)';
+    } else {
+      $('brand').add(new Option('ไม่ระบุ', ''));
+      matched.forEach(b => $('brand').add(new Option(b.name + (b.active === false ? ' (ยกเลิกใช้งาน)' : ''), b.id)));
+      $('brand-filter-clear').textContent = 'ล้างคำค้น Brand (พบ ' + matched.length + ' รายการ)';
+
+      if (state.chosenBrandId && matched.some(b => b.id === state.chosenBrandId)) {
+        $('brand').value = state.chosenBrandId;
+      } else {
+        $('brand').value = matched[0].id;
+      }
+    }
+  }
+  function clearValidation() {setError('form-error','');Object.entries(fields).forEach(([key,id])=>{$(id).removeAttribute('aria-invalid');$(key+'-error').textContent='';});}
+  function showValidation(errors) {for(const [key,text] of Object.entries(errors || {})){if(fields[key]){$(fields[key]).setAttribute('aria-invalid','true');$(key+'-error').textContent=text;}}const first=Object.keys(errors || {}).find(k=>fields[k]);if(first)$(fields[first]).focus();}
+  function readForm() {return {partNumber:$('part-number').value,description:$('description').value,brandId:$('brand').value || null,storeCode:$('store-code').value,lifespan:$('lifespan').value,price:$('price').value,notes:$('notes').value};}
+  function resetImage() {state.imageGeneration++;if(state.image)URL.revokeObjectURL(state.image.url);state.image=null;state.removeImage=false;state.imageBusy=false;$('image-error').textContent='';$('image-status').textContent='ย่อและบีบอัดก่อนอัปโหลดอัตโนมัติ';$('preview').replaceChildren(node('span','','▧'));$('remove-image').hidden=true;$('picture-input').value='';$('camera-input').value='';}
+  function editPart(part=null) {
+    if(state.saving)return;
+    editorReturn=document.activeElement;state.editing=part;state.dirty=false;state.requestId=uuid();resetImage();clearValidation();
+    state.chosenBrandId = part && part.brandId ? part.brandId : '';
+    $('part-form').reset();$('brand-filter').value='';renderBrandSelect();
+    Object.entries(fields).forEach(([key,id])=>$(id).value=part && part[key]!=null?part[key]:'');
+    $('editor-title').textContent=part?'แก้ไข Part':'เพิ่ม Part';$('editor-code').textContent=part?part.id:'NEW PART';$('save-part').textContent=part?'บันทึกการแก้ไข':'บันทึก Part';$('save-part').disabled=false;
+    $('editor-copy-link').hidden=!part;
+    if(part)$('editor-copy-link').onclick=()=>copyPartLink(part);
+    if(part && part.picture){$('remove-image').hidden=false;$('preview').replaceChildren(node('span','','▧'));const generation=state.imageGeneration;rpc('getPicture',part.id,'thumbnail').then(data=>{if(data && generation===state.imageGeneration && !state.image && !state.removeImage){const img=node('img');img.alt='รูปเดิม';img.src='data:'+data.mime+';base64,'+data.base64;$('preview').replaceChildren(img);}}).catch(()=>{$('image-status').textContent='โหลดรูปเดิมไม่ได้ แต่ข้อมูลรูปยังคงอยู่';});}
+    openDialog('editor','part-number');title(part?'แก้ไข Part':'เพิ่ม Part');
+  }
+  function endEditor() {closeDialog('editor');state.dirty=false;resetImage();title('ทะเบียนอะไหล่');if(editorReturn && editorReturn.isConnected)editorReturn.focus();else $('page-title').focus();}
+  function cancelEditor() {if(state.saving)return;if(state.dirty)ask('ละทิ้งข้อมูลที่ยังไม่บันทึก?','ข้อมูลที่กรอกและรูปที่เลือกจะไม่ถูกบันทึก','ละทิ้งข้อมูล',()=>endEditor(),'editor','warning');else endEditor();}
+  function ask(heading,copy,label,action,parent=null,intent='danger') {
+    confirmReturn=document.activeElement;confirmParent=parent;if(parent)closeDialog(parent);
+    $('confirmation-title').textContent=heading;$('confirmation-copy').textContent=copy;$('confirmation-accept').textContent=label;$('confirmation-accept').className='button '+intent;$('confirmation-error').textContent='';confirmAction=action;
+    openDialog('confirmation','confirmation-cancel');
+  }
+  function restoreConfirmationParent() {if(confirmParent && !$(confirmParent).open)openDialog(confirmParent);if(confirmReturn && confirmReturn.isConnected)confirmReturn.focus();confirmParent=null;}
+  $('confirmation-cancel').onclick=()=>{if($('confirmation-accept').disabled)return;closeDialog('confirmation');restoreConfirmationParent();};
+  $('confirmation').addEventListener('cancel',e=>{e.preventDefault();$('confirmation-cancel').click();});
+  $('confirmation-accept').onclick=async()=>{
+    if($('confirmation-accept').disabled)return;
+    $('confirmation-accept').disabled=true;$('confirmation-cancel').disabled=true;$('confirmation').setAttribute('aria-busy','true');
+    try {await confirmAction();closeDialog('confirmation');if(confirmParent==='editor' && !state.dirty)confirmParent=null;restoreConfirmationParent();}
+    catch(error){$('confirmation-error').textContent=error.message;}
+    finally{$('confirmation-accept').disabled=false;$('confirmation-cancel').disabled=false;$('confirmation').setAttribute('aria-busy','false');}
+  };
+  function setSaving(busy) {state.saving=busy;$('part-form').setAttribute('aria-busy',String(busy));$('part-form').querySelectorAll('button,input,textarea,select').forEach(el=>el.disabled=busy);$('save-part').disabled=busy || state.imageBusy;}
+  $('part-form').addEventListener('submit',async e=>{
+    e.preventDefault();if(state.saving || state.imageBusy || e.isComposing)return;clearValidation();
+    const {value,errors}=PartCore.validate(readForm());if(Object.keys(errors).length){showValidation(errors);return;}
+    const payload={...value,requestId:state.requestId,version:state.editing?state.editing.version:undefined,removeImage:state.removeImage,image:state.image?state.image.image:null,thumbnail:state.image?state.image.thumbnail:null};
+    setSaving(true);
+    try {
+      if(state.editing)await rpc('updatePart',state.editing.id,payload);else await rpc('createPart',payload);
+      state.dirty=false;endEditor();toast(state.editing?'บันทึกการแก้ไขแล้ว':'เพิ่ม Part แล้ว');
+      await fetchFreshData(false);
+    }
+    catch(error){setError('form-error',error.message);showValidation(error.fields);}
+    finally{setSaving(false);}
+  });
+  $('part-form').addEventListener('input',e=>{if(e.target.id==='brand-filter')return;state.dirty=true;if(e.target.name && fields[e.target.name]){e.target.removeAttribute('aria-invalid');$(e.target.name+'-error').textContent='';}if(e.target.tagName==='TEXTAREA'){e.target.style.height='auto';e.target.style.height=Math.min(260,e.target.scrollHeight)+'px';}});
+  $('part-form').addEventListener('change',()=>state.dirty=true);
+  async function acceptFile(file,count=1) {
+    if(!file || state.saving)return;const generation=++state.imageGeneration;state.imageBusy=true;$('save-part').disabled=true;$('image-error').textContent='';$('image-status').textContent='กำลังย่อรูป…';
+    try {const result=await PartImage.compress(file);if(generation!==state.imageGeneration){URL.revokeObjectURL(result.url);return;}if(state.image)URL.revokeObjectURL(state.image.url);state.image=result;state.removeImage=false;state.dirty=true;
+      const img=node('img');img.alt='รูปที่เลือก';img.src=result.url;$('preview').replaceChildren(img);$('remove-image').hidden=false;
+      $('image-status').textContent=result.name+' · '+(result.originalSize/1000).toFixed(0)+' KB → '+(result.size/1000).toFixed(0)+' KB'+(count>1?' · ใช้รูปแรกเท่านั้น':'');
+    }catch(error){if(generation===state.imageGeneration){$('image-error').textContent=error.message;$('image-status').textContent='ยังไม่ได้เปลี่ยนรูป';}}
+    finally{if(generation===state.imageGeneration){state.imageBusy=false;$('save-part').disabled=state.saving;}}
+  }
+  $('choose-file').onclick=()=>$('picture-input').click();$('choose-camera').onclick=()=>$('camera-input').click();
+  for(const id of ['picture-input','camera-input'])$(id).onchange=e=>acceptFile(e.target.files[0],e.target.files.length);
+  $('drop-zone').addEventListener('dragover',e=>{e.preventDefault();if(!state.saving)$('drop-zone').classList.add('drag-over');});
+  $('drop-zone').addEventListener('dragleave',()=>$('drop-zone').classList.remove('drag-over'));
+  $('drop-zone').addEventListener('drop',e=>{e.preventDefault();$('drop-zone').classList.remove('drag-over');acceptFile(e.dataTransfer.files[0],e.dataTransfer.files.length);});
+  document.addEventListener('paste',e=>{
+    if(!$('editor').open || state.saving)return;
+    if(e.clipboardData.getData('text/plain') && ['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    const files=Array.from(e.clipboardData.items).filter(item=>item.kind==='file' && item.type.startsWith('image/')).map(item=>item.getAsFile());
+    if(files.length){e.preventDefault();acceptFile(files[0],files.length);}
+  });
+  $('remove-image').onclick=()=>{resetImage();state.removeImage=true;state.dirty=true;$('image-status').textContent='จะนำรูปออกเมื่อบันทึก';};
+  async function openDetail(part) {
+    state.detail=part;const generation=++detailGeneration;$('detail-title').textContent=part.partNumber;$('detail-id').textContent=part.id;$('detail-values').replaceChildren();
+    for(const [label,value] of [['Description',part.description],['Brand',part.brand || 'ไม่ระบุ'],['ราคา',part.price==null?'ยังไม่ระบุ':number.format(part.price)],['Store code',part.storeCode || '—'],['อายุอุปกรณ์',part.lifespan==null?'—':part.lifespan+' ปี'],['หมายเหตุ / รหัสทดแทน',part.notes || '—']])$('detail-values').append(node('dt','',label),node('dd','',value));
+    const link=getEditLink(part);
+    $('detail-link-input').value=link;
+    $('detail-link-input').onclick=()=>{$('detail-link-input').select();copyPartLink(part);};
+    $('detail-copy-link').onclick=()=>copyPartLink(part);
+    $('detail-picture').replaceChildren();openDialog('detail','detail-close');title('รายละเอียด Part');
+    if(part.picture){$('detail-picture').textContent='กำลังโหลดรูป…';try{const data=await rpc('getPicture',part.id,'full');if(generation===detailGeneration && data){const img=node('img');img.alt=part.description;img.src='data:'+data.mime+';base64,'+data.base64;$('detail-picture').replaceChildren(img);}}catch(_){if(generation===detailGeneration)$('detail-picture').replaceChildren(button('โหลดรูปไม่สำเร็จ · ลองอีกครั้ง',()=>{closeDialog('detail');openDetail(part);}));}}
+  }
+  function deletePart(part) {ask('ลบ '+part.partNumber+'?','ลบรายการนี้ออกจากทะเบียนอย่างถาวร และย้ายรูปใน Drive ไปยังถังขยะ การลบรายการนี้ย้อนกลับจากเว็บไม่ได้','ลบรายการ',async()=>{await rpc('deletePart',part.id,part.version);toast('ลบ Part แล้ว');await fetchFreshData(false);$('page-title').focus();});}
+  async function refreshBrands() {
+    state.brands=await rpc('getBrands');
+    saveCache({brands:state.brands,parts:state.allParts,webAppUrl:state.webAppUrl});
+    renderBrandSelect();renderBrands();
+  }
+  function renderBrands() {$('brand-list').replaceChildren();if(!state.brands.length)$('brand-list').append(node('p','hint','ยังไม่มี Brand เพิ่มชื่อแรกได้ด้านบน'));state.brands.slice().sort((a,b)=>a.name.localeCompare(b.name,'th')).forEach(brand=>{const row=node('div','brand-row');row.append(node('span','',brand.name),button('ลบ',()=>ask('ลบตัวเลือก '+brand.name+'?','ชื่อ Brand ใน Part เดิมจะยังอยู่ แต่ไม่แสดงเป็นตัวเลือกสำหรับ Part ใหม่','ลบตัวเลือก',async()=>{await rpc('deleteBrand',brand.id);await refreshBrands();toast('ลบตัวเลือก Brand แล้ว');},'brands-dialog','warning')));$('brand-list').append(row);});}
+  async function openBrands(parent=null) {brandParent=parent;if(parent)closeDialog(parent);setError('brand-error','');$('brandName-error').textContent='';openDialog('brands-dialog','brand-name');title('จัดการ Brand');try{await refreshBrands();}catch(error){setError('brand-error',error.message);}}
+  function closeBrands(){closeDialog('brands-dialog');if(brandParent){openDialog(brandParent,'brand');brandParent=null;title('แก้ไขข้อมูล Part');}else title('ทะเบียนอะไหล่');}
+  $('brand-form').addEventListener('submit',async e=>{
+    e.preventDefault();if($('brand-save').disabled || e.isComposing)return;const name=$('brand-name').value.trim();$('brandName-error').textContent='';setError('brand-error','');
+    if(!name){$('brandName-error').textContent='กรุณากรอกชื่อ Brand';$('brand-name').setAttribute('aria-invalid','true');$('brand-name').focus();return;}
+    $('brand-name').removeAttribute('aria-invalid');$('brand-save').disabled=true;$('brands-close').disabled=true;
+    try{const result=await rpc('createBrand',name,false);if(result.requiresReactivation){ask('เปิดใช้ '+result.name+' อีกครั้ง?','Brand นี้เคยถูกลบ จะเปิดใช้งานชื่อเดิมโดยไม่สร้างรายการซ้ำ','เปิดใช้งาน',async()=>{await rpc('createBrand',name,true);await refreshBrands();$('brand-name').value='';toast('เปิดใช้งาน Brand แล้ว');},'brands-dialog','primary');}
+      else {await refreshBrands();$('brand-name').value='';toast('เพิ่ม Brand แล้ว');}}
+    catch(error){setError('brand-error',error.message);}finally{$('brand-save').disabled=false;$('brands-close').disabled=false;}
+  });
+  $('brands-close').onclick=closeBrands;$('brands-dialog').addEventListener('cancel',e=>{e.preventDefault();if(!$('brand-save').disabled)closeBrands();});
+  $('brands-open').onclick=()=>openBrands();$('form-brands').onclick=()=>openBrands('editor');
+  $('brand').addEventListener('change', () => { state.chosenBrandId = $('brand').value; });
+  $('brand-filter').oninput = renderBrandSelect;
+  $('brand-filter').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('brand').focus(); } });
+  $('brand-filter-clear').onclick = () => { $('brand-filter').value = ''; renderBrandSelect(); $('brand-filter').focus(); };
+  $('add-part').onclick=()=>editPart();$('empty-action').onclick=()=>state.params.query?clearSearch():editPart();$('editor-close').onclick=cancelEditor;$('cancel-part').onclick=cancelEditor;$('editor').addEventListener('cancel',e=>{e.preventDefault();cancelEditor();});
+  $('detail-close').onclick=()=>{detailGeneration++;closeDialog('detail');title('ทะเบียนอะไหล่');};$('detail').addEventListener('cancel',()=>{detailGeneration++;title('ทะเบียนอะไหล่');setTimeout(syncModal,0);});$('detail-edit').onclick=()=>{closeDialog('detail');editPart(state.detail);};
+  $('search').addEventListener('input',()=>{
+    $('clear-search').hidden=!$('search').value;
+    clearTimeout(searchTimer);
+    if(!composing)searchTimer=setTimeout(runSearch,40);
+  });
+  $('search').addEventListener('compositionstart',()=>{composing=true;clearTimeout(searchTimer);});
+  $('search').addEventListener('compositionend',()=>{composing=false;runSearch();});
+  $('search').addEventListener('keydown',e=>{if(e.key==='Enter' && !e.isComposing){e.preventDefault();runSearch();}});
+  $('clear-search').onclick=clearSearch;
+  $('sort').onchange=()=>{[state.params.sortBy,state.params.sortOrder]=$('sort').value.split(':');state.params.page=1;applyLocalQuery();};
+  document.querySelectorAll('th button[data-sort]').forEach(el=>el.onclick=()=>{state.params.sortOrder=state.params.sortBy===el.dataset.sort && state.params.sortOrder==='asc'?'desc':'asc';state.params.sortBy=el.dataset.sort;$('sort').value=state.params.sortBy+':'+state.params.sortOrder;applyLocalQuery();});
+  $('page-size').onchange=()=>{state.params.pageSize=Number($('page-size').value);state.params.page=1;applyLocalQuery();};
+  $('previous').onclick=()=>{if(state.params.page>1){state.params.page--;applyLocalQuery();}};
+  $('next').onclick=()=>{state.params.page++;applyLocalQuery();};
+  $('density').onclick=()=>{const compact=$('list-surface').classList.toggle('compact');$('density').setAttribute('aria-pressed',String(compact));};
+  /* --- BATCH IMAGE UPLOADER CONTROLLER --- */
+  function formatBytes(bytes) {
+    if(!bytes)return '0 B';
+    const k=1024,sizes=['B','KB','MB'];
+    const i=Math.floor(Math.log(bytes)/Math.log(k));
+    return parseFloat((bytes/Math.pow(k,i)).toFixed(1))+' '+sizes[i];
+  }
+
+  function switchView(viewName) {
+    state.view = viewName;
+    const isCatalog = viewName === 'catalog';
+    const isBatch = viewName === 'batch';
+    const isBulk = viewName === 'bulk';
+
+    $('nav-catalog').classList.toggle('active', isCatalog);
+    $('nav-bulk').classList.toggle('active', isBulk);
+    $('nav-batch').classList.toggle('active', isBatch);
+
+    $('intro-catalog').hidden = !isCatalog;
+    $('catalog-section').hidden = !isCatalog;
+    $('batch-section').hidden = !isBatch;
+    $('bulk-section').hidden = !isBulk;
+
+    if (isBulk) {
+      title('เพิ่มแบบตารางหลายรายการ');
+      revalidateBulkRows();
+      renderBulkTable();
+    } else if (isBatch) {
+      title('อัปโหลดรูปชุด');
+      renderBatchStats();
+      renderBatchList();
+    } else {
+      title('ทะเบียนอะไหล่');
+      applyLocalQuery();
+    }
+  }
+
+  function setBatchFilter(filter) {
+    state.batchFilter = filter;
+    ['missing', 'pending', 'all', 'has'].forEach(key => {
+      const el = $('batch-tab-' + key);
+      if (el) {
+        el.classList.toggle('active', key === filter);
+        el.setAttribute('aria-selected', String(key === filter));
+      }
+    });
+    renderBatchList();
+  }
+
+  async function copyPartNumber(partNumber, btn) {
+    const ok = await copyToClipboard(partNumber);
+    if (ok) {
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = '✓ คัดลอกแล้ว';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1400);
+      }
+      toast('คัดลอก Part number: ' + partNumber);
+    } else {
+      window.prompt('คัดลอก Part number:', partNumber);
+    }
+  }
+
+  function setActiveBatchRow(partId) {
+    state.batchActiveRowId = partId;
+    document.querySelectorAll('.batch-row').forEach(row => {
+      row.classList.toggle('row-focused', row.dataset.id === partId);
+    });
+  }
+
+  async function processBatchFile(partId, file) {
+    if (!file) return;
+    const part = state.allParts.find(p => p.id === partId);
+    const row = document.getElementById('batch-row-' + partId);
+    setActiveBatchRow(partId);
+    if (row) {
+      const statusBadge = row.querySelector('.batch-status-badge');
+      if (statusBadge) statusBadge.innerHTML = '<span class="spinner" aria-hidden="true"></span> กำลังย่อขนาด…';
+    }
+    try {
+      const result = await PartImage.compress(file);
+      state.batchPending.set(partId, {
+        ...result,
+        status: 'pending',
+        error: ''
+      });
+      renderBatchStats();
+      updateBatchRowPending(partId);
+      toast('ย่อรูปเสร็จสิ้นสำหรับ ' + (part ? part.partNumber : partId) + ' (' + formatBytes(result.size) + ')');
+    } catch (err) {
+      toast('ย่อรูปไม่สำเร็จ: ' + (err.message || err));
+      if (row) {
+        const statusBadge = row.querySelector('.batch-status-badge');
+        if (statusBadge) statusBadge.innerHTML = '<span class="status-error">✕ ' + (err.message || 'ผิดพลาด') + '</span>';
+      }
+    }
+  }
+
+  async function triggerPasteForPart(partId) {
+    state.batchActiveRowId = partId;
+    setActiveBatchRow(partId);
+    let handled = false;
+    if (navigator.clipboard && navigator.clipboard.read) {
+      try {
+        const items = await navigator.clipboard.read();
+        for (const item of items) {
+          for (const type of item.types) {
+            if (type.startsWith('image/')) {
+              const blob = await item.getType(type);
+              const file = new File([blob], 'clipboard.' + (type.split('/')[1] || 'png'), { type });
+              await processBatchFile(partId, file);
+              handled = true;
+              break;
+            }
+          }
+          if (handled) break;
+        }
+      } catch (_) {}
+    }
+    if (!handled) {
+      toast('คลิกที่แถวนี้แล้วกด Ctrl+V เพื่อวางรูปภาพ หรือกดปุ่ม "เลือกรูป"');
+    }
+  }
+
+  function renderDefaultPasteBox(row, partId) {
+    const pasteCol = row.querySelector('.batch-paste-col');
+    if (!pasteCol) return;
+    pasteCol.replaceChildren();
+
+    const box = node('div', 'paste-target-box');
+    const promptWrap = node('div', 'paste-prompt-wrap');
+    const pasteBtn = node('button', 'paste-action-btn paste-btn', '📋 วางรูป (Ctrl+V)');
+    pasteBtn.type = 'button';
+    pasteBtn.onclick = (e) => {
+      e.stopPropagation();
+      triggerPasteForPart(partId);
+    };
+
+    const chooseBtn = node('button', 'paste-action-btn button ghost', '📁 เลือกรูป');
+    chooseBtn.type = 'button';
+    const fileInput = node('input', 'visually-hidden');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/jpeg,image/png,image/webp';
+    fileInput.onchange = (e) => {
+      if (e.target.files && e.target.files[0]) processBatchFile(partId, e.target.files[0]);
+    };
+    chooseBtn.onclick = (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    };
+
+    const hint = node('span', 'paste-shortcut-hint', 'หรือลากรูปมาวาง');
+    promptWrap.append(pasteBtn, chooseBtn, fileInput, hint);
+    box.append(promptWrap);
+    pasteCol.append(box);
+
+    box.ondragover = (e) => { e.preventDefault(); box.classList.add('drag-over'); };
+    box.ondragleave = () => box.classList.remove('drag-over');
+    box.ondrop = (e) => {
+      e.preventDefault();
+      box.classList.remove('drag-over');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        processBatchFile(partId, e.dataTransfer.files[0]);
+      }
+    };
+  }
+
+  function updateBatchRowPending(partId) {
+    const row = document.getElementById('batch-row-' + partId);
+    if (!row) return;
+    const pending = state.batchPending.get(partId);
+    const pasteCol = row.querySelector('.batch-paste-col');
+    const actionCol = row.querySelector('.batch-action-col');
+    if (!pasteCol || !actionCol) return;
+
+    if (pending) {
+      row.classList.add('row-has-pending');
+      row.classList.remove('row-success');
+      pasteCol.replaceChildren();
+
+      const box = node('div', 'paste-target-box has-image');
+      const previewWrap = node('div', 'pending-image-preview');
+      const img = node('img', 'pending-thumb');
+      img.src = pending.url;
+      img.alt = 'รูปที่รอดำเนินการ';
+
+      const details = node('div', 'pending-details');
+      const sizeInfo = node('span', 'pending-size', 'WebP · ' + formatBytes(pending.size));
+      const origPct = pending.originalSize ? Math.round((1 - (pending.size / pending.originalSize)) * 100) : 0;
+      const ratioInfo = node('span', 'pending-ratio', origPct > 0 ? 'ลดลง ' + origPct + '%' : 'พร้อมอัปโหลด');
+      details.append(sizeInfo, ratioInfo);
+      previewWrap.append(img, details);
+
+      const cancelBtn = node('button', 'pending-cancel-btn', 'ยกเลิก');
+      cancelBtn.type = 'button';
+      cancelBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (pending.url) URL.revokeObjectURL(pending.url);
+        state.batchPending.delete(partId);
+        renderBatchStats();
+        updateBatchRowPending(partId);
+      };
+
+      box.append(previewWrap, cancelBtn);
+      pasteCol.append(box);
+
+      const uploadBtn = actionCol.querySelector('.batch-item-upload-btn');
+      if (uploadBtn) { uploadBtn.disabled = false; uploadBtn.textContent = 'อัปโหลด'; }
+      const statusBadge = actionCol.querySelector('.batch-status-badge');
+      if (statusBadge) statusBadge.innerHTML = '<span class="status-uploading">● รอดำเนินการ</span>';
+    } else {
+      row.classList.remove('row-has-pending');
+      renderDefaultPasteBox(row, partId);
+      const uploadBtn = actionCol.querySelector('.batch-item-upload-btn');
+      if (uploadBtn) uploadBtn.disabled = true;
+      const statusBadge = actionCol.querySelector('.batch-status-badge');
+      if (statusBadge) statusBadge.replaceChildren();
+    }
+  }
+
+  function createBatchRowElement(part) {
+    const row = node('div', 'batch-row');
+    row.id = 'batch-row-' + part.id;
+    row.dataset.id = part.id;
+    row.tabIndex = 0;
+
+    const pending = state.batchPending.get(part.id);
+    if (pending) {
+      if (pending.status === 'done') row.classList.add('row-success');
+      else if (pending.status === 'uploading') row.classList.add('row-uploading');
+      else row.classList.add('row-has-pending');
+    }
+    if (state.batchActiveRowId === part.id) row.classList.add('row-focused');
+
+    row.onclick = () => setActiveBatchRow(part.id);
+
+    // Column 1: Part Code & Copy
+    const metaCol = node('div', 'part-meta-col');
+    const codeRow = node('div', 'part-code-row');
+    const partNum = node('span', 'batch-part-num', part.partNumber);
+    const copyBtn = node('button', 'batch-copy-btn', '📋 คัดลอก');
+    copyBtn.type = 'button';
+    copyBtn.title = 'คลิกเพื่อคัดลอก Part number';
+    copyBtn.onclick = (e) => {
+      e.stopPropagation();
+      copyPartNumber(part.partNumber, copyBtn);
+    };
+    codeRow.append(partNum, copyBtn);
+    const partIdSpan = node('span', 'part-id', part.id);
+    metaCol.append(codeRow, partIdSpan);
+
+    // Column 2: Info
+    const infoCol = node('div', 'batch-info-col');
+    const desc = node('p', 'batch-desc-text', part.description || 'ไม่มีรายละเอียด');
+    const tagRow = node('div', 'batch-tag-row');
+    if (part.brand) tagRow.append(node('span', 'batch-brand-pill', part.brand));
+    if (part.storeCode) tagRow.append(node('span', 'batch-store-pill', 'Store: ' + part.storeCode));
+    infoCol.append(desc, tagRow);
+
+    // Column 3: Current Picture Status
+    const currPicCol = node('div', 'batch-curr-pic-col');
+    const thumb = button('▧', () => openDetail(part), 'picture-thumb batch-curr-thumb');
+    thumb.title = 'ดูรูปปัจจุบัน';
+    if (part.picture) {
+      thumb.dataset.id = part.id;
+      imageObserver.observe(thumb);
+    }
+    const picTag = node('span', 'batch-pic-tag ' + (part.picture ? 'tag-has' : 'tag-missing'), part.picture ? 'มีรูปแล้ว' : 'ยังไม่มีรูป');
+    currPicCol.append(thumb, picTag);
+
+    // Column 4: Paste / Drop Column
+    const pasteCol = node('div', 'batch-paste-col');
+
+    // Column 5: Action Column
+    const actionCol = node('div', 'batch-action-col');
+    const uploadBtn = node('button', 'button primary batch-item-upload-btn', 'อัปโหลด');
+    uploadBtn.type = 'button';
+    uploadBtn.disabled = !pending || pending.status === 'done';
+    uploadBtn.onclick = (e) => {
+      e.stopPropagation();
+      uploadSingleBatchItem(part.id);
+    };
+    const statusBadge = node('div', 'batch-status-badge');
+    actionCol.append(uploadBtn, statusBadge);
+
+    row.append(metaCol, infoCol, currPicCol, pasteCol, actionCol);
+
+    if (pending) {
+      updateBatchRowPending(part.id);
+    } else {
+      renderDefaultPasteBox(row, part.id);
+    }
+
+    return row;
+  }
+
+  function renderBatchStats() {
+    const missing = state.allParts.filter(p => !p.picture).length;
+    const pending = state.batchPending.size;
+    const success = state.batchSuccessCount || 0;
+    const has = state.allParts.length - missing;
+
+    $('stat-missing-val').textContent = String(missing);
+    $('stat-pending-val').textContent = String(pending);
+    $('stat-done-val').textContent = String(success);
+
+    $('pill-count-missing').textContent = String(missing);
+    $('pill-count-pending').textContent = String(pending);
+    $('pill-count-all').textContent = String(state.allParts.length);
+    $('pill-count-has').textContent = String(has);
+
+    const navBadge = $('batch-missing-count');
+    if (navBadge) {
+      navBadge.textContent = String(missing);
+      navBadge.hidden = missing === 0;
+    }
+
+    $('batch-upload-num').textContent = String(pending);
+    $('batch-upload-all').disabled = pending === 0 || state.batchUploading;
+    $('batch-clear-all').disabled = pending === 0 || state.batchUploading;
+  }
+
+  function renderBatchList() {
+    const container = $('batch-items');
+    container.replaceChildren();
+
+    const q = (state.batchSearch || '').trim().toLowerCase();
+    const filter = state.batchFilter || 'missing';
+
+    const list = state.allParts.filter(p => {
+      if (filter === 'missing' && (p.picture && !state.batchPending.has(p.id))) return false;
+      if (filter === 'pending' && !state.batchPending.has(p.id)) return false;
+      if (filter === 'has' && !p.picture) return false;
+
+      if (q) {
+        const match = PartCore.normalize(p.partNumber).includes(q) ||
+                      PartCore.normalize(p.description).includes(q) ||
+                      PartCore.normalize(p.brand).includes(q) ||
+                      PartCore.normalize(p.storeCode).includes(q);
+        if (!match) return false;
+      }
+      return true;
+    });
+
+    $('batch-empty').hidden = list.length > 0;
+    if (!list.length) return;
+
+    const displayList = list.slice(0, 100);
+    for (const part of displayList) {
+      container.append(createBatchRowElement(part));
+    }
+  }
+
+  async function uploadSingleBatchItem(partId) {
+    const pending = state.batchPending.get(partId);
+    if (!pending) return;
+    const part = state.allParts.find(p => p.id === partId);
+    if (!part) return;
+
+    const row = document.getElementById('batch-row-' + partId);
+    pending.status = 'uploading';
+    if (row) {
+      row.className = 'batch-row row-uploading';
+      const statusBadge = row.querySelector('.batch-status-badge');
+      if (statusBadge) statusBadge.innerHTML = '<span class="spinner" aria-hidden="true"></span> กำลังอัปโหลด…';
+      const uploadBtn = row.querySelector('.batch-item-upload-btn');
+      if (uploadBtn) uploadBtn.disabled = true;
+    }
+
+    try {
+      const res = await rpc('updatePartImage', partId, {
+        image: pending.image,
+        thumbnail: pending.thumbnail,
+        version: part.version,
+        requestId: uuid()
+      });
+
+      part.picture = res.picture;
+      part.thumbnail = res.thumbnail;
+      part.hasThumbnail = !!res.thumbnail;
+      part.version = res.version;
+      saveCache({ brands: state.brands, parts: state.allParts, webAppUrl: state.webAppUrl });
+
+      if (pending.url) URL.revokeObjectURL(pending.url);
+      state.batchPending.delete(partId);
+      state.batchSuccessCount = (state.batchSuccessCount || 0) + 1;
+
+      renderBatchStats();
+
+      if (row) {
+        row.className = 'batch-row row-success';
+        const currPicCol = row.querySelector('.batch-curr-pic-col');
+        if (currPicCol) {
+          currPicCol.replaceChildren();
+          const thumb = button('▧', () => openDetail(part), 'picture-thumb batch-curr-thumb');
+          thumb.dataset.id = part.id;
+          imageObserver.observe(thumb);
+          const tag = node('span', 'batch-pic-tag tag-has', 'มีรูปแล้ว');
+          currPicCol.append(thumb, tag);
+        }
+        renderDefaultPasteBox(row, partId);
+        const statusBadge = row.querySelector('.batch-status-badge');
+        if (statusBadge) statusBadge.innerHTML = '<span class="status-done">✓ สำเร็จ</span>';
+        const uploadBtn = row.querySelector('.batch-item-upload-btn');
+        if (uploadBtn) { uploadBtn.disabled = true; uploadBtn.textContent = 'อัปโหลดแล้ว'; }
+      }
+      toast('✓ อัปโหลดรูปภาพ ' + part.partNumber + ' เรียบร้อย');
+      return true;
+    } catch (err) {
+      pending.status = 'error';
+      pending.error = err.message || 'อัปโหลดไม่สำเร็จ';
+      if (row) {
+        row.className = 'batch-row row-has-pending';
+        const statusBadge = row.querySelector('.batch-status-badge');
+        if (statusBadge) statusBadge.innerHTML = '<span class="status-error">✕ ' + pending.error + '</span>';
+        const uploadBtn = row.querySelector('.batch-item-upload-btn');
+        if (uploadBtn) { uploadBtn.disabled = false; uploadBtn.textContent = 'ลองอีกครั้ง'; }
+      }
+      toast('อัปโหลด ' + part.partNumber + ' ล้มเหลว: ' + pending.error);
+      throw err;
+    }
+  }
+
+  async function uploadAllBatchItems() {
+    const pendingIds = Array.from(state.batchPending.keys()).filter(id => {
+      const item = state.batchPending.get(id);
+      return item && item.status !== 'done';
+    });
+    if (!pendingIds.length || state.batchUploading) return;
+
+    state.batchUploading = true;
+    $('batch-upload-all').disabled = true;
+    $('batch-clear-all').disabled = true;
+    $('batch-progress').hidden = false;
+
+    const total = pendingIds.length;
+    let finished = 0, failed = 0;
+
+    $('batch-progress-label').textContent = 'กำลังเริ่มอัปโหลดรูปภาพ…';
+    $('batch-progress-count').textContent = '0 / ' + total;
+    $('batch-progress-bar').style.width = '0%';
+
+    for (const id of pendingIds) {
+      const part = state.allParts.find(p => p.id === id);
+      const label = part ? part.partNumber : id;
+      $('batch-progress-label').textContent = 'กำลังอัปโหลด ' + label + ' (' + (finished + failed + 1) + '/' + total + ')…';
+
+      try {
+        await uploadSingleBatchItem(id);
+        finished++;
+      } catch (_) {
+        failed++;
+      }
+
+      const pct = Math.round(((finished + failed) / total) * 100);
+      $('batch-progress-bar').style.width = pct + '%';
+      $('batch-progress-count').textContent = (finished + failed) + ' / ' + total;
+    }
+
+    state.batchUploading = false;
+    $('batch-upload-all').disabled = state.batchPending.size === 0;
+    $('batch-clear-all').disabled = state.batchPending.size === 0;
+    $('batch-progress-label').textContent = 'อัปโหลดเสร็จสิ้น: สำเร็จ ' + finished + ' รายการ' + (failed ? ', ล้มเหลว ' + failed + ' รายการ' : '');
+
+    setTimeout(() => {
+      if (!state.batchUploading) $('batch-progress').hidden = true;
+    }, 4000);
+
+    renderBatchStats();
+    if (state.batchFilter === 'missing') {
+      renderBatchList();
+    }
+  }
+
+  function clearAllBatchPending() {
+    for (const pending of state.batchPending.values()) {
+      if (pending.url) URL.revokeObjectURL(pending.url);
+    }
+    state.batchPending.clear();
+    renderBatchStats();
+    renderBatchList();
+    toast('ล้างรูปภาพที่รอดำเนินการทั้งหมดแล้ว');
+  }
+
+  window.addEventListener('paste', async e => {
+    if (state.view !== 'batch') return;
+    const items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+
+    let imageFile = null;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith('image/')) {
+        imageFile = items[i].getAsFile();
+        break;
+      }
+    }
+    if (!imageFile) return;
+
+    e.preventDefault();
+
+    let targetRow = e.target && e.target.closest && e.target.closest('.batch-row');
+    let partId = targetRow ? targetRow.dataset.id : state.batchActiveRowId;
+
+    if (!partId) {
+      const firstRow = $('batch-items').querySelector('.batch-row');
+      if (firstRow) partId = firstRow.dataset.id;
+    }
+
+    if (!partId) {
+      toast('กรุณาคลิกเลือกแถว Part ที่ต้องการวางรูปภาพก่อน');
+      return;
+    }
+
+    await processBatchFile(partId, imageFile);
+  });
+
+  // Wiring Batch view navigation and buttons
+  $('nav-catalog').onclick = () => switchView('catalog');
+  $('nav-batch').onclick = () => switchView('batch');
+
+  $('batch-tab-missing').onclick = () => setBatchFilter('missing');
+  $('batch-tab-pending').onclick = () => setBatchFilter('pending');
+  $('batch-tab-all').onclick = () => setBatchFilter('all');
+  $('batch-tab-has').onclick = () => setBatchFilter('has');
+
+  let batchSearchTimer;
+  $('batch-search').addEventListener('input', () => {
+    $('batch-clear-search').hidden = !$('batch-search').value;
+    clearTimeout(batchSearchTimer);
+    batchSearchTimer = setTimeout(() => {
+      state.batchSearch = $('batch-search').value;
+      renderBatchList();
+    }, 40);
+  });
+  $('batch-clear-search').onclick = () => {
+    $('batch-search').value = '';
+    $('batch-clear-search').hidden = true;
+    state.batchSearch = '';
+    renderBatchList();
+    $('batch-search').focus();
+  };
+
+  $('batch-upload-all').onclick = uploadAllBatchItems;
+  $('batch-clear-all').onclick = clearAllBatchPending;
+
+  /* --- BULK TABLE ADD & EXCEL IMPORT CONTROLLER --- */
+  function parseExcelText(rawText) {
+    if (!rawText || typeof rawText !== 'string') return [];
+    const lines = rawText.split(/\r\n|\r|\n/).map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return [];
+
+    let startIndex = 0;
+    const firstLine = lines[0].toLowerCase();
+    const isHeader = firstLine.includes('part') || firstLine.includes('brand') || 
+                     firstLine.includes('desc') || firstLine.includes('store') || 
+                     firstLine.includes('life') || firstLine.includes('อายุ') || 
+                     firstLine.includes('รหัส') || firstLine.includes('ยี่ห้อ');
+    if (isHeader) startIndex = 1;
+
+    const parsed = [];
+    for (let i = startIndex; i < lines.length; i++) {
+      const line = lines[i];
+      const cols = line.includes('\t') ? line.split('\t') : line.split(',');
+      const partNumber = (cols[0] || '').trim();
+      const rawBrand = (cols[1] || '').trim();
+      const description = (cols[2] || '').trim();
+      const storeCode = (cols[3] || '').trim();
+      const lifespan = (cols[4] || '').trim();
+
+      if (!partNumber && !rawBrand && !description && !storeCode && !lifespan) continue;
+
+      let brandId = '', brandName = '', unmatchedBrand = '';
+      if (rawBrand) {
+        const norm = PartCore.normalize(rawBrand);
+        const match = state.brands.find(b => PartCore.normalize(b.name) === norm);
+        if (match) {
+          brandId = match.id;
+          brandName = match.name;
+        } else {
+          unmatchedBrand = rawBrand;
+        }
+      }
+
+      parsed.push({
+        id: 'r-' + uuid(),
+        partNumber,
+        brandId,
+        brandName,
+        unmatchedBrand,
+        description,
+        storeCode,
+        lifespan,
+        status: 'ready',
+        statusText: 'พร้อมบันทึก',
+        canSave: true
+      });
+    }
+    return parsed;
+  }
+
+  function revalidateBulkRows() {
+    const seenPartNumbers = new Set();
+    const dbPartNumbers = new Set(state.allParts.map(p => PartCore.normalize(p.partNumber)));
+
+    for (const row of state.bulkRows) {
+      const pn = String(row.partNumber || '').trim();
+      if (!pn) {
+        row.status = 'missing_pn';
+        row.statusText = 'ขาด Part number';
+        row.canSave = false;
+        continue;
+      }
+      const norm = PartCore.normalize(pn);
+      if (dbPartNumbers.has(norm)) {
+        row.status = 'dup_db';
+        row.statusText = 'ซ้ำในระบบ (จะข้าม)';
+        row.canSave = false;
+        continue;
+      }
+      if (seenPartNumbers.has(norm)) {
+        row.status = 'dup_batch';
+        row.statusText = 'ซ้ำในตาราง (จะข้าม)';
+        row.canSave = false;
+        continue;
+      }
+      seenPartNumbers.add(norm);
+
+      if (row.lifespan) {
+        const rawLife = String(row.lifespan).replace(/,/g, '').replace(/ปี/g, '').trim();
+        const lifeNum = Number(rawLife);
+        if (!Number.isFinite(lifeNum) || lifeNum < 0 || lifeNum > 999) {
+          row.status = 'invalid_lifespan';
+          row.statusText = 'อายุไม่ถูกต้อง (ปี 0-999)';
+          row.canSave = false;
+          continue;
+        }
+      }
+
+      row.status = 'ready';
+      row.statusText = 'พร้อมบันทึก';
+      row.canSave = true;
+    }
+
+    renderBulkStats();
+  }
+
+  function renderBulkStats() {
+    const total = state.bulkRows.length;
+    const ready = state.bulkRows.filter(r => r.canSave).length;
+    const dup = state.bulkRows.filter(r => r.status === 'dup_db' || r.status === 'dup_batch').length;
+    const invalid = state.bulkRows.filter(r => r.status === 'missing_pn' || r.status === 'invalid_lifespan').length;
+
+    const setTxt = (id, txt) => {
+      const el = $(id);
+      if (el) el.textContent = txt;
+    };
+
+    setTxt('bulk-stat-total', total.toLocaleString('th-TH'));
+    setTxt('bulk-stat-ready', ready.toLocaleString('th-TH'));
+    setTxt('bulk-stat-dup', dup.toLocaleString('th-TH'));
+    setTxt('bulk-stat-invalid', invalid.toLocaleString('th-TH'));
+
+    setTxt('bulk-count-all', String(total));
+    setTxt('bulk-count-ready', String(ready));
+    setTxt('bulk-count-dup', String(dup));
+    setTxt('bulk-count-invalid', String(invalid));
+
+    setTxt('bulk-save-num', String(ready));
+    const saveBtn = $('bulk-save-btn');
+    if (saveBtn) saveBtn.disabled = ready === 0 || state.bulkSaving;
+
+    const navBadge = $('bulk-ready-count');
+    if (navBadge) {
+      navBadge.textContent = String(ready);
+      navBadge.hidden = ready === 0;
+    }
+  }
+
+  function setBulkFilter(filter) {
+    state.bulkFilter = filter;
+    ['all', 'ready', 'dup', 'invalid'].forEach(key => {
+      const el = $('bulk-filter-' + key);
+      if (el) {
+        el.classList.toggle('active', key === filter);
+        el.setAttribute('aria-selected', String(key === filter));
+      }
+    });
+    renderBulkTable();
+  }
+
+  function renderBulkTable() {
+    const tbody = $('bulk-table-body');
+    const empty = $('bulk-empty');
+    if (!tbody || !empty) return;
+
+    if (!state.bulkRows.length) {
+      tbody.replaceChildren();
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+
+    const visibleRows = state.bulkRows.filter((r, idx) => {
+      r._origIndex = idx + 1;
+      if (state.bulkFilter === 'ready') return r.canSave;
+      if (state.bulkFilter === 'dup') return r.status === 'dup_db' || r.status === 'dup_batch';
+      if (state.bulkFilter === 'invalid') return r.status === 'missing_pn' || r.status === 'invalid_lifespan';
+      return true;
+    });
+
+    if (!visibleRows.length) {
+      tbody.replaceChildren();
+      empty.hidden = false;
+      $('bulk-empty-title').textContent = 'ไม่พบรายการที่ตรงกับตัวกรอง';
+      $('bulk-empty-copy').textContent = 'ลองเลือกแท็บ "ทั้งหมด" หรือเพิ่มข้อมูลใหม่';
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    visibleRows.forEach(row => {
+      const tr = node('tr', 'bulk-row');
+      tr.dataset.id = row.id;
+      if (row.canSave) tr.classList.add('row-ready');
+      else if (row.status === 'dup_db' || row.status === 'dup_batch') tr.classList.add('row-dup');
+      else tr.classList.add('row-invalid');
+
+      const tdNum = node('td', 'bulk-col-num', String(row._origIndex));
+
+      const tdStatus = node('td', 'bulk-col-status');
+      let badgeClass = 'bulk-badge';
+      let badgeIcon = '● ';
+      if (row.canSave) {
+        badgeClass += ' ready';
+        badgeIcon = '✓ ';
+      } else if (row.status === 'dup_db' || row.status === 'dup_batch') {
+        badgeClass += ' dup';
+        badgeIcon = '⚠️ ';
+      } else {
+        badgeClass += ' invalid';
+        badgeIcon = '✕ ';
+      }
+      const badge = node('span', badgeClass, badgeIcon + row.statusText);
+      tdStatus.append(badge);
+
+      const tdPart = node('td', 'bulk-col-part');
+      const inputPart = node('input', 'bulk-input mono');
+      inputPart.type = 'text';
+      inputPart.value = row.partNumber || '';
+      inputPart.placeholder = 'เช่น ABC-001';
+      inputPart.required = true;
+      if (!row.canSave) inputPart.classList.add('is-invalid');
+      inputPart.oninput = () => {
+        row.partNumber = inputPart.value;
+        revalidateBulkRows();
+        updateRowStatusDom(tr, row);
+      };
+      tdPart.append(inputPart);
+
+      const tdBrand = node('td', 'bulk-col-brand');
+      const selectBrand = node('select', 'bulk-select');
+      if (row.unmatchedBrand && !row.brandId) selectBrand.classList.add('unmatched');
+
+      const optNone = node('option', '', '-- ไม่ระบุ --');
+      optNone.value = '';
+      selectBrand.append(optNone);
+
+      if (row.unmatchedBrand && !row.brandId) {
+        const optUnmatched = node('option', '', '⚠️ ไม่พบ "' + row.unmatchedBrand + '" (กรุณาเลือก)');
+        optUnmatched.value = '';
+        optUnmatched.disabled = true;
+        optUnmatched.selected = true;
+        selectBrand.append(optUnmatched);
+      }
+
+      const optGroup = node('optgroup');
+      optGroup.label = 'ยี่ห้อในระบบ (' + state.brands.length + ')';
+      state.brands.slice().sort((a, b) => a.name.localeCompare(b.name, 'th')).forEach(b => {
+        const opt = node('option', '', b.name);
+        opt.value = b.id;
+        if (b.id === row.brandId) opt.selected = true;
+        optGroup.append(opt);
+      });
+      selectBrand.append(optGroup);
+
+      selectBrand.onchange = () => {
+        row.brandId = selectBrand.value;
+        const matched = state.brands.find(b => b.id === selectBrand.value);
+        row.brandName = matched ? matched.name : '';
+        row.unmatchedBrand = '';
+        selectBrand.classList.remove('unmatched');
+      };
+      tdBrand.append(selectBrand);
+
+      const tdDesc = node('td', 'bulk-col-desc');
+      const inputDesc = node('input', 'bulk-input');
+      inputDesc.type = 'text';
+      inputDesc.value = row.description || '';
+      inputDesc.placeholder = 'รายละเอียดอะไหล่';
+      inputDesc.oninput = () => { row.description = inputDesc.value; };
+      tdDesc.append(inputDesc);
+
+      const tdStore = node('td', 'bulk-col-store');
+      const inputStore = node('input', 'bulk-input mono');
+      inputStore.type = 'text';
+      inputStore.value = row.storeCode || '';
+      inputStore.placeholder = 'เช่น ST-01';
+      inputStore.oninput = () => { row.storeCode = inputStore.value; };
+      tdStore.append(inputStore);
+
+      const tdLife = node('td', 'bulk-col-life');
+      const inputLife = node('input', 'bulk-input numeric');
+      inputLife.type = 'text';
+      inputLife.value = row.lifespan || '';
+      inputLife.placeholder = 'ปี (เช่น 5)';
+      inputLife.oninput = () => {
+        row.lifespan = inputLife.value;
+        revalidateBulkRows();
+        updateRowStatusDom(tr, row);
+      };
+      tdLife.append(inputLife);
+
+      const tdAction = node('td', 'bulk-col-action');
+      const delBtn = node('button', 'bulk-del-row', '✕');
+      delBtn.type = 'button';
+      delBtn.title = 'ลบแถวนี้';
+      delBtn.onclick = () => {
+        const idx = state.bulkRows.findIndex(r => r.id === row.id);
+        if (idx >= 0) {
+          state.bulkRows.splice(idx, 1);
+          revalidateBulkRows();
+          renderBulkTable();
+        }
+      };
+      tdAction.append(delBtn);
+
+      tr.append(tdNum, tdStatus, tdPart, tdBrand, tdDesc, tdStore, tdLife, tdAction);
+      fragment.append(tr);
+    });
+
+    tbody.replaceChildren(fragment);
+  }
+
+  function updateRowStatusDom(tr, row) {
+    tr.classList.toggle('row-ready', row.canSave);
+    tr.classList.toggle('row-dup', row.status === 'dup_db' || row.status === 'dup_batch');
+    tr.classList.toggle('row-invalid', !row.canSave && row.status !== 'dup_db' && row.status !== 'dup_batch');
+
+    const tdStatus = tr.querySelector('.bulk-col-status');
+    if (tdStatus) {
+      let badgeClass = 'bulk-badge';
+      let badgeIcon = '● ';
+      if (row.canSave) {
+        badgeClass += ' ready';
+        badgeIcon = '✓ ';
+      } else if (row.status === 'dup_db' || row.status === 'dup_batch') {
+        badgeClass += ' dup';
+        badgeIcon = '⚠️ ';
+      } else {
+        badgeClass += ' invalid';
+        badgeIcon = '✕ ';
+      }
+      tdStatus.replaceChildren(node('span', badgeClass, badgeIcon + row.statusText));
+    }
+  }
+
+  function addBulkRow(initialData = {}) {
+    state.bulkRows.push({
+      id: 'r-' + uuid(),
+      partNumber: initialData.partNumber || '',
+      brandId: initialData.brandId || '',
+      brandName: initialData.brandName || '',
+      unmatchedBrand: initialData.unmatchedBrand || '',
+      description: initialData.description || '',
+      storeCode: initialData.storeCode || '',
+      lifespan: initialData.lifespan || '',
+      status: 'missing_pn',
+      statusText: 'ขาด Part number',
+      canSave: false
+    });
+    revalidateBulkRows();
+    renderBulkTable();
+    setTimeout(() => {
+      const rows = document.querySelectorAll('#bulk-table-body .bulk-input.mono');
+      if (rows.length) rows[rows.length - 1].focus();
+    }, 50);
+  }
+
+  function clearBulkRows() {
+    if (!state.bulkRows.length) return;
+    if (confirm('ต้องการล้างรายการในตารางทั้งหมดใช่หรือไม่?')) {
+      state.bulkRows = [];
+      revalidateBulkRows();
+      renderBulkTable();
+      toast('ล้างตารางเรียบร้อยแล้ว');
+    }
+  }
+
+  function loadBulkSampleData() {
+    const samples = [
+      { partNumber: 'SAMPLE-101', brandName: state.brands[0] ? state.brands[0].name : '', brandId: state.brands[0] ? state.brands[0].id : '', description: 'Power Supply 24VDC 5A Din-rail', storeCode: 'LOC-A01', lifespan: '7' },
+      { partNumber: 'SAMPLE-102', brandName: '', brandId: '', unmatchedBrand: 'Mitsubishi', description: 'Magnetic Contactor 3P 220V', storeCode: 'LOC-B12', lifespan: '5' },
+      { partNumber: 'SAMPLE-103', brandName: state.brands[1] ? state.brands[1].name : '', brandId: state.brands[1] ? state.brands[1].id : '', description: 'Miniature Circuit Breaker 2P 16A', storeCode: 'LOC-C05', lifespan: '10' },
+      { partNumber: 'SAMPLE-103', brandName: '', brandId: '', description: 'รายการทดสอบ Part number ซ้ำในตาราง', storeCode: 'LOC-C05', lifespan: '10' }
+    ];
+    if (state.allParts.length > 0) {
+      const existing = state.allParts[0];
+      samples.push({
+        partNumber: existing.partNumber,
+        brandName: existing.brand || '',
+        brandId: existing.brandId || '',
+        description: 'ตัวอย่างทดสอบซ้ำกับในระบบ: ' + existing.partNumber,
+        storeCode: existing.storeCode || '',
+        lifespan: existing.lifespan ? String(existing.lifespan) : '5'
+      });
+    }
+
+    state.bulkRows = samples.map(s => ({
+      id: 'r-' + uuid(),
+      partNumber: s.partNumber,
+      brandId: s.brandId || '',
+      brandName: s.brandName || '',
+      unmatchedBrand: s.unmatchedBrand || '',
+      description: s.description,
+      storeCode: s.storeCode,
+      lifespan: s.lifespan,
+      status: 'ready',
+      statusText: 'พร้อมบันทึก',
+      canSave: true
+    }));
+
+    revalidateBulkRows();
+    renderBulkTable();
+    toast('โหลดข้อมูลตัวอย่าง ' + samples.length + ' รายการแล้ว ลองตรวจสอบสถานะและกดบันทึกได้ทันที');
+  }
+
+  function openBulkPasteDialog() {
+    $('bulk-paste-input').value = '';
+    $('bulk-paste-preview-count').textContent = '0 บรรทัดที่ตรวจพบ';
+    openDialog('bulk-paste-dialog', 'bulk-paste-input');
+  }
+
+  function closeBulkPasteDialog() {
+    closeDialog('bulk-paste-dialog');
+  }
+
+  async function saveBulkParts() {
+    const toSave = state.bulkRows.filter(r => r.canSave);
+    if (!toSave.length) {
+      toast('ไม่มีรายการที่พร้อมบันทึก กรุณาตรวจสอบ Part number หรือข้อมูลที่ไม่สมบูรณ์');
+      return;
+    }
+
+    const skippedCount = state.bulkRows.length - toSave.length;
+    const confirmMsg = 'ยืนยันบันทึกอะไหล่ ' + toSave.length + ' รายการ?' + (skippedCount > 0 ? '\n(จะข้าม ' + skippedCount + ' รายการที่ซ้ำหรือไม่สมบูรณ์)' : '');
+    if (!confirm(confirmMsg)) return;
+
+    state.bulkSaving = true;
+    const saveBtn = $('bulk-save-btn');
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span class="spinner" aria-hidden="true"></span> กำลังบันทึก ' + toSave.length + ' รายการ...';
+    }
+
+    const payload = toSave.map(r => ({
+      partNumber: r.partNumber.trim(),
+      brandId: r.brandId || null,
+      brand: r.brandName || '',
+      description: r.description.trim() || '-',
+      storeCode: r.storeCode.trim(),
+      lifespan: r.lifespan ? Number(String(r.lifespan).replace(/,/g, '').replace(/ปี/g, '').trim()) : null
+    }));
+
+    try {
+      const res = await rpc('createPartsBatch', payload);
+      if (res && res.success) {
+        if (Array.isArray(res.createdParts)) {
+          state.allParts.unshift(...res.createdParts);
+          saveCache({ brands: state.brands, parts: state.allParts, webAppUrl: state.webAppUrl });
+        }
+
+        const savedPartNumbers = new Set(toSave.map(r => PartCore.normalize(r.partNumber)));
+        state.bulkRows = state.bulkRows.filter(r => !savedPartNumbers.has(PartCore.normalize(r.partNumber)));
+
+        if (saveBtn) {
+          saveBtn.innerHTML = '<span aria-hidden="true">💾</span> บันทึกรายการ (<span id="bulk-save-num">0</span>)';
+        }
+
+        revalidateBulkRows();
+        renderBulkTable();
+
+        toast('🎉 บันทึกสำเร็จ ' + res.createdCount + ' รายการ' + (res.skippedCount ? ' (ข้ามที่ซ้ำ ' + res.skippedCount + ' รายการ)' : ''));
+
+        if (!state.bulkRows.length) {
+          setTimeout(() => {
+            switchView('catalog');
+          }, 1200);
+        }
+      } else {
+        toast('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+      }
+    } catch (err) {
+      alert('บันทึกไม่สำเร็จ: ' + (err.message || err));
+    } finally {
+      state.bulkSaving = false;
+      const btn = $('bulk-save-btn');
+      if (btn) {
+        btn.innerHTML = '<span aria-hidden="true">💾</span> บันทึกรายการ (<span id="bulk-save-num">0</span>)';
+      }
+      renderBulkStats();
+    }
+  }
+
+  // Wiring Bulk View Buttons & Events
+  $('nav-bulk').onclick = () => switchView('bulk');
+  $('bulk-add-btn').onclick = () => switchView('bulk');
+
+  $('bulk-filter-all').onclick = () => setBulkFilter('all');
+  $('bulk-filter-ready').onclick = () => setBulkFilter('ready');
+  $('bulk-filter-dup').onclick = () => setBulkFilter('dup');
+  $('bulk-filter-invalid').onclick = () => setBulkFilter('invalid');
+
+  $('bulk-paste-open-btn').onclick = openBulkPasteDialog;
+  $('bulk-add-row-btn').onclick = () => addBulkRow();
+  $('bulk-sample-btn').onclick = loadBulkSampleData;
+  $('bulk-clear-btn').onclick = clearBulkRows;
+  $('bulk-save-btn').onclick = saveBulkParts;
+
+  $('bulk-empty-paste').onclick = openBulkPasteDialog;
+  $('bulk-empty-add').onclick = () => addBulkRow();
+  $('bulk-empty-sample').onclick = loadBulkSampleData;
+
+  $('bulk-paste-close').onclick = closeBulkPasteDialog;
+  $('bulk-paste-cancel').onclick = closeBulkPasteDialog;
+
+  $('bulk-paste-input').addEventListener('input', () => {
+    const text = $('bulk-paste-input').value.trim();
+    const count = text ? text.split(/\r\n|\r|\n/).filter(Boolean).length : 0;
+    $('bulk-paste-preview-count').textContent = count + ' บรรทัดที่ตรวจพบ';
+  });
+
+  $('bulk-paste-confirm').onclick = () => {
+    const raw = $('bulk-paste-input').value;
+    const items = parseExcelText(raw);
+    if (!items.length) {
+      toast('ไม่พบข้อมูลที่ถูกต้อง กรุณาตรวจสอบการคัดลอกจาก Excel');
+      return;
+    }
+    state.bulkRows.push(...items);
+    revalidateBulkRows();
+    renderBulkTable();
+    closeBulkPasteDialog();
+    toast('นำเข้าข้อมูลจาก Excel แล้ว ' + items.length + ' รายการ');
+  };
+
+  // Global Paste Listener for Bulk View
+  window.addEventListener('paste', e => {
+    if (state.view !== 'bulk') return;
+    if ($('bulk-paste-dialog').open) return;
+    if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+
+    const text = e.clipboardData && e.clipboardData.getData('text/plain');
+    if (!text || !text.trim()) return;
+
+    e.preventDefault();
+    const items = parseExcelText(text);
+    if (items.length) {
+      state.bulkRows.push(...items);
+      revalidateBulkRows();
+      renderBulkTable();
+      toast('วางข้อมูลจาก Excel แล้ว ' + items.length + ' รายการ');
+    }
+  });
+
+  function connectivity(){setError('connection',navigator.onLine?'':'ออฟไลน์ · ข้อมูลที่กรอกยังอยู่ กรุณาเชื่อมต่อก่อนบันทึก');}
+  window.addEventListener('offline',connectivity);
+  window.addEventListener('online',()=>{connectivity();fetchFreshData(false);});
+  window.addEventListener('beforeunload',e=>{if(state.dirty || state.saving){e.preventDefault();e.returnValue='';}});
+  matchMedia('(max-width: 1023px)').addEventListener('change',()=>{if(state.booted)render();});
+  function viewport(){document.documentElement.style.setProperty('--visual-height',(window.visualViewport?window.visualViewport.height:window.innerHeight)+'px');}if(window.visualViewport)window.visualViewport.addEventListener('resize',viewport);viewport();
+  async function init() {
+    const targetId=getInitialTargetId();
+    const cached=getCache();
+    if(cached && Array.isArray(cached.parts) && cached.parts.length){
+      state.allParts=cached.parts;
+      state.brands=cached.brands || [];
+      state.webAppUrl=cached.webAppUrl || '';
+      state.booted=true;
+      renderBrandSelect();
+      applyLocalQuery();
+      renderBatchStats();
+      $('sync-label').textContent='ข้อมูลจากแคช · กำลังซิงก์ข้อมูลล่าสุด…';
+      if(targetId)checkAndOpenExternalEdit(targetId);
+    } else {
+      $('add-part').disabled=true;$('brands-open').disabled=true;
+    }
+    try {
+      const search=new URLSearchParams(window.location.search);
+      if(search.get('view')==='batch' || search.get('view')==='batch-images' || window.location.hash==='#batch'){
+        switchView('batch');
+      } else if(search.get('view')==='bulk' || search.get('view')==='bulk-table' || window.location.hash==='#bulk'){
+        switchView('bulk');
+      }
+    } catch(_){}
+    await fetchFreshData(false);
+    if(targetId && !initialEditHandled){
+      toast('ไม่พบรหัสอะไหล่: '+targetId+' กรุณาตรวจสอบรหัสอีกครั้ง');
+    }
+  }
+  $('reload').onclick=()=>{
+    if(state.loading)return;
+    clearCache();
+    fetchFreshData(true);
+  };
+  if(window.google && google.script && google.script.url && google.script.url.getLocation){
+    google.script.url.getLocation(loc=>{
+      if(loc && loc.parameter){
+        const id=loc.parameter.id||loc.parameter.edit||loc.parameter.partId||loc.parameter.part;
+        if(id)checkAndOpenExternalEdit(id);
+      }
+      if(loc && loc.hash){
+        const match=/(?:PART-\d+|[A-Za-z0-9_-]+)/i.exec(loc.hash);
+        if(match)checkAndOpenExternalEdit(match[0]);
+      }
+    });
+  }
+  restore();
+  $('search').value=state.params.query;
+  $('clear-search').hidden=!state.params.query;
+  $('sort').value=state.params.sortBy+':'+state.params.sortOrder;
+  $('page-size').value=String(state.params.pageSize);
+  init();
+})();
+
+
+</script>
+</body>
+</html>

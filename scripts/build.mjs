@@ -1,6 +1,7 @@
 import {readFile, writeFile, mkdir} from 'node:fs/promises';
 
 const root = new URL('../', import.meta.url), workspace = new URL('../../', import.meta.url);
+const productionBaseline = new URL('web/production-baseline/', root);
 const read = url => readFile(url, 'utf8');
 const readBase64 = async url => {
   try { return 'data:image/png;base64,' + (await readFile(url)).toString('base64'); } catch { return ''; }
@@ -40,7 +41,23 @@ for (const [source, scope, coreFile] of [
   ['Equipment BOM', 'bom', 'Equipment BOM/gas/Core.js'],
   ['', 'users', '']
 ]) {
-  let domain = '', html = '', css = '', appJs = '';
+  let domain = '', html = '', css = '', appJs = '', baselineHtml = '';
+  const targetEnv = process.argv[2] || process.env.TARGET_ENV || 'staging';
+  const forceSource = (process.env.BUILD_SOURCE_SCOPES || 'bom').split(',').map(s => s.trim());
+  const useBaseline = targetEnv === 'production' && !process.env.BUILD_SOURCE_SCOPES
+    ? true
+    : !forceSource.includes(scope);
+
+  try {
+    if (useBaseline) {
+      baselineHtml = await read(new URL(`${scope}/index.html`, productionBaseline));
+    }
+  } catch { /* Source build remains available until each production asset is captured. */ }
+  if (baselineHtml) {
+    await mkdir(new URL(`public/${scope}/`, root), {recursive: true});
+    await writeFile(new URL(`public/${scope}/index.html`, root), baselineHtml);
+    continue;
+  }
   if (scope === 'users') {
     html = await read(new URL('src/users/index.html', root));
     css = await read(new URL('src/users/styles.css', root));
