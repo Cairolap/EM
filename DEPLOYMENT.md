@@ -145,7 +145,81 @@ npm run deploy:production
 2. **ปลดโหมดบำรุงรักษา (Disable Maintenance Mode)**:
    - ขณะนำเข้าข้อมูลเริ่มต้น ค่า `MAINTENANCE_MODE` จะเป็น `"true"` (เปิดให้อ่านข้อมูลได้อย่างเดียว บล็อกการแก้ไข)
    - เมื่อตรวจสอบข้อมูลเรียบร้อยแล้ว ให้ปรับใน `wrangler.jsonc` เป็น `"MAINTENANCE_MODE": "false"` แล้วรัน `npm run deploy:<env>` อีกครั้งเพื่อเปิดรับคำขอแก้ไขตามปกติ
-3. **ตรวจสอบหน้าเว็บทั้ง 3 โมดูล**:
+3. **ตรวจสอบหน้าเว็บทั้ง 4 โมดูล**:
    - `https://<your-worker-domain>/machines/`
    - `https://<your-worker-domain>/parts/`
    - `https://<your-worker-domain>/bom/`
+   - `https://<your-worker-domain>/users/`
+
+---
+
+## ขั้นตอนที่ 7: การดึงโค้ดและข้อมูลล่าสุดจาก Cloudflare (Pull from Cloudflare)
+
+ในกรณีที่มีการแก้ไขโค้ดหรือ Deploy จากเครื่องอื่น หรือมีการเพิ่ม/แก้ไขข้อมูลจริงใน Cloudflare D1 Database แล้วต้องการดึงข้อมูลล่าสุดทั้งหมดกลับมาอัปเดตลง Git:
+
+### วิธีที่ 1: ใช้คำสั่งอัตโนมัติ (แนะนำ)
+ระบบมีสคริปต์ดึงโค้ด Backend, หน้าเว็บ Frontend, และฐานข้อมูล D1 ทั้งหมดในคำสั่งเดียว:
+
+```bash
+npm run pull:cf
+```
+สคริปต์นี้จะดำเนินการให้อัตโนมัติ:
+1. ดึง **Worker Script** ล่าสุดจาก Cloudflare REST API มาเก็บไว้ที่ `src/downloaded/worker.js`
+2. ดึง **Frontend Web Assets** จริงทั้ง 4 หน้ามาเก็บไว้ที่ `public/`
+3. Export **Cloudflare D1 Database Snapshot** ล่าสุดมาเก็บไว้ที่ `data/snapshot_production.sql`
+
+---
+
+### วิธีที่ 2: วิธีทำทีละขั้นตอนด้วยตนเอง (Manual Steps)
+
+#### 1. ตรวจสอบเวอร์ชันล่าสุดบน Cloudflare
+```bash
+# ดูรายการเวอร์ชันที่เคย Deploy เรียงตามเวลา
+npx wrangler versions list --env production
+
+# ดูรายละเอียดของเวอร์ชันที่ต้องการ (Bindings, Secrets, วันที่)
+npx wrangler versions view <VERSION_ID> --env production
+```
+
+#### 2. ดึงโค้ด Backend (Worker Script) ผ่าน Cloudflare REST API
+1. ตรวจสอบ **Account ID**:
+   ```bash
+   npx wrangler whoami
+   ```
+2. อ่าน **OAuth Token** ของ Wrangler จากไฟล์:
+   `%APPDATA%\xdg.config\.wrangler\config\default.toml` (ค่าใน `oauth_token = "..."`)
+3. เรียก Cloudflare REST API เพื่อดาวน์โหลดสคริปต์:
+   ```http
+   GET https://api.cloudflare.com/client/v4/accounts/<ACCOUNT_ID>/workers/scripts/electrical-maintenance
+   Headers:
+     Authorization: Bearer <OAUTH_TOKEN>
+   ```
+
+#### 3. ดึงไฟล์หน้าเว็บ Frontend ล่าสุด
+ดาวน์โหลดไฟล์ HTML ที่คอมไพล์แล้วจาก URL จริง:
+```bash
+# เครื่องจักร
+curl -s https://electrical-maintenance.eercsc.workers.dev/machines/ -o public/machines/index.html
+
+# Master อะไหล่
+curl -s https://electrical-maintenance.eercsc.workers.dev/parts/ -o public/parts/index.html
+
+# Equipment BOM
+curl -s https://electrical-maintenance.eercsc.workers.dev/bom/ -o public/bom/index.html
+
+# จัดการผู้ใช้
+curl -s https://electrical-maintenance.eercsc.workers.dev/users/ -o public/users/index.html
+```
+
+#### 4. Export ข้อมูลล่าสุดจาก Cloudflare D1 Database
+```bash
+npx wrangler d1 export electrical-maintenance --remote --output data/snapshot_production.sql -y
+```
+
+#### 5. Commit และ Push ขึ้น GitHub
+```bash
+git add .
+git commit -m "feat: sync latest Cloudflare Workers code and D1 database snapshot"
+git push origin main
+```
+

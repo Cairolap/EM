@@ -12,6 +12,7 @@
     "seed:local": "node scripts/seed-local.mjs",
     "deploy:staging": "node scripts/deploy.mjs staging",
     "deploy:production": "node scripts/deploy.mjs production",
-    "user-admin": "node scripts/user-admin.mjs"
+    "user-admin": "node scripts/user-admin.mjs",
+    "pull:cf": "node scripts/pull-from-cf.mjs"
   }
 }
