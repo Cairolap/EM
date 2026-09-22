@@ -2,8 +2,6 @@ node_modules/
 .wrangler/
 .dev.vars*
 !.dev.vars.example
-public/
-src/generated/
 private/
 test-results/
 

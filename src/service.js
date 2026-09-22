@@ -156,7 +156,7 @@ async function savePart(env,repo,req,method,args){
  if(!payload)fail('VALIDATION','ไม่พบข้อมูล');
  const before=creating?null:await repo.part(String(args[0]));if(!creating&&!before)fail('NOT_FOUND','ไม่พบ Part นี้',404);
  if(before&&before.version!==Number(payload.version))conflict();
- const result=PartCore.validate(imageOnly?before:payload);if(Object.keys(result.errors).length)fail('VALIDATION','ตรวจสอบช่องที่ระบุด้านล่าง',422,result.errors);
+ const result=PartCore.validate(imageOnly?before:payload);if(!imageOnly&&Object.keys(result.errors).length)fail('VALIDATION','ตรวจสอบช่องที่ระบุด้านล่าง',422,result.errors);
  const value=result.value,brand=(await repo.brands()).find(b=>b.id===value.brandId);
  if(value.brandId&&(!brand||(!brand.active&&before?.brandId!==brand.id)))fail('VALIDATION','Brand นี้ไม่พร้อมใช้งาน',422,{brandId:'เลือก Brand ใหม่'});
  const id=before?.id||await repo.nextId('parts');let picture=before?.picture||'',thumbnail=before?.thumbnail||'';
