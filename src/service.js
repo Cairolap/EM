@@ -5,10 +5,10 @@ import {BomService} from './generated/bom-service.js';
 import {Repository} from './repository.js';
 import {columns,machineFields,partFields} from './model.js';
 import {fail,conflict} from './errors.js';
-import {authorizeWrite} from './auth.js';
+import {authorizeWrite,authorizeDelete} from './auth.js';
 import {readPicture,uploadPicture} from './drive.js';
 
-const machineReads=new Set(['bootstrap','getMachines','getMachine','getMachinePhoto']);
+const machineReads=new Set(['bootstrap','getMachines','getMachine','getMachinePhoto','getMachineTypes']);
 const partReads=new Set(['bootstrap','getParts','getAllParts','getBrands','getPicture']);
 const bomReads=new Set(['references','searchParts','lineMachineStats','list','history']);
 
@@ -16,20 +16,26 @@ export const isRead=(scope,method)=>(scope==='machines'?machineReads:scope==='pa
 const publicMachine=({requestId,photoFileId,...m})=>({...m,hasPhoto:!!photoFileId});
 const publicPart=({requestId,...p})=>p;
 
-async function bomContext(repo,{partIds=null}={}){
- const [ref,rawMachines,rawParts]=await Promise.all([
-  repo.references(),repo.catalog('machines'),partIds?repo.partsByIds(partIds):repo.catalog('parts')
- ]);
+async function bomReferences(repo){
+ const ref=await repo.references(),rawMachines=await repo.catalog('machines');
  const bomRef={
   departments:ref.departments.map(d=>({DeptID:d.deptId,DeptName:d.deptName,Code:d.deptId,IsActive:d.isActive})),
   lines:ref.lines.map(l=>({LineID:l.lineId,DeptID:l.deptId,LineName:l.lineName,IsActive:l.isActive})),
-  machines:rawMachines.map(m=>({MachineID:m.machineId,MachineCode:m.machineCode,MachineName:m.machineName,DeptID:m.deptId,LineID:m.lineId,IsActive:m.isActive,Status:m.status}))
+  machines:rawMachines.map(m=>({MachineID:m.machineId,MachineCode:m.machineCode,MachineName:m.machineName,DeptID:m.deptId,LineID:m.lineId,LineOrder:m.lineOrder,IsActive:m.isActive,Status:m.status}))
  };
- const bomParts=rawParts.map(p=>({
+ return bomRef;
+}
+
+function mapBomParts(rawParts){
+ return rawParts.map(p=>({
   ID:p.id,'Part number':p.partNumber,Description:p.description,Brand:p.brand,
   Price:p.price,Picture:p.picture,Thumbnail:p.thumbnail,'Store code':p.storeCode,'อายุอุปกรณ์ (ปี)':p.lifespan,Notes:p.notes
  }));
- return {bomRef,bomParts};
+}
+
+async function bomContext(repo){
+ const bomRef=await bomReferences(repo),rawParts=await repo.catalog('parts');
+ return {bomRef,bomParts:mapBomParts(rawParts)};
 }
 
 export async function dispatch(env,actor,scope,method,args,key){
@@ -38,7 +44,11 @@ export async function dispatch(env,actor,scope,method,args,key){
 
  if(isRead(scope,method)){
   if(scope==='machines'){
-   if(method==='bootstrap'){const ref=await repo.references();return {...ref,departments:ref.departments.filter(d=>d.isActive),lines:ref.lines.filter(l=>l.isActive),statuses:MachineCore.STATUSES,criticalities:MachineCore.CRITICALITIES,machineTypes:MachineCore.MACHINE_TYPES,pageSizes:MachineCore.PAGE_SIZES,role:actor.role};}
+   if(method==='bootstrap'){
+    const ref=await repo.references(),types=(await repo.machineTypes()).filter(t=>t.active);
+    return {...ref,departments:ref.departments.filter(d=>d.isActive),lines:ref.lines.filter(l=>l.isActive),statuses:MachineCore.STATUSES,criticalities:MachineCore.CRITICALITIES,machineTypes:types.map(t=>t.name),machineTypeDetails:types,pageSizes:MachineCore.PAGE_SIZES,role:actor.role,permissions:actor.permissions};
+   }
+   if(method==='getMachineTypes')return (await repo.machineTypes()).filter(t=>t.active);
    if(method==='getMachines'){
     const rows=await repo.catalog(scope),result=MachineCore.query(rows,args[0]||{}),visible=rows.filter(m=>m.isActive);
     return {...result,items:result.items.map(publicMachine),statusCounts:{...Object.fromEntries(MachineCore.STATUSES.map(s=>[s,visible.filter(m=>m.status===s).length])),all:visible.length}};
@@ -56,27 +66,37 @@ export async function dispatch(env,actor,scope,method,args,key){
    return args[0]?.all?{all:true,allTotal:rows.length,total:rows.length,items:rows.map(publicPart)}:{...PartCore.query(rows,args[0]||{}),items:PartCore.query(rows,args[0]||{}).items.map(publicPart)};
   }
   if(scope==='bom'){
-   if(method==='references')return (await bomContext(repo,{partIds:new Set()})).bomRef;
+   if(method==='references')return bomReferences(repo);
    if(method==='searchParts'){
+    const query=args[0]||{};
     const {bomParts}=await bomContext(repo);
-    const query=args[0]||{};if(query.all)return {items:bomParts,total:bomParts.length};
+    if(query.all)return {items:bomParts,total:bomParts.length};
     const words=BomCore.normalized(query.query).split(/\s+/).filter(Boolean);
     return BomCore.page(bomParts.filter(p=>words.every(w=>BomCore.normalized([p.ID,p['Part number'],p.Description,p.Brand].join(' ')).includes(w))),query);
    }
    if(method==='lineMachineStats'){
-    const query=args[0]||{},records=await repo.bomLineRecords(query.deptId,query.lineId),{bomRef,bomParts}=await bomContext(repo,{partIds:records.map(r=>r.PartID)});
+    const query=args[0]||{},records=await repo.bomLineRecords(query.deptId,query.lineId);
+    const bomRef=await bomReferences(repo);
+    const rawParts=await repo.bomPartsForLine(query.deptId,query.lineId);
+    const bomParts=mapBomParts(rawParts);
     const bomRepo={references:()=>bomRef,parts:()=>bomParts,lineLocation:(dept,line)=>({code:dept.DeptID,sheet:'LINE_'+line.LineID}),assertReady:()=>{},records:()=>records};
     const service=new BomService(bomRepo,()=>new Date(),()=>crypto.randomUUID());
     return service.lineMachineStats(query);
    }
    if(method==='list'){
-    const query=args[0]||{},records=await repo.bomRecords(query.machineId),{bomRef,bomParts}=await bomContext(repo,{partIds:records.map(r=>r.PartID)});
+    const query=args[0]||{},records=await repo.bomRecords(query.machineId);
+    const bomRef=await bomReferences(repo);
+    const rawParts=await repo.bomPartsForMachine(query.machineId);
+    const bomParts=mapBomParts(rawParts);
     const bomRepo={references:()=>bomRef,parts:()=>bomParts,location:(m)=>({code:m.DeptID,sheet:'LINE_'+m.LineID}),assertReady:()=>{},records:()=>records};
     const service=new BomService(bomRepo,()=>new Date(),()=>crypto.randomUUID());
     return service.list(query);
    }
    if(method==='history'){
-    const query=args[0]||{},records=await repo.bomRecords(query.machineId),events=await repo.bomEvents(query.machineId,query.equipmentId),{bomRef,bomParts}=await bomContext(repo,{partIds:records.filter(r=>r.EquipmentID===query.equipmentId).map(r=>r.PartID)});
+    const query=args[0]||{},records=await repo.bomRecords(query.machineId),events=await repo.bomEvents(query.machineId,query.equipmentId);
+    const bomRef=await bomReferences(repo);
+    const rawParts=await repo.bomPartsForMachine(query.machineId);
+    const bomParts=mapBomParts(rawParts);
     const bomRepo={references:()=>bomRef,parts:()=>bomParts,location:(m)=>({code:m.DeptID,sheet:'LINE_'+m.LineID}),assertReady:()=>{},records:()=>records,events:()=>events};
     const service=new BomService(bomRepo,()=>new Date(),()=>crypto.randomUUID());
     return service.history(query);
@@ -94,7 +114,11 @@ export async function dispatch(env,actor,scope,method,args,key){
  const req=await repo.request(actor,scope+':'+method,args,payload?.requestId||key);
  if(req.replay)return req.replay;
  if(['deleteMachine','deletePart'].includes(method))fail('REFERENCE_CHECK_REQUIRED','ยังไม่เปิดการลบถาวรระหว่างย้ายระบบ กรุณาซ่อนเครื่องจักรหรือคง Part ไว้เพื่อรักษาประวัติ BOM',409);
- if(scope==='machines')return saveMachine(env,repo,req,method,args);
+ if(scope==='machines'){
+  if(method==='reorderMachine')return repo.reorderMachine(req,String(args[0]),Number(args[1]?.position));
+  if(['createMachineType','deleteMachineType'].includes(method))return saveMachineType(repo,actor,env,req,method,args);
+  return saveMachine(env,repo,req,method,args);
+ }
  if(['createBrand','deleteBrand'].includes(method))return saveBrand(repo,req,method,args);
  if(['createPart','updatePart','updatePartImage'].includes(method))return savePart(env,repo,req,method,args);
  fail('NOT_FOUND','ไม่พบคำสั่งนี้',404);
@@ -135,7 +159,8 @@ async function saveMachine(env,repo,req,method,args){
  const before=creating?null:await repo.machine(String(args[0]));if(!creating&&!before)fail('NOT_FOUND','ไม่พบเครื่องจักรนี้',404);
  const payload=creating?args[0]:lifecycle?{...before,version:args[1]}:args[1];if(!payload)fail('VALIDATION','ไม่พบข้อมูล');
  if(before&&before.version!==Number(payload.version))conflict();
- const validation=MachineCore.validate(payload);
+ const activeTypes=(await repo.machineTypes()).filter(t=>t.active).map(t=>t.name);
+ const validation=MachineCore.validate(payload, activeTypes);
  if(before && MachineCore.normalize(before.machineType)===MachineCore.normalize(validation.value.machineType))delete validation.errors.machineType;
  if(Object.keys(validation.errors).length)fail('VALIDATION','ตรวจสอบช่องที่ระบุด้านล่าง',422,validation.errors);
  const value=validation.value,ref=await repo.references();
@@ -179,4 +204,20 @@ async function saveBrand(repo,req,method,args){
   value={id:before?.id||'BR-'+crypto.randomUUID(),name:before?.name||name,active:true,version:(before?.version||0)+1};
  }else{before=brands.find(b=>b.id===String(args[0]));if(!before)fail('NOT_FOUND','ไม่พบ Brand',404);value={...before,active:false,version:before.version+1};}
  return repo.commit(req,'brands',value.id,before,{id:value.id,name:value.name,normalized_name:PartCore.normalize(value.name),is_active:Number(value.active),version:value.version},value);
+}
+
+async function saveMachineType(repo,actor,env,req,method,args){
+ const types=await repo.machineTypes();let before,value;
+ if(method==='createMachineType'){
+  const name=String(args[0]||'').trim().replace(/\s+/g,' ');if(!name||name.length>100)fail('VALIDATION','กรอกชื่อประเภทเครื่องจักร 1–100 ตัวอักษร');
+  before=types.find(t=>MachineCore.normalize(t.name)===MachineCore.normalize(name));
+  if(before?.active)fail('DUPLICATE','มีประเภทเครื่องจักรนี้แล้ว',409);
+  if(before&&!args[1])return {requiresReactivation:true,id:before.id,name:before.name};
+  value={id:before?.id||'MT-'+crypto.randomUUID(),name:before?.name||name,active:true,version:(before?.version||0)+1};
+ }else{
+  authorizeDelete(actor,env,'machines');
+  before=types.find(t=>t.id===String(args[0]));if(!before)fail('NOT_FOUND','ไม่พบประเภทเครื่องจักรนี้',404);
+  value={...before,active:false,version:before.version+1};
+ }
+ return repo.commit(req,'machine_types',value.id,before,{id:value.id,name:value.name,normalized_name:MachineCore.normalize(value.name),is_active:Number(value.active),version:value.version},value);
 }

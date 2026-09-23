@@ -101,13 +101,12 @@ var BomService = (() => {
         if(!Array.isArray(payload.labels)||!payload.labels.length||payload.labels.length>50) C.fail('เพิ่มได้ครั้งละ 1–50 รายการ');
         payload.labels.forEach(v=>additions.push(newRecord(validate(v))));
       } else if(kind==='edit') {
-        if(!C.text(payload.reason).trim()) C.fail('กรอกเหตุผลการแก้ไข','VALIDATION',{reason:'ระบุเหตุผลที่แก้ไขข้อมูล'});
         const editItems = Array.isArray(payload.items) ? payload.items : [{recordId:payload.recordId, expectedVersion:payload.expectedVersion, values:payload.values}];
         if(!editItems.length || editItems.length>50) C.fail('แก้ไขได้ครั้งละ 1–50 รายการ');
         if(new Set(editItems.map(t=>t.recordId)).size!==editItems.length) C.fail('รายการที่เลือกแก้ไขซ้ำ');
         editItems.forEach(item => {
           const row=target(item);
-          const values=validate({...item.values,PartID:row.PartID},row.PartID);
+          const values=validate({...item.values,PartID:item.values?.PartID||row.PartID},row.PartID);
           changes.push({before:row,after:{...row,...values,Version:row.Version+1,UpdatedAt:now,OperationID:payload.operationId}});
         });
       } else if(kind==='split') {

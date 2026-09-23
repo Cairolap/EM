@@ -1,6 +1,6 @@
 :root {
-  --primary: #cc681c;
-  --primary-hover: #b25814;
+  --primary: #1e4976;
+  --primary-hover: #123254;
   --bg-dark: #18313d;
   --bg-page: #f8fafc;
   --card-bg: #ffffff;
@@ -9,7 +9,7 @@
   --border: #e2e8f0;
   --success: #16a34a;
   --warning: #d97706;
-  --danger: #dc2626;
+  --danger: #80182a;
   --radius: 8px;
 }
 

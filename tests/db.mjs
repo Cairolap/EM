@@ -2,7 +2,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
 export function database() {
   const db = new DatabaseSync(':memory:');
-  for (const file of ['0001_registry.sql', '0002_equipment_bom.sql', '0003_auth_users.sql', '0004_user_permissions.sql']) {
+  for (const file of ['0001_registry.sql', '0002_equipment_bom.sql', '0003_auth_users.sql', '0004_user_permissions.sql', '0005_bom_read_indexes.sql', '0006_machine_display_order.sql', '0007_machine_types.sql']) {
     db.exec(readFileSync(new URL('../migrations/' + file, import.meta.url), 'utf8'));
   }
   const wrap = (sql, args=[]) => ({

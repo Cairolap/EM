@@ -12,3 +12,8 @@ client_secret*.json
 key*.json
 *.pem
 .oauth_tokens.json
+
+# Local temp folders
+Backup/
+imports/
+

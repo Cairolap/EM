@@ -193,58 +193,184 @@
   return promise;
  }
 
- function updateBadge() {
-  const badge = document.getElementById('em-user-badge');
-  const navUsers = document.getElementById('em-nav-users');
-  if (navUsers) {
-   const canManageUsers = currentUser && (currentUser.role === 'admin' || currentUser.permissions?.users === 'admin');
-   navUsers.style.display = canManageUsers ? 'inline-block' : 'none';
-  }
-  if (!badge) return;
-  if (!currentUser) {
-   badge.innerHTML = `<button id="em-open-login" style="background:#cc681c;color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:13px;cursor:pointer">เข้าสู่ระบบ</button>`;
-   const btn = document.getElementById('em-open-login');
-   if (btn) btn.onclick = () => promptLogin();
-   return;
-  }
-  const roleTh = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : currentUser.role === 'editor' ? 'แก้ไขได้' : 'ดูอย่างเดียว';
-  badge.innerHTML = `
-   <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:6px">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-    ${currentUser.displayName || currentUser.username} (${roleTh})
-   </span>
-   <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:4px;padding:3px 8px;font-size:12px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
-  `;
-  const logoutBtn = document.getElementById('em-btn-logout');
-  if (logoutBtn) {
-   logoutBtn.onclick = async () => {
-    try {
-     await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
-    } catch (_) {}
-    location.reload();
-   };
-  }
- }
+ function initNavUI() {
+    const hamburgerBtn = document.getElementById('em-hamburger-btn');
+    const drawer = document.getElementById('em-drawer');
+    const overlay = document.getElementById('em-drawer-overlay');
+    const closeBtn = document.getElementById('em-drawer-close');
 
- // Check initial session state on load
- if (typeof window !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', () => {
-   fetch('/api/v1/auth/me', { credentials: 'same-origin' })
-    .then(r => r.json())
-    .then(async res => {
-     if (res.ok && res.data) {
-      currentUser = res.data;
-      updateBadge();
-      if (res.data.mustChangePassword) {
-       await promptForceChangePassword();
+    function openDrawer() {
+      if (drawer) {
+        drawer.classList.add('is-active');
+        hamburgerBtn?.setAttribute('aria-expanded', 'true');
       }
-     } else {
-      updateBadge();
-     }
-    })
-    .catch(() => updateBadge());
-  });
- }
+      if (overlay) overlay.classList.add('is-active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      if (drawer) {
+        drawer.classList.remove('is-active');
+        hamburgerBtn?.setAttribute('aria-expanded', 'false');
+      }
+      if (overlay) overlay.classList.remove('is-active');
+      document.body.style.overflow = '';
+    }
+
+    if (hamburgerBtn) hamburgerBtn.onclick = openDrawer;
+    if (closeBtn) closeBtn.onclick = closeDrawer;
+    if (overlay) overlay.onclick = closeDrawer;
+
+    // Drawer accordions
+    document.querySelectorAll('.em-drawer-group-btn').forEach(btn => {
+      btn.onclick = () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!expanded));
+        const sublist = btn.nextElementSibling;
+        if (sublist) {
+          sublist.style.display = expanded ? 'none' : 'flex';
+        }
+      };
+    });
+
+    // Auto-handle ?dept= in Equipment BOM
+    if (location.pathname.startsWith('/bom')) {
+      const params = new URLSearchParams(location.search);
+      const targetDept = params.get('dept');
+      if (targetDept) {
+        try {
+          sessionStorage.setItem('BOM_LAST_DEPT', targetDept);
+          sessionStorage.removeItem('BOM_LAST_LINE');
+          sessionStorage.removeItem('BOM_LAST_MACHINE');
+        } catch (_) {}
+      }
+    }
+
+    // Auto-handle ?action=add in Parts
+    if (location.pathname.startsWith('/parts')) {
+      const params = new URLSearchParams(location.search);
+      if (params.get('action') === 'add') {
+        const checkAddBtn = () => {
+          const btn = document.getElementById('add-part');
+          if (btn && !btn.disabled) {
+            btn.click();
+          } else {
+            setTimeout(checkAddBtn, 100);
+          }
+        };
+        setTimeout(checkAddBtn, 300);
+      }
+    }
+  }
+
+  function updateBadge() {
+    const badge = document.getElementById('em-user-badge');
+    const navUsers = document.getElementById('em-nav-users');
+    const drawerNavUsers = document.getElementById('em-drawer-nav-users');
+    const drawerUserCard = document.getElementById('em-drawer-user-card');
+    const drawerFooter = document.getElementById('em-drawer-footer');
+
+    const canManageUsers = currentUser && (currentUser.role === 'admin' || currentUser.permissions?.users === 'admin');
+    if (navUsers) navUsers.style.display = canManageUsers ? 'inline-flex' : 'none';
+    if (drawerNavUsers) drawerNavUsers.style.display = canManageUsers ? 'flex' : 'none';
+
+    if (!currentUser) {
+      if (badge) {
+        badge.innerHTML = '<button id="em-open-login" style="background:#cc681c;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s">เข้าสู่ระบบ</button>';
+        const btn = document.getElementById('em-open-login');
+        if (btn) btn.onclick = () => promptLogin();
+      }
+      if (drawerUserCard) {
+        drawerUserCard.innerHTML = '<div style="font-size:13px;color:#94a3b8;margin-bottom:8px">ยังไม่ได้เข้าสู่ระบบ</div><button id="em-drawer-open-login" style="width:100%;background:#cc681c;color:#fff;border:none;border-radius:6px;padding:8px;font-size:13px;font-weight:600;cursor:pointer">เข้าสู่ระบบ</button>';
+        const dBtn = document.getElementById('em-drawer-open-login');
+        if (dBtn) dBtn.onclick = () => {
+          const overlay = document.getElementById('em-drawer-overlay');
+          const drawer = document.getElementById('em-drawer');
+          if (drawer) drawer.classList.remove('is-active');
+          if (overlay) overlay.classList.remove('is-active');
+          document.body.style.overflow = '';
+          promptLogin();
+        };
+      }
+      if (drawerFooter) drawerFooter.innerHTML = '';
+      return;
+    }
+
+    const roleTh = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : currentUser.role === 'editor' ? 'แก้ไขได้' : 'ดูอย่างเดียว';
+
+    if (badge) {
+      badge.innerHTML = `
+        <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <strong style="font-weight:600">${currentUser.displayName || currentUser.username}</strong>
+          <span style="font-size:11.5px;color:#94a3b8">(${roleTh})</span>
+        </span>
+        <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
+      `;
+      const logoutBtn = document.getElementById('em-btn-logout');
+      if (logoutBtn) {
+        logoutBtn.onclick = async () => {
+          try {
+            await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+          } catch (_) {}
+          location.reload();
+        };
+      }
+    }
+
+    if (drawerUserCard) {
+      drawerUserCard.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:50%;background:#cc681c;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">
+            ${(currentUser.displayName || currentUser.username).charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:14px;color:#fff">${currentUser.displayName || currentUser.username}</div>
+            <div style="font-size:12px;color:#94a3b8">${roleTh}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (drawerFooter) {
+      drawerFooter.innerHTML = `
+        <button id="em-drawer-btn-logout" style="width:100%;background:rgba(239, 68, 68, 0.15);color:#fca5a5;border:1px solid rgba(239, 68, 68, 0.3);border-radius:6px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          ออกจากระบบ
+        </button>
+      `;
+      const dLogoutBtn = document.getElementById('em-drawer-btn-logout');
+      if (dLogoutBtn) {
+        dLogoutBtn.onclick = async () => {
+          try {
+            await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+          } catch (_) {}
+          location.reload();
+        };
+      }
+    }
+  }
+
+
+  if (typeof window !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initNavUI();
+      fetch('/api/v1/auth/me', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(async res => {
+          if (res.ok && res.data) {
+            currentUser = res.data;
+            updateBadge();
+            if (res.data.mustChangePassword) {
+              await promptForceChangePassword();
+            }
+          } else {
+            updateBadge();
+          }
+        })
+        .catch(() => updateBadge());
+    });
+  }
 
  window.EM_RPC = async (method, ...args) => {
   const signature = JSON.stringify([method, args]);

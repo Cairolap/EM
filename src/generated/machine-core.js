@@ -16,7 +16,7 @@ const MachineCore = (() => {
     .replace(/\s+/g, ' ')
     .toLocaleLowerCase('th-TH');
 
-  function validate(input) {
+  function validate(input, allowedTypes = MACHINE_TYPES) {
     const value = {};
     const errors = {};
     const limits = {
@@ -59,7 +59,7 @@ const MachineCore = (() => {
     if (!value.lineId) errors.lineId = 'กรุณาเลือกไลน์ผลิต';
     if (!CRITICALITIES.includes(value.criticality)) errors.criticality = 'กรุณาเลือกความสำคัญ';
     if (!STATUSES.includes(value.status)) errors.status = 'กรุณาเลือกสถานะ';
-    if (value.machineType && !MACHINE_TYPES.includes(value.machineType)) {
+    if (value.machineType && !allowedTypes.includes(value.machineType)) {
       errors.machineType = 'กรุณาเลือกประเภทเครื่องจากรายการ';
     }
     if (value.installDate && !isValidDateOnly(value.installDate)) {

@@ -23,7 +23,7 @@
   --color-surface: #ffffff;
   --color-surfaceMuted: #f5f7f7;
   --color-border: #cbd6d9;
-  --color-accent: #cc681c;
+  --color-accent: #80182a;
   --color-success: #28734d;
   --color-warning: #946019;
   --color-danger: #a63f43;
@@ -33,7 +33,7 @@
   --radius-control: 6px;
   --radius-panel: 8px;
   --space-unit: 6px;
-  --focus-ring: #e58b45;
+  --focus-ring: #6fa8dc;
   --scroll-thumb: #78919c;
   --scroll-track: #e4eaec;
   --scroll-hover: #58737f;
@@ -203,7 +203,7 @@ textarea:focus-visible,
 }
 
 .page-shell {
-  padding-block: 16px 40px;
+  padding-block: 12px;
 }
 
 .page-intro {
@@ -327,6 +327,9 @@ h3 {
 }
 
 .register-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   border: 1px solid #dbe4e8;
   border-radius: 8px;
   background: var(--color-surface);
@@ -752,7 +755,10 @@ textarea[aria-invalid="true"] {
 
 .list-frame {
   position: relative;
-  min-height: 280px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .loading-overlay,
@@ -819,7 +825,9 @@ textarea[aria-invalid="true"] {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .table-scroll {
-  max-height: 720px;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
   overflow: auto;
   scrollbar-gutter: stable;
 }
@@ -911,25 +919,6 @@ tbody tr:last-child td { border-bottom: 0; }
   font-weight: 600;
 }
 
-.order-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 4px;
-  background: #eaf3f7;
-  color: var(--color-primary);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 600;
-  border: 1px solid #c9dbe4;
-  letter-spacing: 0.02em;
-  margin-left: 6px;
-  vertical-align: middle;
-}
-
 .machine-name {
   display: block;
   max-width: 260px;
@@ -1019,6 +1008,16 @@ tbody tr:last-child td { border-bottom: 0; }
 .machine-cards {
   display: none;
   padding: 12px;
+}
+
+@media (min-width: 781px) {
+  .page-shell {
+    display: flex;
+    height: calc(100dvh - 52px);
+    min-height: 520px;
+    flex-direction: column;
+  }
+  .register-panel { flex: 1; }
 }
 
 .machine-card {
@@ -1128,45 +1127,6 @@ tbody tr:last-child td { border-bottom: 0; }
   padding-top: 3px;
   color: var(--color-danger);
   font-size: 0.78rem;
-}
-
-.field-hint {
-  display: block;
-  font-size: 0.8rem;
-  line-height: 1.4;
-  margin-top: 4px;
-  color: var(--color-text-sub);
-}
-
-.field-hint.hint-accent {
-  color: #14566f;
-  font-weight: 500;
-  background: #eaf3f7;
-  padding: 4px 8px;
-  border-radius: 4px;
-  border-left: 3px solid #14566f;
-}
-
-.field-hint.hint-info {
-  color: var(--color-text-sub);
-  padding: 2px 4px;
-}
-
-.compact-order-btn {
-  font-size: 0.8rem;
-  font-weight: 500;
-  padding: 3px 10px;
-  height: 28px;
-  margin-left: auto;
-  color: var(--color-primary-dark, #14566f);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface, #ffffff);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.compact-order-btn:hover {
-  background: #eaf3f7;
 }
 
 .checkbox-field {
@@ -1360,6 +1320,15 @@ tbody tr:last-child td { border-bottom: 0; }
 
 .confirmation-dialog { width: min(520px, calc(100% - 32px)); }
 .confirmation-dialog .dialog-body { overflow-wrap: anywhere; }
+.reorder-field { margin-top: 18px; }
+.machine-type-add-form { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; align-items: end; }
+.machine-type-add-form .button { min-height: 40px; }
+.machine-type-list { display: grid; gap: 7px; margin-top: 16px; }
+.machine-type-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 11px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surfaceMuted); }
+.machine-type-item strong { overflow-wrap: anywhere; }
+.machine-type-item .button { min-height: 32px; padding: 4px 9px; }
+.machine-type-permission-note { margin: 12px 0 0; font-size: .78rem; }
+@media (max-width: 560px) { .machine-type-add-form { grid-template-columns: 1fr; } .machine-type-add-form .button { width: 100%; } }
 .danger-copy { color: var(--color-danger); }
 .danger-note {
   margin-top: 16px;
@@ -1495,36 +1464,551 @@ tbody tr:last-child td { border-bottom: 0; }
 
 </style>
 </head>
-<body><nav aria-label="ระบบซ่อมบำรุงไฟฟ้า" style="padding:12px 24px;background:#18313d;display:flex;gap:24px;align-items:center;flex-wrap:wrap"><a style="color:white;text-decoration:none;font-weight:bold;border-bottom:2px solid #cc681c;padding-bottom:2px" href="/machines/" aria-current="page">เครื่องจักร</a><a style="color:white;text-decoration:none;font-weight:normal;border-bottom:none;padding-bottom:2px" href="/parts/">Master อะไหล่</a><a style="color:white;text-decoration:none;font-weight:normal;border-bottom:none;padding-bottom:2px" href="/bom/">อุปกรณ์ประจำเครื่องจักร</a><a id="em-nav-users" style="color:white;text-decoration:none;font-weight:normal;border-bottom:none;padding-bottom:2px;display:none" href="/users/">จัดการผู้ใช้งาน</a><span id="em-user-badge" style="margin-left:auto;color:#cbd5e1;font-size:13px;display:flex;align-items:center;gap:12px"></span></nav>
+<body>
+<nav aria-label="ระบบซ่อมบำรุงไฟฟ้า" class="em-main-nav">
+  <div class="em-nav-container">
+    <div class="em-nav-left">
+      <!-- Hamburger Toggle Button -->
+      <button type="button" id="em-hamburger-btn" class="em-hamburger-btn" aria-label="เปิดเมนูนำทาง" aria-expanded="false" aria-controls="em-drawer">
+        <svg class="em-icon-menu" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Logo แผนกซ่อมไฟฟ้า -->
+      <a href="/bom/" class="em-brand-link" title="แผนกซ่อมไฟฟ้า">
+        <img class="em-brand-logo" src="/Logo%20small.png" alt="แผนกซ่อมไฟฟ้า">
+        <span class="em-brand-text">แผนกซ่อมไฟฟ้า</span>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <div class="em-nav-center">
+      <!-- 2. อุปกรณ์ประจำเครื่องจักร with Dropdown -->
+      <div class="em-dropdown em-dropdown-bom">
+        <a href="/bom/" class="em-nav-link em-dropdown-trigger">
+          <span>อุปกรณ์ประจำเครื่องจักร</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <div class="em-dropdown-header">เลือกแผนก</div>
+          <a class="em-dropdown-item" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
+          <a class="em-dropdown-item" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PC"><span class="em-dept-badge">PC</span> ฝาพลาสติก</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PR"><span class="em-dept-badge">PR</span> งานพิมพ์</a>
+          <a class="em-dropdown-item" href="/bom/?dept=OT"><span class="em-dept-badge">OT</span> อื่นๆ</a>
+        </div>
+      </div>
+
+      <!-- 3. Master อะไหล่ with Dropdown -->
+      <div class="em-dropdown em-dropdown-parts">
+        <a href="/parts/" class="em-nav-link em-dropdown-trigger">
+          <span>Master อะไหล่</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/parts/"><span class="em-item-icon">▤</span> รายการอะไหล่</a>
+          <a class="em-dropdown-item" href="/parts/?action=add"><span class="em-item-icon">＋</span> เพิ่มแบบตาราง</a>
+          <a class="em-dropdown-item" href="/parts/?view=batch"><span class="em-item-icon">🖼</span> อัปโหลดรูปชุด</a>
+        </div>
+      </div>
+
+      <!-- 4. เครื่องจักร -->
+      <a class="em-nav-link active" href="/machines/" aria-current="page">เครื่องจักร</a>
+
+    </div>
+
+    <!-- Right: User management and account -->
+    <div class="em-nav-right">
+      <a id="em-nav-users" class="em-nav-link" style="display:none" href="/users/">จัดการผู้ใช้งาน</a>
+      <span id="em-user-badge" class="em-user-badge"></span>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Overlay & Sidebar -->
+  <div id="em-drawer-overlay" class="em-drawer-overlay" aria-hidden="true"></div>
+  <aside id="em-drawer" class="em-drawer" aria-label="เมนูนำทางหลัก">
+    <div class="em-drawer-header">
+      <div class="em-drawer-brand">
+        <img class="em-brand-logo" src="/Logo%20small.png" alt="แผนกซ่อมไฟฟ้า">
+        <div class="em-drawer-brand-text">
+          <strong>แผนกซ่อมไฟฟ้า</strong>
+          <small>ระบบซ่อมบำรุงไฟฟ้า</small>
+        </div>
+      </div>
+      <button type="button" id="em-drawer-close" class="em-drawer-close" aria-label="ปิดเมนู">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="em-drawer-content">
+      <!-- User Info Card in Drawer -->
+      <div id="em-drawer-user-card" class="em-drawer-user-card"></div>
+
+      <nav class="em-drawer-nav">
+        <!-- 2. อุปกรณ์ประจำเครื่องจักร Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              อุปกรณ์ประจำเครื่องจักร
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PC"><span class="em-dept-badge">PC</span> ฝาพลาสติก</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PR"><span class="em-dept-badge">PR</span> งานพิมพ์</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=OT"><span class="em-dept-badge">OT</span> อื่นๆ</a>
+          </div>
+        </div>
+
+        <!-- 3. Master อะไหล่ Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              Master อะไหล่
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/parts/"><span class="em-item-icon">▤</span> รายการอะไหล่</a>
+            <a class="em-drawer-subitem" href="/parts/?action=add"><span class="em-item-icon">＋</span> เพิ่มแบบตาราง</a>
+            <a class="em-drawer-subitem" href="/parts/?view=batch"><span class="em-item-icon">🖼</span> อัปโหลดรูปชุด</a>
+          </div>
+        </div>
+
+        <!-- 4. เครื่องจักร -->
+        <a class="em-drawer-link active" href="/machines/" aria-current="page">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+          เครื่องจักร
+        </a>
+
+        <!-- 5. จัดการผู้ใช้งาน -->
+        <a id="em-drawer-nav-users" class="em-drawer-link" style="display:none" href="/users/">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          จัดการผู้ใช้งาน
+        </a>
+      </nav>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div id="em-drawer-footer" class="em-drawer-footer"></div>
+  </aside>
+</nav>
+
+<style>
+/* --- UNIFIED ELECTRICAL MAINTENANCE NAVIGATION BAR --- */
+.em-main-nav {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  background: #152934;
+  color: #ffffff;
+  font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+.em-nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 20px;
+  height: 54px;
+  width: 100%;
+}
+.em-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.em-hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #f1f5f9;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+.em-hamburger-btn:hover {
+  background: rgba(128, 24, 42, 0.28);
+  border-color: #80182a;
+  color: #ffffff;
+  transform: scale(1.04);
+}
+.em-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #ffffff;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: opacity 0.2s;
+}
+.em-brand-link:hover { opacity: 0.92; }
+.em-brand-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 2px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.em-brand-text {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* Nav Links & Dropdowns */
+.em-nav-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+.em-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 7px 12px;
+  border-radius: 6px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.em-nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+.em-nav-link.active {
+  color: #ffffff;
+  font-weight: 600;
+  background: rgba(128, 24, 42, 0.22);
+  border-bottom-color: #80182a;
+}
+.em-caret {
+  transition: transform 0.2s ease;
+  opacity: 0.7;
+}
+
+/* Dropdown Menu */
+.em-dropdown {
+  position: relative;
+}
+.em-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 200px;
+  background: #18313d;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  z-index: 10001;
+}
+.em-dropdown:hover .em-dropdown-menu,
+.em-dropdown.is-open .em-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.em-dropdown:hover .em-caret,
+.em-dropdown.is-open .em-caret {
+  transform: rotate(180deg);
+}
+.em-dropdown-header {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  padding: 6px 10px 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 4px;
+}
+.em-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  color: #e2e8f0;
+  text-decoration: none;
+  font-size: 13px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.em-dropdown-item:hover {
+  background: rgba(128, 24, 42, 0.3);
+  color: #ffffff;
+}
+.em-dept-badge {
+  display: inline-block;
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 2px 6px;
+  background: rgba(128, 24, 42, 0.38);
+  color: #f3c4ce;
+  border: 1px solid rgba(243, 196, 206, 0.45);
+  border-radius: 4px;
+}
+.em-item-icon {
+  font-size: 14px;
+  width: 18px;
+  text-align: center;
+  color: #d68a9a;
+}
+
+/* Right User Info Badge */
+.em-nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.em-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+/* Mobile Drawer Elements */
+.em-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 10002;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+.em-drawer-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+.em-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(320px, 86vw);
+  background: #13242e;
+  color: #ffffff;
+  z-index: 10003;
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+}
+.em-drawer.is-active {
+  transform: translateX(0);
+}
+.em-drawer-header {
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.em-drawer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.em-drawer-brand-text strong {
+  display: block;
+  font-size: 14.5px;
+  color: #ffffff;
+}
+.em-drawer-brand-text small {
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+.em-drawer-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.em-drawer-close:hover {
+  color: #ffffff;
+  background: rgba(255,255,255,0.08);
+}
+.em-drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.em-drawer-user-card {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+.em-drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.em-drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+.em-drawer-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+.em-drawer-link.active {
+  background: rgba(128, 24, 42, 0.3);
+  color: #f3c4ce;
+  font-weight: 600;
+  border-left: 3px solid #80182a;
+}
+.em-drawer-group {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  margin-bottom: 2px;
+  overflow: hidden;
+}
+.em-drawer-group-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.em-drawer-group-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+.em-drawer-group-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.em-drawer-arrow {
+  transition: transform 0.2s ease;
+  color: #94a3b8;
+}
+.em-drawer-group-btn[aria-expanded="true"] .em-drawer-arrow {
+  transform: rotate(180deg);
+  color: #f3c4ce;
+}
+.em-drawer-sublist {
+  padding: 4px 8px 10px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.em-drawer-subitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: #94a3b8;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.em-drawer-subitem:hover {
+  color: #ffffff;
+  background: rgba(128, 24, 42, 0.22);
+}
+.em-drawer-footer {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .em-hamburger-btn {
+    display: inline-flex;
+  }
+  .em-nav-center {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .em-nav-right {
+    display: none;
+  }
+  .em-nav-container {
+    padding: 0 14px;
+  }
+  .em-nav-left {
+    min-width: 0;
+  }
+  .em-brand-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+</style>
+
   <a class="skip-link" href="#machine-list">ข้ามไปยังรายการเครื่องจักร</a>
 
-  <header class="app-header">
-    <div class="header-inner">
-      <div class="brand-lockup" aria-label="ทะเบียนเครื่องจักร">
-        <span class="brand-mark" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/></svg>
-        </span>
-        <span class="brand-text">
-          <strong>MACHINE REGISTER</strong>
-        </span>
-      </div>
-      <div class="connection-state" id="connection-state" role="status">
-        <span class="connection-dot" aria-hidden="true"></span>
-        <span>เชื่อมต่อข้อมูลแล้ว</span>
-      </div>
-    </div>
-  </header>
-
   <main class="page-shell">
-    <section class="page-intro" aria-labelledby="page-title">
-      <div class="intro-headline">
-        <h1 id="page-title" tabindex="-1">ทุกรหัส ค้นเจอในที่เดียว.</h1>
-      </div>
-      <button class="button button-primary" id="create-machine" type="button" data-action="create-machine" onclick="void 0">
-        <span aria-hidden="true">＋</span>
-        เพิ่มเครื่องจักร
-      </button>
-    </section>
+    <h1 id="page-title" class="sr-only" tabindex="-1">ทะเบียนเครื่องจักร</h1>
+    <div class="connection-state" id="connection-state" role="status" hidden><span class="connection-dot" aria-hidden="true"></span><span>เชื่อมต่อข้อมูลแล้ว</span></div>
 
     <section class="register-panel" id="machine-list" aria-labelledby="register-heading">
       <h2 class="sr-only" id="register-heading">รายการเครื่องจักร</h2>
@@ -1535,37 +2019,9 @@ tbody tr:last-child td { border-bottom: 0; }
           <span class="count-badge" data-count="all">—</span>
         </div>
         <div class="panel-actions-group">
-          <div class="status-segment-group" role="group" aria-label="กรองตามสถานะเครื่องจักร">
-            <button type="button" class="status-segment is-active" data-action="filter-status" data-status="" onclick="void 0">
-              <span>ทั้งหมด</span>
-            </button>
-            <button type="button" class="status-segment" data-action="filter-status" data-status="ใช้งาน" onclick="void 0">
-              <span class="status-dot-mini status-running" aria-hidden="true"></span>
-              <span>ใช้งาน</span>
-              <strong data-count="ใช้งาน">—</strong>
-            </button>
-            <button type="button" class="status-segment" data-action="filter-status" data-status="หยุด" onclick="void 0">
-              <span class="status-dot-mini status-stopped" aria-hidden="true"></span>
-              <span>หยุด</span>
-              <strong data-count="หยุด">—</strong>
-            </button>
-            <button type="button" class="status-segment" data-action="filter-status" data-status="ซ่อม" onclick="void 0">
-              <span class="status-dot-mini status-repair" aria-hidden="true"></span>
-              <span>ซ่อม</span>
-              <strong data-count="ซ่อม">—</strong>
-            </button>
-            <button type="button" class="status-segment" data-action="filter-status" data-status="สำรอง" onclick="void 0">
-              <span class="status-dot-mini status-standby" aria-hidden="true"></span>
-              <span>สำรอง</span>
-              <strong data-count="สำรอง">—</strong>
-            </button>
-            <button type="button" class="status-segment" data-action="filter-status" data-status="ปลดระวาง" onclick="void 0">
-              <span class="status-dot-mini status-retired" aria-hidden="true"></span>
-              <span>ปลดระวาง</span>
-              <strong data-count="ปลดระวาง">—</strong>
-            </button>
-          </div>
           <button class="button button-ghost reset-filters" id="reset-filters" type="button" data-action="reset-filters" onclick="void 0">ล้างตัวกรอง</button>
+          <button class="button button-secondary" id="manage-machine-types" type="button">จัดการประเภทเครื่อง</button>
+          <button class="button button-primary" id="create-machine" type="button" data-action="create-machine" onclick="void 0"><span aria-hidden="true">＋</span> เพิ่มเครื่องจักร</button>
         </div>
       </div>
 
@@ -1623,7 +2079,6 @@ tbody tr:last-child td { border-bottom: 0; }
 
       <div class="list-meta">
         <p id="result-summary" role="status" aria-live="polite">กำลังโหลดรายการ…</p>
-        <button class="compact-order-btn" id="reindex-line-btn" type="button" hidden title="จัดเรียงลำดับ 1..N ในไลน์นี้ใหม่อัตโนมัติ">จัดเรียงลำดับ 1..N</button>
       </div>
 
       <div class="list-frame">
@@ -1651,7 +2106,7 @@ tbody tr:last-child td { border-bottom: 0; }
                 <th scope="col" class="th-photo">รูป</th>
                 <th scope="col"><button class="sort-button" type="button" data-action="sort" data-sort="machineCode" onclick="void 0">รหัสเครื่อง <span aria-hidden="true"></span></button></th>
                 <th scope="col"><button class="sort-button" type="button" data-action="sort" data-sort="machineName" onclick="void 0">ชื่อเครื่อง / รายละเอียด <span aria-hidden="true"></span></button></th>
-                <th scope="col"><button class="sort-button" type="button" data-action="sort" data-sort="lineOrder" onclick="void 0">แผนก / ไลน์ (ลำดับ) <span aria-hidden="true"></span></button></th>
+                <th scope="col">แผนก / ไลน์</th>
                 <th scope="col">รุ่น / ผู้ผลิต</th>
                 <th scope="col"><button class="sort-button" type="button" data-action="sort" data-sort="criticality" onclick="void 0">ความสำคัญ <span aria-hidden="true"></span></button></th>
                 <th scope="col"><button class="sort-button" type="button" data-action="sort" data-sort="status" onclick="void 0">สถานะ <span aria-hidden="true"></span></button></th>
@@ -1706,12 +2161,6 @@ tbody tr:last-child td { border-bottom: 0; }
             <label for="line">ไลน์ผลิต <span aria-hidden="true">*</span></label>
             <select id="line" name="lineId" required></select>
             <span class="field-error" id="line-error"></span>
-          </div>
-          <div class="field">
-            <label for="line-order">ตำแหน่งในไลน์ <small class="muted">(แทนลำดับไหน)</small></label>
-            <select id="line-order" name="lineOrder"></select>
-            <span class="field-hint" id="line-order-hint"></span>
-            <span class="field-error" id="line-order-error"></span>
           </div>
           <div class="field">
             <label for="manufacturer">ผู้ผลิต</label>
@@ -1831,6 +2280,49 @@ tbody tr:last-child td { border-bottom: 0; }
       <button class="button button-secondary" id="detail-close-button" type="button" data-action="close-detail" onclick="void 0">ปิด</button>
       <button class="button button-primary" id="detail-edit" type="button" data-action="edit-machine" onclick="void 0">แก้ไขข้อมูล</button>
     </footer>
+  </dialog>
+
+  <dialog class="app-dialog confirmation-dialog" id="machine-types-dialog" aria-labelledby="machine-types-title">
+    <header class="dialog-header">
+      <div><p class="eyebrow">MACHINE_TYPES</p><h2 id="machine-types-title">จัดการประเภทเครื่องจักร</h2></div>
+      <button class="icon-button" id="close-machine-types" type="button" aria-label="ปิด">×</button>
+    </header>
+    <div class="dialog-body">
+      <form id="machine-type-form" class="machine-type-add-form">
+        <div class="field"><label for="new-machine-type">ชื่อประเภทใหม่</label><input id="new-machine-type" maxlength="100" autocomplete="off" placeholder="เช่น CNC, Conveyor"></div>
+        <button class="button button-primary" id="add-machine-type" type="submit">+ เพิ่มประเภท</button>
+      </form>
+      <p class="field-error" id="machine-type-error" role="alert"></p>
+      <div class="machine-type-list" id="machine-type-list"></div>
+      <p class="muted machine-type-permission-note" id="machine-type-permission-note"></p>
+    </div>
+  </dialog>
+
+  <dialog class="app-dialog confirmation-dialog" id="reorder-dialog" aria-labelledby="reorder-title">
+    <form id="reorder-form" method="dialog" novalidate>
+      <header class="dialog-header">
+        <div>
+          <p class="eyebrow">ลำดับการแสดงในไลน์ผลิต</p>
+          <h2 id="reorder-title">ย้ายลำดับเครื่องจักร</h2>
+        </div>
+        <button class="icon-button" id="close-reorder" type="button" aria-label="ปิดฟอร์ม">×</button>
+      </header>
+      <div class="dialog-body">
+        <p id="reorder-description" class="muted"></p>
+        <div class="field reorder-field">
+          <label for="reorder-position">ย้ายไปตำแหน่ง</label>
+          <select id="reorder-position" required></select>
+        </div>
+        <div class="dialog-inline-error" id="reorder-error" role="alert" hidden></div>
+      </div>
+      <footer class="dialog-actions">
+        <button class="button button-secondary" id="cancel-reorder" type="button">ยกเลิก</button>
+        <button class="button button-primary stable-button" id="confirm-reorder" type="submit">
+          <span class="button-label">บันทึกลำดับ</span>
+          <span class="button-busy" hidden><i class="mini-spinner"></i> กำลังบันทึก</span>
+        </button>
+      </footer>
+    </form>
   </dialog>
 
   <dialog class="app-dialog confirmation-dialog" id="lifecycle-dialog" aria-labelledby="lifecycle-title">
@@ -2095,58 +2587,184 @@ tbody tr:last-child td { border-bottom: 0; }
   return promise;
  }
 
- function updateBadge() {
-  const badge = document.getElementById('em-user-badge');
-  const navUsers = document.getElementById('em-nav-users');
-  if (navUsers) {
-   const canManageUsers = currentUser && (currentUser.role === 'admin' || currentUser.permissions?.users === 'admin');
-   navUsers.style.display = canManageUsers ? 'inline-block' : 'none';
-  }
-  if (!badge) return;
-  if (!currentUser) {
-   badge.innerHTML = `<button id="em-open-login" style="background:#cc681c;color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:13px;cursor:pointer">เข้าสู่ระบบ</button>`;
-   const btn = document.getElementById('em-open-login');
-   if (btn) btn.onclick = () => promptLogin();
-   return;
-  }
-  const roleTh = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : currentUser.role === 'editor' ? 'แก้ไขได้' : 'ดูอย่างเดียว';
-  badge.innerHTML = `
-   <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:6px">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-    ${currentUser.displayName || currentUser.username} (${roleTh})
-   </span>
-   <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:4px;padding:3px 8px;font-size:12px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
-  `;
-  const logoutBtn = document.getElementById('em-btn-logout');
-  if (logoutBtn) {
-   logoutBtn.onclick = async () => {
-    try {
-     await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
-    } catch (_) {}
-    location.reload();
-   };
-  }
- }
+ function initNavUI() {
+    const hamburgerBtn = document.getElementById('em-hamburger-btn');
+    const drawer = document.getElementById('em-drawer');
+    const overlay = document.getElementById('em-drawer-overlay');
+    const closeBtn = document.getElementById('em-drawer-close');
 
- // Check initial session state on load
- if (typeof window !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', () => {
-   fetch('/api/v1/auth/me', { credentials: 'same-origin' })
-    .then(r => r.json())
-    .then(async res => {
-     if (res.ok && res.data) {
-      currentUser = res.data;
-      updateBadge();
-      if (res.data.mustChangePassword) {
-       await promptForceChangePassword();
+    function openDrawer() {
+      if (drawer) {
+        drawer.classList.add('is-active');
+        hamburgerBtn?.setAttribute('aria-expanded', 'true');
       }
-     } else {
-      updateBadge();
-     }
-    })
-    .catch(() => updateBadge());
-  });
- }
+      if (overlay) overlay.classList.add('is-active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      if (drawer) {
+        drawer.classList.remove('is-active');
+        hamburgerBtn?.setAttribute('aria-expanded', 'false');
+      }
+      if (overlay) overlay.classList.remove('is-active');
+      document.body.style.overflow = '';
+    }
+
+    if (hamburgerBtn) hamburgerBtn.onclick = openDrawer;
+    if (closeBtn) closeBtn.onclick = closeDrawer;
+    if (overlay) overlay.onclick = closeDrawer;
+
+    // Drawer accordions
+    document.querySelectorAll('.em-drawer-group-btn').forEach(btn => {
+      btn.onclick = () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!expanded));
+        const sublist = btn.nextElementSibling;
+        if (sublist) {
+          sublist.style.display = expanded ? 'none' : 'flex';
+        }
+      };
+    });
+
+    // Auto-handle ?dept= in Equipment BOM
+    if (location.pathname.startsWith('/bom')) {
+      const params = new URLSearchParams(location.search);
+      const targetDept = params.get('dept');
+      if (targetDept) {
+        try {
+          sessionStorage.setItem('BOM_LAST_DEPT', targetDept);
+          sessionStorage.removeItem('BOM_LAST_LINE');
+          sessionStorage.removeItem('BOM_LAST_MACHINE');
+        } catch (_) {}
+      }
+    }
+
+    // Auto-handle ?action=add in Parts
+    if (location.pathname.startsWith('/parts')) {
+      const params = new URLSearchParams(location.search);
+      if (params.get('action') === 'add') {
+        const checkAddBtn = () => {
+          const btn = document.getElementById('add-part');
+          if (btn && !btn.disabled) {
+            btn.click();
+          } else {
+            setTimeout(checkAddBtn, 100);
+          }
+        };
+        setTimeout(checkAddBtn, 300);
+      }
+    }
+  }
+
+  function updateBadge() {
+    const badge = document.getElementById('em-user-badge');
+    const navUsers = document.getElementById('em-nav-users');
+    const drawerNavUsers = document.getElementById('em-drawer-nav-users');
+    const drawerUserCard = document.getElementById('em-drawer-user-card');
+    const drawerFooter = document.getElementById('em-drawer-footer');
+
+    const canManageUsers = currentUser && (currentUser.role === 'admin' || currentUser.permissions?.users === 'admin');
+    if (navUsers) navUsers.style.display = canManageUsers ? 'inline-flex' : 'none';
+    if (drawerNavUsers) drawerNavUsers.style.display = canManageUsers ? 'flex' : 'none';
+
+    if (!currentUser) {
+      if (badge) {
+        badge.innerHTML = '<button id="em-open-login" style="background:#cc681c;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s">เข้าสู่ระบบ</button>';
+        const btn = document.getElementById('em-open-login');
+        if (btn) btn.onclick = () => promptLogin();
+      }
+      if (drawerUserCard) {
+        drawerUserCard.innerHTML = '<div style="font-size:13px;color:#94a3b8;margin-bottom:8px">ยังไม่ได้เข้าสู่ระบบ</div><button id="em-drawer-open-login" style="width:100%;background:#cc681c;color:#fff;border:none;border-radius:6px;padding:8px;font-size:13px;font-weight:600;cursor:pointer">เข้าสู่ระบบ</button>';
+        const dBtn = document.getElementById('em-drawer-open-login');
+        if (dBtn) dBtn.onclick = () => {
+          const overlay = document.getElementById('em-drawer-overlay');
+          const drawer = document.getElementById('em-drawer');
+          if (drawer) drawer.classList.remove('is-active');
+          if (overlay) overlay.classList.remove('is-active');
+          document.body.style.overflow = '';
+          promptLogin();
+        };
+      }
+      if (drawerFooter) drawerFooter.innerHTML = '';
+      return;
+    }
+
+    const roleTh = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : currentUser.role === 'editor' ? 'แก้ไขได้' : 'ดูอย่างเดียว';
+
+    if (badge) {
+      badge.innerHTML = `
+        <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <strong style="font-weight:600">${currentUser.displayName || currentUser.username}</strong>
+          <span style="font-size:11.5px;color:#94a3b8">(${roleTh})</span>
+        </span>
+        <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
+      `;
+      const logoutBtn = document.getElementById('em-btn-logout');
+      if (logoutBtn) {
+        logoutBtn.onclick = async () => {
+          try {
+            await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+          } catch (_) {}
+          location.reload();
+        };
+      }
+    }
+
+    if (drawerUserCard) {
+      drawerUserCard.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:50%;background:#cc681c;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">
+            ${(currentUser.displayName || currentUser.username).charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:14px;color:#fff">${currentUser.displayName || currentUser.username}</div>
+            <div style="font-size:12px;color:#94a3b8">${roleTh}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (drawerFooter) {
+      drawerFooter.innerHTML = `
+        <button id="em-drawer-btn-logout" style="width:100%;background:rgba(239, 68, 68, 0.15);color:#fca5a5;border:1px solid rgba(239, 68, 68, 0.3);border-radius:6px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          ออกจากระบบ
+        </button>
+      `;
+      const dLogoutBtn = document.getElementById('em-drawer-btn-logout');
+      if (dLogoutBtn) {
+        dLogoutBtn.onclick = async () => {
+          try {
+            await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+          } catch (_) {}
+          location.reload();
+        };
+      }
+    }
+  }
+
+
+  if (typeof window !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initNavUI();
+      fetch('/api/v1/auth/me', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(async res => {
+          if (res.ok && res.data) {
+            currentUser = res.data;
+            updateBadge();
+            if (res.data.mustChangePassword) {
+              await promptForceChangePassword();
+            }
+          } else {
+            updateBadge();
+          }
+        })
+        .catch(() => updateBadge());
+    });
+  }
 
  window.EM_RPC = async (method, ...args) => {
   const signature = JSON.stringify([method, args]);
@@ -2201,34 +2819,6 @@ tbody tr:last-child td { border-bottom: 0; }
 
   return doRequest();
  };
-
-  if (typeof window !== 'undefined' && (!window.google || !window.google.script)) {
-    window.google = window.google || {};
-    window.google.script = {
-      run: (function createRunner(successFn, failureFn) {
-        return new Proxy({}, {
-          get(_, prop) {
-            if (prop === 'withSuccessHandler') return fn => createRunner(fn, failureFn);
-            if (prop === 'withFailureHandler') return fn => createRunner(successFn, fn);
-            if (prop === 'rpc') {
-              return (method, token, payload) => {
-                window.EM_RPC(method, payload).then(
-                  data => (successFn ? successFn({ ok: true, data }) : null),
-                  err => (failureFn ? failureFn(err) : null)
-                );
-              };
-            }
-            return (...args) => {
-              window.EM_RPC(prop, ...args).then(
-                data => (successFn ? successFn({ ok: true, data }) : null),
-                err => (failureFn ? failureFn(err) : null)
-              );
-            };
-          }
-        });
-      })()
-    };
-  }
 })();
 
 </script>
@@ -2251,7 +2841,7 @@ const MachineCore = (() => {
     .replace(/\s+/g, ' ')
     .toLocaleLowerCase('th-TH');
 
-  function validate(input) {
+  function validate(input, allowedTypes = MACHINE_TYPES) {
     const value = {};
     const errors = {};
     const limits = {
@@ -2294,7 +2884,7 @@ const MachineCore = (() => {
     if (!value.lineId) errors.lineId = 'กรุณาเลือกไลน์ผลิต';
     if (!CRITICALITIES.includes(value.criticality)) errors.criticality = 'กรุณาเลือกความสำคัญ';
     if (!STATUSES.includes(value.status)) errors.status = 'กรุณาเลือกสถานะ';
-    if (value.machineType && !MACHINE_TYPES.includes(value.machineType)) {
+    if (value.machineType && !allowedTypes.includes(value.machineType)) {
       errors.machineType = 'กรุณาเลือกประเภทเครื่องจากรายการ';
     }
     if (value.installDate && !isValidDateOnly(value.installDate)) {
@@ -2577,7 +3167,7 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       visibility: 'active',
       page: 1,
       pageSize: 25,
-      sortBy: 'machineCode',
+      sortBy: 'lineOrder',
       sortOrder: 'asc',
     },
     result: null,
@@ -2592,6 +3182,7 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
     detailMachine: null,
     deleteTarget: null,
     lifecycleTarget: null,
+    reorderTarget: null,
     originFocus: null,
     online: navigator.onLine
   };
@@ -2681,6 +3272,15 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       deleteMachine: id => {
         machines = machines.filter(machine => machine.machineId !== id);
         return ok({machineId:id});
+      },
+      reorderMachine: (id, payload) => {
+        const machine=machines.find(item=>item.machineId===id);
+        if(!machine)return {ok:false,error:{code:'NOT_FOUND',message:'ไม่พบเครื่องจักรนี้',fields:{}}};
+        const siblings=machines.filter(item=>item.deptId===machine.deptId&&item.lineId===machine.lineId&&item.machineId!==id)
+          .sort((a,b)=>(Number(a.lineOrder)||999999)-(Number(b.lineOrder)||999999)||a.machineCode.localeCompare(b.machineCode,'th',{numeric:true}));
+        const position=Math.max(1,Math.min(Number(payload.position)||1,siblings.length+1));
+        siblings.splice(position-1,0,machine);siblings.forEach((item,index)=>{item.lineOrder=index+1;});
+        return ok({machineId:id,position});
       }
     };
 
@@ -2693,9 +3293,10 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
     }
   })();
 
-  const isLocalPreview = !window.google || !google.script || !google.script.run;
+  const isLocalPreview = !window.EM_RPC && ['127.0.0.1', 'localhost'].includes(location.hostname) && (!window.google || !google.script || !google.script.run);
 
   function rpc(method, ...args) {
+    if (window.EM_RPC) return window.EM_RPC(method, ...args);
     if (isLocalPreview) {
       return Promise.resolve().then(() => {
         if (!localApi[method]) throw new Error('Local method not found: ' + method);
@@ -2790,164 +3391,6 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
     if (Array.from(select.options).some(option => option.value === value)) select.value = value;
   }
 
-  async function updateLineOrderOptions(lineId, currentMachineId, preferredOrder) {
-    const select = byId('line-order');
-    const hint = byId('line-order-hint');
-    if (!select) return;
-
-    select.innerHTML = '';
-    if (hint) {
-      hint.textContent = '';
-      hint.className = 'field-hint';
-    }
-
-    if (!lineId) {
-      const opt = create('option', '', '— กรุณาเลือกไลน์ผลิตก่อน —');
-      opt.value = '';
-      select.appendChild(opt);
-      select.disabled = true;
-      state.currentLineMachines = [];
-      return;
-    }
-
-    select.disabled = false;
-    const loadingOpt = create('option', '', 'กำลังโหลดเครื่องจักรในไลน์...');
-    loadingOpt.value = preferredOrder != null && preferredOrder !== '' ? String(preferredOrder) : '';
-    select.appendChild(loadingOpt);
-
-    try {
-      const machines = await rpc('getLineMachines', lineId);
-      state.currentLineMachines = machines || [];
-      select.innerHTML = '';
-
-      const inLine = (machines || []).filter(m => m.machineId !== currentMachineId);
-      const currentMachine = (machines || []).find(m => m.machineId === currentMachineId);
-      state.currentEditingMachine = currentMachine || null;
-
-      const hasCurrentOrder = currentMachine && currentMachine.lineOrder !== '' && currentMachine.lineOrder != null;
-      const currentOrderNum = hasCurrentOrder ? Number(currentMachine.lineOrder) : null;
-
-      // 1. Current position option (if editing and had an order)
-      if (currentOrderNum != null) {
-        const curOpt = create('option', '', `✓ ลำดับเดิม: ลำดับที่ ${currentOrderNum} (${currentMachine.machineCode})`);
-        curOpt.value = String(currentOrderNum);
-        select.appendChild(curOpt);
-      }
-
-      // 2. Options for each machine in the line: "แทนที่ {code} (ลำดับที่ {order})"
-      inLine.forEach(m => {
-        const mOrder = m.lineOrder !== '' && m.lineOrder != null ? Number(m.lineOrder) : null;
-        const label = mOrder != null
-          ? `แทนที่ ${m.machineCode} (ลำดับที่ ${mOrder})${m.machineName ? ' — ' + m.machineName : ''}`
-          : `แทนที่ ${m.machineCode}`;
-        const opt = create('option', '', label);
-        opt.value = mOrder != null ? String(mOrder) : '';
-        select.appendChild(opt);
-      });
-
-      // 3. Option: "ต่อท้ายสุด"
-      let maxOrder = 0;
-      (machines || []).forEach(m => {
-        if (m.lineOrder !== '' && m.lineOrder != null && !isNaN(Number(m.lineOrder))) {
-          maxOrder = Math.max(maxOrder, Number(m.lineOrder));
-        }
-      });
-      const endOrder = maxOrder + 1;
-      const endOpt = create('option', '', `➕ ต่อท้ายสุด (ลำดับที่ ${endOrder})`);
-      endOpt.value = String(endOrder);
-      select.appendChild(endOpt);
-
-      // 4. Option: "ไม่ระบุลำดับ"
-      const noneOpt = create('option', '', '— ไม่ระบุลำดับ —');
-      noneOpt.value = '';
-      select.appendChild(noneOpt);
-
-      // Determine selected value
-      let targetValue = '';
-      if (preferredOrder !== '' && preferredOrder != null) {
-        targetValue = String(preferredOrder);
-      } else if (currentOrderNum != null) {
-        targetValue = String(currentOrderNum);
-      } else {
-        // For new machine: default to "ต่อท้ายสุด"
-        targetValue = String(endOrder);
-      }
-
-      if (Array.from(select.options).some(o => o.value === targetValue)) {
-        select.value = targetValue;
-      } else if (targetValue !== '') {
-        const customOpt = create('option', '', `ลำดับที่ ${targetValue}`);
-        customOpt.value = targetValue;
-        select.insertBefore(customOpt, select.firstChild);
-        select.value = targetValue;
-      }
-
-      updateOrderHint(select.value);
-    } catch (error) {
-      console.error('Error fetching line machines:', error);
-      select.innerHTML = '';
-      const fallbackOpt = create('option', '', preferredOrder ? `ลำดับที่ ${preferredOrder}` : '— ไม่ระบุลำดับ —');
-      fallbackOpt.value = preferredOrder || '';
-      select.appendChild(fallbackOpt);
-    }
-  }
-
-  function updateOrderHint(selectedValue) {
-    const hint = byId('line-order-hint');
-    if (!hint) return;
-    if (!selectedValue) {
-      hint.textContent = '';
-      hint.className = 'field-hint';
-      return;
-    }
-
-    const newNum = Number(selectedValue);
-    const currentMachine = state.currentEditingMachine;
-    const machines = state.currentLineMachines || [];
-    const oldNum = currentMachine && currentMachine.lineOrder !== '' && currentMachine.lineOrder != null ? Number(currentMachine.lineOrder) : null;
-
-    if (oldNum != null && oldNum === newNum) {
-      hint.textContent = 'ℹ️ คงอยู่ที่ตำแหน่งเดิม ไม่มีการสลับลำดับ';
-      hint.className = 'field-hint hint-info';
-      return;
-    }
-
-    if (oldNum != null && oldNum > newNum) {
-      // Moving down (e.g. 4 -> 2)
-      const affected = machines
-        .filter(m => m.machineId !== (currentMachine && currentMachine.machineId) && Number(m.lineOrder) >= newNum && Number(m.lineOrder) < oldNum)
-        .map(m => m.machineCode);
-      if (affected.length > 0) {
-        hint.textContent = `💡 จะเลื่อน ${affected.join(', ')} ถัดไป (+1) โดยลำดับ 1 และตั้งแต่ลำดับ ${oldNum + 1} ขึ้นไปไม่ขยับ`;
-        hint.className = 'field-hint hint-accent';
-        return;
-      }
-    } else if (oldNum != null && oldNum < newNum) {
-      // Moving up (e.g. 2 -> 5)
-      const affected = machines
-        .filter(m => m.machineId !== (currentMachine && currentMachine.machineId) && Number(m.lineOrder) > oldNum && Number(m.lineOrder) <= newNum)
-        .map(m => m.machineCode);
-      if (affected.length > 0) {
-        hint.textContent = `💡 จะขยับ ${affected.join(', ')} ขึ้นมาแทน (-1) โดยลำดับอื่นไม่ขยับ`;
-        hint.className = 'field-hint hint-accent';
-        return;
-      }
-    } else {
-      // New insertion
-      const affected = machines
-        .filter(m => m.machineId !== (currentMachine && currentMachine.machineId) && Number(m.lineOrder) >= newNum)
-        .map(m => m.machineCode);
-      if (affected.length > 0) {
-        hint.textContent = `💡 จะแทรกเป็นลำดับที่ ${newNum} และเลื่อน ${affected.slice(0, 3).join(', ')}${affected.length > 3 ? '...' : ''} ถัดไป (+1)`;
-        hint.className = 'field-hint hint-accent';
-        return;
-      }
-    }
-
-    hint.textContent = '';
-    hint.className = 'field-hint';
-  }
-
   function readUrlState() {
     try {
       const params = new URLSearchParams(location.search);
@@ -2968,7 +3411,7 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
         if (value !== '' && value !== true && value != null &&
             !((key === 'page' && value === 1) || (key === 'pageSize' && value === 25) ||
               (key === 'visibility' && value === 'active') ||
-              (key === 'sortBy' && value === 'machineCode') || (key === 'sortOrder' && value === 'asc'))) {
+              (key === 'sortBy' && value === 'lineOrder') || (key === 'sortOrder' && value === 'asc'))) {
           params.set(key, String(value));
         }
       });
@@ -3059,9 +3502,6 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
 
       const codeCell = create('td');
       codeCell.appendChild(create('span', 'machine-code', machine.machineCode));
-      if (machine.lineOrder) {
-        codeCell.appendChild(create('span', 'order-badge', '#' + machine.lineOrder));
-      }
       if (machine.serialNo) {
         codeCell.appendChild(create('span', 'cell-sub', machine.serialNo));
       } else if (machine.hasPhoto) {
@@ -3073,7 +3513,7 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       nameCell.appendChild(create('span', 'machine-name', machine.machineName));
       nameCell.appendChild(create('span', 'cell-sub', machine.machineType || machine.serialNo || '—'));
       row.appendChild(nameCell);
-      row.appendChild(twoLineCell(machine.departmentName, machine.lineName + (machine.lineOrder ? ' (ลำดับ ' + machine.lineOrder + ')' : '')));
+      row.appendChild(twoLineCell(machine.departmentName, machine.lineName));
       row.appendChild(twoLineCell(machine.model, machine.manufacturer));
       const criticalityCell = create('td');
       criticalityCell.appendChild(criticalityBadge(machine.criticality));
@@ -3086,6 +3526,7 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       const actionWrap = create('div', 'row-actions');
       actionWrap.appendChild(actionButton('ดู', 'view', machine.machineId, 'button-ghost text-action'));
       actionWrap.appendChild(actionButton('แก้ไข', 'edit', machine.machineId, 'button-ghost text-action'));
+      actionWrap.appendChild(actionButton('ย้ายลำดับ', 'reorder', machine.machineId, 'button-ghost text-action'));
       actions.appendChild(actionWrap);
       row.appendChild(actions);
       body.appendChild(row);
@@ -3094,16 +3535,13 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       const head = create('div', 'machine-card-head');
       const identity = create('div');
       identity.appendChild(create('span', 'machine-code', machine.machineCode));
-      if (machine.lineOrder) {
-        identity.appendChild(create('span', 'order-badge', '#' + machine.lineOrder));
-      }
       identity.appendChild(create('h3', '', machine.machineName));
       head.appendChild(identity);
       head.appendChild(statusBadge(machine.status));
       if (machine.isActive === false) head.appendChild(visibilityBadge(false));
       card.appendChild(head);
       const list = create('dl');
-      [['แผนก',machine.departmentName],['ไลน์',machine.lineName + (machine.lineOrder ? ' (ลำดับ ' + machine.lineOrder + ')' : '')],['รุ่น',machine.model || '—'],['ความสำคัญ',machine.criticality]].forEach(([label,value]) => {
+      [['แผนก',machine.departmentName],['ไลน์',machine.lineName],['รุ่น',machine.model || '—'],['ความสำคัญ',machine.criticality]].forEach(([label,value]) => {
         list.appendChild(create('dt','',label));
         list.appendChild(create('dd','',value));
       });
@@ -3111,6 +3549,7 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       const cardActions = create('div', 'machine-card-actions');
       cardActions.appendChild(actionButton('ดูรายละเอียด', 'view', machine.machineId, 'button-secondary'));
       cardActions.appendChild(actionButton('แก้ไข', 'edit', machine.machineId, 'button-ghost'));
+      cardActions.appendChild(actionButton('ย้ายลำดับ', 'reorder', machine.machineId, 'button-ghost'));
       card.appendChild(cardActions);
       cards.appendChild(card);
     });
@@ -3167,10 +3606,6 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
     }
     renderCounts(result.statusCounts);
     renderSort();
-    const reindexBtn = byId('reindex-line-btn');
-    if (reindexBtn) {
-      reindexBtn.hidden = !(state.filters.lineId && result.items.length > 1);
-    }
   }
 
   async function loadMachines(options) {
@@ -3230,13 +3665,44 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
     syncControlsFromState();
   }
 
+  function canDeleteMachineTypes(){return Boolean(state.reference?.permissions?.can_delete||state.reference?.role==='admin');}
+  async function refreshMachineTypes(){
+    const types=await rpc('getMachineTypes');
+    state.reference.machineTypeDetails=types;state.reference.machineTypes=types.map(item=>item.name);
+    populateReferenceControls();renderMachineTypes(types);
+  }
+  function renderMachineTypes(types){
+    const root=byId('machine-type-list');root.replaceChildren();
+    const canDelete=canDeleteMachineTypes();
+    types.forEach(type=>{
+      const row=create('div','machine-type-item');row.appendChild(create('strong','',type.name));
+      if(canDelete){const remove=create('button','button button-danger-outline','ลบ');remove.type='button';remove.addEventListener('click',()=>deleteMachineType(type,remove));row.appendChild(remove);}
+      root.appendChild(row);
+    });
+    byId('machine-type-permission-note').textContent=canDelete?'การลบจะปิดประเภทนี้จากตัวเลือกใหม่ โดยข้อมูลเครื่องจักรเดิมยังคงอยู่':'บัญชีนี้เพิ่มประเภทได้ แต่ไม่มีสิทธิ์ลบประเภท';
+  }
+  async function openMachineTypes(){
+    byId('machine-type-error').textContent='';byId('machine-types-dialog').showModal();
+    try{await refreshMachineTypes();byId('new-machine-type').focus();}catch(error){byId('machine-type-error').textContent=error.message;}
+  }
+  async function addMachineType(event){
+    event.preventDefault();const input=byId('new-machine-type'),name=input.value.trim();if(!name)return;
+    const button=byId('add-machine-type');button.disabled=true;byId('machine-type-error').textContent='';
+    try{let result=await rpc('createMachineType',name);if(result?.requiresReactivation)await rpc('createMachineType',name,true);input.value='';await refreshMachineTypes();toast('เพิ่มประเภทเครื่องจักรแล้ว','success');}
+    catch(error){byId('machine-type-error').textContent=error.message;}finally{button.disabled=false;}
+  }
+  async function deleteMachineType(type,button){
+    button.disabled=true;byId('machine-type-error').textContent='';
+    try{await rpc('deleteMachineType',type.id);await refreshMachineTypes();toast('ลบประเภทเครื่องจักรแล้ว','success');}
+    catch(error){byId('machine-type-error').textContent=error.message;button.disabled=false;}
+  }
+
   function fieldPayload() {
     return {
       machineCode:byId('machine-code').value,
       machineName:byId('machine-name').value,
       deptId:byId('department').value,
       lineId:byId('line').value,
-      lineOrder:byId('line-order').value,
       manufacturer:byId('manufacturer').value,
       model:byId('model').value,
       serialNo:byId('serial-no').value,
@@ -3256,7 +3722,6 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
     machineName:'machine-name',
     deptId:'department',
     lineId:'line',
-    lineOrder:'line-order',
     manufacturer:'manufacturer',
     model:'model',
     serialNo:'serial-no',
@@ -3404,17 +3869,16 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
     }
   }
 
-  async function setFormValues(machine) {
-    state.currentEditingMachine = machine;
+  function setFormValues(machine) {
     const values = machine || {
-      machineId:'',version:'',machineCode:'',machineName:'',deptId:'',lineId:'',lineOrder:'',
+      machineId:'',version:'',machineCode:'',machineName:'',deptId:'',lineId:'',
       manufacturer:'',model:'',serialNo:'',machineType:'',installDate:'',
       criticality:'กลาง',status:'ใช้งาน',locationDetail:'',manualUrl:'',remark:'',isActive:true
     };
     byId('machine-id').value = values.machineId || '';
     byId('machine-version').value = values.version || '';
     for (const [key, id] of Object.entries(fieldIds)) {
-      if (key === 'deptId' || key === 'lineId' || key === 'lineOrder') continue;
+      if (key === 'deptId' || key === 'lineId') continue;
       byId(id).value = values[key] == null ? '' : values[key];
     }
     byId('department').value = values.deptId || '';
@@ -3427,7 +3891,6 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
     }
     byId('machine-type').value = values.machineType || '';
     updateLineOptions(byId('line'), values.deptId || '', 'เลือกไลน์ผลิต', values.lineId || '');
-    await updateLineOrderOptions(values.lineId || '', values.machineId || '', values.lineOrder != null ? values.lineOrder : '');
     byId('is-active').checked = values.isActive !== false;
   }
 
@@ -3447,7 +3910,7 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
         setListLoading(false);
       }
     }
-    await setFormValues(machine);
+    setFormValues(machine);
     byId('editor-mode').textContent = machine ? machine.machineCode : 'เพิ่มรายการ';
     byId('editor-title').textContent = machine ? 'แก้ไขเครื่องจักร' : 'เพิ่มเครื่องจักร';
     byId('save-machine').querySelector('.button-label').textContent = machine ? 'บันทึกการแก้ไข' : 'บันทึกเครื่องจักร';
@@ -3562,7 +4025,6 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       detailField(list, 'ความสำคัญ', criticalityBadge(machine.criticality));
       detailField(list, 'แผนก', machine.departmentName);
       detailField(list, 'ไลน์ผลิต', machine.lineName);
-      detailField(list, 'ลำดับในไลน์', machine.lineOrder ? 'ลำดับที่ ' + machine.lineOrder : '—');
       detailField(list, 'ประเภทเครื่อง', machine.machineType);
       detailField(list, 'ผู้ผลิต', machine.manufacturer);
       detailField(list, 'รุ่น / Model', machine.model);
@@ -3710,30 +4172,43 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
     if (!button) return;
     if (button.dataset.action === 'view') openDetail(button.dataset.machineId);
     if (button.dataset.action === 'edit') openEditor(button.dataset.machineId);
+    if (button.dataset.action === 'reorder') openReorder(button.dataset.machineId);
+  }
+
+  async function openReorder(machineId) {
+    try {
+      const machine=await rpc('getMachine',machineId);
+      const result=await rpc('getMachines',{deptId:machine.deptId,lineId:machine.lineId,visibility:'all',sortBy:'lineOrder',sortOrder:'asc',page:1,pageSize:100});
+      state.reorderTarget=machine;
+      const select=byId('reorder-position');select.replaceChildren();
+      result.items.forEach((item,index)=>{
+        const option=create('option','',`${index+1} — ${item.machineCode} ${item.machineName}`);option.value=String(index+1);select.appendChild(option);
+      });
+      select.value=String(result.items.findIndex(item=>item.machineId===machineId)+1||1);
+      byId('reorder-description').textContent=`${machine.machineCode} — ${machine.machineName} · ${machine.lineName}`;
+      byId('reorder-error').hidden=true;byId('reorder-dialog').showModal();select.focus();
+    }catch(error){toast(error.message,'error');}
+  }
+
+  async function confirmReorder(event){
+    event.preventDefault();const machine=state.reorderTarget;if(!machine)return;
+    const button=byId('confirm-reorder');setButtonBusy(button,true);byId('cancel-reorder').disabled=true;byId('reorder-error').hidden=true;
+    try{
+      await rpc('reorderMachine',machine.machineId,{position:Number(byId('reorder-position').value),requestId:newRequestId()});
+      byId('reorder-dialog').close();state.reorderTarget=null;state.filters.sortBy='lineOrder';state.filters.sortOrder='asc';state.filters.page=1;
+      await loadMachines();toast('บันทึกลำดับเครื่องจักรแล้ว','success');
+    }catch(error){byId('reorder-error').textContent=error.message;byId('reorder-error').hidden=false;}
+    finally{setButtonBusy(button,false);byId('cancel-reorder').disabled=false;}
   }
 
   function wireEvents() {
     byId('create-machine').addEventListener('click', () => openEditor());
+    byId('manage-machine-types').addEventListener('click',openMachineTypes);
+    byId('machine-type-form').addEventListener('submit',addMachineType);
+    byId('close-machine-types').addEventListener('click',()=>byId('machine-types-dialog').close());
     byId('empty-action').addEventListener('click', () => hasFilters() ? resetFilters() : openEditor());
     byId('retry-list').addEventListener('click', () => loadMachines());
     byId('reset-filters').addEventListener('click', resetFilters);
-    const reindexBtn = byId('reindex-line-btn');
-    if (reindexBtn) {
-      reindexBtn.addEventListener('click', async () => {
-        if (!state.filters.lineId) return;
-        if (!confirm('ต้องการจัดเรียงลำดับเครื่องจักรในไลน์นี้ใหม่เป็น 1..N ทั้งหมดใช่หรือไม่?')) return;
-        setListLoading(true);
-        try {
-          await rpc('reindexLineOrders', state.filters.lineId);
-          toast('จัดระเบียบลำดับ 1..N ในไลน์นี้เรียบร้อย', 'success');
-          await loadMachines();
-        } catch (err) {
-          toast(err.message, 'error');
-        } finally {
-          setListLoading(false);
-        }
-      });
-    }
     byId('previous-page').addEventListener('click', () => {
       state.filters.page = Math.max(1, state.filters.page - 1);
       loadMachines();
@@ -3837,17 +4312,8 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
         if (error) error.textContent = '';
       }
     });
-    byId('department').addEventListener('change', async event => {
+    byId('department').addEventListener('change', event => {
       updateLineOptions(byId('line'), event.target.value, 'เลือกไลน์ผลิต', '');
-      await updateLineOrderOptions('', byId('machine-id').value, '');
-      refreshDirtyState();
-    });
-    byId('line').addEventListener('change', async event => {
-      await updateLineOrderOptions(event.target.value, byId('machine-id').value, '');
-      refreshDirtyState();
-    });
-    byId('line-order').addEventListener('change', () => {
-      updateOrderHint(byId('line-order').value);
       refreshDirtyState();
     });
     byId('close-editor').addEventListener('click', requestCloseEditor);
@@ -3923,6 +4389,9 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       if (id) openEditor(id);
     });
     byId('detail-delete').addEventListener('click', () => openDelete(state.detailMachine));
+    byId('reorder-form').addEventListener('submit',confirmReorder);
+    byId('cancel-reorder').addEventListener('click',()=>{byId('reorder-dialog').close();state.reorderTarget=null;});
+    byId('close-reorder').addEventListener('click',()=>{byId('reorder-dialog').close();state.reorderTarget=null;});
     byId('detail-retire').addEventListener('click', () => openLifecycle('retireMachine'));
     byId('detail-visibility').addEventListener('click', () => {
       openLifecycle(state.detailMachine && state.detailMachine.isActive === false ? 'restoreMachine' : 'archiveMachine');

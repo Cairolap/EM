@@ -31,16 +31,18 @@ textarea{resize:none;min-height:86px;max-height:260px} :focus-visible{outline:3p
 .button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:9px 16px;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-ink);font-size:14px;font-weight:600;white-space:nowrap;transition:background var(--motion),border-color var(--motion)}
 .button:hover:not(:disabled){background:var(--color-tint);border-color:var(--color-primary)} .button:active:not(:disabled){transform:translateY(1px)} .button.primary{background:var(--color-primary);color:var(--color-surface);border-color:var(--color-primary)} .button.primary:hover:not(:disabled){background:var(--color-ink)}
 .button.ghost{background:transparent;border-color:transparent}.button.danger{background:var(--color-danger);color:var(--color-surface);border-color:var(--color-danger)}.button.warning{background:var(--color-warning);color:var(--color-surface)} .button.icon{width:44px;padding:0;font-size:24px}
-.topbar{min-height:80px;background:var(--color-surface);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;padding:16px max(24px,calc((100vw - 1400px)/2));gap:12px}
-.wordmark{display:flex;align-items:center;gap:12px;font:700 20px var(--font-display);letter-spacing:1px}.brand-icon{display:grid;place-items:center;width:38px;height:38px;border:2px solid var(--color-primary);color:var(--color-primary);border-radius:5px;font-size:28px}.wordmark-light{font-weight:400;margin-left:5px}.privacy{font-size:12px;color:var(--color-muted)}.privacy span{color:var(--color-primary);margin-right:5px}
+.intro-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 
-/* Topbar Navigation */
-.main-nav{display:flex;align-items:center;gap:6px;background:var(--color-background);padding:4px;border-radius:10px;border:1px solid var(--color-border)}
-.nav-tab{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:0;background:transparent;color:var(--color-muted);font-size:13px;font-weight:600;border-radius:7px;transition:all var(--motion);cursor:pointer}
-.nav-tab:hover{color:var(--color-ink);background:rgba(255,255,255,0.6)}
-.nav-tab.active{background:var(--color-surface);color:var(--color-primary);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
-.nav-badge{display:inline-flex;align-items:center;justify-content:center;padding:2px 7px;font-size:11px;font-family:var(--font-mono);font-weight:700;border-radius:12px;background:var(--color-warning);color:#ffffff}
-
+/* Bulk Part table, restored from the deployment backup. */
+.bulk-section{display:flex;flex-direction:column;gap:18px}
+.bulk-header,.bulk-toolbar{display:flex;justify-content:space-between;align-items:center;gap:18px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);padding:18px 22px}
+.bulk-header p{margin:6px 0 0;color:var(--color-muted);font-size:14px}.bulk-header h1{font-size:clamp(24px,3vw,34px)}
+.bulk-stats,.bulk-toolbar-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.bulk-stats span{padding:8px 12px;border:1px solid var(--color-border);border-radius:8px;background:var(--color-background);font-size:12px}.bulk-stats strong{margin-left:6px;font:700 16px var(--font-mono)}
+.bulk-table-wrap{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);overflow:auto;max-height:calc(var(--visual-height,100dvh) - 290px);scrollbar-gutter:stable}
+.bulk-table{display:table!important;width:100%;min-width:1050px;border-collapse:collapse;table-layout:fixed}.bulk-table thead{position:sticky;top:0;z-index:2;background:var(--color-background)}.bulk-table th,.bulk-table td{padding:8px;border-bottom:1px solid var(--color-border);vertical-align:middle}.bulk-table th{font-size:11px;color:var(--color-muted)}
+.bulk-table th:nth-child(1){width:44px}.bulk-table th:nth-child(2){width:125px}.bulk-table th:nth-child(3){width:190px}.bulk-table th:nth-child(4){width:170px}.bulk-table th:nth-child(6){width:130px}.bulk-table th:nth-child(7){width:100px}.bulk-table th:nth-child(8){width:52px}
+.bulk-input,.bulk-select{min-height:36px;padding:6px 8px;font-size:13px}.bulk-input.invalid{border-color:var(--color-danger);background:#fff7f7}.bulk-status{font-size:11px;font-weight:600;white-space:nowrap}.bulk-status.ready{color:#176b43}.bulk-status.invalid{color:var(--color-danger)}.bulk-delete{width:36px;min-height:36px;padding:0;color:var(--color-danger)}
+.paste-textarea{min-height:220px;font-family:var(--font-mono);font-size:13px;white-space:pre;overflow:auto}
 /* Batch Image Uploader */
 .batch-section{display:flex;flex-direction:column;gap:18px}
 .batch-header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);padding:24px}
@@ -128,79 +130,11 @@ textarea{resize:none;min-height:86px;max-height:260px} :focus-visible{outline:3p
 .status-done{color:#198754}
 .status-error{color:var(--color-danger)}
 .status-uploading{color:var(--color-warning)}
-
-/* Bulk Table Add & Excel Import */
-.bulk-section{display:flex;flex-direction:column;gap:18px}
-.bulk-header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);padding:24px}
-.bulk-headline{max-width:740px}
-.bulk-title{font-size:clamp(22px,2.5vw,30px);font-weight:700;letter-spacing:-0.5px;margin:0 0 8px;line-height:1.3}
-.bulk-sub{color:var(--color-muted);font-size:14px;margin:0;line-height:1.6}
-.bulk-sub kbd{background:var(--color-tint);border:1px solid var(--color-border);padding:2px 6px;border-radius:4px;font-family:var(--font-mono);font-size:12px;color:var(--color-primary);font-weight:600}
-.bulk-stats{display:flex;gap:12px;flex-shrink:0;flex-wrap:wrap}
-.bulk-stat-card{background:var(--color-background);border:1px solid var(--color-border);border-radius:10px;padding:12px 18px;min-width:110px;text-align:center;display:flex;flex-direction:column;gap:4px}
-.bulk-stat-card.stat-total .stat-val{color:var(--color-ink)}
-.bulk-stat-card.stat-ready .stat-val{color:#198754}
-.bulk-stat-card.stat-dup .stat-val{color:var(--color-warning)}
-.bulk-stat-card.stat-invalid .stat-val{color:var(--color-danger)}
-
-.bulk-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);padding:14px 20px;flex-wrap:wrap}
-.bulk-actions-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1}
-.bulk-pills{display:flex;gap:6px;background:var(--color-background);padding:4px;border-radius:8px;border:1px solid var(--color-border)}
-.bulk-pill{border:0;background:transparent;color:var(--color-muted);padding:6px 12px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;transition:all var(--motion)}
-.bulk-pill:hover{color:var(--color-ink)}
-.bulk-pill.active{background:var(--color-surface);color:var(--color-primary);box-shadow:0 1px 2px rgba(0,0,0,0.06)}
-.bulk-cta-group{display:flex;gap:10px;align-items:center}
-
-.bulk-table-wrap{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);overflow:auto;max-height:calc(var(--visual-height,100dvh) - 340px);position:relative;scrollbar-gutter:stable}
-.bulk-table{width:100% !important;display:table !important;border-collapse:collapse;table-layout:fixed;font-size:13px;min-width:980px}
-.bulk-table thead{position:sticky;top:0;z-index:2;background:var(--color-background);box-shadow:0 1px 0 var(--color-border)}
-.bulk-table th{padding:10px 12px;font-size:11px;font-weight:700;color:var(--color-muted);letter-spacing:0.5px;text-align:left;border-bottom:1px solid var(--color-border)}
-.bulk-table td{padding:8px 10px;border-bottom:1px solid var(--color-border);vertical-align:middle}
-.bulk-table tbody tr:hover{background:rgba(237,242,245,0.45)}
-.bulk-table tr.row-ready{border-left:4px solid #198754}
-.bulk-table tr.row-dup{border-left:4px solid var(--color-warning);background:rgba(255,248,225,0.45)}
-.bulk-table tr.row-invalid{border-left:4px solid var(--color-danger);background:rgba(253,238,238,0.4)}
-
-.bulk-input{width:100%;min-height:36px;padding:6px 10px;border:1px solid var(--color-border);border-radius:6px;background:var(--color-surface);font-size:13px;color:var(--color-ink);transition:border-color var(--motion)}
-.bulk-input:hover{border-color:var(--scroll-hover)}
-.bulk-input:focus{border-color:var(--color-primary);outline:2px solid rgba(23,100,135,0.2)}
-.bulk-input.mono{font-family:var(--font-mono);font-weight:600}
-.bulk-input.is-invalid{border-color:var(--color-danger);background:rgba(167,53,57,0.03)}
-.bulk-select{width:100%;min-height:36px;padding:6px 8px;border:1px solid var(--color-border);border-radius:6px;background:var(--color-surface);font-size:13px;color:var(--color-ink);cursor:pointer}
-.bulk-select.unmatched{border-color:var(--color-warning);background:#fffdf7;color:var(--color-warning);font-weight:600}
-.bulk-select.unmatched:focus{border-color:var(--color-primary);color:var(--color-ink)}
-
-.bulk-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
-.bulk-badge.ready{background:#d1e7dd;color:#0f5132;border:1px solid #badbcc}
-.bulk-badge.dup{background:#fff3cd;color:#856404;border:1px solid #ffeeba}
-.bulk-badge.invalid{background:#f8d7da;color:#842029;border:1px solid #f5c2c7}
-
-.bulk-col-num{width:46px;text-align:center;color:var(--color-muted);font-family:var(--font-mono);font-size:11px}
-.bulk-col-status{width:160px}
-.bulk-col-part{width:210px}
-.bulk-col-brand{width:180px}
-.bulk-col-desc{min-width:200px}
-.bulk-col-store{width:130px}
-.bulk-col-life{width:105px}
-.bulk-col-action{width:56px;text-align:center}
-
-.bulk-del-row{width:32px;height:32px;min-height:32px;padding:0;border:0;background:transparent;color:var(--color-muted);font-size:18px;border-radius:6px;cursor:pointer;display:grid;place-items:center;transition:all var(--motion)}
-.bulk-del-row:hover{background:rgba(167,53,57,0.1);color:var(--color-danger)}
-
-/* Bulk Paste Modal */
-.paste-textarea{width:100%;min-height:220px;font-family:var(--font-mono);font-size:12px;line-height:1.6;white-space:pre;overflow-x:auto;padding:12px;border:1px solid var(--color-border);border-radius:8px;background:var(--color-surface)}
-.col-guide-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 16px}
-.col-guide-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:6px;background:var(--color-background);border:1px solid var(--color-border);font-size:11px;font-weight:600;color:var(--color-ink)}
-.col-guide-pill.required{border-color:var(--color-primary);color:var(--color-primary);background:var(--color-tint)}
-
 main{max-width:1448px;margin:auto;padding:40px 24px 20px}.intro{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:8px 0 34px}.eyebrow{font:600 11px/1.6 var(--font-mono);letter-spacing:1.5px;color:var(--color-primary);margin:0 0 12px}h1{font-size:clamp(26px,3vw,39px);font-weight:600;line-height:1.4;letter-spacing:-1px;margin:0}.accent-dot{color:var(--color-primary)}.intro p{margin:9px 0 0;color:var(--color-muted);font-size:14px}.intro>.button{padding-inline:24px;min-height:48px}
 .catalog{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-panel);overflow:clip}.catalog-top{padding:20px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--color-border);gap:12px}.catalog h2{margin:0;font-size:18px;font-weight:600;display:flex;align-items:center;gap:12px}.badge{font:12px var(--font-mono);padding:5px 8px;border:1px solid var(--color-border);border-radius:5px}.toolbar-actions{display:flex;gap:6px}.filters{display:flex;gap:24px;padding:24px 24px 8px;align-items:flex-start}.search-block{flex:1}.sort-block{width:205px}label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}.search-control{display:flex;align-items:center;border:1px solid var(--color-border);border-radius:8px;padding-left:14px;gap:8px;min-height:48px}.search-control>span{font-size:28px;color:var(--color-muted)}.search-control input{border:0;min-width:0;background:transparent}.search-control input::-webkit-search-cancel-button{display:none}.hint{color:var(--color-muted);font-size:12px;margin:8px 0;line-height:1.65}.sample{font-family:var(--font-mono);background:var(--color-tint);padding:2px 6px;border-radius:4px}.list-meta{padding:4px 24px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--color-muted);min-height:52px}.list-meta p{margin:0}.table-frame{position:relative;min-height:340px;max-height:640px;overflow:auto;scrollbar-gutter:stable}.table-frame[aria-busy=true] tbody,.table-frame[aria-busy=true] .cards{opacity:.5;pointer-events:none}table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}thead{position:sticky;top:0;z-index:1;background:var(--color-background)}th{text-align:left;font-size:11px;color:var(--color-muted);font-weight:600;padding:10px 12px;border-block:1px solid var(--color-border)}th button{border:0;background:transparent;color:inherit;min-height:44px;padding:0;font:inherit}th:nth-child(1){width:84px}th:nth-child(2){width:16%}th:nth-child(3){width:22%}th:nth-child(4){width:11%}th:nth-child(5){width:10%}th:nth-child(6){width:11%}th:nth-child(7){width:11%}th:nth-child(8){width:112px}td{border-bottom:1px solid var(--color-border);padding:16px 12px;vertical-align:middle;overflow-wrap:anywhere}tbody tr:hover{background:var(--color-tint)}tbody tr:last-child td{border-bottom:0}.numeric{text-align:right;font-variant-numeric:tabular-nums}.part-code{font:600 14px/1.5 var(--font-mono);color:var(--color-primary);text-align:left;white-space:normal;word-break:break-word}.part-id{font:10px var(--font-mono);letter-spacing:.5px;color:var(--color-muted);margin-top:4px}.row-note{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:11px;color:var(--color-muted);margin-top:6px}.row-description{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.mono{font-family:var(--font-mono)}.brand-tag{display:inline-block;padding:3px 7px;border-radius:4px;background:var(--color-tint);font-size:12px;max-width:100%;overflow-wrap:anywhere}.row-actions{display:flex;gap:2px}.row-actions .button{padding:6px;font-size:12px;min-width:44px}.picture-thumb{display:grid;place-items:center;background:var(--color-background);border:1px solid var(--color-border);width:56px;height:56px;overflow:hidden;border-radius:7px;color:var(--color-muted);font-size:25px}.picture-thumb img{width:100%;height:100%;object-fit:contain}.picture-thumb.image-failed{font-size:9px}.compact td{padding-block:7px}.cards{display:none}.empty{min-height:340px;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:32px;text-align:center}.empty h3{font-size:20px;font-weight:600;margin:12px 0 4px}.empty p{color:var(--color-muted);font-size:14px;max-width:400px;margin:0 0 20px}.empty-symbol{font-size:40px;width:74px;height:74px;display:grid;place-items:center;background:var(--color-tint);border-radius:16px;color:var(--color-primary)}.loading{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--color-surface);border:1px solid var(--color-border);padding:10px 18px;border-radius:30px;display:flex;align-items:center;gap:10px;font-size:13px;z-index:2}.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--color-border);border-top-color:var(--color-primary);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 .pagination{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--color-border);font-size:12px;min-height:78px;flex-wrap:wrap}.pagination nav,.page-size{display:flex;align-items:center;gap:12px}.page-size label{margin:0;font-size:12px}.page-size select{width:76px;font-size:13px}.pagination nav span{font-family:var(--font-mono)}.page-footer{display:flex;justify-content:space-between;gap:12px;font-size:10px;color:var(--color-muted);padding:20px 0}.footer-divider{padding:0 8px;color:var(--color-border)}
 dialog{border:1px solid var(--color-border);border-radius:var(--radius-panel);padding:0;background:var(--color-surface);color:var(--color-ink);width:min(600px,calc(100% - 32px));max-height:calc(var(--visual-height,100dvh) - 32px);overflow:auto;scrollbar-gutter:stable}dialog::backdrop{background:rgba(19,43,59,.5)}dialog.editor-dialog{width:min(800px,calc(100% - 32px))}dialog.small-dialog{max-width:440px}.dialog-header{display:flex;align-items:center;justify-content:space-between;padding:24px;border-bottom:1px solid var(--color-border);gap:16px}.dialog-header h2{font-size:23px;margin:0;overflow-wrap:anywhere}.dialog-header .eyebrow{margin:0 0 4px}.dialog-body{padding:24px}.dialog-footer{display:flex;justify-content:flex-end;gap:12px;padding:16px 24px;border-top:1px solid var(--color-border);background:var(--color-surface)}.dialog-footer button{min-width:110px}.form-layout{display:grid;grid-template-columns:1fr 240px;gap:24px;margin-top:20px}.field{margin-bottom:8px}.field-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field-error{color:var(--color-danger);font-size:12px;min-height:20px;margin:3px 0;overflow-wrap:anywhere}.required{color:var(--color-danger)}.optional{font-size:11px;font-weight:400;color:var(--color-muted);margin-left:5px}.drop-zone{border:1px dashed var(--scroll-hover);border-radius:10px;padding:18px;text-align:center;background:var(--color-background)}.drop-zone.drag-over{border:2px solid var(--color-primary);background:var(--color-tint)}.preview{height:160px;display:grid;place-items:center;margin-bottom:16px;overflow:hidden}.preview>span{font-size:60px;color:var(--scroll-hover)}.preview img{width:100%;height:100%;object-fit:contain}.drop-zone .button{margin:4px auto}.notice{padding:12px 16px;background:var(--color-tint);border-left:3px solid var(--color-primary);font-size:13px;margin:12px 0;overflow-wrap:anywhere}.notice.error{color:var(--color-danger);border-color:var(--color-danger)}.catalog>.notice{margin:0 24px 16px}.inline-form{display:flex;gap:10px}.inline-form input{min-width:0}.brand-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--color-border);padding:10px 0}.brand-row span{overflow-wrap:anywhere;min-width:0}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--color-ink);color:var(--color-surface);border-radius:8px;padding:14px 24px;z-index:10;max-width:calc(100% - 32px);font-size:14px}.detail-picture{min-height:180px;background:var(--color-background);display:grid;place-items:center;border-radius:8px}.detail-picture img{max-width:100%;max-height:320px;object-fit:contain}.detail-picture button{white-space:normal}.detail-picture:empty{display:none}dl{display:grid;grid-template-columns:120px 1fr;gap:14px 20px}dt{color:var(--color-muted);font-size:13px}dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.external-link-card{margin-top:20px;padding:14px 16px;background:var(--color-tint);border-radius:var(--radius-control);border:1px solid var(--color-border)}.external-link-card label{font-size:12px;font-weight:600;color:var(--color-ink);margin-bottom:6px}.link-input-row{display:flex;gap:8px;align-items:center}.link-input-row input{font-size:12px;height:38px;min-height:38px;padding:6px 10px;background:var(--color-surface);font-family:var(--font-mono);cursor:pointer}.link-input-row .button{min-height:38px;padding:6px 14px;font-size:13px}.part-id-btn{background:transparent;border:0;padding:2px 4px;font-family:var(--font-mono);font-size:10px;letter-spacing:.5px;color:var(--color-muted);margin-top:2px;border-radius:3px;cursor:pointer;display:inline-block;transition:background var(--motion),color var(--motion)}.part-id-btn:hover{background:var(--color-tint);color:var(--color-primary);text-decoration:underline}body.modal-open{overflow:hidden}
 @media(min-width:1024px){
-  .topbar{min-height:50px;padding:6px 24px}
-  .brand-icon{width:32px;height:32px;font-size:22px}
-  .wordmark{font-size:17px}
   main{max-width:100%;padding:6px 24px 6px}
   .intro{margin:0 0 8px;gap:16px;align-items:center}
   .intro .eyebrow,.intro p{display:none}
@@ -254,46 +188,573 @@ dialog{border:1px solid var(--color-border);border-radius:var(--radius-panel);pa
   .batch-action-col{align-items:stretch}
 }
 @media(max-width:767px){
-  .topbar{padding:16px;min-height:68px;flex-wrap:wrap;gap:12px}
-  .main-nav{order:3;width:100%;justify-content:center}
-  .wordmark{font-size:15px;gap:8px}.brand-icon{width:32px;height:32px}.privacy{font-size:10px}main{padding:24px 12px 10px}.intro{align-items:stretch;flex-direction:column;gap:20px;margin:0 4px 24px}.intro h1{font-size:28px}.intro>.button{width:100%}.catalog-top{padding:14px 16px;align-items:flex-start;flex-wrap:wrap}.catalog h2{font-size:16px}.toolbar-actions{margin-left:auto}.toolbar-actions .button{padding-inline:8px;font-size:12px}.filters{flex-direction:column;gap:12px;padding:16px}.search-block,.sort-block{width:100%}.list-meta{padding:0 16px 12px}.cards{grid-template-columns:1fr;padding:12px;gap:12px}.pagination{padding:12px;gap:12px}.pagination nav{width:100%;justify-content:space-between}.pagination #range{margin-left:auto}.page-footer{flex-direction:column;gap:2px;padding:16px 4px}.form-layout{grid-template-columns:1fr}.upload-column{grid-row:1}.drop-zone{padding:12px}.preview{height:120px}.dialog-header,.dialog-body{padding:20px 16px}.editor-dialog{width:100%;max-width:none;max-height:var(--visual-height,100dvh);border-radius:0;margin:0 auto}.dialog-footer{padding:16px;position:static}.field-pair{grid-template-columns:1fr 1fr;gap:12px}input,textarea,select{font-size:16px}.dialog-header h2{font-size:21px}dl{grid-template-columns:1fr;gap:4px}dd{margin-bottom:12px}.toast{bottom:12px}.inline-form{flex-wrap:wrap}.inline-form input{flex:1}.intro .eyebrow{font-size:10px}
+  main{padding:24px 12px 10px}.intro{align-items:stretch;flex-direction:column;gap:20px;margin:0 4px 24px}.intro h1{font-size:28px}.intro>.button{width:100%}.catalog-top{padding:14px 16px;align-items:flex-start;flex-wrap:wrap}.catalog h2{font-size:16px}.toolbar-actions{margin-left:auto}.toolbar-actions .button{padding-inline:8px;font-size:12px}.filters{flex-direction:column;gap:12px;padding:16px}.search-block,.sort-block{width:100%}.list-meta{padding:0 16px 12px}.cards{grid-template-columns:1fr;padding:12px;gap:12px}.pagination{padding:12px;gap:12px}.pagination nav{width:100%;justify-content:space-between}.pagination #range{margin-left:auto}.page-footer{flex-direction:column;gap:2px;padding:16px 4px}.form-layout{grid-template-columns:1fr}.upload-column{grid-row:1}.drop-zone{padding:12px}.preview{height:120px}.dialog-header,.dialog-body{padding:20px 16px}.editor-dialog{width:100%;max-width:none;max-height:var(--visual-height,100dvh);border-radius:0;margin:0 auto}.dialog-footer{padding:16px;position:static}.field-pair{grid-template-columns:1fr 1fr;gap:12px}input,textarea,select{font-size:16px}.dialog-header h2{font-size:21px}dl{grid-template-columns:1fr;gap:4px}dd{margin-bottom:12px}.toast{bottom:12px}.inline-form{flex-wrap:wrap}.inline-form input{flex:1}.intro .eyebrow{font-size:10px}
   .batch-pills{flex-wrap:wrap}
   .batch-stats{flex-direction:column}
+  .intro-actions,.intro-actions .button,.bulk-toolbar-actions,.bulk-toolbar-actions .button,.bulk-save{width:100%}
+  .bulk-header,.bulk-toolbar{align-items:stretch;flex-direction:column}.bulk-stats{align-items:stretch}.bulk-stats span{flex:1}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none;transition:none;scroll-behavior:auto}}
 @media(forced-colors:active){*{scrollbar-color:auto}.button{border:1px solid ButtonText}.badge,.brand-tag{border:1px solid CanvasText}}
 
 </style>
 </head>
-<body><nav aria-label="ระบบซ่อมบำรุงไฟฟ้า" style="padding:12px 24px;background:#18313d;display:flex;gap:24px;align-items:center;flex-wrap:wrap"><a style="color:white;text-decoration:none;font-weight:normal;border-bottom:none;padding-bottom:2px" href="/machines/">เครื่องจักร</a><a style="color:white;text-decoration:none;font-weight:bold;border-bottom:2px solid #cc681c;padding-bottom:2px" href="/parts/" aria-current="page">Master อะไหล่</a><a style="color:white;text-decoration:none;font-weight:normal;border-bottom:none;padding-bottom:2px" href="/bom/">อุปกรณ์ประจำเครื่องจักร</a><a id="em-nav-users" style="color:white;text-decoration:none;font-weight:normal;border-bottom:none;padding-bottom:2px;display:none" href="/users/">จัดการผู้ใช้งาน</a><span id="em-user-badge" style="margin-left:auto;color:#cbd5e1;font-size:13px;display:flex;align-items:center;gap:12px"></span></nav>
-  <header class="topbar">
-    <div class="wordmark"><span class="brand-icon" aria-hidden="true">▤</span><span>PART<span class="wordmark-light">REGISTER</span></span></div>
-    <nav class="main-nav" aria-label="เมนูหลัก">
-      <button id="nav-catalog" class="nav-tab active" type="button"><span class="nav-icon" aria-hidden="true">▤</span> รายการอะไหล่</button>
-      <button id="nav-bulk" class="nav-tab" type="button"><span class="nav-icon" aria-hidden="true">📋</span> เพิ่มแบบตาราง <span id="bulk-ready-count" class="nav-badge" style="background:#198754" hidden>0</span></button>
-      <button id="nav-batch" class="nav-tab" type="button"><span class="nav-icon" aria-hidden="true">🖼</span> อัปโหลดรูปชุด <span id="batch-missing-count" class="nav-badge" hidden>0</span></button>
-    </nav>
-    <span class="privacy"><span aria-hidden="true">●</span> พื้นที่ส่วนตัว</span>
-  </header>
+<body>
+<nav aria-label="ระบบซ่อมบำรุงไฟฟ้า" class="em-main-nav">
+  <div class="em-nav-container">
+    <div class="em-nav-left">
+      <!-- Hamburger Toggle Button -->
+      <button type="button" id="em-hamburger-btn" class="em-hamburger-btn" aria-label="เปิดเมนูนำทาง" aria-expanded="false" aria-controls="em-drawer">
+        <svg class="em-icon-menu" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Logo แผนกซ่อมไฟฟ้า -->
+      <a href="/bom/" class="em-brand-link" title="แผนกซ่อมไฟฟ้า">
+        <img class="em-brand-logo" src="/Logo%20small.png" alt="แผนกซ่อมไฟฟ้า">
+        <span class="em-brand-text">แผนกซ่อมไฟฟ้า</span>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <div class="em-nav-center">
+      <!-- 2. อุปกรณ์ประจำเครื่องจักร with Dropdown -->
+      <div class="em-dropdown em-dropdown-bom">
+        <a href="/bom/" class="em-nav-link em-dropdown-trigger">
+          <span>อุปกรณ์ประจำเครื่องจักร</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <div class="em-dropdown-header">เลือกแผนก</div>
+          <a class="em-dropdown-item" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
+          <a class="em-dropdown-item" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PC"><span class="em-dept-badge">PC</span> ฝาพลาสติก</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PR"><span class="em-dept-badge">PR</span> งานพิมพ์</a>
+          <a class="em-dropdown-item" href="/bom/?dept=OT"><span class="em-dept-badge">OT</span> อื่นๆ</a>
+        </div>
+      </div>
+
+      <!-- 3. Master อะไหล่ with Dropdown -->
+      <div class="em-dropdown em-dropdown-parts">
+        <a href="/parts/" class="em-nav-link em-dropdown-trigger active" aria-current="page">
+          <span>Master อะไหล่</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/parts/"><span class="em-item-icon">▤</span> รายการอะไหล่</a>
+          <a class="em-dropdown-item" href="/parts/?action=add"><span class="em-item-icon">＋</span> เพิ่มแบบตาราง</a>
+          <a class="em-dropdown-item" href="/parts/?view=batch"><span class="em-item-icon">🖼</span> อัปโหลดรูปชุด</a>
+        </div>
+      </div>
+
+      <!-- 4. เครื่องจักร -->
+      <a class="em-nav-link" href="/machines/">เครื่องจักร</a>
+
+    </div>
+
+    <!-- Right: User management and account -->
+    <div class="em-nav-right">
+      <a id="em-nav-users" class="em-nav-link" style="display:none" href="/users/">จัดการผู้ใช้งาน</a>
+      <span id="em-user-badge" class="em-user-badge"></span>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Overlay & Sidebar -->
+  <div id="em-drawer-overlay" class="em-drawer-overlay" aria-hidden="true"></div>
+  <aside id="em-drawer" class="em-drawer" aria-label="เมนูนำทางหลัก">
+    <div class="em-drawer-header">
+      <div class="em-drawer-brand">
+        <img class="em-brand-logo" src="/Logo%20small.png" alt="แผนกซ่อมไฟฟ้า">
+        <div class="em-drawer-brand-text">
+          <strong>แผนกซ่อมไฟฟ้า</strong>
+          <small>ระบบซ่อมบำรุงไฟฟ้า</small>
+        </div>
+      </div>
+      <button type="button" id="em-drawer-close" class="em-drawer-close" aria-label="ปิดเมนู">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="em-drawer-content">
+      <!-- User Info Card in Drawer -->
+      <div id="em-drawer-user-card" class="em-drawer-user-card"></div>
+
+      <nav class="em-drawer-nav">
+        <!-- 2. อุปกรณ์ประจำเครื่องจักร Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              อุปกรณ์ประจำเครื่องจักร
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PC"><span class="em-dept-badge">PC</span> ฝาพลาสติก</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PR"><span class="em-dept-badge">PR</span> งานพิมพ์</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=OT"><span class="em-dept-badge">OT</span> อื่นๆ</a>
+          </div>
+        </div>
+
+        <!-- 3. Master อะไหล่ Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="true">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              Master อะไหล่
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist">
+            <a class="em-drawer-subitem" href="/parts/"><span class="em-item-icon">▤</span> รายการอะไหล่</a>
+            <a class="em-drawer-subitem" href="/parts/?action=add"><span class="em-item-icon">＋</span> เพิ่มแบบตาราง</a>
+            <a class="em-drawer-subitem" href="/parts/?view=batch"><span class="em-item-icon">🖼</span> อัปโหลดรูปชุด</a>
+          </div>
+        </div>
+
+        <!-- 4. เครื่องจักร -->
+        <a class="em-drawer-link" href="/machines/">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+          เครื่องจักร
+        </a>
+
+        <!-- 5. จัดการผู้ใช้งาน -->
+        <a id="em-drawer-nav-users" class="em-drawer-link" style="display:none" href="/users/">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          จัดการผู้ใช้งาน
+        </a>
+      </nav>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div id="em-drawer-footer" class="em-drawer-footer"></div>
+  </aside>
+</nav>
+
+<style>
+/* --- UNIFIED ELECTRICAL MAINTENANCE NAVIGATION BAR --- */
+.em-main-nav {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  background: #152934;
+  color: #ffffff;
+  font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+.em-nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 20px;
+  height: 54px;
+  width: 100%;
+}
+.em-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.em-hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #f1f5f9;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+.em-hamburger-btn:hover {
+  background: rgba(128, 24, 42, 0.28);
+  border-color: #80182a;
+  color: #ffffff;
+  transform: scale(1.04);
+}
+.em-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #ffffff;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: opacity 0.2s;
+}
+.em-brand-link:hover { opacity: 0.92; }
+.em-brand-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 2px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.em-brand-text {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* Nav Links & Dropdowns */
+.em-nav-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+.em-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 7px 12px;
+  border-radius: 6px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.em-nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+.em-nav-link.active {
+  color: #ffffff;
+  font-weight: 600;
+  background: rgba(128, 24, 42, 0.22);
+  border-bottom-color: #80182a;
+}
+.em-caret {
+  transition: transform 0.2s ease;
+  opacity: 0.7;
+}
+
+/* Dropdown Menu */
+.em-dropdown {
+  position: relative;
+}
+.em-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 200px;
+  background: #18313d;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  z-index: 10001;
+}
+.em-dropdown:hover .em-dropdown-menu,
+.em-dropdown.is-open .em-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.em-dropdown:hover .em-caret,
+.em-dropdown.is-open .em-caret {
+  transform: rotate(180deg);
+}
+.em-dropdown-header {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  padding: 6px 10px 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 4px;
+}
+.em-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  color: #e2e8f0;
+  text-decoration: none;
+  font-size: 13px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.em-dropdown-item:hover {
+  background: rgba(128, 24, 42, 0.3);
+  color: #ffffff;
+}
+.em-dept-badge {
+  display: inline-block;
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 2px 6px;
+  background: rgba(128, 24, 42, 0.38);
+  color: #f3c4ce;
+  border: 1px solid rgba(243, 196, 206, 0.45);
+  border-radius: 4px;
+}
+.em-item-icon {
+  font-size: 14px;
+  width: 18px;
+  text-align: center;
+  color: #d68a9a;
+}
+
+/* Right User Info Badge */
+.em-nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.em-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+/* Mobile Drawer Elements */
+.em-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 10002;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+.em-drawer-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+.em-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(320px, 86vw);
+  background: #13242e;
+  color: #ffffff;
+  z-index: 10003;
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+}
+.em-drawer.is-active {
+  transform: translateX(0);
+}
+.em-drawer-header {
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.em-drawer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.em-drawer-brand-text strong {
+  display: block;
+  font-size: 14.5px;
+  color: #ffffff;
+}
+.em-drawer-brand-text small {
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+.em-drawer-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.em-drawer-close:hover {
+  color: #ffffff;
+  background: rgba(255,255,255,0.08);
+}
+.em-drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.em-drawer-user-card {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+.em-drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.em-drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+.em-drawer-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+.em-drawer-link.active {
+  background: rgba(128, 24, 42, 0.3);
+  color: #f3c4ce;
+  font-weight: 600;
+  border-left: 3px solid #80182a;
+}
+.em-drawer-group {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  margin-bottom: 2px;
+  overflow: hidden;
+}
+.em-drawer-group-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.em-drawer-group-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+.em-drawer-group-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.em-drawer-arrow {
+  transition: transform 0.2s ease;
+  color: #94a3b8;
+}
+.em-drawer-group-btn[aria-expanded="true"] .em-drawer-arrow {
+  transform: rotate(180deg);
+  color: #f3c4ce;
+}
+.em-drawer-sublist {
+  padding: 4px 8px 10px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.em-drawer-subitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: #94a3b8;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.em-drawer-subitem:hover {
+  color: #ffffff;
+  background: rgba(128, 24, 42, 0.22);
+}
+.em-drawer-footer {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .em-hamburger-btn {
+    display: inline-flex;
+  }
+  .em-nav-center {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .em-nav-right {
+    display: none;
+  }
+  .em-nav-container {
+    padding: 0 14px;
+  }
+  .em-nav-left {
+    min-width: 0;
+  }
+  .em-brand-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+</style>
+
   <main>
     <section id="intro-catalog" class="intro" aria-labelledby="page-title">
       <div><div class="eyebrow">ทะเบียนอะไหล่ / PARTS CATALOG</div><h1 id="page-title" tabindex="-1">ทุกรหัส ค้นเจอในที่เดียว<span class="accent-dot">.</span></h1><p>จัดเก็บรายละเอียด รูปภาพ และรหัสทดแทนของอะไหล่</p></div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <button id="bulk-add-btn" class="button" type="button"><span aria-hidden="true">📋</span> เพิ่มแบบตาราง</button>
-        <button id="add-part" class="button primary"><span aria-hidden="true">＋</span> เพิ่ม Part</button>
-      </div>
+      <div class="intro-actions"><button id="bulk-add-btn" class="button"><span aria-hidden="true">▤</span> เพิ่มแบบตาราง</button><button id="add-part" class="button primary"><span aria-hidden="true">＋</span> เพิ่ม Part</button></div>
     </section>
     <div id="connection" class="notice" role="status" hidden></div>
     <section id="catalog-section" class="catalog" aria-label="รายการอะไหล่">
       <div class="catalog-top"><h2>รายการอะไหล่ <span id="total-badge" class="badge">—</span></h2><div class="toolbar-actions"><button id="brands-open" class="button ghost">จัดการ Brand</button><button id="reload" class="button ghost">รีเฟรช</button></div></div>
       <div class="filters">
         <div class="search-block"><label for="search">ค้นหาอะไหล่</label><div class="search-control"><span aria-hidden="true">⌕</span><input id="search" type="search" maxlength="300" placeholder="Part number, Brand, Store code, อายุอุปกรณ์ หรือหมายเหตุ" autocomplete="off"><button id="clear-search" class="button ghost icon" aria-label="ล้างคำค้น" hidden>×</button></div><p class="hint">เว้นวรรคเพื่อค้นหาหลายคำ เช่น <span class="sample">delta 24v</span></p></div>
-        <div class="sort-block"><label for="sort">เรียงรายการ</label><select id="sort"><option value="id:desc">เพิ่มล่าสุด</option><option value="partNumber:asc">Part number ก–ฮ</option><option value="price:asc">ราคา ต่ำ–สูง</option><option value="price:desc">ราคา สูง–ต่ำ</option><option value="lifespan:asc">อายุอุปกรณ์ น้อย–มาก</option><option value="lifespan:desc">อายุอุปกรณ์ มาก–น้อย</option><option value="brand:asc">Brand ก–ฮ</option></select></div>
+        <div class="sort-block"><label for="sort">เรียงรายการ</label><select id="sort"><option value="id:desc">เพิ่มล่าสุด</option><option value="partNumber:asc">Part number ก–ฮ</option><option value="description:asc">รายละเอียด ก–ฮ</option><option value="description:desc">รายละเอียด ฮ–ก</option><option value="price:asc">ราคา ต่ำ–สูง</option><option value="price:desc">ราคา สูง–ต่ำ</option><option value="lifespan:asc">อายุอุปกรณ์ น้อย–มาก</option><option value="lifespan:desc">อายุอุปกรณ์ มาก–น้อย</option><option value="brand:asc">Brand ก–ฮ</option></select></div>
       </div>
       <div class="list-meta"><p id="result-status" role="status" aria-live="polite">กำลังเชื่อมต่อข้อมูล…</p><button id="density" class="button ghost" aria-pressed="false">มุมมองกระชับ</button></div>
       <div id="list-error" class="notice error" role="alert" hidden></div>
       <div class="table-frame" id="list-surface" aria-busy="true">
-        <table aria-label="ทะเบียนอะไหล่"><thead><tr><th scope="col">รูป</th><th scope="col" data-sort="partNumber"><button data-sort="partNumber">Part number ↕</button></th><th scope="col">รายละเอียด / หมายเหตุ</th><th scope="col" data-sort="brand"><button data-sort="brand">Brand ↕</button></th><th scope="col">Store code</th><th scope="col" data-sort="lifespan" class="numeric"><button data-sort="lifespan">อายุ (ปี) ↕</button></th><th scope="col" data-sort="price" class="numeric"><button data-sort="price">ราคา ↕</button></th><th scope="col">จัดการ</th></tr></thead><tbody id="rows"></tbody></table>
+        <table aria-label="ทะเบียนอะไหล่"><thead><tr><th scope="col">รูป</th><th scope="col" data-sort="partNumber"><button data-sort="partNumber">Part number ↕</button></th><th scope="col" data-sort="description"><button data-sort="description">รายละเอียด / หมายเหตุ ↕</button></th><th scope="col" data-sort="brand"><button data-sort="brand">Brand ↕</button></th><th scope="col">Store code</th><th scope="col" data-sort="lifespan" class="numeric"><button data-sort="lifespan">อายุ (ปี) ↕</button></th><th scope="col" data-sort="price" class="numeric"><button data-sort="price">ราคา ↕</button></th><th scope="col">จัดการ</th></tr></thead><tbody id="rows"></tbody></table>
         <div id="cards" class="cards"></div>
         <div id="empty" class="empty"><div class="empty-symbol" aria-hidden="true">▤</div><h3 id="empty-title">กำลังโหลดรายการ</h3><p id="empty-copy">รอสักครู่ ระบบกำลังอ่านข้อมูลของคุณ</p><button id="empty-action" class="button primary" hidden>เพิ่ม Part แรก</button></div>
         <div id="loading" class="loading" role="status" hidden><span class="spinner" aria-hidden="true"></span> กำลังโหลด…</div>
@@ -374,91 +835,11 @@ dialog{border:1px solid var(--color-border);border-radius:var(--radius-panel);pa
       </div>
     </section>
 
-    <!-- Bulk Table Import Section -->
-    <section id="bulk-section" class="bulk-section" aria-label="เพิ่มแบบตารางหลายรายการ" hidden>
-      <div class="bulk-header">
-        <div class="bulk-headline">
-          <div class="eyebrow">BULK TABLE ADD / เพิ่มแบบตารางหลายรายการ</div>
-          <h1 class="bulk-title">เพิ่มอะไหล่แบบตาราง (Excel Paste)<span class="accent-dot">.</span></h1>
-          <p class="bulk-sub">คัดลอกจาก Excel หรือ ทะเบียนกลาง แล้วกด <kbd>Ctrl+V</kbd> เพื่อวางข้อมูลลงในตารางได้ทันที หรือกดปุ่ม "วางจาก Excel" พร้อมระบบตรวจสอบ Part number ซ้ำอัตโนมัติ (ห้ามซ้ำ หากซ้ำจะไม่ถูกบันทึก)</p>
-        </div>
-        <div class="bulk-stats">
-          <div class="bulk-stat-card stat-total">
-            <span class="stat-label">ทั้งหมดในตาราง</span>
-            <span id="bulk-stat-total" class="stat-val">0</span>
-          </div>
-          <div class="bulk-stat-card stat-ready">
-            <span class="stat-label">พร้อมบันทึก</span>
-            <span id="bulk-stat-ready" class="stat-val">0</span>
-          </div>
-          <div class="bulk-stat-card stat-dup">
-            <span class="stat-label">ซ้ำ/จะข้าม</span>
-            <span id="bulk-stat-dup" class="stat-val">0</span>
-          </div>
-          <div class="bulk-stat-card stat-invalid">
-            <span class="stat-label">ข้อมูลไม่ครบ</span>
-            <span id="bulk-stat-invalid" class="stat-val">0</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="bulk-toolbar">
-        <div class="bulk-actions-left">
-          <button id="bulk-paste-open-btn" class="button primary" type="button">
-            <span aria-hidden="true">📋</span> วางข้อมูลจาก Excel (Ctrl+V)
-          </button>
-          <button id="bulk-add-row-btn" class="button" type="button">
-            <span aria-hidden="true">＋</span> เพิ่มแถว
-          </button>
-          <button id="bulk-sample-btn" class="button ghost" type="button">
-            ตัวอย่างข้อมูล
-          </button>
-          <button id="bulk-clear-btn" class="button ghost" type="button">
-            ล้างตาราง
-          </button>
-          <div class="bulk-pills" role="tablist" aria-label="ตัวกรองสถานะตาราง">
-            <button id="bulk-filter-all" class="bulk-pill active" type="button" role="tab" aria-selected="true">ทั้งหมด (<span id="bulk-count-all">0</span>)</button>
-            <button id="bulk-filter-ready" class="bulk-pill" type="button" role="tab" aria-selected="false">พร้อมบันทึก (<span id="bulk-count-ready">0</span>)</button>
-            <button id="bulk-filter-dup" class="bulk-pill" type="button" role="tab" aria-selected="false">ซ้ำ/จะข้าม (<span id="bulk-count-dup">0</span>)</button>
-            <button id="bulk-filter-invalid" class="bulk-pill" type="button" role="tab" aria-selected="false">ไม่ถูกต้อง (<span id="bulk-count-invalid">0</span>)</button>
-          </div>
-        </div>
-        <div class="bulk-cta-group">
-          <button id="bulk-save-btn" class="button primary" type="button" disabled>
-            <span aria-hidden="true">💾</span> บันทึกรายการ (<span id="bulk-save-num">0</span>)
-          </button>
-        </div>
-      </div>
-
-      <div id="bulk-alert" class="notice" role="status" hidden></div>
-
-      <div class="bulk-table-wrap" id="bulk-table-surface">
-        <table class="bulk-table" aria-label="ตารางเพิ่มอะไหล่หลายรายการ">
-          <thead>
-            <tr>
-              <th scope="col" class="bulk-col-num">#</th>
-              <th scope="col" class="bulk-col-status">สถานะ</th>
-              <th scope="col" class="bulk-col-part">Part number * <span class="required">(ห้ามซ้ำ)</span></th>
-              <th scope="col" class="bulk-col-brand">Brand <span class="optional">(เลือกจากระบบ)</span></th>
-              <th scope="col" class="bulk-col-desc">Description</th>
-              <th scope="col" class="bulk-col-store">Store Code</th>
-              <th scope="col" class="bulk-col-life">อายุ (ปี)</th>
-              <th scope="col" class="bulk-col-action">ลบ</th>
-            </tr>
-          </thead>
-          <tbody id="bulk-table-body"></tbody>
-        </table>
-        <div id="bulk-empty" class="empty">
-          <div class="empty-symbol" aria-hidden="true">📋</div>
-          <h3 id="bulk-empty-title">ยังไม่มีข้อมูลในตาราง</h3>
-          <p id="bulk-empty-copy">คัดลอกแถวจาก Excel 5 คอลัมน์: Part number, Brand, Description, Store Code, Lifespan แล้วกด Ctrl+V เพื่อวาง หรือกดปุ่มด้านล่าง</p>
-          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-            <button id="bulk-empty-paste" class="button primary" type="button">📋 วางข้อมูลจาก Excel</button>
-            <button id="bulk-empty-add" class="button" type="button">＋ เพิ่มแถวเปล่า</button>
-            <button id="bulk-empty-sample" class="button ghost" type="button">ใส่ตัวอย่างทดสอบ</button>
-          </div>
-        </div>
-      </div>
+    <section id="bulk-section" class="bulk-section" aria-label="เพิ่ม Part หลายรายการแบบตาราง" hidden>
+      <div class="bulk-header"><div><div class="eyebrow">BULK TABLE ADD / EXCEL PASTE</div><h1>เพิ่ม Part แบบตาราง<span class="accent-dot">.</span></h1><p>วางข้อมูลจาก Excel หรือเพิ่มแถวแล้วกรอกข้อมูล ระบบจะตรวจ Part number ซ้ำก่อนบันทึก</p></div><div class="bulk-stats"><span>ทั้งหมด <strong id="bulk-total">0</strong></span><span>พร้อมบันทึก <strong id="bulk-ready">0</strong></span><span>มีปัญหา <strong id="bulk-invalid">0</strong></span></div></div>
+      <div class="bulk-toolbar"><div class="bulk-toolbar-actions"><button id="bulk-back" class="button">← กลับรายการอะไหล่</button><button id="bulk-paste-open" class="button primary">วางจาก Excel</button><button id="bulk-add-row" class="button">＋ เพิ่มแถว</button><button id="bulk-clear" class="button ghost">ล้างตาราง</button></div><button id="bulk-save" class="button primary" disabled>บันทึก <span id="bulk-save-count">0</span> รายการ</button></div>
+      <div id="bulk-error" class="notice error" role="alert" hidden></div>
+      <div class="bulk-table-wrap"><table class="bulk-table"><thead><tr><th>#</th><th>สถานะ</th><th>Part number *</th><th>Brand</th><th>Description</th><th>Store code</th><th>อายุ (ปี)</th><th>ลบ</th></tr></thead><tbody id="bulk-rows"></tbody></table><div id="bulk-empty" class="empty"><div class="empty-symbol">▤</div><h3>ยังไม่มีข้อมูลในตาราง</h3><p>กด “วางจาก Excel” หรือ “เพิ่มแถว” เพื่อเริ่มต้น</p></div></div>
     </section>
     <footer class="page-footer"><span>PART REGISTER <span class="footer-divider">/</span> ทะเบียนอะไหล่</span><span id="sync-label">ข้อมูลส่วนตัว · ทะเบียนกลาง</span></footer>
   </main>
@@ -487,39 +868,7 @@ dialog{border:1px solid var(--color-border);border-radius:var(--radius-panel);pa
   <dialog id="detail" aria-labelledby="detail-title"><header class="dialog-header"><div><p class="eyebrow" id="detail-id"></p><h2 id="detail-title">รายละเอียด Part</h2></div><button id="detail-close" class="button ghost icon" aria-label="ปิดรายละเอียด">×</button></header><div class="dialog-body"><div id="detail-picture" class="detail-picture"></div><dl id="detail-values"></dl><div class="external-link-card"><label for="detail-link-input">ลิงก์แก้ไขจากภายนอก (สำหรับเชื่อมต่อเว็บอื่น)</label><div class="link-input-row"><input id="detail-link-input" type="text" readonly class="mono" aria-label="ลิงก์แก้ไขภายนอก"><button type="button" id="detail-copy-link" class="button">คัดลอกลิงก์</button></div></div></div><footer class="dialog-footer"><button id="detail-edit" class="button primary">แก้ไข Part</button></footer></dialog>
   <dialog id="brands-dialog" aria-labelledby="brands-title"><header class="dialog-header"><div><p class="eyebrow">BRAND DIRECTORY</p><h2 id="brands-title">จัดการ Brand</h2></div><button id="brands-close" class="button ghost icon" aria-label="ปิดจัดการ Brand">×</button></header><div class="dialog-body"><form id="brand-form" novalidate><label for="brand-name">เพิ่มชื่อ Brand</label><div class="inline-form"><input id="brand-name" maxlength="100" aria-describedby="brandName-error"><button type="submit" id="brand-save" class="button primary">เพิ่ม Brand</button></div><p id="brandName-error" class="field-error"></p></form><div id="brand-error" class="notice error" role="alert" hidden></div><div id="brand-list"></div></div></dialog>
   <dialog id="confirmation" aria-labelledby="confirmation-title" class="small-dialog"><header class="dialog-header"><h2 id="confirmation-title"></h2></header><div class="dialog-body"><p id="confirmation-copy"></p><p id="confirmation-error" class="field-error" role="alert"></p></div><footer class="dialog-footer"><button id="confirmation-cancel" class="button" autofocus>ยกเลิก</button><button id="confirmation-accept" class="button danger">ลบรายการ</button></footer></dialog>
-  <dialog id="bulk-paste-dialog" aria-labelledby="bulk-paste-title" class="editor-dialog">
-    <header class="dialog-header">
-      <div>
-        <p class="eyebrow">EXCEL CLIPBOARD IMPORT</p>
-        <h2 id="bulk-paste-title">วางข้อมูลจาก Excel</h2>
-      </div>
-      <button id="bulk-paste-close" class="button ghost icon" aria-label="ปิดหน้าต่างวางข้อมูล" type="button">×</button>
-    </header>
-    <div class="dialog-body">
-      <p class="hint">จัดลำดับข้อมูล 5 คอลัมน์ใน Excel แล้วคัดลอก (Ctrl+C) มาวาง (Ctrl+V) ในช่องด้านล่างนี้:</p>
-      <div class="col-guide-row">
-        <span class="col-guide-pill required">1. Part number * (บังคับ ห้ามซ้ำ)</span>
-        <span class="col-guide-pill">2. Brand (เลือกจากระบบ)</span>
-        <span class="col-guide-pill">3. Description</span>
-        <span class="col-guide-pill">4. Store Code</span>
-        <span class="col-guide-pill">5. Lifespan (ปี)</span>
-      </div>
-      <textarea id="bulk-paste-input" class="paste-textarea" rows="8" placeholder="ตัวอย่างการวาง (คั่นด้วย Tab จาก Excel):
-PN-001	SIEMENS	Contactor 24VDC 5A	ST-A01	5
-PN-002	ABB	Circuit Breaker 3P 32A	ST-B04	10
-PN-003	OMRON	Relay Module 8CH	ST-C12	3"></textarea>
-      <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
-          <input type="checkbox" id="bulk-skip-header" checked style="width:auto;min-height:auto"> ข้ามบรรทัดแรกหากเป็นหัวตาราง (Header)
-        </label>
-        <span id="bulk-paste-preview-count" class="hint">0 บรรทัดที่ตรวจพบ</span>
-      </div>
-    </div>
-    <footer class="dialog-footer">
-      <button id="bulk-paste-cancel" class="button" type="button">ยกเลิก</button>
-      <button id="bulk-paste-confirm" class="button primary" type="button">นำเข้าสู่ตาราง</button>
-    </footer>
-  </dialog>
+  <dialog id="bulk-paste-dialog" aria-labelledby="bulk-paste-title" class="editor-dialog"><header class="dialog-header"><div><p class="eyebrow">EXCEL CLIPBOARD IMPORT</p><h2 id="bulk-paste-title">วางข้อมูลจาก Excel</h2></div><button id="bulk-paste-close" class="button ghost icon" type="button" aria-label="ปิด">×</button></header><div class="dialog-body"><p class="hint">เรียง 5 คอลัมน์: Part number, Brand, Description, Store code, อายุ (ปี)</p><textarea id="bulk-paste-input" class="paste-textarea" rows="9" placeholder="PN-001&#9;SIEMENS&#9;Contactor 24VDC&#9;ST-A01&#9;5"></textarea><p id="bulk-paste-count" class="hint">0 บรรทัด</p></div><footer class="dialog-footer"><button id="bulk-paste-cancel" class="button" type="button">ยกเลิก</button><button id="bulk-paste-confirm" class="button primary" type="button">นำเข้าสู่ตาราง</button></footer></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   <script>
 (() => {
@@ -717,58 +1066,184 @@ PN-003	OMRON	Relay Module 8CH	ST-C12	3"></textarea>
   return promise;
  }
 
- function updateBadge() {
-  const badge = document.getElementById('em-user-badge');
-  const navUsers = document.getElementById('em-nav-users');
-  if (navUsers) {
-   const canManageUsers = currentUser && (currentUser.role === 'admin' || currentUser.permissions?.users === 'admin');
-   navUsers.style.display = canManageUsers ? 'inline-block' : 'none';
-  }
-  if (!badge) return;
-  if (!currentUser) {
-   badge.innerHTML = `<button id="em-open-login" style="background:#cc681c;color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:13px;cursor:pointer">เข้าสู่ระบบ</button>`;
-   const btn = document.getElementById('em-open-login');
-   if (btn) btn.onclick = () => promptLogin();
-   return;
-  }
-  const roleTh = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : currentUser.role === 'editor' ? 'แก้ไขได้' : 'ดูอย่างเดียว';
-  badge.innerHTML = `
-   <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:6px">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-    ${currentUser.displayName || currentUser.username} (${roleTh})
-   </span>
-   <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:4px;padding:3px 8px;font-size:12px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
-  `;
-  const logoutBtn = document.getElementById('em-btn-logout');
-  if (logoutBtn) {
-   logoutBtn.onclick = async () => {
-    try {
-     await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
-    } catch (_) {}
-    location.reload();
-   };
-  }
- }
+ function initNavUI() {
+    const hamburgerBtn = document.getElementById('em-hamburger-btn');
+    const drawer = document.getElementById('em-drawer');
+    const overlay = document.getElementById('em-drawer-overlay');
+    const closeBtn = document.getElementById('em-drawer-close');
 
- // Check initial session state on load
- if (typeof window !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', () => {
-   fetch('/api/v1/auth/me', { credentials: 'same-origin' })
-    .then(r => r.json())
-    .then(async res => {
-     if (res.ok && res.data) {
-      currentUser = res.data;
-      updateBadge();
-      if (res.data.mustChangePassword) {
-       await promptForceChangePassword();
+    function openDrawer() {
+      if (drawer) {
+        drawer.classList.add('is-active');
+        hamburgerBtn?.setAttribute('aria-expanded', 'true');
       }
-     } else {
-      updateBadge();
-     }
-    })
-    .catch(() => updateBadge());
-  });
- }
+      if (overlay) overlay.classList.add('is-active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      if (drawer) {
+        drawer.classList.remove('is-active');
+        hamburgerBtn?.setAttribute('aria-expanded', 'false');
+      }
+      if (overlay) overlay.classList.remove('is-active');
+      document.body.style.overflow = '';
+    }
+
+    if (hamburgerBtn) hamburgerBtn.onclick = openDrawer;
+    if (closeBtn) closeBtn.onclick = closeDrawer;
+    if (overlay) overlay.onclick = closeDrawer;
+
+    // Drawer accordions
+    document.querySelectorAll('.em-drawer-group-btn').forEach(btn => {
+      btn.onclick = () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!expanded));
+        const sublist = btn.nextElementSibling;
+        if (sublist) {
+          sublist.style.display = expanded ? 'none' : 'flex';
+        }
+      };
+    });
+
+    // Auto-handle ?dept= in Equipment BOM
+    if (location.pathname.startsWith('/bom')) {
+      const params = new URLSearchParams(location.search);
+      const targetDept = params.get('dept');
+      if (targetDept) {
+        try {
+          sessionStorage.setItem('BOM_LAST_DEPT', targetDept);
+          sessionStorage.removeItem('BOM_LAST_LINE');
+          sessionStorage.removeItem('BOM_LAST_MACHINE');
+        } catch (_) {}
+      }
+    }
+
+    // Auto-handle ?action=add in Parts
+    if (location.pathname.startsWith('/parts')) {
+      const params = new URLSearchParams(location.search);
+      if (params.get('action') === 'add') {
+        const checkAddBtn = () => {
+          const btn = document.getElementById('add-part');
+          if (btn && !btn.disabled) {
+            btn.click();
+          } else {
+            setTimeout(checkAddBtn, 100);
+          }
+        };
+        setTimeout(checkAddBtn, 300);
+      }
+    }
+  }
+
+  function updateBadge() {
+    const badge = document.getElementById('em-user-badge');
+    const navUsers = document.getElementById('em-nav-users');
+    const drawerNavUsers = document.getElementById('em-drawer-nav-users');
+    const drawerUserCard = document.getElementById('em-drawer-user-card');
+    const drawerFooter = document.getElementById('em-drawer-footer');
+
+    const canManageUsers = currentUser && (currentUser.role === 'admin' || currentUser.permissions?.users === 'admin');
+    if (navUsers) navUsers.style.display = canManageUsers ? 'inline-flex' : 'none';
+    if (drawerNavUsers) drawerNavUsers.style.display = canManageUsers ? 'flex' : 'none';
+
+    if (!currentUser) {
+      if (badge) {
+        badge.innerHTML = '<button id="em-open-login" style="background:#cc681c;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s">เข้าสู่ระบบ</button>';
+        const btn = document.getElementById('em-open-login');
+        if (btn) btn.onclick = () => promptLogin();
+      }
+      if (drawerUserCard) {
+        drawerUserCard.innerHTML = '<div style="font-size:13px;color:#94a3b8;margin-bottom:8px">ยังไม่ได้เข้าสู่ระบบ</div><button id="em-drawer-open-login" style="width:100%;background:#cc681c;color:#fff;border:none;border-radius:6px;padding:8px;font-size:13px;font-weight:600;cursor:pointer">เข้าสู่ระบบ</button>';
+        const dBtn = document.getElementById('em-drawer-open-login');
+        if (dBtn) dBtn.onclick = () => {
+          const overlay = document.getElementById('em-drawer-overlay');
+          const drawer = document.getElementById('em-drawer');
+          if (drawer) drawer.classList.remove('is-active');
+          if (overlay) overlay.classList.remove('is-active');
+          document.body.style.overflow = '';
+          promptLogin();
+        };
+      }
+      if (drawerFooter) drawerFooter.innerHTML = '';
+      return;
+    }
+
+    const roleTh = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : currentUser.role === 'editor' ? 'แก้ไขได้' : 'ดูอย่างเดียว';
+
+    if (badge) {
+      badge.innerHTML = `
+        <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <strong style="font-weight:600">${currentUser.displayName || currentUser.username}</strong>
+          <span style="font-size:11.5px;color:#94a3b8">(${roleTh})</span>
+        </span>
+        <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
+      `;
+      const logoutBtn = document.getElementById('em-btn-logout');
+      if (logoutBtn) {
+        logoutBtn.onclick = async () => {
+          try {
+            await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+          } catch (_) {}
+          location.reload();
+        };
+      }
+    }
+
+    if (drawerUserCard) {
+      drawerUserCard.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:50%;background:#cc681c;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">
+            ${(currentUser.displayName || currentUser.username).charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:14px;color:#fff">${currentUser.displayName || currentUser.username}</div>
+            <div style="font-size:12px;color:#94a3b8">${roleTh}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (drawerFooter) {
+      drawerFooter.innerHTML = `
+        <button id="em-drawer-btn-logout" style="width:100%;background:rgba(239, 68, 68, 0.15);color:#fca5a5;border:1px solid rgba(239, 68, 68, 0.3);border-radius:6px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          ออกจากระบบ
+        </button>
+      `;
+      const dLogoutBtn = document.getElementById('em-drawer-btn-logout');
+      if (dLogoutBtn) {
+        dLogoutBtn.onclick = async () => {
+          try {
+            await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+          } catch (_) {}
+          location.reload();
+        };
+      }
+    }
+  }
+
+
+  if (typeof window !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initNavUI();
+      fetch('/api/v1/auth/me', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(async res => {
+          if (res.ok && res.data) {
+            currentUser = res.data;
+            updateBadge();
+            if (res.data.mustChangePassword) {
+              await promptForceChangePassword();
+            }
+          } else {
+            updateBadge();
+          }
+        })
+        .catch(() => updateBadge());
+    });
+  }
 
  window.EM_RPC = async (method, ...args) => {
   const signature = JSON.stringify([method, args]);
@@ -823,34 +1298,6 @@ PN-003	OMRON	Relay Module 8CH	ST-C12	3"></textarea>
 
   return doRequest();
  };
-
-  if (typeof window !== 'undefined' && (!window.google || !window.google.script)) {
-    window.google = window.google || {};
-    window.google.script = {
-      run: (function createRunner(successFn, failureFn) {
-        return new Proxy({}, {
-          get(_, prop) {
-            if (prop === 'withSuccessHandler') return fn => createRunner(fn, failureFn);
-            if (prop === 'withFailureHandler') return fn => createRunner(successFn, fn);
-            if (prop === 'rpc') {
-              return (method, token, payload) => {
-                window.EM_RPC(method, payload).then(
-                  data => (successFn ? successFn({ ok: true, data }) : null),
-                  err => (failureFn ? failureFn(err) : null)
-                );
-              };
-            }
-            return (...args) => {
-              window.EM_RPC(prop, ...args).then(
-                data => (successFn ? successFn({ ok: true, data }) : null),
-                err => (failureFn ? failureFn(err) : null)
-              );
-            };
-          }
-        });
-      })()
-    };
-  }
 })();
 
 </script>
@@ -951,11 +1398,11 @@ const PartImage = (() => {
   'use strict';
   const $=id=>document.getElementById(id);
   const CACHE_KEY='part-register-cache-v1';
-  function saveCache(data){try{sessionStorage.setItem(CACHE_KEY,JSON.stringify(data));}catch(_){}}
-  function getCache(){try{const raw=sessionStorage.getItem(CACHE_KEY);return raw?JSON.parse(raw):null;}catch(_){return null;}}
+  function saveCache(data){if(window.EM_RPC)return;try{sessionStorage.setItem(CACHE_KEY,JSON.stringify(data));}catch(_){}}
+  function getCache(){if(window.EM_RPC)return null;try{const raw=sessionStorage.getItem(CACHE_KEY);return raw?JSON.parse(raw):null;}catch(_){return null;}}
   function clearCache(){try{sessionStorage.removeItem(CACHE_KEY);}catch(_){}}
 
-  const state={params:{query:'',page:1,pageSize:50,sortBy:'id',sortOrder:'desc'},allParts:[],items:[],brands:[],chosenBrandId:'',webAppUrl:'',request:0,loading:false,editing:null,detail:null,dirty:false,saving:false,imageBusy:false,image:null,removeImage:false,imageGeneration:0,booted:false,view:'catalog',batchFilter:'missing',batchSearch:'',batchPending:new Map(),batchUploading:false,batchActiveRowId:null,batchSuccessCount:0,bulkRows:[],bulkFilter:'all',bulkSaving:false};
+  const state={params:{query:'',page:1,pageSize:50,sortBy:'id',sortOrder:'desc'},allParts:[],items:[],brands:[],webAppUrl:'',request:0,loading:false,editing:null,detail:null,dirty:false,saving:false,imageBusy:false,image:null,removeImage:false,imageGeneration:0,booted:false,view:'catalog',batchFilter:'missing',batchSearch:'',batchPending:new Map(),batchUploading:false,batchActiveRowId:null,batchSuccessCount:0,bulkRows:[],bulkSaving:false};
   let searchTimer,composing=false,toastTimer,confirmAction,confirmParent,confirmReturn,brandParent,editorReturn,detailGeneration=0,initialEditHandled=false;
   const fields={partNumber:'part-number',description:'description',brandId:'brand',storeCode:'store-code',lifespan:'lifespan',price:'price',notes:'notes'};
   const number=new Intl.NumberFormat('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -969,12 +1416,12 @@ const PartImage = (() => {
   function openDialog(id,focus) {$(id).showModal();syncModal();if(focus)$(focus).focus();}
   function closeDialog(id) {$(id).close();syncModal();}
   function rpc(method,...args) {
-    if (window.EM_RPC) return window.EM_RPC(method, ...args);
+    if(window.EM_RPC)return window.EM_RPC(method,...args);
     return new Promise((resolve,reject)=>{
       let complete=false;
       const timeout=setTimeout(()=>{complete=true;reject(Object.assign(new Error('ยังยืนยันผลไม่ได้ ตรวจสอบการเชื่อมต่อแล้วลองคำขอเดิมอีกครั้ง'),{code:'TIMEOUT'}));},60000);
       const success=result=>{if(complete)return;clearTimeout(timeout);complete=true;if(result.ok)resolve(result.data);else reject(Object.assign(new Error(result.error.message),result.error));};
-      const failure=()=>success({ok:false,error:{code:'CONNECTION',message:'เชื่อมต่อไม่สำเร็จ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง'}});
+      const failure=()=>success({ok:false,error:{code:'CONNECTION',message:'เชื่อมต่อไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตและการเชื่อมต่อ แล้วลองอีกครั้ง'}});
       if(window.google && google.script && google.script.run) google.script.run.withSuccessHandler(success).withFailureHandler(failure)[method](...args);
       else if(location.hostname==='127.0.0.1' || location.hostname==='localhost') fetch('/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method,args})}).then(r=>r.json()).then(success,failure);
       else failure();
@@ -1138,10 +1585,10 @@ const PartImage = (() => {
       applyLocalQuery();
       renderBatchStats();
       if(state.view==='batch')renderBatchList();
-      if(state.view==='bulk'){revalidateBulkRows();renderBulkTable();}
+      if(state.view==='bulk')renderBulkRows();
       const targetId=getInitialTargetId();
       if(targetId && !initialEditHandled)checkAndOpenExternalEdit(targetId);
-      $('sync-label').textContent='อัปเดต '+new Intl.DateTimeFormat('th-TH',{hour:'2-digit',minute:'2-digit'}).format(new Date())+' · ทะเบียนกลาง';
+      $('sync-label').textContent='อัปเดต '+new Intl.DateTimeFormat('th-TH',{hour:'2-digit',minute:'2-digit'}).format(new Date())+(window.EM_RPC?' · ทะเบียนกลาง':' · ทะเบียนกลาง');
       if(showToast)toast('รีเฟรชข้อมูลล่าสุดแล้ว ('+state.allParts.length.toLocaleString('th-TH')+' รายการ)');
     } catch(error) {
       if(generation===state.request){
@@ -1163,43 +1610,12 @@ const PartImage = (() => {
   function runSearch() {clearTimeout(searchTimer);state.params.query=$('search').value;state.params.page=1;applyLocalQuery();}
   function clearSearch() {$('search').value='';$('clear-search').hidden=true;runSearch();$('search').focus();}
   function renderBrandSelect() {
-    const filter = PartCore.normalize($('brand-filter').value);
-    const brands = state.brands.slice();
-    if (state.editing && state.editing.brandId && !brands.some(b => b.id === state.editing.brandId)) {
-      brands.push({id: state.editing.brandId, name: state.editing.brand, active: false});
-    }
-
-    $('brand').replaceChildren();
-
-    if (!filter) {
-      $('brand').add(new Option('ไม่ระบุ', ''));
-      brands.sort((a,b) => a.name.localeCompare(b.name, 'th'))
-        .forEach(b => $('brand').add(new Option(b.name + (b.active === false ? ' (ยกเลิกใช้งาน)' : ''), b.id)));
-      $('brand').value = state.chosenBrandId || '';
-      $('brand-filter-clear').hidden = true;
-      $('brand-filter-clear').textContent = 'ล้างคำค้น Brand';
-      return;
-    }
-
-    $('brand-filter-clear').hidden = false;
-    const matched = brands.filter(b => PartCore.normalize(b.name).includes(filter))
-      .sort((a,b) => a.name.localeCompare(b.name, 'th'));
-
-    if (matched.length === 0) {
-      $('brand').add(new Option('ไม่พบ Brand ที่ค้นหา', ''));
-      $('brand').value = '';
-      $('brand-filter-clear').textContent = 'ล้างคำค้น Brand (ไม่พบ)';
-    } else {
-      $('brand').add(new Option('ไม่ระบุ', ''));
-      matched.forEach(b => $('brand').add(new Option(b.name + (b.active === false ? ' (ยกเลิกใช้งาน)' : ''), b.id)));
-      $('brand-filter-clear').textContent = 'ล้างคำค้น Brand (พบ ' + matched.length + ' รายการ)';
-
-      if (state.chosenBrandId && matched.some(b => b.id === state.chosenBrandId)) {
-        $('brand').value = state.chosenBrandId;
-      } else {
-        $('brand').value = matched[0].id;
-      }
-    }
+    const selected=$('brand').value, filter=PartCore.normalize($('brand-filter').value);
+    $('brand').replaceChildren(new Option('ไม่ระบุ',''));
+    const brands=state.brands.slice();
+    if(state.editing && state.editing.brandId && !brands.some(b=>b.id===state.editing.brandId))brands.push({id:state.editing.brandId,name:state.editing.brand,active:false});
+    brands.filter(b=>!filter || PartCore.normalize(b.name).includes(filter) || b.id===selected).sort((a,b)=>a.name.localeCompare(b.name,'th')).forEach(b=>$('brand').add(new Option(b.name+(b.active===false?' (ยกเลิกใช้งาน)':''),b.id)));
+    $('brand').value=selected;$('brand-filter-clear').hidden=!filter;
   }
   function clearValidation() {setError('form-error','');Object.entries(fields).forEach(([key,id])=>{$(id).removeAttribute('aria-invalid');$(key+'-error').textContent='';});}
   function showValidation(errors) {for(const [key,text] of Object.entries(errors || {})){if(fields[key]){$(fields[key]).setAttribute('aria-invalid','true');$(key+'-error').textContent=text;}}const first=Object.keys(errors || {}).find(k=>fields[k]);if(first)$(fields[first]).focus();}
@@ -1207,9 +1623,7 @@ const PartImage = (() => {
   function resetImage() {state.imageGeneration++;if(state.image)URL.revokeObjectURL(state.image.url);state.image=null;state.removeImage=false;state.imageBusy=false;$('image-error').textContent='';$('image-status').textContent='ย่อและบีบอัดก่อนอัปโหลดอัตโนมัติ';$('preview').replaceChildren(node('span','','▧'));$('remove-image').hidden=true;$('picture-input').value='';$('camera-input').value='';}
   function editPart(part=null) {
     if(state.saving)return;
-    editorReturn=document.activeElement;state.editing=part;state.dirty=false;state.requestId=uuid();resetImage();clearValidation();
-    state.chosenBrandId = part && part.brandId ? part.brandId : '';
-    $('part-form').reset();$('brand-filter').value='';renderBrandSelect();
+    editorReturn=document.activeElement;state.editing=part;state.dirty=false;state.requestId=uuid();resetImage();clearValidation();$('part-form').reset();$('brand-filter').value='';renderBrandSelect();
     Object.entries(fields).forEach(([key,id])=>$(id).value=part && part[key]!=null?part[key]:'');
     $('editor-title').textContent=part?'แก้ไข Part':'เพิ่ม Part';$('editor-code').textContent=part?part.id:'NEW PART';$('save-part').textContent=part?'บันทึกการแก้ไข':'บันทึก Part';$('save-part').disabled=false;
     $('editor-copy-link').hidden=!part;
@@ -1299,10 +1713,7 @@ const PartImage = (() => {
   });
   $('brands-close').onclick=closeBrands;$('brands-dialog').addEventListener('cancel',e=>{e.preventDefault();if(!$('brand-save').disabled)closeBrands();});
   $('brands-open').onclick=()=>openBrands();$('form-brands').onclick=()=>openBrands('editor');
-  $('brand').addEventListener('change', () => { state.chosenBrandId = $('brand').value; });
-  $('brand-filter').oninput = renderBrandSelect;
-  $('brand-filter').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('brand').focus(); } });
-  $('brand-filter-clear').onclick = () => { $('brand-filter').value = ''; renderBrandSelect(); $('brand-filter').focus(); };
+  $('brand-filter').oninput=renderBrandSelect;$('brand-filter-clear').onclick=()=>{$('brand-filter').value='';renderBrandSelect();$('brand-filter').focus();};
   $('add-part').onclick=()=>editPart();$('empty-action').onclick=()=>state.params.query?clearSearch():editPart();$('editor-close').onclick=cancelEditor;$('cancel-part').onclick=cancelEditor;$('editor').addEventListener('cancel',e=>{e.preventDefault();cancelEditor();});
   $('detail-close').onclick=()=>{detailGeneration++;closeDialog('detail');title('ทะเบียนอะไหล่');};$('detail').addEventListener('cancel',()=>{detailGeneration++;title('ทะเบียนอะไหล่');setTimeout(syncModal,0);});$('detail-edit').onclick=()=>{closeDialog('detail');editPart(state.detail);};
   $('search').addEventListener('input',()=>{
@@ -1330,27 +1741,19 @@ const PartImage = (() => {
 
   function switchView(viewName) {
     state.view = viewName;
-    const isCatalog = viewName === 'catalog';
     const isBatch = viewName === 'batch';
     const isBulk = viewName === 'bulk';
-
-    $('nav-catalog').classList.toggle('active', isCatalog);
-    $('nav-bulk').classList.toggle('active', isBulk);
-    $('nav-batch').classList.toggle('active', isBatch);
-
-    $('intro-catalog').hidden = !isCatalog;
-    $('catalog-section').hidden = !isCatalog;
+    $('intro-catalog').hidden = isBatch || isBulk;
+    $('catalog-section').hidden = isBatch || isBulk;
     $('batch-section').hidden = !isBatch;
     $('bulk-section').hidden = !isBulk;
-
-    if (isBulk) {
-      title('เพิ่มแบบตารางหลายรายการ');
-      revalidateBulkRows();
-      renderBulkTable();
-    } else if (isBatch) {
+    if (isBatch) {
       title('อัปโหลดรูปชุด');
       renderBatchStats();
       renderBatchList();
+    } else if (isBulk) {
+      title('เพิ่ม Part แบบตาราง');
+      renderBulkRows();
     } else {
       title('ทะเบียนอะไหล่');
       applyLocalQuery();
@@ -1838,9 +2241,6 @@ const PartImage = (() => {
   });
 
   // Wiring Batch view navigation and buttons
-  $('nav-catalog').onclick = () => switchView('catalog');
-  $('nav-batch').onclick = () => switchView('batch');
-
   $('batch-tab-missing').onclick = () => setBatchFilter('missing');
   $('batch-tab-pending').onclick = () => setBatchFilter('pending');
   $('batch-tab-all').onclick = () => setBatchFilter('all');
@@ -1866,533 +2266,71 @@ const PartImage = (() => {
   $('batch-upload-all').onclick = uploadAllBatchItems;
   $('batch-clear-all').onclick = clearAllBatchPending;
 
-  /* --- BULK TABLE ADD & EXCEL IMPORT CONTROLLER --- */
-  function parseExcelText(rawText) {
-    if (!rawText || typeof rawText !== 'string') return [];
-    const lines = rawText.split(/\r\n|\r|\n/).map(l => l.trim()).filter(Boolean);
-    if (!lines.length) return [];
-
-    let startIndex = 0;
-    const firstLine = lines[0].toLowerCase();
-    const isHeader = firstLine.includes('part') || firstLine.includes('brand') || 
-                     firstLine.includes('desc') || firstLine.includes('store') || 
-                     firstLine.includes('life') || firstLine.includes('อายุ') || 
-                     firstLine.includes('รหัส') || firstLine.includes('ยี่ห้อ');
-    if (isHeader) startIndex = 1;
-
-    const parsed = [];
-    for (let i = startIndex; i < lines.length; i++) {
-      const line = lines[i];
-      const cols = line.includes('\t') ? line.split('\t') : line.split(',');
-      const partNumber = (cols[0] || '').trim();
-      const rawBrand = (cols[1] || '').trim();
-      const description = (cols[2] || '').trim();
-      const storeCode = (cols[3] || '').trim();
-      const lifespan = (cols[4] || '').trim();
-
-      if (!partNumber && !rawBrand && !description && !storeCode && !lifespan) continue;
-
-      let brandId = '', brandName = '', unmatchedBrand = '';
-      if (rawBrand) {
-        const norm = PartCore.normalize(rawBrand);
-        const match = state.brands.find(b => PartCore.normalize(b.name) === norm);
-        if (match) {
-          brandId = match.id;
-          brandName = match.name;
-        } else {
-          unmatchedBrand = rawBrand;
-        }
-      }
-
-      parsed.push({
-        id: 'r-' + uuid(),
-        partNumber,
-        brandId,
-        brandName,
-        unmatchedBrand,
-        description,
-        storeCode,
-        lifespan,
-        status: 'ready',
-        statusText: 'พร้อมบันทึก',
-        canSave: true
-      });
-    }
-    return parsed;
-  }
-
-  function revalidateBulkRows() {
-    const seenPartNumbers = new Set();
-    const dbPartNumbers = new Set(state.allParts.map(p => PartCore.normalize(p.partNumber)));
-
-    for (const row of state.bulkRows) {
-      const pn = String(row.partNumber || '').trim();
-      if (!pn) {
-        row.status = 'missing_pn';
-        row.statusText = 'ขาด Part number';
-        row.canSave = false;
-        continue;
-      }
-      const norm = PartCore.normalize(pn);
-      if (dbPartNumbers.has(norm)) {
-        row.status = 'dup_db';
-        row.statusText = 'ซ้ำในระบบ (จะข้าม)';
-        row.canSave = false;
-        continue;
-      }
-      if (seenPartNumbers.has(norm)) {
-        row.status = 'dup_batch';
-        row.statusText = 'ซ้ำในตาราง (จะข้าม)';
-        row.canSave = false;
-        continue;
-      }
-      seenPartNumbers.add(norm);
-
-      if (row.lifespan) {
-        const rawLife = String(row.lifespan).replace(/,/g, '').replace(/ปี/g, '').trim();
-        const lifeNum = Number(rawLife);
-        if (!Number.isFinite(lifeNum) || lifeNum < 0 || lifeNum > 999) {
-          row.status = 'invalid_lifespan';
-          row.statusText = 'อายุไม่ถูกต้อง (ปี 0-999)';
-          row.canSave = false;
-          continue;
-        }
-      }
-
-      row.status = 'ready';
-      row.statusText = 'พร้อมบันทึก';
-      row.canSave = true;
-    }
-
-    renderBulkStats();
-  }
-
-  function renderBulkStats() {
-    const total = state.bulkRows.length;
-    const ready = state.bulkRows.filter(r => r.canSave).length;
-    const dup = state.bulkRows.filter(r => r.status === 'dup_db' || r.status === 'dup_batch').length;
-    const invalid = state.bulkRows.filter(r => r.status === 'missing_pn' || r.status === 'invalid_lifespan').length;
-
-    const setTxt = (id, txt) => {
-      const el = $(id);
-      if (el) el.textContent = txt;
-    };
-
-    setTxt('bulk-stat-total', total.toLocaleString('th-TH'));
-    setTxt('bulk-stat-ready', ready.toLocaleString('th-TH'));
-    setTxt('bulk-stat-dup', dup.toLocaleString('th-TH'));
-    setTxt('bulk-stat-invalid', invalid.toLocaleString('th-TH'));
-
-    setTxt('bulk-count-all', String(total));
-    setTxt('bulk-count-ready', String(ready));
-    setTxt('bulk-count-dup', String(dup));
-    setTxt('bulk-count-invalid', String(invalid));
-
-    setTxt('bulk-save-num', String(ready));
-    const saveBtn = $('bulk-save-btn');
-    if (saveBtn) saveBtn.disabled = ready === 0 || state.bulkSaving;
-
-    const navBadge = $('bulk-ready-count');
-    if (navBadge) {
-      navBadge.textContent = String(ready);
-      navBadge.hidden = ready === 0;
-    }
-  }
-
-  function setBulkFilter(filter) {
-    state.bulkFilter = filter;
-    ['all', 'ready', 'dup', 'invalid'].forEach(key => {
-      const el = $('bulk-filter-' + key);
-      if (el) {
-        el.classList.toggle('active', key === filter);
-        el.setAttribute('aria-selected', String(key === filter));
-      }
+  /* --- BULK TABLE ADD, restored from EM/Backup/public/parts/index.html --- */
+  const emptyBulkRow=values=>({id:'bulk-'+uuid(),partNumber:'',brandId:'',description:'',storeCode:'',lifespan:'',status:'invalid',message:'กรอก Part number',...values});
+  function parseBulkText(text){
+    const lines=String(text||'').split(/\r\n|\r|\n/).map(v=>v.trim()).filter(Boolean);
+    if(!lines.length)return [];
+    const first=lines[0].toLowerCase();
+    const start=/part|brand|desc|store|life|อายุ|รหัส|ยี่ห้อ/.test(first)?1:0;
+    return lines.slice(start).map(line=>{
+      const cols=line.includes('\t')?line.split('\t'):line.split(',');
+      const brandName=String(cols[1]||'').trim();
+      const brand=state.brands.find(b=>PartCore.normalize(b.name)===PartCore.normalize(brandName));
+      return emptyBulkRow({partNumber:String(cols[0]||'').trim(),brandId:brand?.id||'',description:String(cols[2]||'').trim(),storeCode:String(cols[3]||'').trim(),lifespan:String(cols[4]||'').trim()});
     });
-    renderBulkTable();
   }
-
-  function renderBulkTable() {
-    const tbody = $('bulk-table-body');
-    const empty = $('bulk-empty');
-    if (!tbody || !empty) return;
-
-    if (!state.bulkRows.length) {
-      tbody.replaceChildren();
-      empty.hidden = false;
-      return;
-    }
-    empty.hidden = true;
-
-    const visibleRows = state.bulkRows.filter((r, idx) => {
-      r._origIndex = idx + 1;
-      if (state.bulkFilter === 'ready') return r.canSave;
-      if (state.bulkFilter === 'dup') return r.status === 'dup_db' || r.status === 'dup_batch';
-      if (state.bulkFilter === 'invalid') return r.status === 'missing_pn' || r.status === 'invalid_lifespan';
-      return true;
+  function validateBulkRows(){
+    const existing=new Set(state.allParts.map(p=>PartCore.normalize(p.partNumber))),seen=new Set();
+    state.bulkRows.forEach(row=>{
+      const pn=String(row.partNumber||'').trim(),key=PartCore.normalize(pn),life=String(row.lifespan||'').replace(/,/g,'').replace(/ปี/g,'').trim();
+      if(!pn){row.status='invalid';row.message='กรอก Part number';return;}
+      if(existing.has(key)){row.status='invalid';row.message='ซ้ำในระบบ';return;}
+      if(seen.has(key)){row.status='invalid';row.message='ซ้ำในตาราง';return;}
+      seen.add(key);
+      if(life&&(!Number.isFinite(Number(life))||Number(life)<0||Number(life)>999)){row.status='invalid';row.message='อายุไม่ถูกต้อง';return;}
+      row.status='ready';row.message='พร้อมบันทึก';
     });
-
-    if (!visibleRows.length) {
-      tbody.replaceChildren();
-      empty.hidden = false;
-      $('bulk-empty-title').textContent = 'ไม่พบรายการที่ตรงกับตัวกรอง';
-      $('bulk-empty-copy').textContent = 'ลองเลือกแท็บ "ทั้งหมด" หรือเพิ่มข้อมูลใหม่';
-      return;
-    }
-
-    const fragment = document.createDocumentFragment();
-    visibleRows.forEach(row => {
-      const tr = node('tr', 'bulk-row');
-      tr.dataset.id = row.id;
-      if (row.canSave) tr.classList.add('row-ready');
-      else if (row.status === 'dup_db' || row.status === 'dup_batch') tr.classList.add('row-dup');
-      else tr.classList.add('row-invalid');
-
-      const tdNum = node('td', 'bulk-col-num', String(row._origIndex));
-
-      const tdStatus = node('td', 'bulk-col-status');
-      let badgeClass = 'bulk-badge';
-      let badgeIcon = '● ';
-      if (row.canSave) {
-        badgeClass += ' ready';
-        badgeIcon = '✓ ';
-      } else if (row.status === 'dup_db' || row.status === 'dup_batch') {
-        badgeClass += ' dup';
-        badgeIcon = '⚠️ ';
-      } else {
-        badgeClass += ' invalid';
-        badgeIcon = '✕ ';
-      }
-      const badge = node('span', badgeClass, badgeIcon + row.statusText);
-      tdStatus.append(badge);
-
-      const tdPart = node('td', 'bulk-col-part');
-      const inputPart = node('input', 'bulk-input mono');
-      inputPart.type = 'text';
-      inputPart.value = row.partNumber || '';
-      inputPart.placeholder = 'เช่น ABC-001';
-      inputPart.required = true;
-      if (!row.canSave) inputPart.classList.add('is-invalid');
-      inputPart.oninput = () => {
-        row.partNumber = inputPart.value;
-        revalidateBulkRows();
-        updateRowStatusDom(tr, row);
-      };
-      tdPart.append(inputPart);
-
-      const tdBrand = node('td', 'bulk-col-brand');
-      const selectBrand = node('select', 'bulk-select');
-      if (row.unmatchedBrand && !row.brandId) selectBrand.classList.add('unmatched');
-
-      const optNone = node('option', '', '-- ไม่ระบุ --');
-      optNone.value = '';
-      selectBrand.append(optNone);
-
-      if (row.unmatchedBrand && !row.brandId) {
-        const optUnmatched = node('option', '', '⚠️ ไม่พบ "' + row.unmatchedBrand + '" (กรุณาเลือก)');
-        optUnmatched.value = '';
-        optUnmatched.disabled = true;
-        optUnmatched.selected = true;
-        selectBrand.append(optUnmatched);
-      }
-
-      const optGroup = node('optgroup');
-      optGroup.label = 'ยี่ห้อในระบบ (' + state.brands.length + ')';
-      state.brands.slice().sort((a, b) => a.name.localeCompare(b.name, 'th')).forEach(b => {
-        const opt = node('option', '', b.name);
-        opt.value = b.id;
-        if (b.id === row.brandId) opt.selected = true;
-        optGroup.append(opt);
-      });
-      selectBrand.append(optGroup);
-
-      selectBrand.onchange = () => {
-        row.brandId = selectBrand.value;
-        const matched = state.brands.find(b => b.id === selectBrand.value);
-        row.brandName = matched ? matched.name : '';
-        row.unmatchedBrand = '';
-        selectBrand.classList.remove('unmatched');
-      };
-      tdBrand.append(selectBrand);
-
-      const tdDesc = node('td', 'bulk-col-desc');
-      const inputDesc = node('input', 'bulk-input');
-      inputDesc.type = 'text';
-      inputDesc.value = row.description || '';
-      inputDesc.placeholder = 'รายละเอียดอะไหล่';
-      inputDesc.oninput = () => { row.description = inputDesc.value; };
-      tdDesc.append(inputDesc);
-
-      const tdStore = node('td', 'bulk-col-store');
-      const inputStore = node('input', 'bulk-input mono');
-      inputStore.type = 'text';
-      inputStore.value = row.storeCode || '';
-      inputStore.placeholder = 'เช่น ST-01';
-      inputStore.oninput = () => { row.storeCode = inputStore.value; };
-      tdStore.append(inputStore);
-
-      const tdLife = node('td', 'bulk-col-life');
-      const inputLife = node('input', 'bulk-input numeric');
-      inputLife.type = 'text';
-      inputLife.value = row.lifespan || '';
-      inputLife.placeholder = 'ปี (เช่น 5)';
-      inputLife.oninput = () => {
-        row.lifespan = inputLife.value;
-        revalidateBulkRows();
-        updateRowStatusDom(tr, row);
-      };
-      tdLife.append(inputLife);
-
-      const tdAction = node('td', 'bulk-col-action');
-      const delBtn = node('button', 'bulk-del-row', '✕');
-      delBtn.type = 'button';
-      delBtn.title = 'ลบแถวนี้';
-      delBtn.onclick = () => {
-        const idx = state.bulkRows.findIndex(r => r.id === row.id);
-        if (idx >= 0) {
-          state.bulkRows.splice(idx, 1);
-          revalidateBulkRows();
-          renderBulkTable();
-        }
-      };
-      tdAction.append(delBtn);
-
-      tr.append(tdNum, tdStatus, tdPart, tdBrand, tdDesc, tdStore, tdLife, tdAction);
-      fragment.append(tr);
+  }
+  function updateBulkStats(){
+    const ready=state.bulkRows.filter(r=>r.status==='ready').length,invalid=state.bulkRows.length-ready;
+    $('bulk-total').textContent=String(state.bulkRows.length);$('bulk-ready').textContent=String(ready);$('bulk-invalid').textContent=String(invalid);$('bulk-save-count').textContent=String(ready);$('bulk-save').disabled=!ready||state.bulkSaving;
+  }
+  function renderBulkRows(){
+    validateBulkRows();updateBulkStats();const body=$('bulk-rows');body.replaceChildren();$('bulk-empty').hidden=state.bulkRows.length>0;
+    state.bulkRows.forEach((row,index)=>{
+      const tr=node('tr');
+      const cell=value=>{const td=node('td');if(value)td.append(value);return td;};
+      const status=node('span','bulk-status '+row.status,row.message);
+      const input=(key,placeholder,extra='')=>{const n=node('input','bulk-input '+extra);n.value=row[key]||'';n.placeholder=placeholder;n.oninput=()=>{row[key]=n.value;state.dirty=true;validateBulkRows();updateBulkStats();};n.onblur=renderBulkRows;return n;};
+      const part=input('partNumber','Part number','mono'+(row.status==='invalid'?' invalid':''));
+      const brand=node('select','bulk-select');brand.append(new Option('ไม่ระบุ',''));state.brands.slice().sort((a,b)=>a.name.localeCompare(b.name,'th')).forEach(b=>brand.add(new Option(b.name,b.id)));brand.value=row.brandId||'';brand.onchange=()=>{row.brandId=brand.value;state.dirty=true;};
+      const del=button('×',()=>{state.bulkRows.splice(index,1);state.dirty=state.bulkRows.length>0;renderBulkRows();},'button ghost bulk-delete');del.setAttribute('aria-label','ลบแถว '+(index+1));
+      tr.append(cell(node('span','mono',String(index+1))),cell(status),cell(part),cell(brand),cell(input('description','รายละเอียด')),cell(input('storeCode','Store code','mono')),cell(input('lifespan','เช่น 5','numeric')),cell(del));body.append(tr);
     });
-
-    tbody.replaceChildren(fragment);
   }
-
-  function updateRowStatusDom(tr, row) {
-    tr.classList.toggle('row-ready', row.canSave);
-    tr.classList.toggle('row-dup', row.status === 'dup_db' || row.status === 'dup_batch');
-    tr.classList.toggle('row-invalid', !row.canSave && row.status !== 'dup_db' && row.status !== 'dup_batch');
-
-    const tdStatus = tr.querySelector('.bulk-col-status');
-    if (tdStatus) {
-      let badgeClass = 'bulk-badge';
-      let badgeIcon = '● ';
-      if (row.canSave) {
-        badgeClass += ' ready';
-        badgeIcon = '✓ ';
-      } else if (row.status === 'dup_db' || row.status === 'dup_batch') {
-        badgeClass += ' dup';
-        badgeIcon = '⚠️ ';
-      } else {
-        badgeClass += ' invalid';
-        badgeIcon = '✕ ';
+  function addBulkRow(values={}){state.bulkRows.push(emptyBulkRow(values));state.dirty=true;renderBulkRows();setTimeout(()=>$('bulk-rows').lastElementChild?.querySelector('input')?.focus(),0);}
+  function openBulkPaste(){ $('bulk-paste-input').value='';$('bulk-paste-count').textContent='0 บรรทัด';openDialog('bulk-paste-dialog','bulk-paste-input'); }
+  async function commitBulkRows(){
+    validateBulkRows();const rows=state.bulkRows.filter(r=>r.status==='ready');if(!rows.length)return;
+    state.bulkSaving=true;updateBulkStats();setError('bulk-error','');
+    try{
+      for(let i=0;i<rows.length;i++){
+        $('bulk-save').textContent='กำลังบันทึก '+(i+1)+' / '+rows.length;
+        const lifespan=String(rows[i].lifespan||'').replace(/,/g,'').replace(/ปี/g,'').trim();
+        await rpc('createPart',{partNumber:rows[i].partNumber.trim(),description:rows[i].description.trim()||'-',brandId:rows[i].brandId||null,storeCode:rows[i].storeCode.trim(),lifespan:lifespan?Number(lifespan):null,price:null,notes:'',requestId:uuid()});
       }
-      tdStatus.replaceChildren(node('span', badgeClass, badgeIcon + row.statusText));
-    }
+      state.bulkRows=[];state.dirty=false;toast('บันทึก Part สำเร็จ '+rows.length+' รายการ');await fetchFreshData(false);switchView('catalog');
+    }catch(error){setError('bulk-error',error.message||'บันทึกไม่สำเร็จ');await fetchFreshData(false);validateBulkRows();renderBulkRows();}
+    finally{state.bulkSaving=false;$('bulk-save').replaceChildren(document.createTextNode('บันทึก '),node('span','',String(state.bulkRows.filter(r=>r.status==='ready').length)),document.createTextNode(' รายการ'));updateBulkStats();}
   }
-
-  function addBulkRow(initialData = {}) {
-    state.bulkRows.push({
-      id: 'r-' + uuid(),
-      partNumber: initialData.partNumber || '',
-      brandId: initialData.brandId || '',
-      brandName: initialData.brandName || '',
-      unmatchedBrand: initialData.unmatchedBrand || '',
-      description: initialData.description || '',
-      storeCode: initialData.storeCode || '',
-      lifespan: initialData.lifespan || '',
-      status: 'missing_pn',
-      statusText: 'ขาด Part number',
-      canSave: false
-    });
-    revalidateBulkRows();
-    renderBulkTable();
-    setTimeout(() => {
-      const rows = document.querySelectorAll('#bulk-table-body .bulk-input.mono');
-      if (rows.length) rows[rows.length - 1].focus();
-    }, 50);
-  }
-
-  function clearBulkRows() {
-    if (!state.bulkRows.length) return;
-    if (confirm('ต้องการล้างรายการในตารางทั้งหมดใช่หรือไม่?')) {
-      state.bulkRows = [];
-      revalidateBulkRows();
-      renderBulkTable();
-      toast('ล้างตารางเรียบร้อยแล้ว');
-    }
-  }
-
-  function loadBulkSampleData() {
-    const samples = [
-      { partNumber: 'SAMPLE-101', brandName: state.brands[0] ? state.brands[0].name : '', brandId: state.brands[0] ? state.brands[0].id : '', description: 'Power Supply 24VDC 5A Din-rail', storeCode: 'LOC-A01', lifespan: '7' },
-      { partNumber: 'SAMPLE-102', brandName: '', brandId: '', unmatchedBrand: 'Mitsubishi', description: 'Magnetic Contactor 3P 220V', storeCode: 'LOC-B12', lifespan: '5' },
-      { partNumber: 'SAMPLE-103', brandName: state.brands[1] ? state.brands[1].name : '', brandId: state.brands[1] ? state.brands[1].id : '', description: 'Miniature Circuit Breaker 2P 16A', storeCode: 'LOC-C05', lifespan: '10' },
-      { partNumber: 'SAMPLE-103', brandName: '', brandId: '', description: 'รายการทดสอบ Part number ซ้ำในตาราง', storeCode: 'LOC-C05', lifespan: '10' }
-    ];
-    if (state.allParts.length > 0) {
-      const existing = state.allParts[0];
-      samples.push({
-        partNumber: existing.partNumber,
-        brandName: existing.brand || '',
-        brandId: existing.brandId || '',
-        description: 'ตัวอย่างทดสอบซ้ำกับในระบบ: ' + existing.partNumber,
-        storeCode: existing.storeCode || '',
-        lifespan: existing.lifespan ? String(existing.lifespan) : '5'
-      });
-    }
-
-    state.bulkRows = samples.map(s => ({
-      id: 'r-' + uuid(),
-      partNumber: s.partNumber,
-      brandId: s.brandId || '',
-      brandName: s.brandName || '',
-      unmatchedBrand: s.unmatchedBrand || '',
-      description: s.description,
-      storeCode: s.storeCode,
-      lifespan: s.lifespan,
-      status: 'ready',
-      statusText: 'พร้อมบันทึก',
-      canSave: true
-    }));
-
-    revalidateBulkRows();
-    renderBulkTable();
-    toast('โหลดข้อมูลตัวอย่าง ' + samples.length + ' รายการแล้ว ลองตรวจสอบสถานะและกดบันทึกได้ทันที');
-  }
-
-  function openBulkPasteDialog() {
-    $('bulk-paste-input').value = '';
-    $('bulk-paste-preview-count').textContent = '0 บรรทัดที่ตรวจพบ';
-    openDialog('bulk-paste-dialog', 'bulk-paste-input');
-  }
-
-  function closeBulkPasteDialog() {
-    closeDialog('bulk-paste-dialog');
-  }
-
-  async function saveBulkParts() {
-    const toSave = state.bulkRows.filter(r => r.canSave);
-    if (!toSave.length) {
-      toast('ไม่มีรายการที่พร้อมบันทึก กรุณาตรวจสอบ Part number หรือข้อมูลที่ไม่สมบูรณ์');
-      return;
-    }
-
-    const skippedCount = state.bulkRows.length - toSave.length;
-    const confirmMsg = 'ยืนยันบันทึกอะไหล่ ' + toSave.length + ' รายการ?' + (skippedCount > 0 ? '\n(จะข้าม ' + skippedCount + ' รายการที่ซ้ำหรือไม่สมบูรณ์)' : '');
-    if (!confirm(confirmMsg)) return;
-
-    state.bulkSaving = true;
-    const saveBtn = $('bulk-save-btn');
-    if (saveBtn) {
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = '<span class="spinner" aria-hidden="true"></span> กำลังบันทึก ' + toSave.length + ' รายการ...';
-    }
-
-    const payload = toSave.map(r => ({
-      partNumber: r.partNumber.trim(),
-      brandId: r.brandId || null,
-      brand: r.brandName || '',
-      description: r.description.trim() || '-',
-      storeCode: r.storeCode.trim(),
-      lifespan: r.lifespan ? Number(String(r.lifespan).replace(/,/g, '').replace(/ปี/g, '').trim()) : null
-    }));
-
-    try {
-      const res = await rpc('createPartsBatch', payload);
-      if (res && res.success) {
-        if (Array.isArray(res.createdParts)) {
-          state.allParts.unshift(...res.createdParts);
-          saveCache({ brands: state.brands, parts: state.allParts, webAppUrl: state.webAppUrl });
-        }
-
-        const savedPartNumbers = new Set(toSave.map(r => PartCore.normalize(r.partNumber)));
-        state.bulkRows = state.bulkRows.filter(r => !savedPartNumbers.has(PartCore.normalize(r.partNumber)));
-
-        if (saveBtn) {
-          saveBtn.innerHTML = '<span aria-hidden="true">💾</span> บันทึกรายการ (<span id="bulk-save-num">0</span>)';
-        }
-
-        revalidateBulkRows();
-        renderBulkTable();
-
-        toast('🎉 บันทึกสำเร็จ ' + res.createdCount + ' รายการ' + (res.skippedCount ? ' (ข้ามที่ซ้ำ ' + res.skippedCount + ' รายการ)' : ''));
-
-        if (!state.bulkRows.length) {
-          setTimeout(() => {
-            switchView('catalog');
-          }, 1200);
-        }
-      } else {
-        toast('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
-      }
-    } catch (err) {
-      alert('บันทึกไม่สำเร็จ: ' + (err.message || err));
-    } finally {
-      state.bulkSaving = false;
-      const btn = $('bulk-save-btn');
-      if (btn) {
-        btn.innerHTML = '<span aria-hidden="true">💾</span> บันทึกรายการ (<span id="bulk-save-num">0</span>)';
-      }
-      renderBulkStats();
-    }
-  }
-
-  // Wiring Bulk View Buttons & Events
-  $('nav-bulk').onclick = () => switchView('bulk');
-  $('bulk-add-btn').onclick = () => switchView('bulk');
-
-  $('bulk-filter-all').onclick = () => setBulkFilter('all');
-  $('bulk-filter-ready').onclick = () => setBulkFilter('ready');
-  $('bulk-filter-dup').onclick = () => setBulkFilter('dup');
-  $('bulk-filter-invalid').onclick = () => setBulkFilter('invalid');
-
-  $('bulk-paste-open-btn').onclick = openBulkPasteDialog;
-  $('bulk-add-row-btn').onclick = () => addBulkRow();
-  $('bulk-sample-btn').onclick = loadBulkSampleData;
-  $('bulk-clear-btn').onclick = clearBulkRows;
-  $('bulk-save-btn').onclick = saveBulkParts;
-
-  $('bulk-empty-paste').onclick = openBulkPasteDialog;
-  $('bulk-empty-add').onclick = () => addBulkRow();
-  $('bulk-empty-sample').onclick = loadBulkSampleData;
-
-  $('bulk-paste-close').onclick = closeBulkPasteDialog;
-  $('bulk-paste-cancel').onclick = closeBulkPasteDialog;
-
-  $('bulk-paste-input').addEventListener('input', () => {
-    const text = $('bulk-paste-input').value.trim();
-    const count = text ? text.split(/\r\n|\r|\n/).filter(Boolean).length : 0;
-    $('bulk-paste-preview-count').textContent = count + ' บรรทัดที่ตรวจพบ';
-  });
-
-  $('bulk-paste-confirm').onclick = () => {
-    const raw = $('bulk-paste-input').value;
-    const items = parseExcelText(raw);
-    if (!items.length) {
-      toast('ไม่พบข้อมูลที่ถูกต้อง กรุณาตรวจสอบการคัดลอกจาก Excel');
-      return;
-    }
-    state.bulkRows.push(...items);
-    revalidateBulkRows();
-    renderBulkTable();
-    closeBulkPasteDialog();
-    toast('นำเข้าข้อมูลจาก Excel แล้ว ' + items.length + ' รายการ');
-  };
-
-  // Global Paste Listener for Bulk View
-  window.addEventListener('paste', e => {
-    if (state.view !== 'bulk') return;
-    if ($('bulk-paste-dialog').open) return;
-    if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
-
-    const text = e.clipboardData && e.clipboardData.getData('text/plain');
-    if (!text || !text.trim()) return;
-
-    e.preventDefault();
-    const items = parseExcelText(text);
-    if (items.length) {
-      state.bulkRows.push(...items);
-      revalidateBulkRows();
-      renderBulkTable();
-      toast('วางข้อมูลจาก Excel แล้ว ' + items.length + ' รายการ');
-    }
-  });
+  $('bulk-add-btn').onclick=()=>switchView('bulk');$('bulk-back').onclick=()=>switchView('catalog');$('bulk-add-row').onclick=()=>addBulkRow();$('bulk-paste-open').onclick=openBulkPaste;
+  $('bulk-clear').onclick=()=>{state.bulkRows=[];state.dirty=false;renderBulkRows();};
+  $('bulk-save').onclick=()=>{const count=state.bulkRows.filter(r=>r.status==='ready').length;ask('บันทึก Part '+count+' รายการ?','ระบบจะข้ามรายการที่ซ้ำหรือข้อมูลไม่ครบ','บันทึกรายการ',commitBulkRows,null,'primary');};
+  $('bulk-paste-close').onclick=()=>closeDialog('bulk-paste-dialog');$('bulk-paste-cancel').onclick=()=>closeDialog('bulk-paste-dialog');
+  $('bulk-paste-input').oninput=()=>{$('bulk-paste-count').textContent=String($('bulk-paste-input').value.split(/\r\n|\r|\n/).filter(Boolean).length)+' บรรทัด';};
+  $('bulk-paste-confirm').onclick=()=>{const rows=parseBulkText($('bulk-paste-input').value);if(!rows.length){toast('ไม่พบข้อมูลสำหรับนำเข้า');return;}state.bulkRows.push(...rows);state.dirty=true;closeDialog('bulk-paste-dialog');renderBulkRows();};
+  window.addEventListener('paste',event=>{if(state.view!=='bulk'||$('bulk-paste-dialog').open||['INPUT','TEXTAREA'].includes(event.target.tagName))return;const text=event.clipboardData?.getData('text/plain');if(!text)return;const rows=parseBulkText(text);if(rows.length){event.preventDefault();state.bulkRows.push(...rows);state.dirty=true;renderBulkRows();}});
 
   function connectivity(){setError('connection',navigator.onLine?'':'ออฟไลน์ · ข้อมูลที่กรอกยังอยู่ กรุณาเชื่อมต่อก่อนบันทึก');}
   window.addEventListener('offline',connectivity);
@@ -2418,10 +2356,10 @@ const PartImage = (() => {
     }
     try {
       const search=new URLSearchParams(window.location.search);
-      if(search.get('view')==='batch' || search.get('view')==='batch-images' || window.location.hash==='#batch'){
-        switchView('batch');
-      } else if(search.get('view')==='bulk' || search.get('view')==='bulk-table' || window.location.hash==='#bulk'){
+      if(search.get('action')==='add' || search.get('view')==='bulk' || search.get('view')==='bulk-table' || window.location.hash==='#bulk'){
         switchView('bulk');
+      } else if(search.get('view')==='batch' || search.get('view')==='batch-images' || window.location.hash==='#batch'){
+        switchView('batch');
       }
     } catch(_){}
     await fetchFreshData(false);
@@ -2453,7 +2391,6 @@ const PartImage = (() => {
   $('page-size').value=String(state.params.pageSize);
   init();
 })();
-
 
 </script>
 </body>

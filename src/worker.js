@@ -115,7 +115,7 @@ export default {
     let body;try{body=JSON.parse(new TextDecoder().decode(bytes));}catch{fail('VALIDATION','รูปแบบคำขอไม่ถูกต้อง');}
 
     // Check deletion permission
-    const isDelete = ['deleteMachine','deleteBrand','remove'].includes(body.method);
+    const isDelete = ['deleteMachine','deleteBrand','remove','deleteMachineType'].includes(body.method);
     if(isDelete && actor.permissions && !actor.permissions.can_delete){
       fail('FORBIDDEN','บัญชีนี้ไม่ได้รับสิทธิ์ในการลบข้อมูล',403);
     }
@@ -128,7 +128,7 @@ export default {
     const repo=new Repository(env.DB);let data;
     if(url.pathname.endsWith('/references')){
      const ref=await repo.references(),machines=await repo.catalog('machines');
-     data={departments:ref.departments.map(d=>({DeptID:d.deptId,DeptName:d.deptName,IsActive:d.isActive})),lines:ref.lines.map(l=>({LineID:l.lineId,DeptID:l.deptId,LineName:l.lineName,IsActive:l.isActive})),machines:machines.map(m=>({MachineID:m.machineId,MachineCode:m.machineCode,MachineName:m.machineName,DeptID:m.deptId,LineID:m.lineId,Status:m.status,IsActive:m.isActive}))};
+     data={departments:ref.departments.map(d=>({DeptID:d.deptId,DeptName:d.deptName,IsActive:d.isActive})),lines:ref.lines.map(l=>({LineID:l.lineId,DeptID:l.deptId,LineName:l.lineName,IsActive:l.isActive})),machines:machines.map(m=>({MachineID:m.machineId,MachineCode:m.machineCode,MachineName:m.machineName,DeptID:m.deptId,LineID:m.lineId,LineOrder:m.lineOrder,Status:m.status,IsActive:m.isActive}))};
     }else if(url.pathname.endsWith('/parts')) data=(await repo.catalog('parts')).map(p=>({ID:p.id,'Part number':p.partNumber,Description:p.description,Brand:p.brand,Price:p.price,Picture:p.picture,Thumbnail:p.thumbnail,'Store code':p.storeCode,'อายุอุปกรณ์ (ปี)':p.lifespan,Notes:p.notes}));
     else fail('NOT_FOUND','ไม่พบข้อมูล',404);
     return json({ok:true,data});

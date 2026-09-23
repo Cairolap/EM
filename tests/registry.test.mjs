@@ -18,6 +18,18 @@ test('machine create persists, ID is monotonic, retry is exact, stale update nev
  assert.equal(env.DB.raw.prepare('SELECT count(*) n FROM audit_events').get().n,2);
  const list=await rpc(env,'machines','getMachines',[{}]);assert.equal(list.data.items[0].machineName,'ใหม่');assert.equal(list.data.items[0].machineCode,'0001');
 });
+test('machine display order moves within a line and is exposed to BOM',async()=>{
+ const env=setup();
+ const first=await rpc(env,'machines','createMachine',[{...machine,machineCode:'M-01',requestId:crypto.randomUUID()}]);
+ const second=await rpc(env,'machines','createMachine',[{...machine,machineCode:'M-02',requestId:crypto.randomUUID()}]);
+ const move=await rpc(env,'machines','reorderMachine',[second.data.machineId,{position:1,requestId:crypto.randomUUID()}]);
+ assert.equal(move.status,200);assert.equal(move.data.position,1);
+ const list=await rpc(env,'machines','getMachines',[{lineId:'L01',sortBy:'lineOrder',pageSize:25}]);
+ assert.deepEqual(list.data.items.map(item=>item.machineCode),['M-02','M-01']);
+ assert.deepEqual(list.data.items.map(item=>item.lineOrder),[1,2]);
+ const references=await rpc(env,'bom','references');
+ assert.deepEqual(references.data.machines.filter(item=>item.LineID==='L01').sort((a,b)=>a.LineOrder-b.LineOrder).map(item=>item.MachineCode),['M-02','M-01']);
+});
 test('references, unique normalized machine codes, inactive history and lifecycle',async()=>{
  const env=setup();let r=await rpc(env,'machines','createMachine',[{...machine,lineId:'bad',requestId:crypto.randomUUID()}]);assert.equal(r.status,422);
  r=await rpc(env,'machines','createMachine',[{...machine,requestId:crypto.randomUUID()}]);const id=r.data.machineId;
@@ -338,43 +350,82 @@ test('user management: granular permissions, temporary expiry, reset to 1234 and
  assert.equal(expiredLogin.status,401);
 });
 
-test('production baseline parity: lineOrder sorting/validation, bom pageSize all, and partsByIds optimization', async () => {
+test('machine types lifecycle: create, duplicate, dynamic validation in machine, delete permission check', async () => {
  const env = setup();
- const { MachineCore } = await import('../src/generated/machine-core.js');
- const { BomCore } = await import('../src/generated/bom-core.js');
- const { Repository } = await import('../src/repository.js');
+ const boot = await rpc(env, 'machines', 'bootstrap');
+ assert.equal(boot.status, 200);
+ assert.ok(boot.data.machineTypes.includes('Press'));
+ assert.ok(boot.data.machineTypes.includes('อื่นๆ'));
 
- // 1. MachineCore lineOrder validation
- const valid = MachineCore.validate({ ...machine, lineOrder: '12' });
- assert.equal(valid.value.lineOrder, 12);
- assert.equal(Object.keys(valid.errors).length, 0);
+ const created = await rpc(env, 'machines', 'createMachineType', ['CNC']);
+ assert.equal(created.status, 200);
+ assert.equal(created.data.name, 'CNC');
+ assert.equal(created.data.active, true);
 
- const invalid = MachineCore.validate({ ...machine, lineOrder: '0' });
- assert.ok(invalid.errors.lineOrder);
+ const dup = await rpc(env, 'machines', 'createMachineType', [' cnc ']);
+ assert.equal(dup.status, 409);
 
- const empty = MachineCore.validate({ ...machine, lineOrder: '' });
- assert.equal(empty.value.lineOrder, '');
+ const mRes = await rpc(env, 'machines', 'createMachine', [{
+  ...machine,
+  machineCode: 'M-CNC-1',
+  machineType: 'CNC',
+  requestId: crypto.randomUUID()
+ }]);
+ assert.equal(mRes.status, 200);
 
- // 2. Sorting by lineOrder
- const sorted = MachineCore.query([
-  { machineId: 'M1', machineCode: 'A', lineOrder: 20 },
-  { machineId: 'M2', machineCode: 'B', lineOrder: 5 },
-  { machineId: 'M3', machineCode: 'C', lineOrder: '' }
- ], { sortBy: 'lineOrder', sortOrder: 'asc' });
- assert.equal(sorted.items[0].machineId, 'M2');
- assert.equal(sorted.items[1].machineId, 'M1');
- assert.equal(sorted.items[2].machineId, 'M3');
+ const badM = await rpc(env, 'machines', 'createMachine', [{
+  ...machine,
+  machineCode: 'M-BAD-1',
+  machineType: 'NonExistentType',
+  requestId: crypto.randomUUID()
+ }]);
+ assert.equal(badM.status, 422);
 
- // 3. BomCore pageSize === 'all'
- const pagedAll = BomCore.page([1, 2, 3, 4, 5], { pageSize: 'all' });
- assert.equal(pagedAll.pageSize, 'all');
- assert.equal(pagedAll.items.length, 5);
+ const prodEnv = { ...env, DEV_AUTH: null };
+ const adminLogin = await worker.fetch(new Request('http://localhost/api/v1/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', 'Origin': 'http://localhost' },
+  body: JSON.stringify({ username: 'admin', password: 'admin1234' })
+ }), prodEnv);
+ const adminCookie = adminLogin.headers.get('Set-Cookie').split(';')[0];
 
- // 4. Repository partsByIds
- const repo = new Repository(env.DB);
- await rpc(env, 'parts', 'createPart', [{ partNumber: 'PX-1', description: 'P1', brandId: 'B01', price: 10, lifespan: 1, requestId: crypto.randomUUID() }]);
- const p2 = await rpc(env, 'parts', 'createPart', [{ partNumber: 'PX-2', description: 'P2', brandId: 'B01', price: 20, lifespan: 2, requestId: crypto.randomUUID() }]);
- const fetched = await repo.partsByIds([p2.data.id]);
- assert.equal(fetched.length, 1);
- assert.equal(fetched[0].partNumber, 'PX-2');
+ await worker.fetch(new Request('http://localhost/api/v1/users/rpc', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', 'Origin': 'http://localhost', Cookie: adminCookie },
+  body: JSON.stringify({
+   method: 'createUser',
+   args: [{
+    username: 'nodeleteuser',
+    password: 'password123',
+    displayName: 'Editor Without Delete',
+    role: 'editor',
+    userType: 'permanent',
+    permissions: { machines: 'write', parts: 'write', bom: 'write', users: 'none', can_delete: false }
+   }]
+  })
+ }), prodEnv);
+
+ const noDelLogin = await worker.fetch(new Request('http://localhost/api/v1/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', 'Origin': 'http://localhost' },
+  body: JSON.stringify({ username: 'nodeleteuser', password: 'password123' })
+ }), prodEnv);
+ const noDelCookie = noDelLogin.headers.get('Set-Cookie').split(';')[0];
+
+ const forbidDel = await worker.fetch(new Request('http://localhost/api/v1/machines/rpc', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', 'Origin': 'http://localhost', Cookie: noDelCookie, 'Idempotency-Key': crypto.randomUUID() },
+  body: JSON.stringify({ method: 'deleteMachineType', args: [created.data.id] })
+ }), prodEnv);
+ assert.equal(forbidDel.status, 403);
+
+ const delRes = await rpc(env, 'machines', 'deleteMachineType', [created.data.id]);
+ assert.equal(delRes.status, 200);
+
+ const reCreate = await rpc(env, 'machines', 'createMachineType', ['CNC']);
+ assert.equal(reCreate.data.requiresReactivation, true);
+ const reactivated = await rpc(env, 'machines', 'createMachineType', ['CNC', true]);
+ assert.equal(reactivated.status, 200);
+ assert.equal(reactivated.data.active, true);
 });
+

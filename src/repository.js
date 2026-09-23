@@ -5,6 +5,7 @@ export class Repository {
  async all(sql,...args){return (await this.db.prepare(sql).bind(...args).all()).results;}
  async references(){return {departments:(await this.all('SELECT * FROM departments')).map(d=>({deptId:d.id,deptName:d.name,isActive:!!d.is_active})),lines:(await this.all('SELECT * FROM lines')).map(l=>({lineId:l.id,deptId:l.department_id,lineName:l.name,isActive:!!l.is_active,remark:l.remark}))};}
  async brands(){return (await this.all('SELECT * FROM brands')).map(b=>({id:b.id,name:b.name,active:!!b.is_active,version:b.version}));}
+ async machineTypes(){return (await this.all('SELECT * FROM machine_types')).map(t=>({id:t.id,name:t.name,active:!!t.is_active,version:t.version}));}
  async machine(id){return machineRecord(await this.db.prepare(MACHINE_SELECT+' WHERE m.id=?').bind(id).first());}
  async part(id){return partRecord(await this.db.prepare(PART_SELECT+' WHERE p.id=?').bind(id).first());}
  async partsByIds(ids){
@@ -18,6 +19,18 @@ export class Repository {
    const rows=await this.all((kind==='machines'?MACHINE_SELECT:PART_SELECT)+' ORDER BY '+(kind==='machines'?'m':'p')+'.id LIMIT 10001');
    if(rows.length>10000)fail('CAPACITY','ทะเบียนเกินขอบเขต 10,000 รายการ กรุณาติดต่อผู้ดูแลเพื่อเปิดการค้นหาแบบฐานข้อมูล',503);
    return rows.map(kind==='machines'?machineRecord:partRecord);
+ }
+ async reorderMachine(req,machineId,targetPosition){
+  const machine=await this.machine(machineId);if(!machine)fail('NOT_FOUND','ไม่พบเครื่องจักรนี้',404);
+  const rows=await this.all(`${MACHINE_SELECT} WHERE m.department_id=? AND m.line_id=? ORDER BY CASE WHEN m.line_order IS NULL THEN 1 ELSE 0 END, m.line_order, m.code COLLATE NOCASE, m.id`,machine.deptId,machine.lineId);
+  const ordered=rows.map(machineRecord).filter(m=>m.machineId!==machineId);
+  const position=Math.max(1,Math.min(Number(targetPosition)||1,ordered.length+1));
+  ordered.splice(position-1,0,machine);
+  const statements=[this.db.prepare("INSERT INTO requests VALUES(?,?,?,?,'DONE',?,?)").bind(req.key,req.actor,req.operation,req.payloadHash,JSON.stringify({machineId,position}),req.now)];
+  ordered.forEach((m,index)=>statements.push(this.db.prepare('UPDATE machines SET line_order=? WHERE id=?').bind(index+1,m.machineId)));
+  statements.push(this.db.prepare('INSERT INTO audit_events(request_key,actor,operation,entity_id,before_json,after_json,created_at) VALUES(?,?,?,?,?,?,?)').bind(req.key,req.actor,req.operation,machineId,JSON.stringify({lineOrder:machine.lineOrder||null}),JSON.stringify({lineOrder:position,departmentId:machine.deptId,lineId:machine.lineId}),req.now));
+  await this.db.batch(statements);
+  return {machineId,position};
  }
  async nextId(kind){const r=await this.db.prepare('UPDATE id_counters SET value=value+1 WHERE kind=? RETURNING value').bind(kind).first();if(!r)fail('SCHEMA','ยังไม่ได้เตรียมฐานข้อมูล',503);return (kind==='machines'?'M':'PART-')+String(r.value).padStart(6,'0');}
  async request(actor,operation,payload,requestId){
@@ -53,6 +66,14 @@ export class Repository {
  async bomLineRecords(deptId,lineId){
   const rows=await this.all("SELECT r.* FROM equipment_records r JOIN machines m ON r.machine_id=m.id WHERE m.department_id=? AND m.line_id=? AND r.record_status='ACTIVE' ORDER BY r.created_at ASC",deptId,lineId);
   return rows.map(bomRecord);
+ }
+ async bomPartsForMachine(machineId){
+  const rows=await this.all(`${PART_SELECT} WHERE p.id IN (SELECT DISTINCT part_id FROM equipment_records WHERE machine_id=?)`,machineId);
+  return rows.map(partRecord);
+ }
+ async bomPartsForLine(deptId,lineId){
+  const rows=await this.all(`${PART_SELECT} WHERE p.id IN (SELECT DISTINCT r.part_id FROM equipment_records r JOIN machines m ON r.machine_id=m.id WHERE m.department_id=? AND m.line_id=?)`,deptId,lineId);
+  return rows.map(partRecord);
  }
  async bomOperation(opId){
   const r=await this.db.prepare('SELECT * FROM equipment_operations WHERE id=?').bind(opId).first();
