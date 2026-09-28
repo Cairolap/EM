@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>สื่อประชาสัมพันธ์ - Electrical Maintenance</title>
+  <link rel="icon" type="image/png" href="__APP_FAVICON__">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap">
+  <!-- APP_STYLE -->
+</head>
+<body>
+  <div class="ann-container">
+    <header class="ann-header">
+      <div class="header-left">
+        <h1 class="page-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          สื่อประชาสัมพันธ์
+        </h1>
+        <p class="page-subtitle">จัดการรูปภาพและวิดีโอสำหรับแสดงผลบนจอ TV</p>
+      </div>
+      <div class="header-right">
+        <a href="/announcements/tv.html" target="_blank" class="btn btn-primary btn-tv-launch">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          เปิดหน้าจอ TV (Public View)
+        </a>
+      </div>
+    </header>
+
+    <div class="ann-grid-layout">
+      <!-- Main Content Left: Media Upload & List -->
+      <main class="ann-main-content">
+        <section class="card ann-upload-card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              จัดการสื่อ (รูปภาพ / วิดีโอ)
+            </h2>
+          </div>
+          <div class="upload-area" id="upload-dropzone">
+            <input type="file" id="file-input" accept="image/jpeg,image/png,video/mp4" style="display:none">
+            <div class="upload-icon">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.8"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="M12 12v9"></path><path d="m16 16-4-4-4 4"></path></svg>
+            </div>
+            <p class="upload-text">คลิก หรือลากไฟล์มาวางเพื่ออัปโหลด</p>
+            <p class="upload-hint">รองรับรูปภาพ (JPG, PNG) และวิดีโอ (MP4) | Ctrl + V เพื่อวาง</p>
+            <div id="upload-progress-container" style="display:none" class="upload-progress-bar">
+              <div id="upload-progress-fill" class="progress-fill"></div>
+            </div>
+          </div>
+
+          <div class="media-list-header">
+            <span class="media-count" id="media-count-label">0 รายการ</span>
+          </div>
+
+          <div class="media-grid" id="media-grid">
+            <!-- Media cards inserted via JavaScript -->
+            <div class="loading-state">กำลังโหลดสื่อ...</div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Right Sidebar: Safety Statistics & Display Settings -->
+      <aside class="ann-sidebar">
+        <section class="card ann-settings-card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+              สถิติความปลอดภัย
+            </h2>
+          </div>
+          
+          <form id="form-settings" class="settings-form">
+            <!-- สถิติบริษัท -->
+            <div class="settings-group-box">
+              <h3 class="group-title">สถิติบริษัท</h3>
+              <div class="form-group">
+                <label for="company_last_incident">วันที่เกิดอุบัติเหตุล่าสุด</label>
+                <input type="date" id="company_last_incident">
+              </div>
+              <div class="form-group">
+                <label for="company_target_days">เป้าหมาย (วัน)</label>
+                <input type="number" id="company_target_days" min="1" placeholder="1200">
+              </div>
+            </div>
+
+            <!-- แผนกซ่อมไฟฟ้า -->
+            <div class="settings-group-box">
+              <h3 class="group-title">แผนกซ่อมไฟฟ้า</h3>
+              <div class="form-group">
+                <label for="dept_last_incident">วันที่เกิดอุบัติเหตุล่าสุด</label>
+                <input type="date" id="dept_last_incident">
+              </div>
+              <div class="form-group">
+                <label for="dept_target_days">เป้าหมาย (วัน)</label>
+                <input type="number" id="dept_target_days" min="1" placeholder="3802">
+              </div>
+            </div>
+
+            <!-- การแสดงผล -->
+            <div class="settings-group-box">
+              <h3 class="group-title">การแสดงผล</h3>
+              <div class="form-group">
+                <label for="slide_interval_sec">เวลาเปลี่ยนสไลด์ (วินาที)</label>
+                <input type="number" id="slide_interval_sec" min="5" max="600" value="60">
+              </div>
+              <div class="checkbox-group">
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="show_clock" checked>
+                  <span>นาฬิกา</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="show_safety" checked>
+                  <span>สถิติความปลอดภัย</span>
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-block" id="btn-save-settings">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              บันทึกการตั้งค่าทั้งหมด
+            </button>
+          </form>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" style="display:none"></div>
+
+  <!-- APP_SCRIPT -->
+</body>
+</html>

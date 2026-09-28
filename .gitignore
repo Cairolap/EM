@@ -12,6 +12,10 @@ client_secret*.json
 key*.json
 *.pem
 .oauth_tokens.json
+electrical-maintenance-*.json
+*serviceaccount*.json
+*-*.json.json
+*.private.json
 
 # Local temp folders
 Backup/

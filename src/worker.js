@@ -2,12 +2,24 @@ import {authenticate, authenticateUser, changePassword, createSession, destroySe
 import {dispatch} from './service.js';
 import {Repository} from './repository.js';
 import {listUsers, createUser, updateUser, resetPassword, deleteUser} from './user-service.js';
+import {listAnnouncements, createAnnouncement, deleteAnnouncement, updateAnnouncementSettings, getAnnouncementMedia} from './announcement-service.js';
 import {AppError,fail,json} from './errors.js';
 
 export default {
  async fetch(request,env){
   try{
    const url=new URL(request.url);
+
+   // Public API for TV Display (No login required)
+   if(url.pathname==='/api/v1/announcements/public'){
+    if(request.method!=='GET')fail('METHOD','ใช้ GET สำหรับดึงข้อมูลประชาสัมพันธ์',405);
+    const data=await listAnnouncements(env);
+    return json({ok:true,data});
+   }
+   if(url.pathname.startsWith('/api/v1/announcements/media/')){
+    const id=url.pathname.replace('/api/v1/announcements/media/','');
+    return await getAnnouncementMedia(env,id,request);
+   }
 
    // 1. Static Web Assets & Root Redirect (No Auth Required to load HTML/JS/CSS)
    if(!url.pathname.startsWith('/api/')){
@@ -99,6 +111,23 @@ export default {
     else if(method==='resetPassword') result=await resetPassword(env,actor,args[0]);
     else if(method==='deleteUser') result=await deleteUser(env,actor,args[0]);
     else fail('NOT_FOUND','ไม่พบคำสั่งผู้ใช้นี้',404);
+    return json({ok:true,data:result});
+   }
+
+   // Announcements Management RPC
+   if(url.pathname==='/api/v1/announcements/rpc'){
+    if(request.method!=='POST')fail('METHOD','ใช้ POST สำหรับคำสั่งประชาสัมพันธ์',405);
+    let body;
+    try{ body=await request.json(); }catch{ fail('VALIDATION','รูปแบบคำขอไม่ถูกต้อง'); }
+    const rawMethod = body?.method || '';
+    const method = rawMethod.replace(/^announcements\./, '');
+    const args = body?.args || [];
+    let result;
+    if(method==='list') result=await listAnnouncements(env);
+    else if(method==='create') result=await createAnnouncement(env,actor,args[0],request.headers.get('Idempotency-Key')||crypto.randomUUID());
+    else if(method==='delete') result=await deleteAnnouncement(env,actor,args[0]);
+    else if(method==='updateSettings') result=await updateAnnouncementSettings(env,actor,args[0]);
+    else fail('NOT_FOUND','ไม่พบคำสั่งประชาสัมพันธ์นี้',404);
     return json({ok:true,data:result});
    }
 

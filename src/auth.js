@@ -36,10 +36,10 @@ export async function authenticateUser(db, username, password) {
   let permissions = {};
   try { permissions = JSON.parse(user.permissions_json || '{}'); } catch (_) {}
   const defaultPerms = user.role === 'admin'
-    ? { machines: 'write', parts: 'write', bom: 'write', users: 'admin', can_delete: true }
+    ? { machines: 'write', parts: 'write', bom: 'write', announcements: 'write', users: 'admin', can_delete: true }
     : user.role === 'editor'
-    ? { machines: 'write', parts: 'write', bom: 'write', users: 'none', can_delete: false }
-    : { machines: 'read', parts: 'read', bom: 'read', users: 'none', can_delete: false };
+    ? { machines: 'write', parts: 'write', bom: 'write', announcements: 'write', users: 'none', can_delete: false }
+    : { machines: 'read', parts: 'read', bom: 'read', announcements: 'read', users: 'none', can_delete: false };
 
   return {
     ...user,
@@ -118,10 +118,10 @@ export async function authenticate(request, env) {
       let permissions = {};
       try { permissions = JSON.parse(session.permissions_json || '{}'); } catch (_) {}
       const defaultPerms = session.role === 'admin'
-        ? { machines: 'write', parts: 'write', bom: 'write', users: 'admin', can_delete: true }
+        ? { machines: 'write', parts: 'write', bom: 'write', announcements: 'write', users: 'admin', can_delete: true }
         : session.role === 'editor'
-        ? { machines: 'write', parts: 'write', bom: 'write', users: 'none', can_delete: false }
-        : { machines: 'read', parts: 'read', bom: 'read', users: 'none', can_delete: false };
+        ? { machines: 'write', parts: 'write', bom: 'write', announcements: 'write', users: 'none', can_delete: false }
+        : { machines: 'read', parts: 'read', bom: 'read', announcements: 'read', users: 'none', can_delete: false };
 
       return {
         id: session.id,
@@ -147,8 +147,8 @@ export async function authenticate(request, env) {
           const role = record?.role || (email === String(env.OWNER_EMAIL || '').toLowerCase() ? 'admin' : null);
           if (role) {
             const defaultPerms = role === 'admin'
-              ? { machines: 'write', parts: 'write', bom: 'write', users: 'admin', can_delete: true }
-              : { machines: 'write', parts: 'write', bom: 'write', users: 'none', can_delete: false };
+              ? { machines: 'write', parts: 'write', bom: 'write', announcements: 'write', users: 'admin', can_delete: true }
+              : { machines: 'write', parts: 'write', bom: 'write', announcements: 'write', users: 'none', can_delete: false };
             return { id: email, username: email, role, displayName: email, permissions: defaultPerms, mustChangePassword: false };
           }
         }
@@ -160,7 +160,9 @@ export async function authenticate(request, env) {
 }
 
 export function authorizeWrite(actor, env, scope = 'machines') {
-  if (actor.permissions) {
+  if (actor.role === 'admin') {
+    // Admin has full write access to all scopes
+  } else if (actor.permissions) {
     if (actor.permissions[scope] !== 'write') fail('FORBIDDEN', 'บัญชีนี้ไม่มีสิทธิ์แก้ไขข้อมูลในส่วนนี้', 403);
   } else if (!['editor', 'admin'].includes(actor.role)) {
     fail('FORBIDDEN', 'บัญชีนี้ไม่มีสิทธิ์แก้ไขข้อมูล', 403);
@@ -170,7 +172,7 @@ export function authorizeWrite(actor, env, scope = 'machines') {
 
 export function authorizeDelete(actor, env, scope = 'machines') {
   authorizeWrite(actor, env, scope);
-  if (actor.permissions && !actor.permissions.can_delete) {
+  if (actor.role !== 'admin' && actor.permissions && !actor.permissions.can_delete) {
     fail('FORBIDDEN', 'บัญชีนี้ไม่ได้รับสิทธิ์ในการลบข้อมูล', 403);
   }
 }

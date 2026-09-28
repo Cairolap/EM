@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ประชาสัมพันธ์ - Digital Signage</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Cdefs%3E%3ClinearGradient%20id='g'%20x1='0%25'%20y1='0%25'%20x2='100%25'%20y2='100%25'%3E%3Cstop%20offset='0%25'%20stop-color='%23ef4444'/%3E%3Cstop%20offset='50%25'%20stop-color='%23f97316'/%3E%3Cstop%20offset='100%25'%20stop-color='%23eab308'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20fill='url(%23g)'%20d='M18%202%20L6%2018%20H15%20L14%2030%20L26%2014%20H17%20Z'%20stroke='%23fff'%20stroke-width='1.5'%20stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <!-- Icons (Offline) -->
+    <link rel="stylesheet" href="../css/fontawesome.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #020617; /* Dark tech background */
+            color: #f8fafc;
+            font-family: 'Noto Sans Thai', sans-serif;
+            overflow: hidden;
+            /* No scrollbars for TV */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 3s ease;
+            /* Smooth bg transition */
+            padding: 10px; /* Safe area for TVs */
+        }
+
+        /* Top Bar: Time & Date */
+        .top-bar {
+            min-height: 80px;
+            background: rgba(15, 23, 42, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem 1rem 0 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .clock-container {
+            display: flex;
+            align-items: baseline;
+            gap: 1.2rem;
+        }
+
+        .time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #38bdf8;
+            line-height: 1;
+        }
+
+        .date {
+            font-size: 1.5rem;
+            color: #cbd5e1;
+            font-weight: 300;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Main Layout */
+        .main-container {
+            flex: 1;
+            display: flex;
+            height: 90vh;
+            /* Remaining height */
+            position: relative;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Left Side: Media Slideshow */
+        .media-section {
+            flex: 1;
+            /* Takes available space */
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000000;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .media-element {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* Fit whole image/video */
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .media-element.active {
+            opacity: 1;
+        }
+
+        /* Right Side: Safety Stats (Sidebar Layout Container, not a card itself to prevent nested cards) */
+        .stats-section {
+            width: 24vw;
+            /* Fixed width sidebar */
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            z-index: 50;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 4rem;
+            font-weight: 700;
+            color: #22c55e;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #cbd5e1;
+        }
+
+        .target-box {
+            margin-top: 0.75rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #f8fafc;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .target-box span {
+            color: #38bdf8;
+            font-weight: 800;
+            font-size: 1.5rem;
+        }
+
+        .start-date-display {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 0.4rem;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #22c55e;
+            width: 100%;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 1s ease;
+        }
+
+        /* Fullscreen Button */
+        .fullscreen-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.6);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            opacity: 0.3;
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+        }
+
+        .fullscreen-btn:hover {
+            opacity: 1;
+            background: rgba(15, 23, 42, 0.9);
+            transform: scale(1.1);
+            border-color: #38bdf8;
+        }
+
+        /* Carousel Indicator Dots */
+        .dots-container {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            pointer-events: auto; /* enable clicking */
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.35);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dot:hover {
+            background: rgba(255, 255, 255, 0.7);
+            transform: scale(1.1);
+        }
+
+        .dot.active {
+            background: #38bdf8; /* light blue */
+            transform: scale(1.3);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="top-bar">
+        <div class="logo">
+            <i class="fa-solid fa-bolt" style="color: #f59e0b; margin-right: 0.5rem;"></i>
+            ELECTRICAL MAINTENANCE
+        </div>
+        <div class="clock-container">
+            <div class="time" id="clock-time">00:00:00</div>
+            <div class="date" id="clock-date">จันทร์ 1 มกราคม 2568</div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Media Slideshow -->
+        <div class="media-section" id="media-container">
+            <!-- Default Placeholder if no media -->
+            <div style="text-align: center; color: #94a3b8; padding: 2rem;">
+                <i class="fa-solid fa-photo-film" style="font-size: 5rem; margin-bottom: 1rem;"></i>
+                <h2>รอข้อมูลสื่อประชาสัมพันธ์</h2>
+            </div>
+        </div>
+
+        <!-- Safety Stats Sidebar -->
+        <div class="stats-section" id="stats-sidebar">
+            <!-- Company Stat -->
+            <div class="stat-card">
+                <div class="stat-title"><i class="fa-solid fa-building"></i> สถิติบริษัท</div>
+                <div class="stat-value" id="company-days">0</div>
+                <div class="stat-label">วันปลอดอุบัติเหตุ</div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="company-progress"></div>
+                </div>
+                <div class="target-box">เป้าหมาย: <span id="company-target">0</span> วัน</div>
+                <div class="start-date-display" id="company-start-date"></div>
+            </div>
+
+            <!-- Department Stat -->
+            <div class="stat-card">
+                <div class="stat-title"><i class="fa-solid fa-helmet-safety"></i> แผนกซ่อมไฟฟ้า</div>
+                <div class="stat-value" id="dept-days"
+                    style="color: var(--warning);">0</div>
+                <div class="stat-label">วันปลอดอุบัติเหตุ</div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="dept-progress"
+                        style="background: var(--warning);"></div>
+                </div>
+                <div class="target-box">เป้าหมาย: <span id="dept-target">0</span> วัน</div>
+                <div class="start-date-display" id="dept-start-date"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Button -->
+    <button class="fullscreen-btn" id="fs-btn" onclick="toggleFullScreen()" title="เต็มจอ (Full Screen)">
+        <i class="fa-solid fa-expand"></i>
+    </button>
+
+    <script>
+        // ==================== Burn-in Protection ====================
+        function initBurnInProtection() {
+            // 1. Pixel Shift every 1 minute
+            setInterval(() => {
+                const container = document.body;
+                const x = Math.random() * 10 - 5; // -5 to 5 px
+                const y = Math.random() * 10 - 5;
+                container.style.transform = `translate(${x}px, ${y}px)`;
+            }, 60000);
+
+            // 2. Layout Rotation every 10 minutes
+            // Swaps the flex order of media and sidebar
+            setInterval(() => {
+                const main = document.querySelector('.main-container');
+                const sidebar = document.getElementById('stats-sidebar');
+
+                if (main.style.flexDirection === 'row-reverse') {
+                    main.style.flexDirection = 'row';
+                    sidebar.style.borderLeft = '2px solid rgba(255,255,255,0.1)';
+                    sidebar.style.borderRight = 'none';
+                } else {
+                    main.style.flexDirection = 'row-reverse';
+                    sidebar.style.borderRight = '2px solid rgba(255,255,255,0.1)';
+                    sidebar.style.borderLeft = 'none';
+                }
+            }, 600000); // 10 minutes
+
+            // 3. Background Color Cycle every 5 minutes
+            const bgColors = ['#000000', '#0f172a', '#1e1b4b', '#1a0505', '#022c22'];
+            let colorIdx = 0;
+            setInterval(() => {
+                colorIdx = (colorIdx + 1) % bgColors.length;
+                document.body.style.backgroundColor = bgColors[colorIdx];
+            }, 300000); // 5 minutes
+        }
+        initBurnInProtection();
+
+        // ==================== Clock ====================
+        function updateClock() {
+            const now = new Date();
+            // Time
+            const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('clock-time').textContent = timeStr;
+            // Date
+            const dateStr = now.toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('clock-date').textContent = dateStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ==================== Logic ====================
+        let settings = {};
+        let mediaIndex = 0;
+        let slideTimer = null;
+
+        async function fetchData() {
+            try {
+                const res = await fetch('/api/pr/settings');
+                const newSettings = await res.json();
+
+                // Only update if changed (Deep comparison simple version)
+                if (JSON.stringify(newSettings) !== JSON.stringify(settings)) {
+                    settings = newSettings;
+                    updateStats();
+                    setupSlideshow();
+                }
+            } catch (err) {
+                console.error("Connection Error", err);
+            }
+        }
+
+        // ==================== STATE SYNCING ====================
+        let lastForceTime = 0;
+
+        async function fetchState() {
+            try {
+                const res = await fetch('/api/pr/state');
+                if (res.ok) {
+                    const state = await res.json();
+
+                    // Check if there is a new force slide command
+                    if (state.forceSlideTime > lastForceTime) {
+                        lastForceTime = state.forceSlideTime;
+                        const mediaList = settings.media || [];
+                        if (mediaList.length > 0) {
+                            // Ensure index is within range
+                            let forcedIndex = state.forceSlideIndex;
+                            if (forcedIndex >= 0 && forcedIndex < mediaList.length) {
+                                mediaIndex = forcedIndex;
+                                showSlide(mediaIndex);
+                            }
+                        }
+                    }
+                }
+            } catch (err) { }
+        }
+
+        // Poll for updates every 10 seconds for data, and every 2 secs for state
+        const POLL_INTERVAL = 10000; // 10 seconds for main settings
+        setInterval(fetchData, POLL_INTERVAL);
+        setInterval(fetchState, 2000); // 2 seconds for state updates (fast reaction)
+        fetchData(); // Initial load
+
+        // Log update status
+        console.log('🔄 Auto-refresh enabled: Data will update every', POLL_INTERVAL / 1000, 'seconds');
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function updateStats() {
+            const stats = settings.safetyStats;
+            if (!stats) return;
+
+            // Company
+            const compDays = calculateDays(stats.company.lastAccidentDate);
+            document.getElementById('company-days').textContent = compDays.toLocaleString();
+            document.getElementById('company-target').textContent = (stats.company.targetDays || 0).toLocaleString();
+            updateProgress('company-progress', compDays, stats.company.targetDays);
+
+            // Date Display
+            const compDateContainer = document.getElementById('company-start-date');
+            if (stats.company.lastAccidentDate) {
+                compDateContainer.innerHTML = `<i class="fa-solid fa-calendar"></i> ล่าสุด: ${formatDate(stats.company.lastAccidentDate)}`;
+            } else {
+                compDateContainer.innerHTML = '';
+            }
+
+            // Dept
+            const deptDays = calculateDays(stats.department.lastAccidentDate);
+            document.getElementById('dept-days').textContent = deptDays.toLocaleString();
+            document.getElementById('dept-target').textContent = (stats.department.targetDays || 0).toLocaleString();
+            updateProgress('dept-progress', deptDays, stats.department.targetDays);
+
+            // Date Display
+            const deptDateContainer = document.getElementById('dept-start-date');
+            if (stats.department.lastAccidentDate) {
+                deptDateContainer.innerHTML = `<i class="fa-solid fa-calendar"></i> ล่าสุด: ${formatDate(stats.department.lastAccidentDate)}`;
+            } else {
+                deptDateContainer.innerHTML = '';
+            }
+
+            // Visibility
+            const showSafety = settings.displaySettings?.showSafety !== false;
+            const sidebar = document.getElementById('stats-sidebar');
+            sidebar.style.display = showSafety ? 'flex' : 'none';
+            document.getElementById('media-container').style.width = showSafety ? '75vw' : '100vw'; // Adjust width if sidebar hidden
+        }
+
+        function calculateDays(dateStr) {
+            if (!dateStr) return 0;
+            const start = new Date(dateStr);
+            const now = new Date();
+            const diffTime = Math.abs(now - start);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+
+        function updateProgress(id, current, target) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (!target || target <= 0) {
+                el.style.transform = 'scaleX(0)';
+                return;
+            }
+            let pct = (current / target);
+            if (pct > 1) pct = 1;
+            el.style.transform = 'scaleX(' + pct + ')';
+        }
+
+        // ==================== Slideshow ====================
+        function setupSlideshow() {
+            const container = document.getElementById('media-container');
+            const mediaList = settings.media || [];
+
+            if (mediaList.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #94a3b8; padding: 2rem;">
+                        <i class="fa-solid fa-photo-film" style="font-size: 5rem; margin-bottom: 1rem;"></i>
+                        <h2>รอข้อมูลสื่อประชาสัมพันธ์</h2>
+                    </div>`;
+                return;
+            }
+
+            // Clean existing
+            container.innerHTML = '';
+
+            // Create dots container
+            const dotsContainer = document.createElement('div');
+            dotsContainer.className = 'dots-container';
+
+            // Create elements
+            mediaList.forEach((item, index) => {
+                let el;
+                if (item.type === 'video') {
+                    el = document.createElement('video');
+                    el.src = item.url;
+                    el.muted = true; // Auto play often needs muted
+                    el.autoplay = false;
+                    el.style.objectFit = 'contain';
+                    // Handling video end to next slide
+                    el.onended = nextSlide;
+                } else {
+                    el = document.createElement('img');
+                    el.src = item.url;
+                }
+                el.className = 'media-element';
+                el.id = `slide-${index}`;
+                container.appendChild(el);
+
+                // Create dot
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.id = `dot-${index}`;
+                dot.onclick = (e) => {
+                    e.stopPropagation(); // prevent dblclick fullscreen trigger
+                    mediaIndex = index;
+                    showSlide(mediaIndex);
+                };
+                dotsContainer.appendChild(dot);
+            });
+
+            // Append dots container
+            container.appendChild(dotsContainer);
+
+            // Start if not running or reset
+            mediaIndex = 0;
+            showSlide(0);
+        }
+
+        function showSlide(index) {
+            const mediaList = settings.media || [];
+            if (mediaList.length === 0) return;
+
+            // Stop previous video if needed
+            const prevEl = document.querySelector('.media-element.active');
+            if (prevEl && prevEl.tagName === 'VIDEO') {
+                prevEl.pause();
+                prevEl.currentTime = 0;
+            }
+
+            // Hide all
+            document.querySelectorAll('.media-element').forEach(el => el.classList.remove('active'));
+
+            // Show current
+            const currentEl = document.getElementById(`slide-${index}`);
+            if (currentEl) {
+                currentEl.classList.add('active');
+
+                // Update dots active class
+                document.querySelectorAll('.dot').forEach((dot, idx) => {
+                    if (idx === index) dot.classList.add('active');
+                    else dot.classList.remove('active');
+                });
+
+                const item = mediaList[index];
+                if (item.type === 'video') {
+                    currentEl.play().catch(e => console.log("Autoplay blocked", e));
+                    // Wait for 'ended' event to trigger next
+                    if (slideTimer) clearTimeout(slideTimer);
+                } else {
+                    // Image: set timer
+                    const defaultInterval = settings.displaySettings?.slideInterval || 10;
+                    const duration = (item.duration || defaultInterval) * 1000;
+                    if (slideTimer) clearTimeout(slideTimer);
+                    slideTimer = setTimeout(nextSlide, duration);
+                }
+
+                // Notify Server of currently playing slide
+                fetch('/api/pr/state/current', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ index })
+                }).catch(() => { });
+            }
+        }
+
+        function nextSlide() {
+            const mediaList = settings.media || [];
+            mediaIndex = (mediaIndex + 1) % mediaList.length;
+            showSlide(mediaIndex);
+        }
+
+        function prevSlide() {
+            const mediaList = settings.media || [];
+            if (mediaList.length === 0) return;
+            mediaIndex = (mediaIndex - 1 + mediaList.length) % mediaList.length;
+            showSlide(mediaIndex);
+        }
+
+        // ==================== Swipe Detection ====================
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        function handleGesture() {
+            const swipeThreshold = 50;
+            if (touchEndX < touchStartX - swipeThreshold) {
+                // Swiped Left -> Next
+                nextSlide();
+            } else if (touchEndX > touchStartX + swipeThreshold) {
+                // Swiped Right -> Previous
+                prevSlide();
+            }
+        }
+
+        const mediaContainer = document.getElementById('media-container');
+        mediaContainer.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        mediaContainer.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleGesture();
+        }, { passive: true });
+
+        // ==================== Full Screen ====================
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        document.addEventListener('fullscreenchange', (event) => {
+            const btn = document.getElementById('fs-btn');
+            if (document.fullscreenElement) {
+                btn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+                btn.title = "ออกจากการเต็มจอ (Exit Full Screen)";
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+                btn.title = "เต็มจอ (Full Screen)";
+            }
+        });
+
+        // Double click anywhere to toggle fullscreen
+        document.addEventListener('dblclick', (e) => {
+            // Prevent if clicking on buttons
+            if(e.target.closest('button')) return;
+            toggleFullScreen();
+        });
+
+    </script>
+</body>
+
+</html>

@@ -1,9 +1,9 @@
-import {readFile, writeFile, mkdir} from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 
 const root = new URL('../', import.meta.url), workspace = new URL('../../', import.meta.url);
 const read = url => readFile(url, 'utf8');
 
-await mkdir(new URL('src/generated/', root), {recursive: true});
+await mkdir(new URL('src/generated/', root), { recursive: true });
 
 // 1. Core modules for server/tests
 for (const [source, name, exportName] of [
@@ -11,29 +11,38 @@ for (const [source, name, exportName] of [
   ['Part List/gas/Core.js', 'part', 'PartCore'],
   ['Equipment BOM/gas/Core.js', 'bom', 'BomCore']
 ]) {
-  const domain = await read(new URL(source, workspace));
-  const cleanDomain = domain.replace(/if\s*\(\s*typeof\s+module\s*!==\s*['"]undefined['"]\s*\)\s*module\.exports\s*=[^;]+;?/g, '');
-  await writeFile(new URL(`src/generated/${name}-core.js`, root), cleanDomain + `\nexport {${exportName}};\n`);
+  try {
+    const domain = await read(new URL(source, workspace));
+    const cleanDomain = domain.replace(/if\s*\(\s*typeof\s+module\s*!==\s*['"]undefined['"]\s*\)\s*module\.exports\s*=[^;]+;?/g, '');
+    await writeFile(new URL(`src/generated/${name}-core.js`, root), cleanDomain + `\nexport {${exportName}};\n`);
+  } catch (err) {
+    console.log(`Skipping rebuild of generated/${name}-core.js (source not found in workspace)`);
+  }
 }
 
 // 2. BomService module for server
-const bomServiceSrc = await read(new URL('Equipment BOM/gas/Service.js', workspace));
-const cleanService = bomServiceSrc
-  .replace(/require\(['"](\.\/Core\.js|\.\.\/gas\/Core\.js)['"]\)/g, 'BomCore')
-  .replace(/if\s*\(\s*typeof\s+module\s*!==\s*['"]undefined['"]\s*\)\s*module\.exports\s*=[^;]+;?/g, '');
-await writeFile(
-  new URL('src/generated/bom-service.js', root),
-  `import {BomCore} from './bom-core.js';\n` + cleanService + `\nexport {BomService};\n`
-);
+try {
+  const bomServiceSrc = await read(new URL('Equipment BOM/gas/Service.js', workspace));
+  const cleanService = bomServiceSrc
+    .replace(/require\(['"](\.\/Core\.js|\.\.\/gas\/Core\.js)['"]\)/g, 'BomCore')
+    .replace(/if\s*\(\s*typeof\s+module\s*!==\s*['"]undefined['"]\s*\)\s*module\.exports\s*=[^;]+;?/g, '');
+  await writeFile(
+    new URL('src/generated/bom-service.js', root),
+    `import {BomCore} from './bom-core.js';\n` + cleanService + `\nexport {BomService};\n`
+  );
+} catch (err) {
+  console.log('Skipping rebuild of generated/bom-service.js (source not found in workspace)');
+}
 
-// 3. Web Bundles: /machines/, /parts/, /bom/, /users/
+// 3. Web Bundles: /machines/, /parts/, /bom/, /users/, /announcements/
 const transportJs = await read(new URL('web/transport.js', root));
 
 for (const [sourceFile, scope] of [
   ['Spare part/Index.html', 'machines'],
   ['Part List/Index.html', 'parts'],
   ['Equipment BOM/Index.html', 'bom'],
-  ['', 'users']
+  ['', 'users'],
+  ['', 'announcements']
 ]) {
   let output = '';
   if (scope === 'users') {
@@ -44,9 +53,28 @@ for (const [sourceFile, scope] of [
     output = html
       .replace('<!-- APP_STYLE -->', () => '<style>\n' + css + '\n</style>')
       .replace('<!-- APP_SCRIPT -->', () => '<script>\n' + js + '\n</script>');
+  } else if (scope === 'announcements') {
+    const html = await read(new URL('src/announcements/index.html', root));
+    const css = await read(new URL('src/announcements/styles.css', root));
+    const appJs = await read(new URL('src/announcements/app.js', root));
+    const js = transportJs + '\n' + appJs;
+    output = html
+      .replace('<!-- APP_STYLE -->', () => '<style>\n' + css + '\n</style>')
+      .replace('<!-- APP_SCRIPT -->', () => '<script>\n' + js + '\n</script>');
   } else {
-    const html = await read(new URL(sourceFile, workspace));
-    const scriptInsert = '<script>\n' + transportJs + '\n</script>\n';
+    let html;
+    try {
+      html = await read(new URL(sourceFile, workspace));
+    } catch {
+      html = await read(new URL(`public/${scope}/index.html`, root));
+    }
+
+    // Always strip any previously injected navigation bars and transport scripts
+    html = html.replace(/<nav\s+aria-label="ระบบซ่อมบำรุงไฟฟ้า"\s+class="em-main-nav">[\s\S]*?<\/style>/gi, '');
+    html = html.replace(/<script[^>]*id="em-transport-script"[^>]*>[\s\S]*?<\/script>\s*/gi, '');
+    html = html.replace(/<script(?:\s[^>]*)?>[\s\S]*?const inFlight = new Map[\s\S]*?<\/script>\s*/gi, '');
+
+    const scriptInsert = '<script id="em-transport-script">\n' + transportJs + '\n</script>\n';
     if (html.includes('<script')) {
       output = html.replace(/<script(?:\s[^>]*)?>/, scriptInsert + '$&');
     } else {
@@ -54,9 +82,12 @@ for (const [sourceFile, scope] of [
     }
   }
 
+  // Strip any lingering nav bars from output before injecting
+  output = output.replace(/<nav\s+aria-label="ระบบซ่อมบำรุงไฟฟ้า"\s+class="em-main-nav">[\s\S]*?<\/style>/gi, '');
+
   output = output.replaceAll('Google Sheets', 'ทะเบียนกลาง')
-                 .replaceAll('Google Apps Script', 'Electrical Maintenance')
-                 .replaceAll('บัญชี Google', 'การเชื่อมต่อ');
+    .replaceAll('Google Apps Script', 'Electrical Maintenance')
+    .replaceAll('บัญชี Google', 'การเชื่อมต่อ');
 
   const navHtml = `
 <nav aria-label="ระบบซ่อมบำรุงไฟฟ้า" class="em-main-nav">
@@ -82,8 +113,8 @@ for (const [sourceFile, scope] of [
     <div class="em-nav-center">
       <!-- 2. อุปกรณ์ประจำเครื่องจักร with Dropdown -->
       <div class="em-dropdown em-dropdown-bom">
-        <a href="/bom/" class="em-nav-link em-dropdown-trigger${scope==='bom'?' active':''}"${scope==='bom'?' aria-current="page"':''}>
-          <span>อุปกรณ์ประจำเครื่องจักร</span>
+        <a href="/bom/" class="em-nav-link em-dropdown-trigger${scope === 'bom' ? ' active' : ''}"${scope === 'bom' ? ' aria-current="page"' : ''}>
+          <span>BoM Parts</span>
           <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
@@ -99,8 +130,8 @@ for (const [sourceFile, scope] of [
 
       <!-- 3. Master อะไหล่ with Dropdown -->
       <div class="em-dropdown em-dropdown-parts">
-        <a href="/parts/" class="em-nav-link em-dropdown-trigger${scope==='parts'?' active':''}"${scope==='parts'?' aria-current="page"':''}>
-          <span>Master อะไหล่</span>
+        <a href="/parts/" class="em-nav-link em-dropdown-trigger${scope === 'parts' ? ' active' : ''}"${scope === 'parts' ? ' aria-current="page"' : ''}>
+          <span>Master List</span>
           <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
@@ -111,13 +142,16 @@ for (const [sourceFile, scope] of [
       </div>
 
       <!-- 4. เครื่องจักร -->
-      <a class="em-nav-link${scope==='machines'?' active':''}" href="/machines/"${scope==='machines'?' aria-current="page"':''}>เครื่องจักร</a>
+      <a class="em-nav-link${scope === 'machines' ? ' active' : ''}" href="/machines/"${scope === 'machines' ? ' aria-current="page"' : ''}>Machines</a>
+
+      <!-- 5. สื่อประชาสัมพันธ์ -->
+      <a class="em-nav-link${scope === 'announcements' ? ' active' : ''}" href="/announcements/"${scope === 'announcements' ? ' aria-current="page"' : ''}>สื่อประชาสัมพันธ์</a>
 
     </div>
 
     <!-- Right: User management and account -->
     <div class="em-nav-right">
-      <a id="em-nav-users" class="em-nav-link${scope==='users'?' active':''}" style="display:${scope==='users'?'inline-flex':'none'}" href="/users/"${scope==='users'?' aria-current="page"':''}>จัดการผู้ใช้งาน</a>
+      <a id="em-nav-users" class="em-nav-link${scope === 'users' ? ' active' : ''}" style="display:${scope === 'users' ? 'inline-flex' : 'none'}" href="/users/"${scope === 'users' ? ' aria-current="page"' : ''}>จัดการผู้ใช้งาน</a>
       <span id="em-user-badge" class="em-user-badge"></span>
     </div>
   </div>
@@ -145,14 +179,14 @@ for (const [sourceFile, scope] of [
       <nav class="em-drawer-nav">
         <!-- 2. อุปกรณ์ประจำเครื่องจักร Accordion -->
         <div class="em-drawer-group">
-          <button type="button" class="em-drawer-group-btn" aria-expanded="${scope==='bom'?'true':'false'}">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="${scope === 'bom' ? 'true' : 'false'}">
             <span class="em-drawer-group-title">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-              อุปกรณ์ประจำเครื่องจักร
+              BoM Parts
             </span>
             <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
-          <div class="em-drawer-sublist"${scope==='bom'?'':' style="display:none;"'}>
+          <div class="em-drawer-sublist"${scope === 'bom' ? '' : ' style="display:none;"'}>
             <a class="em-drawer-subitem" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
             <a class="em-drawer-subitem" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
             <a class="em-drawer-subitem" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
@@ -164,14 +198,14 @@ for (const [sourceFile, scope] of [
 
         <!-- 3. Master อะไหล่ Accordion -->
         <div class="em-drawer-group">
-          <button type="button" class="em-drawer-group-btn" aria-expanded="${scope==='parts'?'true':'false'}">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="${scope === 'parts' ? 'true' : 'false'}">
             <span class="em-drawer-group-title">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-              Master อะไหล่
+              Master List
             </span>
             <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
-          <div class="em-drawer-sublist"${scope==='parts'?'':' style="display:none;"'}>
+          <div class="em-drawer-sublist"${scope === 'parts' ? '' : ' style="display:none;"'}>
             <a class="em-drawer-subitem" href="/parts/"><span class="em-item-icon">▤</span> รายการอะไหล่</a>
             <a class="em-drawer-subitem" href="/parts/?action=add"><span class="em-item-icon">＋</span> เพิ่มแบบตาราง</a>
             <a class="em-drawer-subitem" href="/parts/?view=batch"><span class="em-item-icon">🖼</span> อัปโหลดรูปชุด</a>
@@ -179,13 +213,19 @@ for (const [sourceFile, scope] of [
         </div>
 
         <!-- 4. เครื่องจักร -->
-        <a class="em-drawer-link${scope==='machines'?' active':''}" href="/machines/"${scope==='machines'?' aria-current="page"':''}>
+        <a class="em-drawer-link${scope === 'machines' ? ' active' : ''}" href="/machines/"${scope === 'machines' ? ' aria-current="page"' : ''}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
-          เครื่องจักร
+          Machines
         </a>
 
-        <!-- 5. จัดการผู้ใช้งาน -->
-        <a id="em-drawer-nav-users" class="em-drawer-link${scope==='users'?' active':''}" style="display:${scope==='users'?'flex':'none'}" href="/users/"${scope==='users'?' aria-current="page"':''}>
+        <!-- 5. สื่อประชาสัมพันธ์ -->
+        <a class="em-drawer-link${scope === 'announcements' ? ' active' : ''}" href="/announcements/"${scope === 'announcements' ? ' aria-current="page"' : ''}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          สื่อประชาสัมพันธ์
+        </a>
+
+        <!-- 6. จัดการผู้ใช้งาน -->
+        <a id="em-drawer-nav-users" class="em-drawer-link${scope === 'users' ? ' active' : ''}" style="display:${scope === 'users' ? 'flex' : 'none'}" href="/users/"${scope === 'users' ? ' aria-current="page"' : ''}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           จัดการผู้ใช้งาน
         </a>
@@ -205,11 +245,11 @@ for (const [sourceFile, scope] of [
   left: 0;
   right: 0;
   z-index: 10000;
-  background: #152934;
+  background: #0d1e38;
   color: #ffffff;
   font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.18);
+  box-shadow: 0 4px 20px rgba(10, 25, 47, 0.35);
 }
 .em-nav-container {
   display: flex;
@@ -601,8 +641,15 @@ for (const [sourceFile, scope] of [
 
   output = output.replace(/<body([^>]*)>/, `<body$1>${navHtml}`);
 
-  await mkdir(new URL(`public/${scope}/`, root), {recursive: true});
+  await mkdir(new URL(`public/${scope}/`, root), { recursive: true });
   await writeFile(new URL(`public/${scope}/index.html`, root), output);
+
+  if (scope === 'announcements') {
+    try {
+      const tvContent = await read(new URL('src/announcements/tv.html', root));
+      await writeFile(new URL('public/announcements/tv.html', root), tvContent);
+    } catch (_) {}
+  }
 }
 
 console.log('Built /machines/, /parts/, /bom/, /users/ and shared domain modules. No remote data changed.');

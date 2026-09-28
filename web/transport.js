@@ -1,6 +1,6 @@
 (() => {
  'use strict';
- const scope = location.pathname.startsWith('/parts') ? 'parts' : location.pathname.startsWith('/bom') ? 'bom' : 'machines';
+ const scope = location.pathname.startsWith('/parts') ? 'parts' : location.pathname.startsWith('/bom') ? 'bom' : location.pathname.startsWith('/announcements') ? 'announcements' : location.pathname.startsWith('/users') ? 'users' : 'machines';
  const inFlight = new Map();
 
  let loginPromise = null;
@@ -423,6 +423,10 @@
    }
   };
 
-  return doRequest();
- };
+    return doRequest();
+  };
+
+  window.callRPC = async (method, ...args) => {
+    return window.EM_RPC(method, ...args);
+  };
 })();

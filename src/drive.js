@@ -5,19 +5,31 @@ export function fileId(source){
  if(/^[\w-]{20,}$/.test(source))return source;
  try{const url=new URL(source);if(!['drive.google.com','docs.google.com'].includes(url.hostname))return '';return url.searchParams.get('id')||url.pathname.match(/\/d\/([\w-]+)/)?.[1]||'';}catch{return '';}
 }
+export function fastBase64Decode(b64) {
+ if (typeof Uint8Array.fromBase64 === 'function') {
+  return Uint8Array.fromBase64(b64);
+ }
+ const binary = atob(b64);
+ const len = binary.length;
+ const bytes = new Uint8Array(len);
+ for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+ return bytes;
+}
 export function decodeImage(image,max=1500000){
  if(!image||!['image/jpeg','image/png','image/webp'].includes(image.mime)||typeof image.base64!=='string'||image.base64.length>Math.ceil(max/3)*4+4)fail('VALIDATION','รองรับรูป JPEG, PNG หรือ WebP ที่ขนาดไม่เกินกำหนด');
- let bytes;try{bytes=Uint8Array.from(atob(image.base64),c=>c.charCodeAt(0));}catch{fail('VALIDATION','ไฟล์รูปไม่ถูกต้อง');}
+ let bytes;try{bytes=fastBase64Decode(image.base64);}catch{fail('VALIDATION','ไฟล์รูปไม่ถูกต้อง');}
  const hex=Array.from(bytes.slice(0,12),b=>b.toString(16).padStart(2,'0')).join('');
  const valid=image.mime==='image/jpeg'?hex.startsWith('ffd8ff'):image.mime==='image/png'?hex.startsWith('89504e470d0a1a0a'):hex.startsWith('52494646')&&hex.slice(16,24)==='57454250';
  if(!valid||!bytes.length||bytes.length>max)fail('VALIDATION','เนื้อหารูปไม่ตรงกับชนิดไฟล์หรือขนาดเกินกำหนด');
  return bytes;
 }
 async function getServiceAccountToken(email, privateKeyPem) {
- const cleanKey = privateKeyPem.replace(/-----BEGIN [A-Z ]+-----/g, '').replace(/-----END [A-Z ]+-----/g, '').replace(/\s+/g, '');
- const binary = atob(cleanKey);
- const bytes = new Uint8Array(binary.length);
- for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+ const cleanKey = privateKeyPem
+  .replace(/\\n/g, '')
+  .replace(/-----BEGIN [A-Z ]+-----/g, '')
+  .replace(/-----END [A-Z ]+-----/g, '')
+  .replace(/\s+/g, '');
+ const bytes = fastBase64Decode(cleanKey);
 
  const cryptoKey = await crypto.subtle.importKey(
   'pkcs8',
@@ -90,34 +102,60 @@ async function call(env,path,options={}){
  try{return await fetch('https://www.googleapis.com'+path,{...options,headers:{...options.headers,Authorization:'Bearer '+access},signal:AbortSignal.timeout(25000)});}catch{fail('DRIVE_TIMEOUT','ยังไม่ทราบผลการเชื่อมต่อรูปภาพ กรุณาลองคำขอเดิมอีกครั้ง',503);}
 }
 function folder(env,scope){
- const id=(scope==='parts'&&env.PART_IMAGE_FOLDER_ID)?env.PART_IMAGE_FOLDER_ID:env.MACHINE_IMAGE_FOLDER_ID;
+ const id=scope==='announcements'?(env.ANNOUNCEMENT_FOLDER_ID||'1HH9TL8_Z3dzXrA8O-0Gx9ajq5Z2wj-h8'):(scope==='parts'&&env.PART_IMAGE_FOLDER_ID)?env.PART_IMAGE_FOLDER_ID:env.MACHINE_IMAGE_FOLDER_ID;
  if(!id||!/^[\w-]{10,}$/.test(id))fail('DRIVE_CONFIG','ยังไม่ได้ยืนยันโฟลเดอร์รูปภาพของทะเบียนนี้',503);
  return id;
 }
 async function metadata(env,id){const r=await call(env,`/drive/v3/files/${encodeURIComponent(id)}?fields=id,name,mimeType,size,parents,trashed,appProperties&supportsAllDrives=true`);if(r.status===404)return null;if(!r.ok)fail('DRIVE_UNAVAILABLE','อ่านสิทธิ์ไฟล์รูปไม่ได้ กรุณาลองใหม่',503);return r.json();}
+export async function deleteDriveFile(env, fileIdInput){
+ const id=fileId(fileIdInput); if(!id) return false;
+ try {
+  const res=await call(env,`/drive/v3/files/${encodeURIComponent(id)}?supportsAllDrives=true`,{method:'DELETE'});
+  return res.ok || res.status===404;
+ } catch(_){ return false; }
+}
 export async function readPicture(env,scope,source){
  const id=fileId(source);if(!id)fail('IMAGE_SOURCE','รูปนี้ยังไม่ใช่ลิงก์ Drive ที่รองรับ กรุณาตรวจแหล่งรูปเดิม',422);
  const parent=folder(env,scope),meta=await metadata(env,id);
  if(!meta||meta.trashed)fail('NOT_FOUND','ไม่พบไฟล์รูปเดิม',404);
  if(!meta.parents?.includes(parent))fail('FORBIDDEN','รูปไม่ได้อยู่ในโฟลเดอร์ที่อนุญาต',403);
- if(!['image/jpeg','image/png','image/webp'].includes(meta.mimeType)||Number(meta.size)>1500000)fail('VALIDATION','ชนิดหรือขนาดรูปเดิมไม่รองรับ');
+ if(!['image/jpeg','image/png','image/webp','video/mp4','video/webm'].includes(meta.mimeType))fail('VALIDATION','ชนิดหรือขนาดรูปเดิมไม่รองรับ');
  const response=await call(env,`/drive/v3/files/${encodeURIComponent(id)}?alt=media&supportsAllDrives=true`);if(!response.ok)fail('DRIVE_UNAVAILABLE','อ่านรูปไม่ได้ กรุณาลองใหม่',503);
- const bytes=new Uint8Array(await response.arrayBuffer());if(bytes.length>1500000)fail('VALIDATION','รูปเดิมมีขนาดใหญ่เกินกำหนด');
+ const bytes=new Uint8Array(await response.arrayBuffer());
  let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));
  return {mime:meta.mimeType,base64:btoa(binary)};
 }
-export async function uploadPicture(env,scope,req,slot,image,entityId,max=1500000){
- const bytes=decodeImage(image,max),parent=folder(env,scope),db=env.DB;
+export async function streamMedia(env,scope,source,request){
+ const id=fileId(source);if(!id)fail('IMAGE_SOURCE','รูปนี้ยังไม่ใช่ลิงก์ Drive ที่รองรับ กรุณาตรวจแหล่งรูปเดิม',422);
+ const parent=folder(env,scope),meta=await metadata(env,id);
+ if(!meta||meta.trashed)fail('NOT_FOUND','ไม่พบไฟล์รูปเดิม',404);
+ if(!meta.parents?.includes(parent))fail('FORBIDDEN','รูปไม่ได้อยู่ในโฟลเดอร์ที่อนุญาต',403);
+ const headers={};
+ const range=request?.headers?.get('Range');
+ if(range)headers['Range']=range;
+ const response=await call(env,`/drive/v3/files/${encodeURIComponent(id)}?alt=media&supportsAllDrives=true`,{headers});
+ if(!response.ok)fail('DRIVE_UNAVAILABLE','อ่านไฟล์ไม่ได้ กรุณาลองใหม่',503);
+ const resHeaders=new Headers();
+ resHeaders.set('Content-Type',meta.mimeType||'video/mp4');
+ resHeaders.set('Cache-Control','public, max-age=86400, s-maxage=86400');
+ if(response.headers.get('Content-Length'))resHeaders.set('Content-Length',response.headers.get('Content-Length'));
+ if(response.headers.get('Content-Range'))resHeaders.set('Content-Range',response.headers.get('Content-Range'));
+ if(response.headers.get('Accept-Ranges'))resHeaders.set('Accept-Ranges',response.headers.get('Accept-Ranges'));
+ return new Response(response.body,{status:response.status,headers:resHeaders});
+}
+export async function uploadPicture(env,scope,req,slot,image,entityId,max=50000000){
+ const isVideo=image.mime?.startsWith('video/');
+ const bytes=isVideo?fastBase64Decode(image.bytes||image.base64):decodeImage(image,max),parent=folder(env,scope),db=env.DB;
  let op=await db.prepare('SELECT * FROM image_operations WHERE request_key=? AND slot=?').bind(req.key,slot).first();
  if(!op){
-  const response=await call(env,'/drive/v3/files/generateIds?count=1&space=drive&type=files');if(!response.ok)fail('DRIVE_UNAVAILABLE','เตรียมอัปโหลดรูปไม่สำเร็จ',503);
-  const id=(await response.json()).ids?.[0];if(!id)fail('DRIVE_UNAVAILABLE','เตรียมรหัสรูปไม่สำเร็จ',503);
-  const name=entityId+'-'+slot+'-'+req.key.slice(0,12)+'.'+image.mime.split('/')[1];
+  const response=await call(env,'/drive/v3/files/generateIds?count=1&space=drive&type=files');if(!response.ok)fail('DRIVE_UNAVAILABLE','เตรียมอัปโหลดไฟล์ไม่สำเร็จ',503);
+  const id=(await response.json()).ids?.[0];if(!id)fail('DRIVE_UNAVAILABLE','เตรียมรหัสไฟล์ไม่สำเร็จ',503);
+  const ext=image.mime.split('/')[1]||'bin';
+  const name=entityId+'-'+slot+'-'+req.key.slice(0,12)+'.'+ext;
   await db.prepare("INSERT OR IGNORE INTO image_operations VALUES(?,?,?,?,?,?,?,?,'RESERVED',?)").bind(crypto.randomUUID(),req.key,slot,parent,id,name,image.mime,req.payloadHash,req.now).run();
   op=await db.prepare('SELECT * FROM image_operations WHERE request_key=? AND slot=?').bind(req.key,slot).first();
  }
- if(op.payload_hash!==req.payloadHash||op.folder_id!==parent)fail('CONFLICT','คำขอรูปนี้ถูกใช้กับข้อมูลอื่นแล้ว กรุณาเปิดฟอร์มใหม่',409);
- // Reserve a Drive ID before upload: timeout/retry cannot create a second file.
+ if(op.payload_hash!==req.payloadHash||op.folder_id!==parent)fail('CONFLICT','คำขอไฟล์นี้ถูกใช้กับข้อมูลอื่นแล้ว กรุณาเปิดฟอร์มใหม่',409);
  const existing=await metadata(env,op.file_id);
  if(existing){if(existing.trashed||!existing.parents?.includes(parent)||existing.appProperties?.request!==req.key)fail('CONFLICT','ไฟล์อัปโหลดไม่ตรงกับคำขอ กรุณาติดต่อผู้ดูแล',409);}
  else {
@@ -127,7 +165,7 @@ export async function uploadPicture(env,scope,req,slot,image,entityId,max=150000
   const response=await call(env,'/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id',{method:'POST',headers:{'Content-Type':`multipart/related; boundary=${boundary}`},body});
   if(!response.ok){
    const recovered=await metadata(env,op.file_id);
-   if(!recovered||recovered.appProperties?.request!==req.key||recovered.appProperties?.payload!==req.payloadHash)fail('DRIVE_UNAVAILABLE','อัปโหลดรูปยังไม่สำเร็จ กรุณาลองคำขอเดิมอีกครั้ง',503);
+   if(!recovered||recovered.appProperties?.request!==req.key||recovered.appProperties?.payload!==req.payloadHash)fail('DRIVE_UNAVAILABLE','อัปโหลดไฟล์ยังไม่สำเร็จ กรุณาลองคำขอเดิมอีกครั้ง',503);
   }
  }
  await db.prepare("UPDATE image_operations SET status='UPLOADED' WHERE id=? AND status='RESERVED'").bind(op.id).run();
