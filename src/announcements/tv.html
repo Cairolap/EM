@@ -388,7 +388,8 @@
             const json = await res.json();
             const data = json.data || json;
             if (json.ok || data.success) {
-              const newItems = data.announcements || data.items || [];
+              const allItems = data.announcements || data.items || [];
+              const newItems = allItems.filter(item => item.is_active !== false && item.isActive !== false);
               settingsData = data.settings || {};
               updateUIWithSettings();
 
@@ -471,9 +472,11 @@
             const video = document.createElement('video');
             video.src = mediaUrl;
             video.muted = true;
+            video.setAttribute('muted', '');
             video.playsInline = true;
+            video.setAttribute('playsinline', '');
+            video.setAttribute('webkit-playsinline', '');
             video.preload = 'auto';
-            video.autoplay = (index === 0);
             slide.appendChild(video);
           } else {
             const img = document.createElement('img');
@@ -496,46 +499,115 @@
       function scheduleNextSlide() {
         if (announcementsData.length <= 1) return;
 
-        const currentItem = announcementsData[currentIndex];
+        if (slideTimer) {
+          clearTimeout(slideTimer);
+          slideTimer = null;
+        }
+
         const defaultSec = settingsData.slide_interval_sec || 60;
         let delayMs = defaultSec * 1000;
 
-        // If current slide is a video, wait for it to finish or fallback to interval
         const slides = document.querySelectorAll('.slide-item');
         const activeSlide = slides[currentIndex];
         const video = activeSlide ? activeSlide.querySelector('video') : null;
 
         if (video) {
-          video.currentTime = 0;
-          video.play().catch(() => {});
-          
-          const onEnded = () => {
-            video.removeEventListener('ended', onEnded);
+          let hasAdvanced = false;
+
+          function cleanup() {
+            video.removeEventListener('ended', onAdvance);
+            video.removeEventListener('error', onAdvance);
+            video.removeEventListener('timeupdate', onTimeUpdate);
+          }
+
+          function onAdvance() {
+            if (hasAdvanced) return;
+            hasAdvanced = true;
+            cleanup();
+            if (slideTimer) {
+              clearTimeout(slideTimer);
+              slideTimer = null;
+            }
             nextSlide();
-          };
-          video.addEventListener('ended', onEnded);
+          }
+
+          function onTimeUpdate() {
+            if (video.duration && isFinite(video.duration) && video.duration > 0) {
+              if (video.currentTime >= video.duration - 0.4) {
+                onAdvance();
+              }
+            }
+          }
+
+          video.addEventListener('ended', onAdvance);
+          video.addEventListener('error', onAdvance);
+          video.addEventListener('timeupdate', onTimeUpdate);
+
+          // Reset time and trigger playback
+          try {
+            video.currentTime = 0;
+          } catch (_) {}
+
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((err) => {
+              console.warn('Video play deferred or blocked:', err);
+            });
+          }
+
+          // Fallback Timer:
+          // If video.duration is available, give it duration + 1.5s
+          // Otherwise wait for loadedmetadata or use delayMs
+          function setFallback() {
+            let timeoutMs = delayMs;
+            if (video.duration && isFinite(video.duration) && !isNaN(video.duration) && video.duration > 0) {
+              timeoutMs = Math.ceil(video.duration * 1000) + 1500;
+            }
+            if (slideTimer) clearTimeout(slideTimer);
+            slideTimer = setTimeout(onAdvance, timeoutMs);
+          }
+
+          if (video.readyState >= 1 && video.duration) {
+            setFallback();
+          } else {
+            video.addEventListener('loadedmetadata', setFallback, { once: true });
+            slideTimer = setTimeout(onAdvance, delayMs);
+          }
+
           return;
         }
 
+        // Image slide: transition after delayMs
         slideTimer = setTimeout(() => {
           nextSlide();
         }, delayMs);
       }
 
       function nextSlide() {
+        if (slideTimer) {
+          clearTimeout(slideTimer);
+          slideTimer = null;
+        }
+
         const slides = document.querySelectorAll('.slide-item');
         const dots = document.querySelectorAll('.dot');
         if (slides.length === 0) return;
 
-        slides[currentIndex].classList.remove('active');
-        const curVideo = slides[currentIndex].querySelector('video');
-        if (curVideo) curVideo.pause();
+        // Pause and reset previous video
+        const curVideo = slides[currentIndex]?.querySelector('video');
+        if (curVideo) {
+          try {
+            curVideo.pause();
+            curVideo.currentTime = 0;
+          } catch (_) {}
+        }
 
+        slides[currentIndex]?.classList.remove('active');
         if (dots[currentIndex]) dots[currentIndex].classList.remove('active');
 
         currentIndex = (currentIndex + 1) % announcementsData.length;
 
-        slides[currentIndex].classList.add('active');
+        slides[currentIndex]?.classList.add('active');
         if (dots[currentIndex]) dots[currentIndex].classList.add('active');
 
         scheduleNextSlide();
