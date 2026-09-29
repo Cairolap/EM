@@ -38,6 +38,11 @@
       padding: 0 28px;
       background: #090d16;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 1s ease-in-out;
+    }
+
+    .tv-header.flipped-header {
+      flex-direction: row-reverse;
     }
 
     .header-brand {
@@ -49,6 +54,7 @@
       letter-spacing: 0.06em;
       color: #ffffff;
       text-transform: uppercase;
+      will-change: transform;
     }
 
     .header-brand svg {
@@ -59,6 +65,7 @@
       display: flex;
       align-items: baseline;
       gap: 14px;
+      will-change: transform;
     }
 
     .clock-time {
@@ -75,7 +82,7 @@
       font-weight: 500;
     }
 
-    /* Main Split Layout */
+    /* Main Split Layout with Anti-Burn-In Inversion */
     .tv-main-body {
       flex: 1;
       display: grid;
@@ -83,10 +90,23 @@
       gap: 20px;
       padding: 20px;
       min-height: 0;
+      transition: grid-template-columns 1s ease-in-out, opacity 0.4s ease;
     }
 
     .tv-main-body.no-sidebar {
       grid-template-columns: 1fr;
+    }
+
+    .tv-main-body.flipped-layout {
+      grid-template-columns: 340px 1fr;
+    }
+
+    .tv-main-body.flipped-layout .safety-sidebar {
+      order: 1;
+    }
+
+    .tv-main-body.flipped-layout .slideshow-container {
+      order: 2;
     }
 
     /* Left Slideshow Box */
@@ -214,10 +234,18 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      will-change: transform;
+    }
+
+    .pixel-orbit-target {
+      will-change: transform;
+      transition: transform 3.5s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     .safety-card {
-      background: #0a1120;
+      background: linear-gradient(145deg, #0a1120 0%, #0d182b 50%, #0a1120 100%);
+      background-size: 200% 200%;
+      animation: ambient-card-drift 45s ease infinite;
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       padding: 24px 20px;
@@ -228,6 +256,13 @@
       flex: 1;
       text-align: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      transition: transform 3.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+    }
+
+    @keyframes ambient-card-drift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .card-header-label {
@@ -422,6 +457,7 @@
         setupFullscreen();
         setupNavigation();
         setupTouchGestures();
+        setupAntiBurnIn();
         
         // Fast state polling every 2 seconds for instant reaction to "แสดงตอนนี้"
         setInterval(fetchStateSync, 2000);
@@ -745,6 +781,7 @@
         }
 
         scheduleNextSlide();
+        triggerAntiBurnPulse();
       }
 
       function setupNavigation() {
@@ -837,6 +874,63 @@
         const monthName = thMonths[d.getMonth()];
         const yearBE = d.getFullYear() + 543;
         return `${dateNum} ${monthName} ${yearBE}`;
+      }
+
+      function triggerAntiBurnPulse() {
+        document.querySelectorAll('.safety-card').forEach(card => {
+          card.style.opacity = '0.9';
+          setTimeout(() => { card.style.opacity = '1'; }, 350);
+        });
+      }
+
+      function setupAntiBurnIn() {
+        const mainBody = document.getElementById('tv-main-body');
+        const header = document.getElementById('tv-header');
+        const sidebar = document.getElementById('safety-sidebar');
+        const clock = document.getElementById('clock-container');
+        const brand = document.querySelector('.header-brand');
+        const dots = document.getElementById('slideshow-dots');
+
+        // Add class for smooth micro-translation
+        [sidebar, clock, brand, dots].forEach(el => {
+          if (el) el.classList.add('pixel-orbit-target');
+        });
+
+        // 1. Micro Pixel Orbiting: Subtly shifts X/Y coordinates every 60s (±6px / ±5px)
+        function performPixelOrbit() {
+          const sx = Math.round((Math.random() - 0.5) * 12);
+          const sy = Math.round((Math.random() - 0.5) * 10);
+
+          if (sidebar) sidebar.style.transform = `translate3d(${sx}px, ${sy}px, 0)`;
+          if (clock) clock.style.transform = `translate3d(${-sx}px, ${sy}px, 0)`;
+          if (brand) brand.style.transform = `translate3d(${Math.round(sx / 2)}px, ${-Math.round(sy / 2)}px, 0)`;
+          if (dots) dots.style.transform = `translateX(calc(-50% + ${sx}px)) translateY(${sy}px)`;
+        }
+
+        setInterval(performPixelOrbit, 60 * 1000);
+        performPixelOrbit();
+
+        // 2. Macro Layout Shift (สลับฝั่งซ้าย <-> ขวา) ทุกๆ 10 นาที
+        let isFlipped = false;
+        function performMacroLayoutShift() {
+          isFlipped = !isFlipped;
+          if (mainBody) {
+            mainBody.style.opacity = '0.4';
+            setTimeout(() => {
+              if (isFlipped) {
+                mainBody.classList.add('flipped-layout');
+                header?.classList.add('flipped-header');
+              } else {
+                mainBody.classList.remove('flipped-layout');
+                header?.classList.remove('flipped-header');
+              }
+              mainBody.style.opacity = '1';
+            }, 400);
+          }
+        }
+
+        // Toggle layout every 10 minutes (600,000 ms)
+        setInterval(performMacroLayoutShift, 10 * 60 * 1000);
       }
 
       function setupFullscreen() {
