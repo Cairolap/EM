@@ -100,6 +100,55 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      touch-action: pan-y;
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: grab;
+    }
+
+    .slideshow-container:active {
+      cursor: grabbing;
+    }
+
+    /* Swipe & Click Navigation Buttons */
+    .slide-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 50%;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 15;
+      opacity: 0;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(4px);
+    }
+
+    .slideshow-container:hover .slide-nav-btn {
+      opacity: 0.85;
+    }
+
+    .slide-nav-btn:hover {
+      opacity: 1 !important;
+      background: rgba(15, 23, 42, 0.9);
+      transform: translateY(-50%) scale(1.1);
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+
+    .slide-nav-prev {
+      left: 16px;
+    }
+
+    .slide-nav-next {
+      right: 16px;
     }
 
     .slide-item {
@@ -111,11 +160,13 @@
       align-items: center;
       justify-content: center;
       background: #000;
+      pointer-events: none;
     }
 
     .slide-item.active {
       opacity: 1;
       z-index: 2;
+      pointer-events: auto;
     }
 
     .slide-item img,
@@ -133,7 +184,7 @@
       transform: translateX(-50%);
       display: flex;
       gap: 8px;
-      z-index: 10;
+      z-index: 20;
       background: rgba(0, 0, 0, 0.4);
       padding: 6px 12px;
       border-radius: 20px;
@@ -141,11 +192,16 @@
     }
 
     .dot {
-      width: 10px;
-      height: 10px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.35);
       transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .dot:hover {
+      background: rgba(255, 255, 255, 0.7);
     }
 
     .dot.active {
@@ -291,6 +347,12 @@
     <div class="tv-main-body" id="tv-main-body">
       <!-- Left Slideshow -->
       <div class="slideshow-container" id="slideshow-container">
+        <button type="button" class="slide-nav-btn slide-nav-prev" id="slide-btn-prev" aria-label="ย้อนกลับ (Previous slide)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <button type="button" class="slide-nav-btn slide-nav-next" id="slide-btn-next" aria-label="ถัดไป (Next slide)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
         <div class="empty-slide-msg" id="empty-msg">กำลังโหลดข้อมูลสื่อ...</div>
         <div class="slideshow-dots" id="slideshow-dots"></div>
       </div>
@@ -348,6 +410,8 @@
         startClock();
         fetchPublicData();
         setupFullscreen();
+        setupNavigation();
+        setupTouchGestures();
         
         // Refresh data every 1 minute to catch updates
         setInterval(fetchPublicData, 60 * 1000);
@@ -467,7 +531,7 @@
           const slide = document.createElement('div');
           slide.className = `slide-item ${index === 0 ? 'active' : ''}`;
           
-          const mediaUrl = `/api/v1/announcements/media/${item.id}`;
+          const mediaUrl = `/api/v1/announcements/media/${item.id}?v=${encodeURIComponent(item.updated_at || item.created_at || '1')}`;
           if (item.media_type === 'video') {
             const video = document.createElement('video');
             video.src = mediaUrl;
@@ -489,6 +553,11 @@
 
           const dot = document.createElement('div');
           dot.className = `dot ${index === 0 ? 'active' : ''}`;
+          dot.setAttribute('title', `ไปยังสไลด์ที่ ${index + 1}`);
+          dot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            goToSlide(index);
+          });
           dotsBox.appendChild(dot);
         });
 
@@ -545,7 +614,7 @@
 
           // Reset time and trigger playback
           try {
-            video.currentTime = 0;
+            if (video.currentTime > 0) video.currentTime = 0;
           } catch (_) {}
 
           const playPromise = video.play();
@@ -583,7 +652,19 @@
         }, delayMs);
       }
 
+      function prevSlide() {
+        if (announcementsData.length <= 1) return;
+        const target = (currentIndex - 1 + announcementsData.length) % announcementsData.length;
+        goToSlide(target);
+      }
+
       function nextSlide() {
+        if (announcementsData.length <= 1) return;
+        const target = (currentIndex + 1) % announcementsData.length;
+        goToSlide(target);
+      }
+
+      function goToSlide(targetIndex) {
         if (slideTimer) {
           clearTimeout(slideTimer);
           slideTimer = null;
@@ -598,19 +679,77 @@
         if (curVideo) {
           try {
             curVideo.pause();
-            curVideo.currentTime = 0;
+            if (curVideo.currentTime > 0) curVideo.currentTime = 0;
           } catch (_) {}
         }
 
         slides[currentIndex]?.classList.remove('active');
         if (dots[currentIndex]) dots[currentIndex].classList.remove('active');
 
-        currentIndex = (currentIndex + 1) % announcementsData.length;
+        currentIndex = targetIndex;
 
         slides[currentIndex]?.classList.add('active');
         if (dots[currentIndex]) dots[currentIndex].classList.add('active');
 
         scheduleNextSlide();
+      }
+
+      function setupNavigation() {
+        const btnPrev = document.getElementById('slide-btn-prev');
+        const btnNext = document.getElementById('slide-btn-next');
+        if (btnPrev) btnPrev.addEventListener('click', (e) => { e.stopPropagation(); prevSlide(); });
+        if (btnNext) btnNext.addEventListener('click', (e) => { e.stopPropagation(); nextSlide(); });
+      }
+
+      function setupTouchGestures() {
+        const container = document.getElementById('slideshow-container');
+        let startX = 0;
+        let startY = 0;
+        let isTouching = false;
+
+        // Touch events for touchscreen TV / tablet / mobile
+        container.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 1) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            isTouching = true;
+          }
+        }, { passive: true });
+
+        container.addEventListener('touchend', (e) => {
+          if (!isTouching || e.changedTouches.length === 0) return;
+          isTouching = false;
+          const deltaX = e.changedTouches[0].clientX - startX;
+          const deltaY = e.changedTouches[0].clientY - startY;
+
+          // If horizontal swipe is prominent (> 40px) and mostly horizontal
+          if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+            if (deltaX < 0) {
+              nextSlide(); // Swipe Left -> Next Slide
+            } else {
+              prevSlide(); // Swipe Right -> Prev Slide
+            }
+          }
+        }, { passive: true });
+
+        // Mouse Drag / Air-Mouse support
+        let mouseStartX = 0;
+        let isMouseDown = false;
+        container.addEventListener('mousedown', (e) => {
+          if (e.target.closest('.slide-nav-btn') || e.target.closest('.slideshow-dots')) return;
+          mouseStartX = e.clientX;
+          isMouseDown = true;
+        });
+
+        window.addEventListener('mouseup', (e) => {
+          if (!isMouseDown) return;
+          isMouseDown = false;
+          const deltaX = e.clientX - mouseStartX;
+          if (Math.abs(deltaX) > 50) {
+            if (deltaX < 0) nextSlide();
+            else prevSlide();
+          }
+        });
       }
 
       function calculateDaysDiff(dateStr) {

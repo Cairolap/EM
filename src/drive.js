@@ -138,9 +138,9 @@ export async function streamMedia(env,scope,source,request){
  const resHeaders=new Headers();
  resHeaders.set('Content-Type',meta.mimeType||'video/mp4');
  resHeaders.set('Cache-Control','public, max-age=86400, s-maxage=86400');
+ resHeaders.set('Accept-Ranges','bytes');
  if(response.headers.get('Content-Length'))resHeaders.set('Content-Length',response.headers.get('Content-Length'));
  if(response.headers.get('Content-Range'))resHeaders.set('Content-Range',response.headers.get('Content-Range'));
- if(response.headers.get('Accept-Ranges'))resHeaders.set('Accept-Ranges',response.headers.get('Accept-Ranges'));
  return new Response(response.body,{status:response.status,headers:resHeaders});
 }
 export async function uploadPicture(env,scope,req,slot,image,entityId,max=50000000){
