@@ -403,8 +403,18 @@
       let lastMediaSignature = '';
       let currentIndex = 0;
       let slideTimer = null;
+      let lastForceTime = 0;
       const thMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
       const thDays = ['วันอาทิตย์ที่', 'วันจันทร์ที่', 'วันอังคารที่', 'วันพุธที่', 'วันพฤหัสบดีที่', 'วันศุกร์ที่', 'วันเสาร์ที่'];
+
+      const tvBroadcastChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('em_tv_channel') : null;
+      if (tvBroadcastChannel) {
+        tvBroadcastChannel.onmessage = (e) => {
+          if (e.data?.type === 'force_slide' && e.data?.media_id) {
+            jumpToMediaId(e.data.media_id);
+          }
+        };
+      }
 
       function init() {
         startClock();
@@ -413,14 +423,45 @@
         setupNavigation();
         setupTouchGestures();
         
-        // Refresh data every 1 minute to catch updates
-        setInterval(fetchPublicData, 60 * 1000);
+        // Fast state polling every 2 seconds for instant reaction to "แสดงตอนนี้"
+        setInterval(fetchStateSync, 2000);
+
+        // Refresh public data every 45 seconds to catch new uploads
+        setInterval(fetchPublicData, 45 * 1000);
       }
 
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
       } else {
         init();
+      }
+
+      async function fetchStateSync() {
+        try {
+          const res = await fetch('/api/v1/announcements/state');
+          if (res.ok) {
+            const json = await res.json();
+            const state = json.data || {};
+            if (state.force_timestamp && state.force_timestamp > lastForceTime) {
+              lastForceTime = state.force_timestamp;
+              if (state.force_media_id) {
+                jumpToMediaId(state.force_media_id);
+              }
+            }
+          }
+        } catch (_) {}
+      }
+
+      function jumpToMediaId(mediaId) {
+        const idx = announcementsData.findIndex(item => item.id === mediaId);
+        if (idx !== -1) {
+          goToSlide(idx);
+        } else {
+          fetchPublicData().then(() => {
+            const newIdx = announcementsData.findIndex(item => item.id === mediaId);
+            if (newIdx !== -1) goToSlide(newIdx);
+          });
+        }
       }
 
       function startClock() {
@@ -690,6 +731,18 @@
 
         slides[currentIndex]?.classList.add('active');
         if (dots[currentIndex]) dots[currentIndex].classList.add('active');
+
+        const currentItem = announcementsData[currentIndex];
+        if (currentItem) {
+          if (tvBroadcastChannel) {
+            try { tvBroadcastChannel.postMessage({ type: 'slide_change', media_id: currentItem.id }); } catch (_) {}
+          }
+          fetch('/api/v1/announcements/current', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ media_id: currentItem.id })
+          }).catch(() => {});
+        }
 
         scheduleNextSlide();
       }

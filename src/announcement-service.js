@@ -36,7 +36,10 @@ export async function listAnnouncements(env) {
    dept_target_days: settings.dept_target_days || 3802,
    slide_interval_sec: settings.slide_interval_seconds || 60,
    show_clock: settings.show_clock !== undefined ? Boolean(settings.show_clock) : true,
-   show_safety: settings.show_safety !== undefined ? Boolean(settings.show_safety) : true
+   show_safety: settings.show_safety !== undefined ? Boolean(settings.show_safety) : true,
+   force_media_id: settings.force_media_id || '',
+   force_timestamp: settings.force_timestamp || 0,
+   current_media_id: settings.current_media_id || ''
   } : null
  };
 }
@@ -126,3 +129,37 @@ export async function getAnnouncementMedia(env, id, request) {
  if (!item || !item.file_id) fail('NOT_FOUND', 'ไม่พบไฟล์นี้', 404);
  return streamMedia(env, 'announcements', item.file_id, request);
 }
+
+export async function forceAnnouncementSlide(env, actor, payload) {
+ authorizeWrite(actor, env, 'announcements');
+ const mediaId = payload?.media_id || payload?.mediaId || payload?.id;
+ if (!mediaId) fail('VALIDATION', 'กรุณาระบุสื่อที่ต้องการแสดง');
+ const now = Date.now();
+ 
+ // If media is inactive, auto-activate it so TV can display it
+ await env.DB.prepare('UPDATE announcements SET is_active=1 WHERE id=?').bind(mediaId).run();
+
+ await env.DB.prepare('UPDATE announcement_settings SET force_media_id=?, force_timestamp=?, current_media_id=?, updated_at=CURRENT_TIMESTAMP WHERE id=\'main\'')
+  .bind(mediaId, now, mediaId).run();
+
+ return { success: true, force_media_id: mediaId, force_timestamp: now };
+}
+
+export async function reportCurrentAnnouncement(env, payload) {
+ const mediaId = payload?.media_id || payload?.mediaId || payload?.id || '';
+ if (mediaId) {
+  await env.DB.prepare('UPDATE announcement_settings SET current_media_id=? WHERE id=\'main\'').bind(mediaId).run();
+ }
+ return { success: true };
+}
+
+export async function getAnnouncementState(env) {
+ const settings = await env.DB.prepare('SELECT force_media_id, force_timestamp, current_media_id, slide_interval_seconds FROM announcement_settings WHERE id=\'main\'').first();
+ return {
+  force_media_id: settings?.force_media_id || '',
+  force_timestamp: settings?.force_timestamp || 0,
+  current_media_id: settings?.current_media_id || '',
+  slide_interval_sec: settings?.slide_interval_seconds || 60
+ };
+}
+

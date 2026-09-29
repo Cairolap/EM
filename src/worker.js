@@ -2,7 +2,7 @@ import {authenticate, authenticateUser, changePassword, createSession, destroySe
 import {dispatch} from './service.js';
 import {Repository} from './repository.js';
 import {listUsers, createUser, updateUser, resetPassword, deleteUser} from './user-service.js';
-import {listAnnouncements, createAnnouncement, deleteAnnouncement, updateAnnouncementSettings, getAnnouncementMedia} from './announcement-service.js';
+import {listAnnouncements, createAnnouncement, deleteAnnouncement, updateAnnouncementSettings, getAnnouncementMedia, forceAnnouncementSlide, reportCurrentAnnouncement, getAnnouncementState} from './announcement-service.js';
 import {AppError,fail,json} from './errors.js';
 
 export default {
@@ -15,6 +15,18 @@ export default {
     if(request.method!=='GET')fail('METHOD','ใช้ GET สำหรับดึงข้อมูลประชาสัมพันธ์',405);
     const data=await listAnnouncements(env);
     return json({ok:true,data});
+   }
+   if(url.pathname==='/api/v1/announcements/state'){
+    if(request.method!=='GET')fail('METHOD','ใช้ GET สำหรับตรวจสอบสถานะประชาสัมพันธ์',405);
+    const data=await getAnnouncementState(env);
+    return json({ok:true,data});
+   }
+   if(url.pathname==='/api/v1/announcements/current'){
+    if(request.method!=='POST')fail('METHOD','ใช้ POST สำหรับรายงานสไลด์ปัจจุบัน',405);
+    let body;
+    try{ body=await request.json(); }catch{ fail('VALIDATION','รูปแบบข้อมูลไม่ถูกต้อง'); }
+    await reportCurrentAnnouncement(env, body);
+    return json({ok:true});
    }
    if(url.pathname.startsWith('/api/v1/announcements/media/')){
     const id=url.pathname.replace('/api/v1/announcements/media/','');
@@ -127,6 +139,7 @@ export default {
     else if(method==='create') result=await createAnnouncement(env,actor,args[0],request.headers.get('Idempotency-Key')||crypto.randomUUID());
     else if(method==='delete') result=await deleteAnnouncement(env,actor,args[0]);
     else if(method==='updateSettings') result=await updateAnnouncementSettings(env,actor,args[0]);
+    else if(method==='forceSlide') result=await forceAnnouncementSlide(env,actor,args[0]);
     else fail('NOT_FOUND','ไม่พบคำสั่งประชาสัมพันธ์นี้',404);
     return json({ok:true,data:result});
    }

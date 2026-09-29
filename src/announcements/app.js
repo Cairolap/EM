@@ -1,11 +1,25 @@
 // Media Announcements Management Logic
 (function() {
   let announcementsList = [];
+  let currentPlayingId = '';
+
+  const adminBroadcastChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('em_tv_channel') : null;
+  if (adminBroadcastChannel) {
+    adminBroadcastChannel.onmessage = (e) => {
+      if (e.data?.type === 'slide_change' && e.data?.media_id) {
+        if (currentPlayingId !== e.data.media_id) {
+          currentPlayingId = e.data.media_id;
+          updateNowPlayingUI();
+        }
+      }
+    };
+  }
 
   function init() {
     loadAnnouncementsData();
     setupUploadHandlers();
     setupSettingsForm();
+    setInterval(checkLiveState, 3000);
   }
 
   if (document.readyState === 'loading') {
@@ -19,6 +33,9 @@
       const res = await callRPC('announcements.list');
       if (res && (res.success || res.items || res.announcements)) {
         announcementsList = res.announcements || res.items || [];
+        if (res.settings?.current_media_id || res.settings?.force_media_id) {
+          currentPlayingId = res.settings.current_media_id || res.settings.force_media_id;
+        }
         renderMediaGrid();
         populateSettingsForm(res.settings || {});
       } else {
@@ -44,7 +61,9 @@
 
     announcementsList.forEach((item) => {
       const card = document.createElement('div');
-      card.className = `media-card ${item.is_active ? 'is-active' : ''}`;
+      const isNowPlaying = (currentPlayingId === item.id);
+      card.className = `media-card ${item.is_active ? 'is-active' : ''} ${isNowPlaying ? 'is-now-playing' : ''}`;
+      card.setAttribute('data-id', item.id);
       
       const mediaUrl = `/api/v1/announcements/media/${item.id}`;
       const isVideo = item.media_type === 'video';
@@ -57,26 +76,38 @@
         ? `<span class="media-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> Video</span>`
         : `<span class="media-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg> Image</span>`;
 
+      const liveBadge = isNowPlaying
+        ? `<div class="media-live-badge"><span class="live-dot"></span> กำลังแสดง</div>`
+        : '';
+
       card.innerHTML = `
         <div class="media-preview-box">
           ${previewHtml}
           ${typeBadge}
+          ${liveBadge}
         </div>
         <div class="media-card-body">
           <div class="media-filename" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
           <div class="media-meta">${formatFileSize(item.file_size)} • ${isVideo ? 'MP4' : 'JPG/PNG'}</div>
           <div class="media-actions">
-            <button class="btn-icon btn-toggle-active ${item.is_active ? 'active' : ''}" data-id="${item.id}" title="${item.is_active ? 'แสดงผลอยู่ (คลิกเพื่อปิด)' : 'ซ่อนอยู่ (คลิกเพื่อเปิด)'}">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <button class="btn-force-show" data-id="${item.id}" title="สั่งให้หน้าจอ TV ข้ามมาเล่นรายการนี้ทันที">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>แสดงตอนนี้</span>
             </button>
-            <button class="btn-icon btn-delete" data-id="${item.id}" title="ลบไฟล์ออกจาก Google Drive">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </button>
+            <div class="media-icon-actions">
+              <button class="btn-icon btn-toggle-active ${item.is_active ? 'active' : ''}" data-id="${item.id}" title="${item.is_active ? 'เปิดใช้งานในลูป (คลิกเพื่อปิด)' : 'ปิดใช้งานในลูป (คลิกเพื่อเปิด)'}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              </button>
+              <button class="btn-icon btn-delete" data-id="${item.id}" title="ลบไฟล์ออกจาก Google Drive">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
           </div>
         </div>
       `;
 
       // Event listeners
+      card.querySelector('.btn-force-show').addEventListener('click', () => forceShowMedia(item));
       card.querySelector('.btn-toggle-active').addEventListener('click', () => toggleMediaActive(item));
       card.querySelector('.btn-delete').addEventListener('click', () => deleteMedia(item));
 
@@ -192,6 +223,72 @@
       progressContainer.style.display = 'none';
       showToast('ไม่สามารถอ่านไฟล์ได้');
     }
+  }
+
+  async function forceShowMedia(item) {
+    try {
+      currentPlayingId = item.id;
+      updateNowPlayingUI();
+
+      if (typeof BroadcastChannel !== 'undefined') {
+        try {
+          const ch = new BroadcastChannel('em_tv_channel');
+          ch.postMessage({ type: 'force_slide', media_id: item.id });
+          ch.close();
+        } catch (_) {}
+      }
+
+      showToast(`กำลังสั่งให้หน้าจอ TV ข้ามไปแสดง "${item.title}" ทันที...`);
+
+      const res = await callRPC('announcements.forceSlide', { media_id: item.id });
+      if (res && (res.success || res.ok)) {
+        showToast(`กำลังแสดง "${item.title}" บนหน้าจอ TV แล้ว`);
+        if (!item.is_active) {
+          item.is_active = 1;
+          renderMediaGrid();
+        }
+      } else {
+        showToast(res?.error || 'ไม่สามารถส่งคำสั่งแสดงผลได้');
+      }
+    } catch (err) {
+      console.error('Force slide error:', err);
+      showToast('เกิดข้อผิดพลาดในการส่งคำสั่ง');
+    }
+  }
+
+  function updateNowPlayingUI() {
+    document.querySelectorAll('.media-card').forEach(card => {
+      const id = card.getAttribute('data-id');
+      const previewBox = card.querySelector('.media-preview-box');
+      const existingBadge = previewBox?.querySelector('.media-live-badge');
+      if (id === currentPlayingId) {
+        card.classList.add('is-now-playing');
+        if (!existingBadge && previewBox) {
+          const badge = document.createElement('div');
+          badge.className = 'media-live-badge';
+          badge.innerHTML = '<span class="live-dot"></span> กำลังแสดง';
+          previewBox.appendChild(badge);
+        }
+      } else {
+        card.classList.remove('is-now-playing');
+        if (existingBadge) existingBadge.remove();
+      }
+    });
+  }
+
+  async function checkLiveState() {
+    try {
+      const res = await fetch('/api/v1/announcements/state');
+      if (res.ok) {
+        const json = await res.json();
+        const state = json.data || {};
+        const playingId = state.current_media_id || state.force_media_id;
+        if (playingId && playingId !== currentPlayingId) {
+          currentPlayingId = playingId;
+          updateNowPlayingUI();
+        }
+      }
+    } catch (_) {}
   }
 
   async function toggleMediaActive(item) {
