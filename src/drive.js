@@ -97,9 +97,9 @@ async function token(env){
  }
  fail('DRIVE_CONFIG', 'ยังไม่ได้เชื่อมบัญชีรูปภาพ กรุณาติดต่อผู้ดูแล', 503);
 }
-async function call(env,path,options={}){
+async function call(env,path,options={},timeoutMs=25000){
  const access=await token(env);
- try{return await fetch('https://www.googleapis.com'+path,{...options,headers:{...options.headers,Authorization:'Bearer '+access},signal:AbortSignal.timeout(25000)});}catch{fail('DRIVE_TIMEOUT','ยังไม่ทราบผลการเชื่อมต่อรูปภาพ กรุณาลองคำขอเดิมอีกครั้ง',503);}
+ try{return await fetch('https://www.googleapis.com'+path,{...options,headers:{...options.headers,Authorization:'Bearer '+access},signal:AbortSignal.timeout(timeoutMs)});}catch{fail('DRIVE_TIMEOUT','ยังไม่ทราบผลการเชื่อมต่อรูปภาพ กรุณาลองคำขอเดิมอีกครั้ง',503);}
 }
 function folder(env,scope){
  const id=scope==='announcements'?(env.ANNOUNCEMENT_FOLDER_ID||'1HH9TL8_Z3dzXrA8O-0Gx9ajq5Z2wj-h8'):(scope==='parts'&&env.PART_IMAGE_FOLDER_ID)?env.PART_IMAGE_FOLDER_ID:env.MACHINE_IMAGE_FOLDER_ID;
@@ -162,7 +162,7 @@ export async function uploadPicture(env,scope,req,slot,image,entityId,max=500000
   const boundary='em_'+crypto.randomUUID();
   const info={id:op.file_id,name:op.name,parents:[parent],appProperties:{request:req.key,payload:req.payloadHash,slot}};
   const body=new Blob([`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(info)}\r\n--${boundary}\r\nContent-Type: ${image.mime}\r\n\r\n`,bytes,`\r\n--${boundary}--`]);
-  const response=await call(env,'/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id',{method:'POST',headers:{'Content-Type':`multipart/related; boundary=${boundary}`},body});
+  const response=await call(env,'/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id',{method:'POST',headers:{'Content-Type':`multipart/related; boundary=${boundary}`},body},120000);
   if(!response.ok){
    const recovered=await metadata(env,op.file_id);
    if(!recovered||recovered.appProperties?.request!==req.key||recovered.appProperties?.payload!==req.payloadHash)fail('DRIVE_UNAVAILABLE','อัปโหลดไฟล์ยังไม่สำเร็จ กรุณาลองคำขอเดิมอีกครั้ง',503);

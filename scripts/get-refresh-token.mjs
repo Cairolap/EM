@@ -93,12 +93,12 @@ async function main() {
 
         console.log('กำลังบันทึกลง Cloudflare Secrets (Production & Staging)...');
         const setSecret = (name, val, env) => new Promise((resolve) => {
-          const child = exec(`npx wrangler secret put ${name} --env ${env}`, (err, stdout, stderr) => {
+          const child = exec(`npx wrangler secret put ${name} --env ${env}`, { env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED: '0' } }, (err, stdout, stderr) => {
             if (err) console.error(`Error setting ${name} (${env}):`, stderr);
             else console.log(`✓ ตั้งค่า ${name} บน ${env} สำเร็จ`);
             resolve();
           });
-          child.stdin.write(val);
+          child.stdin.write(val + '\n');
           child.stdin.end();
         });
 
