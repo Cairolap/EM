@@ -43,7 +43,8 @@ for (const [sourceFile, scope] of [
   ['Equipment BOM/Index.html', 'bom'],
   ['', 'users'],
   ['', 'announcements'],
-  ['', 'pm']
+  ['', 'pm'],
+  ['', 'pm-expenses']
 ]) {
   let output = '';
   if (scope === 'users') {
@@ -66,6 +67,14 @@ for (const [sourceFile, scope] of [
     const html = await read(new URL('src/pm/index.html', root));
     const css = await read(new URL('src/pm/styles.css', root));
     const appJs = await read(new URL('src/pm/app.js', root));
+    const js = transportJs + '\n' + appJs;
+    output = html
+      .replace('<!-- APP_STYLE -->', () => '<style>\n' + css + '\n</style>')
+      .replace('<!-- APP_SCRIPT -->', () => '<script>\n' + js + '\n</script>');
+  } else if (scope === 'pm-expenses') {
+    const html = await read(new URL('src/pm-expenses/index.html', root));
+    const css = await read(new URL('src/pm-expenses/styles.css', root));
+    const appJs = await read(new URL('src/pm-expenses/app.js', root));
     const js = transportJs + '\n' + appJs;
     output = html
       .replace('<!-- APP_STYLE -->', () => '<style>\n' + css + '\n</style>')
@@ -156,7 +165,10 @@ for (const [sourceFile, scope] of [
       <!-- 5. จัดการ Order PM -->
       <a class="em-nav-link${scope === 'pm' ? ' active' : ''}" href="/pm/"${scope === 'pm' ? ' aria-current="page"' : ''}>Order PM</a>
 
-      <!-- 6. สื่อประชาสัมพันธ์ -->
+      <!-- 6. ค่าใช้จ่าย PM -->
+      <a class="em-nav-link${scope === 'pm-expenses' ? ' active' : ''}" href="/pm-expenses/"${scope === 'pm-expenses' ? ' aria-current="page"' : ''}>ค่าใช้จ่าย PM</a>
+
+      <!-- 7. สื่อประชาสัมพันธ์ -->
       <a class="em-nav-link${scope === 'announcements' ? ' active' : ''}" href="/announcements/"${scope === 'announcements' ? ' aria-current="page"' : ''}>สื่อประชาสัมพันธ์</a>
 
     </div>
@@ -236,7 +248,13 @@ for (const [sourceFile, scope] of [
           Order PM
         </a>
 
-        <!-- 6. สื่อประชาสัมพันธ์ -->
+        <!-- 6. ค่าใช้จ่าย PM -->
+        <a class="em-drawer-link${scope === 'pm-expenses' ? ' active' : ''}" href="/pm-expenses/"${scope === 'pm-expenses' ? ' aria-current="page"' : ''}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          ค่าใช้จ่าย PM
+        </a>
+
+        <!-- 7. สื่อประชาสัมพันธ์ -->
         <a class="em-drawer-link${scope === 'announcements' ? ' active' : ''}" href="/announcements/"${scope === 'announcements' ? ' aria-current="page"' : ''}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
           สื่อประชาสัมพันธ์

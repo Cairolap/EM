@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ค่าใช้จ่าย PM - แผนกซ่อมบำรุงไฟฟ้า</title>
+  <link rel="icon" type="image/png" href="/Logo%20small.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- APP_STYLE -->
+</head>
+<body>
+  <div class="exp-app-container">
+
+    <!-- Top Page Header -->
+    <header class="exp-page-header">
+      <div class="header-breadcrumb">
+        <span>แผนกซ่อมบำรุงไฟฟ้า</span>
+        <span class="sep">/</span>
+        <span class="current">ค่าใช้จ่าย PM & Dashboard</span>
+      </div>
+      <div class="header-main-row">
+        <div class="title-group">
+          <h1 class="page-title" id="page-main-title">
+            <svg class="title-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            <span id="title-text">ค่าใช้จ่าย PM</span>
+          </h1>
+          <p class="page-subtitle" id="page-main-subtitle">
+            บันทึกและจัดการค่าใช้จ่ายงานบำรุงรักษา (PM) เชื่อมโยงเครื่องจักร และติดตามงบประมาณ
+          </p>
+        </div>
+
+        <!-- View Switcher Tabs -->
+        <div class="header-actions">
+          <div class="view-toggle-group" role="tablist">
+            <button type="button" id="tab-btn-table" class="view-tab-btn active" role="tab" aria-selected="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              รายการค่าใช้จ่าย PM
+            </button>
+            <button type="button" id="tab-btn-dashboard" class="view-tab-btn" role="tab" aria-selected="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+              Dashboard งบประมาณ
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- =========================================================================
+         VIEW 1: ตารางรายการค่าใช้จ่าย PM (Expense Table View ตามภาพที่ 1)
+         ========================================================================= -->
+    <main id="view-table-section" class="exp-view-section">
+      <div class="exp-card">
+        
+        <!-- Top Toolbar of the Card -->
+        <div class="card-toolbar-header">
+          <div class="card-header-left">
+            <div class="card-badge-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              <strong>ค่าใช้จ่าย PM</strong>
+              <span class="count-badge" id="badge-total-items">0 รายการ</span>
+            </div>
+            <span class="retention-badge" title="ระบบจัดเก็บข้อมูลย้อนหลัง 2 ปีอัตโนมัติ เพื่อป้องกันฐานข้อมูลเต็ม">
+              ⏱ จัดเก็บ 2 ปีย้อนหลัง
+            </span>
+          </div>
+
+          <div class="card-header-right">
+            <button type="button" id="btn-open-add-modal" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>+ เพิ่มรายการ</span>
+            </button>
+
+            <button type="button" id="btn-open-import-modal" class="btn btn-purple" title="นำเข้าไฟล์รายงาน SAP (ZLPMRP71EXP.XLS)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <span>นำเข้าจากตาราง</span>
+            </button>
+
+            <button type="button" id="btn-export-excel" class="btn btn-secondary btn-icon" title="นำออกข้อมูล CSV / Excel">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </button>
+
+            <button type="button" id="btn-table-refresh" class="btn btn-secondary btn-icon" title="รีเฟรชข้อมูล">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Controls Bar -->
+        <div class="table-filter-bar">
+          <div class="filter-bar-left">
+            <button type="button" id="btn-toggle-filter-panel" class="btn btn-icon-subtle" title="กรองแผนก / ไลน์">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            </button>
+
+            <!-- Search input -->
+            <div class="search-input-box">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="input-expense-search" placeholder="ค้นหาข้อมูล... (พิมพ์ข้อความเว้นวรรคเพื่อค้นหาหลายคำ)" autocomplete="off">
+              <button type="button" id="btn-clear-table-search" class="btn-clear-icon" style="display:none;">×</button>
+            </div>
+          </div>
+
+          <div class="filter-bar-right">
+            <!-- Total Amount Summary Chip (฿ 10,579,286.13) -->
+            <div class="summary-total-chip">
+              <span class="label">รวม:</span>
+              <span class="val" id="text-total-sum">฿ 0.00</span>
+            </div>
+
+            <!-- Page Size Dropdown -->
+            <div class="page-size-select-wrap">
+              <select id="select-page-size" class="select-control-sm">
+                <option value="50">50 / หน้า</option>
+                <option value="100">100 / หน้า</option>
+                <option value="200">200 / หน้า</option>
+              </select>
+            </div>
+
+            <!-- Pagination Navigator -->
+            <div class="pagination-controls">
+              <span class="page-range-info" id="text-page-range">1-0 จาก 0</span>
+              <button type="button" id="btn-page-prev" class="btn-page-nav" disabled title="หน้าก่อนหน้า">‹</button>
+              <button type="button" id="btn-page-next" class="btn-page-nav" disabled title="หน้าถัดไป">›</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Optional Collapsible Filter Panel -->
+        <div id="collapsible-filter-panel" class="collapsible-filters" style="display:none;">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label>แผนก (Dept):</label>
+              <select id="filter-dept-select" class="form-select-sm">
+                <option value="">ทั้งหมด</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>สายการผลิต (Line):</label>
+              <select id="filter-line-select" class="form-select-sm">
+                <option value="">ทั้งหมด</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>วันที่เริ่มต้น:</label>
+              <input type="date" id="filter-start-date" class="form-input-sm">
+            </div>
+            <div class="filter-group">
+              <label>วันที่สิ้นสุด:</label>
+              <input type="date" id="filter-end-date" class="form-input-sm">
+            </div>
+            <div class="filter-group filter-actions">
+              <button type="button" id="btn-apply-filters" class="btn btn-primary btn-sm">กรองข้อมูล</button>
+              <button type="button" id="btn-reset-filters" class="btn btn-secondary btn-sm">ล้างตัวกรอง</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table of PM Expenses -->
+        <div class="table-container">
+          <table class="exp-table" id="expenses-main-table">
+            <thead>
+              <tr>
+                <th class="th-check"><input type="checkbox" id="check-select-all" aria-label="เลือกทั้งหมด"></th>
+                <th class="th-date">วันที่</th>
+                <th class="th-dept">แผนก</th>
+                <th class="th-line">ไลน์</th>
+                <th class="th-machine">เครื่องจักร</th>
+                <th class="th-pmno">PM No.</th>
+                <th class="th-desc">รายการ</th>
+                <th class="th-qty text-right">จำนวน</th>
+                <th class="th-price text-right">ราคา/หน่วย</th>
+                <th class="th-amount text-right">รวม (฿)</th>
+                <th class="th-notes">หมายเหตุ</th>
+                <th class="th-actions text-center">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-tbody">
+              <tr>
+                <td colspan="12" class="text-center py-10 text-muted">กำลังโหลดข้อมูลค่าใช้จ่าย PM...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- =========================================================================
+         VIEW 2: Dashboard ค่าใช้จ่าย & งบประมาณ (Dashboard View ตามภาพที่ 2)
+         ========================================================================= -->
+    <main id="view-dashboard-section" class="exp-view-section" style="display:none;">
+      
+      <!-- Dashboard Top Filter Strip -->
+      <section class="dash-filter-strip">
+        <div class="date-range-filter-group">
+          <span class="filter-icon-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            ช่วงเวลา:
+          </span>
+          <input type="date" id="dash-date-start" class="dash-date-input">
+          <span class="sep">-</span>
+          <input type="date" id="dash-date-end" class="dash-date-input">
+          
+          <div class="quick-period-pills">
+            <button type="button" class="btn-period active" data-period="year">ปี</button>
+            <button type="button" class="btn-period" data-period="h1">ครึ่งปีแรก</button>
+            <button type="button" class="btn-period" data-period="h2">ครึ่งปีหลัง</button>
+            <button type="button" class="btn-period" data-period="month">เดือนนี้</button>
+          </div>
+        </div>
+
+        <div class="dept-pills-filter" id="dash-dept-pills">
+          <button type="button" class="btn-dept-pill active" data-dept="">ทั้งหมด</button>
+          <button type="button" class="btn-dept-pill" data-dept="CC">CC</button>
+          <button type="button" class="btn-dept-pill" data-dept="PP">PP</button>
+          <button type="button" class="btn-dept-pill" data-dept="MX">MX</button>
+          <button type="button" class="btn-dept-pill" data-dept="PC">PC</button>
+          <button type="button" class="btn-dept-pill" data-dept="PR">PR</button>
+        </div>
+
+        <div class="dash-action-buttons">
+          <button type="button" id="btn-open-budget-modal" class="btn btn-primary btn-sm">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span>ตั้งค่างบประมาณ</span>
+          </button>
+          <button type="button" id="btn-dash-refresh" class="btn btn-secondary btn-icon" title="รีเฟรช Dashboard">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- 4 KPI Summary Cards (ตามภาพที่ 2) -->
+      <section class="kpi-grid">
+        
+        <!-- Card 1: ค่าใช้จ่ายจริงรวม (Actual) -->
+        <div class="kpi-card kpi-card-actual">
+          <div class="kpi-card-header">
+            <span class="kpi-title">ค่าใช้จ่ายจริงรวม (Actual)</span>
+            <span class="kpi-icon-wrap icon-actual">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+            </span>
+          </div>
+          <div class="kpi-value" id="kpi-total-actual">฿ 0.00</div>
+          <div class="kpi-footer">
+            <span class="kpi-subtext" id="kpi-lines-count">0 ไลน์การผลิต</span>
+            <span class="kpi-badge badge-red">เบิกจ่ายสะสม</span>
+          </div>
+        </div>
+
+        <!-- Card 2: งบประมาณรวม (Budget) -->
+        <div class="kpi-card kpi-card-budget">
+          <div class="kpi-card-header">
+            <span class="kpi-title">งบประมาณรวม (Budget)</span>
+            <span class="kpi-icon-wrap icon-budget">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="6" x2="12" y2="18"></line></svg>
+            </span>
+          </div>
+          <div class="kpi-value" id="kpi-total-budget">฿ 0.00</div>
+          <div class="kpi-footer">
+            <span class="kpi-subtext">งบประมาณจัดสรรประจำปี</span>
+            <span class="kpi-badge badge-green">เป้าหมายงบ</span>
+          </div>
+        </div>
+
+        <!-- Card 3: คงเหลือสุทธิ / ผลต่าง -->
+        <div class="kpi-card kpi-card-variance">
+          <div class="kpi-card-header">
+            <span class="kpi-title">คงเหลือสุทธิ / ผลต่าง</span>
+            <span class="kpi-icon-wrap icon-variance">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v18M3 9l9-6 9 6M3 15l9 6 9-6"></path></svg>
+            </span>
+          </div>
+          <div class="kpi-value" id="kpi-total-variance">฿ 0.00</div>
+          <div class="kpi-footer">
+            <span class="kpi-subtext">สัดส่วนงบประมาณคงเหลือ</span>
+            <span class="kpi-badge badge-blue" id="kpi-variance-status">คงเหลือในงบ</span>
+          </div>
+        </div>
+
+        <!-- Card 4: อัตราการใช้งบประมาณ -->
+        <div class="kpi-card kpi-card-percent">
+          <div class="kpi-card-header">
+            <span class="kpi-title">อัตราการใช้งบประมาณ</span>
+            <span class="kpi-icon-wrap icon-percent">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </span>
+          </div>
+          <div class="kpi-value" id="kpi-usage-percent">0.00%</div>
+          <div class="kpi-progress-bar">
+            <div class="progress-fill" id="kpi-progress-fill" style="width: 0%;"></div>
+          </div>
+          <div class="kpi-footer">
+            <span class="kpi-subtext">เทียบกับเพดาน 100%</span>
+            <span class="kpi-badge badge-purple" id="kpi-percent-badge">ปกติ (Within Budget)</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Chart Section: เปรียบเทียบงบประมาณ vs ค่าใช้จ่ายจริง รายไลน์ (ตามภาพที่ 2) -->
+      <section class="dash-chart-card">
+        <div class="chart-header">
+          <div class="chart-title-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            <strong>เปรียบเทียบงบประมาณ vs ค่าใช้จ่ายจริง รายไลน์</strong>
+          </div>
+          
+          <div class="chart-controls">
+            <!-- Legend -->
+            <div class="chart-legend">
+              <span class="legend-item"><span class="legend-dot dot-budget"></span> งบประมาณ (Budget)</span>
+              <span class="legend-item"><span class="legend-dot dot-actual"></span> ค่าใช้จ่ายจริง (Actual)</span>
+            </div>
+
+            <!-- Sort option -->
+            <select id="select-chart-sort" class="select-control-sm">
+              <option value="actual-desc">เรียง: ค่าใช้จ่ายสูงสุด</option>
+              <option value="name-asc">เรียง: ชื่อไลน์</option>
+              <option value="percent-desc">เรียง: % ใช้งบสูงสุด</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Rendered Bar Chart Container -->
+        <div class="chart-canvas-wrapper" id="chart-bars-container">
+          <!-- Dynamically generated SVG / Bar Chart -->
+        </div>
+      </section>
+
+      <!-- Line Breakdown Table (ตามภาพที่ 2 ด้านล่าง) -->
+      <section class="dash-breakdown-card">
+        <div class="breakdown-header">
+          <div class="breakdown-title-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+            <strong>สรุปผลการดำเนินงานรายไลน์ (Line Breakdown)</strong>
+            <span class="count-badge" id="badge-breakdown-lines-count">0 ไลน์</span>
+          </div>
+
+          <div class="breakdown-search-filters">
+            <div class="search-input-box-sm">
+              <input type="text" id="input-breakdown-search" placeholder="ค้นหาไลน์...">
+            </div>
+            <div class="breakdown-status-filter-pills" id="breakdown-status-pills">
+              <button type="button" class="btn-status-pill active" data-status="">ทั้งหมด</button>
+              <button type="button" class="btn-status-pill" data-status="OVER_BUDGET">เกินงบ</button>
+              <button type="button" class="btn-status-pill" data-status="WARNING">เฝ้าระวัง</button>
+              <button type="button" class="btn-status-pill" data-status="NORMAL">ปกติ</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="exp-table breakdown-table">
+            <thead>
+              <tr>
+                <th class="th-num">#</th>
+                <th class="th-line-name">ไลน์การผลิต</th>
+                <th class="th-num-val text-right">งบประมาณ (฿)</th>
+                <th class="th-num-val text-right">ค่าใช้จ่ายจริง (฿)</th>
+                <th class="th-num-val text-right">คงเหลือ / ผลต่าง (฿)</th>
+                <th class="th-percent text-center">% ใช้งบประมาณ</th>
+                <th class="th-status text-center">สถานะ</th>
+              </tr>
+            </thead>
+            <tbody id="breakdown-tbody">
+              <tr>
+                <td colspan="7" class="text-center py-8 text-muted">กำลังโหลดสรุปผลรายไลน์...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- =========================================================================
+       MODAL: นำเข้าไฟล์ (Import SAP File Modal)
+       ========================================================================= -->
+  <div id="modal-import" class="modal-backdrop" style="display:none;">
+    <div class="modal-box modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h2 class="modal-title">นำเข้ารายการค่าใช้จ่าย PM จากไฟล์ตาราง (SAP XLS)</h2>
+          <p class="modal-subtitle">รองรับไฟล์ส่งออกจาก SAP รายงาน ZLPMRP71EXP (.XLS, .XLSX, .CSV, .TSV)</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="btn-close-import-modal">×</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- File Dropzone -->
+        <div class="import-dropzone" id="dropzone-area">
+          <input type="file" id="input-file-import" accept=".xls,.xlsx,.csv,.tsv,.txt" style="display:none;">
+          <div class="dropzone-icon">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          </div>
+          <div class="dropzone-text">
+            <strong>คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</strong>
+            <p>เช่น ไฟล์ <code>ZLPMRP71EXP 261012.XLS</code> จากระบบ SAP</p>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-browse-file">เลือกไฟล์ในเครื่อง</button>
+        </div>
+
+        <!-- Retention Alert -->
+        <div class="retention-notice">
+          <span class="notice-icon">ℹ</span>
+          <span>
+            <strong>นโยบายจัดเก็บ 2 ปี (Storage Retention):</strong> ระบบจะคัดกรองบันทึกเฉพาะรายการที่มีวันที่ภายใน 2 ปีย้อนหลังอัตโนมัติ เพื่อป้องกันฐานข้อมูลเต็ม
+          </span>
+        </div>
+
+        <!-- Preview Section -->
+        <div id="import-preview-container" style="display:none;" class="import-preview-wrapper">
+          <div class="preview-stats-bar">
+            <div class="stat-item">
+              <span class="label">รายการทั้งหมดในไฟล์:</span>
+              <strong id="preview-total-count">0</strong>
+            </div>
+            <div class="stat-item">
+              <span class="label">เชื่อมโยงเครื่องจักรในระบบ:</span>
+              <strong class="text-success" id="preview-linked-count">0</strong>
+            </div>
+            <div class="stat-item">
+              <span class="label">เกิน 2 ปี (จะถูกข้าม):</span>
+              <strong class="text-warning" id="preview-old-count">0</strong>
+            </div>
+            <div class="stat-item">
+              <span class="label">ยอดเงินรวม:</span>
+              <strong class="text-primary" id="preview-total-amount">฿ 0.00</strong>
+            </div>
+          </div>
+
+          <div class="table-container preview-table-container">
+            <table class="exp-table preview-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>วันที่</th>
+                  <th>เครื่องจักร (Equipment)</th>
+                  <th>สถานะเชื่อมโยง</th>
+                  <th>PM No.</th>
+                  <th>รายการ (Description)</th>
+                  <th class="text-right">จำนวน</th>
+                  <th class="text-right">รวมเงิน (฿)</th>
+                </tr>
+              </thead>
+              <tbody id="preview-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-import">ยกเลิก</button>
+        <button type="button" class="btn btn-primary" id="btn-confirm-import" disabled>
+          <span>ยืนยันการนำเข้าข้อมูล</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL: ตั้งค่างบประมาณประจำปี (Set Budget Modal)
+       ========================================================================= -->
+  <div id="modal-budget" class="modal-backdrop" style="display:none;">
+    <div class="modal-box modal-md">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h2 class="modal-title">ตั้งค่างบประมาณประจำปี (Line Budgets)</h2>
+          <p class="modal-subtitle">กำหนดงบประมาณค่าใช้จ่าย PM สำหรับแต่ละสายการผลิต</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="btn-close-budget-modal">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="budget-year-row">
+          <label for="input-budget-year">เลือกปีงบประมาณ:</label>
+          <select id="input-budget-year" class="form-select-sm">
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+
+        <div class="table-container budget-table-container">
+          <table class="exp-table">
+            <thead>
+              <tr>
+                <th>สายการผลิต</th>
+                <th>แผนก</th>
+                <th style="width: 200px;">งบประมาณจัดสรร (฿)</th>
+              </tr>
+            </thead>
+            <tbody id="budget-lines-tbody">
+              <tr><td colspan="3" class="text-center py-6 text-muted">กำลังโหลดรายการสายการผลิต...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-budget">ยกเลิก</button>
+        <button type="button" class="btn btn-primary" id="btn-save-budgets">บันทึกงบประมาณ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL: เพิ่ม / แก้ไขรายการค่าใช้จ่าย (Add / Edit Expense Modal)
+       ========================================================================= -->
+  <div id="modal-expense-form" class="modal-backdrop" style="display:none;">
+    <div class="modal-box modal-md">
+      <div class="modal-header">
+        <h2 class="modal-title" id="expense-modal-title">เพิ่มรายการค่าใช้จ่าย PM</h2>
+        <button type="button" class="btn-close-modal" id="btn-close-expense-modal">×</button>
+      </div>
+
+      <form id="form-single-expense" class="modal-body form-grid">
+        <input type="hidden" id="form-exp-id">
+
+        <div class="form-field">
+          <label for="form-exp-date">วันที่ <span class="req">*</span></label>
+          <input type="date" id="form-exp-date" required class="form-input">
+        </div>
+
+        <div class="form-field">
+          <label for="form-exp-machine">รหัสเครื่องจักร (เช่น LNR301) <span class="req">*</span></label>
+          <input type="text" id="form-exp-machine" placeholder="เช่น LNR301" required class="form-input">
+        </div>
+
+        <div class="form-field">
+          <label for="form-exp-pmno">PM No. / Order No.</label>
+          <input type="text" id="form-exp-pmno" placeholder="เช่น 13117556" class="form-input">
+        </div>
+
+        <div class="form-field">
+          <label for="form-exp-dept">แผนก</label>
+          <select id="form-exp-dept" class="form-select">
+            <option value="">เลือกแผนก</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="form-exp-line">สายการผลิต (Line)</label>
+          <select id="form-exp-line" class="form-select">
+            <option value="">เลือกสายการผลิต</option>
+          </select>
+        </div>
+
+        <div class="form-field form-field-full">
+          <label for="form-exp-desc">รายการ / อะไหล่ <span class="req">*</span></label>
+          <input type="text" id="form-exp-desc" placeholder="เช่น CABLE TIE (BANDEC) COLOR BLACK" required class="form-input">
+        </div>
+
+        <div class="form-field">
+          <label for="form-exp-qty">จำนวน</label>
+          <input type="number" id="form-exp-qty" step="any" min="0" value="1" class="form-input">
+        </div>
+
+        <div class="form-field">
+          <label for="form-exp-price">ราคา/หน่วย (฿)</label>
+          <input type="number" id="form-exp-price" step="any" min="0" value="0" class="form-input">
+        </div>
+
+        <div class="form-field">
+          <label for="form-exp-amount">รวมเงิน (฿) <span class="req">*</span></label>
+          <input type="number" id="form-exp-amount" step="any" min="0" required class="form-input">
+        </div>
+
+        <div class="form-field form-field-full">
+          <label for="form-exp-notes">หมายเหตุ</label>
+          <input type="text" id="form-exp-notes" placeholder="บันทึกเพิ่มเติม (ถ้ามี)" class="form-input">
+        </div>
+
+        <div class="modal-footer form-field-full" style="padding-right:0; padding-left:0; margin-top:12px;">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-expense">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-expense">บันทึก</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Global Toast Notification -->
+  <div id="toast" class="pm-toast" role="alert" aria-live="polite"></div>
+
+  <!-- APP_SCRIPT -->
+</body>
+</html>

@@ -4,6 +4,7 @@ import {Repository} from './repository.js';
 import {listUsers, createUser, updateUser, resetPassword, deleteUser} from './user-service.js';
 import {listAnnouncements, createAnnouncement, deleteAnnouncement, updateAnnouncementSettings, getAnnouncementMedia, forceAnnouncementSlide, reportCurrentAnnouncement, getAnnouncementState} from './announcement-service.js';
 import {getPMReferences, getPMCycleData, savePMCycleOrders, listPMOverview} from './pm-service.js';
+import {listExpenses, importExpenseRecords, deleteExpenseItem, saveExpenseItem, getDashboardData, saveLineBudgets} from './pm-expense-service.js';
 import {AppError,fail,json} from './errors.js';
 
 export default {
@@ -158,6 +159,25 @@ export default {
     else if(method==='saveOrders') result=await savePMCycleOrders(env, actor, args[0]);
     else if(method==='listOverview') result=await listPMOverview(env, args[0]);
     else fail('NOT_FOUND','ไม่พบคำสั่ง PM นี้',404);
+    return json({ok:true,data:result});
+   }
+
+   // PM Expenses & Dashboard RPC
+   if(url.pathname==='/api/v1/pm-expenses/rpc'){
+    if(request.method!=='POST')fail('METHOD','ใช้ POST สำหรับคำสั่งค่าใช้จ่าย PM',405);
+    let body;
+    try{ body=await request.json(); }catch{ fail('VALIDATION','รูปแบบคำขอไม่ถูกต้อง'); }
+    const method = body?.method || '';
+    const args = body?.args || [];
+    let result;
+    if(method==='getReferences') result=await getPMReferences(env);
+    else if(method==='listExpenses') result=await listExpenses(env, args[0]);
+    else if(method==='importRecords') result=await importExpenseRecords(env, actor, args[0]);
+    else if(method==='deleteExpense') result=await deleteExpenseItem(env, actor, args[0]);
+    else if(method==='saveExpense') result=await saveExpenseItem(env, actor, args[0]);
+    else if(method==='getDashboard') result=await getDashboardData(env, args[0]);
+    else if(method==='saveBudgets') result=await saveLineBudgets(env, actor, args[0]);
+    else fail('NOT_FOUND','ไม่พบคำสั่งค่าใช้จ่าย PM นี้',404);
     return json({ok:true,data:result});
    }
 
