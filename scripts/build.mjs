@@ -153,8 +153,8 @@ for (const [sourceFile, scope] of [
       <!-- 4. เครื่องจักร -->
       <a class="em-nav-link${scope === 'machines' ? ' active' : ''}" href="/machines/"${scope === 'machines' ? ' aria-current="page"' : ''}>Machines</a>
 
-      <!-- 5. แผน PM (Order PR) -->
-      <a class="em-nav-link${scope === 'pm' ? ' active' : ''}" href="/pm/"${scope === 'pm' ? ' aria-current="page"' : ''}>Order PR (PM)</a>
+      <!-- 5. จัดการ Order PM -->
+      <a class="em-nav-link${scope === 'pm' ? ' active' : ''}" href="/pm/"${scope === 'pm' ? ' aria-current="page"' : ''}>Order PM</a>
 
       <!-- 6. สื่อประชาสัมพันธ์ -->
       <a class="em-nav-link${scope === 'announcements' ? ' active' : ''}" href="/announcements/"${scope === 'announcements' ? ' aria-current="page"' : ''}>สื่อประชาสัมพันธ์</a>
@@ -230,10 +230,10 @@ for (const [sourceFile, scope] of [
           Machines
         </a>
 
-        <!-- 5. แผน PM (Order PR) -->
+        <!-- 5. จัดการ Order PM -->
         <a class="em-drawer-link${scope === 'pm' ? ' active' : ''}" href="/pm/"${scope === 'pm' ? ' aria-current="page"' : ''}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          Order PR (PM)
+          Order PM
         </a>
 
         <!-- 6. สื่อประชาสัมพันธ์ -->

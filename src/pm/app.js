@@ -369,18 +369,8 @@
               autocomplete="off"
             />
           </td>
-          <td class="col-pr">
-            <input 
-              type="text" 
-              class="input-pr-no" 
-              placeholder="เช่น PR-1002" 
-              value="${escapeHtml(m.prNo || '')}" 
-              data-machine-id="${m.machineId}"
-              autocomplete="off"
-            />
-          </td>
           <td class="col-status">
-            <span class="status-indicator ${isFilled ? 'ready' : 'pending'}" title="${isFilled ? 'พร้อมเปิด PR' : 'ยังไม่ระบุ Order'}">
+            <span class="status-indicator ${isFilled ? 'ready' : 'pending'}" title="${isFilled ? 'ระบุ Order No. แล้ว' : 'ยังไม่ระบุ Order'}">
               ${isFilled ? '✓' : '○'}
             </span>
           </td>
@@ -415,15 +405,6 @@
         }
 
         updateProgressCounter();
-      });
-    });
-
-    tbody.querySelectorAll('.input-pr-no').forEach(input => {
-      input.addEventListener('input', (e) => {
-        const val = e.target.value.trim();
-        const machineId = e.target.getAttribute('data-machine-id');
-        const machine = machines.find(item => item.machineId === machineId);
-        if (machine) machine.prNo = val;
       });
     });
   }
@@ -473,17 +454,17 @@
     if (!state.cycleData || !state.cycleData.machines.length) return;
     const { lineId, year, roundNo, targetMonth, machines } = state.cycleData;
 
-    let text = `[ใบสั่งซื้อ/เปิด PR สำหรับ PM]\n`;
+    let text = `[รายการ Order No. สำหรับ PM]\n`;
     text += `ไลน์: ${lineId} | ปี: ${year} | รอบที่: ${roundNo}/5 | ประจำเดือน: ${formatThaiMonth(targetMonth)}\n`;
     text += `--------------------------------------------------------\n`;
-    text += `รหัสเครื่องจักร\tชื่อเต็ม\tOrder No.\tPR No.\n`;
+    text += `รหัสเครื่องจักร\tชื่อเต็ม\tOrder No.\n`;
 
     machines.forEach(m => {
-      text += `${m.machineCode}\t${m.machineName}\t${m.orderNo || '-'}\t${m.prNo || '-'}\n`;
+      text += `${m.machineCode}\t${m.machineName}\t${m.orderNo || '-'}\n`;
     });
 
     navigator.clipboard.writeText(text).then(() => {
-      showToast('คัดลอกสรุปรายการ Order No. ไปยังคลิปบอร์ดแล้ว');
+      showToast('คัดลอกรายการ Order No. ไปยังคลิปบอร์ดแล้ว');
     }).catch(() => {
       showToast('ไม่สามารถคัดลอกข้อความได้ กรุณาลองใหม่', true);
     });

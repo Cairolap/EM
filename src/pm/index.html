@@ -18,7 +18,7 @@
       <div class="header-breadcrumb">
         <span>แผนกซ่อมบำรุงไฟฟ้า</span>
         <span class="sep">/</span>
-        <span class="current">PM & Order PR Management</span>
+        <span class="current">PM & Order Management</span>
       </div>
       <div class="header-main-row">
         <div class="title-group">
@@ -33,7 +33,7 @@
             จัดการ Order No. รายเครื่อง (PM)
           </h1>
           <p class="page-description">
-            เก็บข้อมูล ORDER สำหรับเปิด PR ของแต่ละเครื่องจักรตามรอบการทำ Preventive Maintenance (สูงสุด 5 ครั้ง/ปี)
+            เก็บข้อมูล Order No. ของแต่ละเครื่องจักรตามรอบการทำ Preventive Maintenance (สูงสุด 5 ครั้ง/ปี)
           </p>
         </div>
         <div class="header-actions">
@@ -174,9 +174,9 @@
             </div>
 
             <!-- Copy Table to Clipboard -->
-            <button type="button" id="btn-copy-summary" class="btn btn-secondary btn-sm" title="คัดลอกรายการ Order No. ไปเปิด PR หรือส่งไลน์">
+            <button type="button" id="btn-copy-summary" class="btn btn-secondary btn-sm" title="คัดลอกรายการ Order No. ทั้งหมด">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              คัดลอกสรุป PR
+              คัดลอกรายการ Order No.
             </button>
           </div>
         </div>
@@ -189,15 +189,14 @@
                 <th class="col-num">#</th>
                 <th class="col-code">รหัสเครื่องจักร</th>
                 <th class="col-name">ชื่อเต็ม</th>
-                <th class="col-order">Order No. (สำหรับเปิด PR)</th>
-                <th class="col-pr">PR No. (ถ้ามี)</th>
+                <th class="col-order">Order No.</th>
                 <th class="col-status">สถานะ</th>
               </tr>
             </thead>
             <tbody id="machines-tbody">
               <!-- Dynamically rendered rows -->
               <tr>
-                <td colspan="6" class="text-center py-8 text-muted">
+                <td colspan="5" class="text-center py-8 text-muted">
                   กำลังโหลดข้อมูลเครื่องจักร...
                 </td>
               </tr>
