@@ -82,59 +82,54 @@ body {
   width: 100%;
   max-width: 100%;
   margin: 0;
-  padding: 16px 20px 48px;
+  padding: 10px 16px 36px;
   box-sizing: border-box;
 }
 
-/* Header */
+/* Compact Header */
 .pm-page-header {
-  margin-bottom: 20px;
-}
-
-.header-breadcrumb {
-  font-size: 12px;
-  color: var(--pm-ink-muted);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-}
-
-.header-breadcrumb .sep {
-  color: var(--pm-border);
-}
-
-.header-breadcrumb .current {
-  color: var(--pm-primary);
-  font-weight: 500;
+  margin-bottom: 8px;
 }
 
 .header-main-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 10px;
 }
 
-.title-group .page-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--pm-ink);
-  letter-spacing: -0.01em;
+.title-with-pill {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
+}
+
+.title-group .page-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--pm-ink);
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
 }
 
 .title-icon {
   color: var(--pm-primary);
+  width: 18px;
+  height: 18px;
 }
 
-.page-description {
-  font-size: 13.5px;
-  color: var(--pm-ink-secondary);
-  margin-top: 4px;
+.header-meta-pill {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--pm-primary);
+  background: var(--pm-primary-surface);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
 }
 
 /* View Tab Switcher */
@@ -142,7 +137,7 @@ body {
   display: inline-flex;
   background: var(--pm-bg-surface-muted);
   border: 1px solid var(--pm-border-subtle);
-  padding: 3px;
+  padding: 2px;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
@@ -150,9 +145,9 @@ body {
 .view-tab-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 8px 16px;
-  font-size: 13px;
+  gap: 6px;
+  padding: 5px 12px;
+  font-size: 12.5px;
   font-family: var(--font-body);
   font-weight: 500;
   color: var(--pm-ink-secondary);
@@ -171,49 +166,49 @@ body {
   background: var(--pm-bg-surface);
   color: var(--pm-primary);
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-/* Filter Panel */
+/* Compact Filter Panel */
 .pm-filter-panel {
   background: var(--pm-bg-surface);
   border: 1px solid var(--pm-border);
-  border-radius: var(--radius-lg);
-  padding: 16px 20px;
-  margin-bottom: 20px;
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  margin-bottom: 8px;
   box-shadow: var(--shadow-sm);
 }
 
 .filter-controls-row {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--pm-border-subtle);
+  gap: 12px;
 }
 
 .filter-field {
-  flex: 1;
-  min-width: 180px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: initial;
 }
 
 .filter-field-year {
-  flex: 0 0 130px;
-  min-width: 110px;
+  flex: initial;
 }
 
 .filter-field-actions {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .field-label {
-  display: block;
+  display: inline-block;
   font-size: 12px;
   font-weight: 600;
   color: var(--pm-ink-secondary);
-  margin-bottom: 6px;
+  margin-bottom: 0;
+  white-space: nowrap;
 }
 
 .select-wrapper {
@@ -221,10 +216,9 @@ body {
 }
 
 .form-select {
-  width: 100%;
-  height: 38px;
-  padding: 0 12px;
-  font-size: 13.5px;
+  height: 32px;
+  padding: 0 10px;
+  font-size: 12.5px;
   font-family: var(--font-body);
   color: var(--pm-ink);
   background: var(--pm-bg-surface);
@@ -237,7 +231,7 @@ body {
 
 .form-select:focus {
   border-color: var(--pm-primary);
-  box-shadow: 0 0 0 3px rgba(20, 86, 111, 0.15);
+  box-shadow: 0 0 0 2px rgba(20, 86, 111, 0.15);
 }
 
 /* 5 PM Rounds Bar */
@@ -245,28 +239,30 @@ body {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-  padding-top: 14px;
+  gap: 8px;
+  padding-left: 10px;
+  border-left: 1px solid var(--pm-border-subtle);
 }
 
 .rounds-bar-label {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--pm-ink-secondary);
+  white-space: nowrap;
 }
 
 .rounds-pills-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .round-pill {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  font-size: 12.5px;
+  gap: 6px;
+  padding: 3px 10px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--pm-ink-secondary);
   background: var(--pm-bg-surface-muted);
@@ -291,8 +287,8 @@ body {
 }
 
 .pill-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--pm-border);
 }
@@ -314,63 +310,57 @@ body {
 .pm-card {
   background: var(--pm-bg-surface);
   border: 1px solid var(--pm-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
-/* Form Card Header */
-.form-card-header {
+/* Compact Ribbon in Form Card */
+.form-compact-ribbon {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 24px;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 14px;
   background: linear-gradient(180deg, #ffffff 0%, var(--pm-bg-surface-muted) 100%);
   border-bottom: 1px solid var(--pm-border-subtle);
-  flex-wrap: wrap;
-  gap: 12px;
 }
 
-.form-card-title-group {
+.ribbon-context {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .line-badge {
   font-size: 11px;
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 2px 7px;
   background: var(--pm-primary);
   color: #ffffff;
   border-radius: var(--radius-sm);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 .round-badge {
   font-size: 11px;
   font-weight: 600;
-  padding: 2px 8px;
+  padding: 2px 7px;
   background: var(--pm-accent-surface);
   color: var(--pm-accent);
   border: 1px solid rgba(204, 104, 28, 0.3);
   border-radius: var(--radius-sm);
 }
 
-.form-card-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--pm-ink);
-}
-
 .status-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  font-size: 12px;
+  gap: 5px;
+  padding: 2px 8px;
+  font-size: 11.5px;
   font-weight: 600;
   border-radius: var(--radius-pill);
   background: var(--pm-bg-surface-muted);
@@ -385,8 +375,8 @@ body {
 }
 
 .chip-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--pm-ink-muted);
 }
@@ -395,49 +385,40 @@ body {
   background: var(--pm-success);
 }
 
-/* Form Meta Strip */
-.form-meta-strip {
+/* Ribbon Inline Meta Fields */
+.ribbon-meta-fields {
   display: flex;
   align-items: center;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: 20px;
-  padding: 16px 24px;
-  background: #fbfdfd;
-  border-bottom: 1px solid var(--pm-border-subtle);
 }
 
-.meta-field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.meta-field-notes {
-  flex: 1;
-  min-width: 240px;
-}
-
-.meta-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--pm-ink);
+.meta-inline-item {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
+.meta-inline-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--pm-ink-secondary);
+  white-space: nowrap;
+  margin-bottom: 0;
+}
+
 .month-input-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .input-month-control,
 .input-date-control,
 .input-text-control {
-  height: 38px;
-  padding: 0 12px;
-  font-size: 13.5px;
+  height: 30px;
+  padding: 0 8px;
+  font-size: 12.5px;
   font-family: var(--font-body);
   border: 1px solid var(--pm-border);
   border-radius: var(--radius-sm);
@@ -451,17 +432,21 @@ body {
 .input-date-control:focus,
 .input-text-control:focus {
   border-color: var(--pm-primary);
-  box-shadow: 0 0 0 3px rgba(20, 86, 111, 0.15);
+  box-shadow: 0 0 0 2px rgba(20, 86, 111, 0.15);
 }
 
 .month-display-thai {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--pm-primary);
-  padding: 4px 10px;
+  padding: 2px 7px;
   background: var(--pm-primary-surface);
   border-radius: var(--radius-sm);
   white-space: nowrap;
+}
+
+.meta-inline-notes input {
+  width: 220px;
 }
 
 /* Toolbar */
@@ -469,18 +454,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 24px;
+  padding: 6px 14px;
   background: var(--pm-bg-surface);
   border-bottom: 1px solid var(--pm-border-subtle);
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
 }
 
 .toolbar-left,
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -491,10 +476,10 @@ body {
 }
 
 .search-box input {
-  height: 34px;
-  width: 240px;
-  padding: 0 30px 0 32px;
-  font-size: 12.5px;
+  height: 30px;
+  width: 210px;
+  padding: 0 24px 0 28px;
+  font-size: 12px;
   font-family: var(--font-body);
   border: 1px solid var(--pm-border);
   border-radius: var(--radius-sm);
@@ -504,31 +489,31 @@ body {
 }
 
 .search-box input:focus {
-  width: 290px;
+  width: 250px;
   background: var(--pm-bg-surface);
   border-color: var(--pm-primary);
-  box-shadow: 0 0 0 3px rgba(20, 86, 111, 0.12);
+  box-shadow: 0 0 0 2px rgba(20, 86, 111, 0.12);
 }
 
 .search-icon {
   position: absolute;
-  left: 10px;
+  left: 8px;
   color: var(--pm-ink-muted);
   pointer-events: none;
 }
 
 .btn-clear {
   position: absolute;
-  right: 8px;
+  right: 6px;
   background: none;
   border: none;
   color: var(--pm-ink-muted);
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .machine-count-text {
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--pm-ink-muted);
 }
 
@@ -539,8 +524,8 @@ body {
 }
 
 .bulk-order-input {
-  height: 32px;
-  width: 140px;
+  height: 30px;
+  width: 130px;
   padding: 0 8px;
   font-size: 12px;
   font-family: var(--font-mono);
@@ -556,7 +541,8 @@ body {
 /* Tables */
 .table-container {
   overflow-x: auto;
-  max-height: 520px;
+  max-height: calc(100vh - 240px);
+  min-height: 280px;
   position: relative;
 }
 
@@ -575,8 +561,8 @@ body {
 }
 
 .pm-table th {
-  padding: 12px 16px;
-  font-size: 12px;
+  padding: 8px 12px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--pm-ink-secondary);
   border-bottom: 1px solid var(--pm-border);
@@ -593,8 +579,8 @@ body {
 }
 
 .pm-table td {
-  padding: 10px 16px;
-  font-size: 13.5px;
+  padding: 6px 12px;
+  font-size: 13px;
   color: var(--pm-ink);
   vertical-align: middle;
 }
@@ -768,20 +754,37 @@ body {
 
 /* Matrix Overview */
 .matrix-card-header {
-  padding: 20px 24px;
+  padding: 8px 14px;
+  background: linear-gradient(180deg, #ffffff 0%, var(--pm-bg-surface-muted) 100%);
   border-bottom: 1px solid var(--pm-border-subtle);
 }
 
+.matrix-header-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .matrix-title {
-  font-size: 18px;
+  font-size: 13.5px;
   font-weight: 700;
   color: var(--pm-ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.matrix-icon {
+  color: var(--pm-primary);
 }
 
 .matrix-subtitle {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--pm-ink-secondary);
-  margin-top: 2px;
+  font-weight: 400;
 }
 
 .matrix-table th.col-round {
@@ -1517,50 +1520,45 @@ html, body {
 
   <div class="pm-app-container">
     
-    <!-- Top Header -->
+    <!-- Compact Top Header -->
     <header class="pm-page-header">
-      <div class="header-breadcrumb">
-        <span>แผนกซ่อมบำรุงไฟฟ้า</span>
-        <span class="sep">/</span>
-        <span class="current">PM & Order Management</span>
-      </div>
       <div class="header-main-row">
         <div class="title-group">
-          <h1 class="page-title">
-            <svg class="title-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-              <path d="m9 16 2 2 4-4"></path>
-            </svg>
-            จัดการ Order No. รายเครื่อง (PM)
-          </h1>
-          <p class="page-description">
-            เก็บข้อมูล Order No. ของแต่ละเครื่องจักรตามรอบการทำ Preventive Maintenance (สูงสุด 5 ครั้ง/ปี)
-          </p>
+          <div class="title-with-pill">
+            <h1 class="page-title">
+              <svg class="title-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+                <path d="m9 16 2 2 4-4"></path>
+              </svg>
+              จัดการ Order No. รายเครื่อง (PM)
+            </h1>
+            <span class="header-meta-pill">PM &amp; Order · สูงสุด 5 รอบ/ปี</span>
+          </div>
         </div>
         <div class="header-actions">
           <div class="view-toggle-group" role="tablist">
-            <button type="button" id="tab-btn-form" class="view-tab-btn" role="tab" aria-selected="false">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-              ฟอร์มจัดการ Order No.
-            </button>
             <button type="button" id="tab-btn-matrix" class="view-tab-btn active" role="tab" aria-selected="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
               ภาพรวม 5 รอบประจำปี
+            </button>
+            <button type="button" id="tab-btn-form" class="view-tab-btn" role="tab" aria-selected="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              ฟอร์มจัดการ Order No.
             </button>
           </div>
         </div>
       </div>
     </header>
 
-    <!-- Selection Bar: Dept, Line, Year -->
+    <!-- Compact Filter & Rounds Control Bar -->
     <section class="pm-filter-panel">
       <div class="filter-controls-row">
         <!-- Dept selector -->
         <div class="filter-field">
-          <label for="select-dept" class="field-label">แผนก (Department)</label>
+          <label for="select-dept" class="field-label">แผนก:</label>
           <div class="select-wrapper">
             <select id="select-dept" class="form-select">
               <option value="">กำลังโหลดแผนก...</option>
@@ -1568,9 +1566,9 @@ html, body {
           </div>
         </div>
 
-        <!-- Line selector -->
-        <div class="filter-field">
-          <label for="select-line" class="field-label">สายการผลิต (Line)</label>
+        <!-- Line selector (shown in Form tab) -->
+        <div class="filter-field" id="filter-field-line" style="display:none;">
+          <label for="select-line" class="field-label">สายการผลิต:</label>
           <div class="select-wrapper">
             <select id="select-line" class="form-select">
               <option value="">กำลังโหลดสายการผลิต...</option>
@@ -1580,7 +1578,7 @@ html, body {
 
         <!-- Year selector -->
         <div class="filter-field filter-field-year">
-          <label for="select-year" class="field-label">ปี (Year)</label>
+          <label for="select-year" class="field-label">ปี:</label>
           <div class="select-wrapper">
             <select id="select-year" class="form-select">
               <option value="2026">2026</option>
@@ -1594,16 +1592,16 @@ html, body {
         <!-- Reload Button -->
         <div class="filter-field-actions">
           <button type="button" id="btn-refresh" class="btn btn-secondary btn-icon-only" title="โหลดข้อมูลใหม่">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
           </button>
         </div>
-      </div>
 
-      <!-- 5 PM Rounds Navigation Pills -->
-      <div class="pm-rounds-bar">
-        <span class="rounds-bar-label">เลือกรอบการทำ PM ประจำปี (สูงสุด 5 ครั้ง):</span>
-        <div class="rounds-pills-list" id="rounds-pills-container">
-          <!-- Populated dynamically: Round 1..5 -->
+        <!-- 5 PM Rounds Navigation Pills (Only in Form View) -->
+        <div class="pm-rounds-bar" id="pm-rounds-bar" style="display:none;">
+          <span class="rounds-bar-label">รอบ PM:</span>
+          <div class="rounds-pills-list" id="rounds-pills-container">
+            <!-- Populated dynamically: Round 1..5 -->
+          </div>
         </div>
       </div>
     </section>
@@ -1612,48 +1610,38 @@ html, body {
     <main id="view-form-container" class="pm-view-section" style="display:none;">
       <div class="pm-card form-card">
         
-        <!-- Form Header -->
-        <div class="form-card-header">
-          <div class="form-card-title-group">
-            <div class="line-badge" id="badge-line-name">ไลน์: -</div>
-            <h2 class="form-card-title" id="form-heading-title">
-              จัดการ Order No. รายเครื่อง (ไลน์: -)
-            </h2>
-            <div class="round-badge" id="badge-round-info">รอบที่ 1/5</div>
-          </div>
-          <div class="form-card-status-badges">
+        <!-- Compact Status & Meta Ribbon -->
+        <div class="form-compact-ribbon">
+          <!-- Line Context & Status Badges -->
+          <div class="ribbon-context">
+            <span class="line-badge" id="badge-line-name">ไลน์: -</span>
+            <span class="round-badge" id="badge-round-info">รอบที่ 1/5</span>
             <span class="status-chip" id="chip-progress-status">
               <span class="chip-dot"></span>
               <span id="chip-progress-text">กรอกแล้ว 0/0 เครื่อง</span>
             </span>
+            <h2 id="form-heading-title" style="display:none;"></h2>
           </div>
-        </div>
 
-        <!-- Month & Plan Inputs (ตามภาพ) -->
-        <div class="form-meta-strip">
-          <div class="meta-field">
-            <label for="input-target-month" class="meta-label">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              เลือกเดือน/ปี (ที่ทำ PM):
-            </label>
-            <div class="month-input-container">
-              <input type="month" id="input-target-month" class="input-month-control" value="2026-10">
-              <span class="month-display-thai" id="text-thai-month">ตุลาคม 2026</span>
+          <!-- Meta Controls Inline: Month, Plan Date, Notes -->
+          <div class="ribbon-meta-fields">
+            <div class="meta-inline-item">
+              <label for="input-target-month" class="meta-inline-label">เดือน/ปี PM:</label>
+              <div class="month-input-container">
+                <input type="month" id="input-target-month" class="input-month-control" value="2026-10">
+                <span class="month-display-thai" id="text-thai-month">ตุลาคม 2026</span>
+              </div>
             </div>
-          </div>
 
-          <div class="meta-field">
-            <label for="input-plan-date" class="meta-label">
-              วันที่เริ่มทำ PM (ตามแผน):
-            </label>
-            <input type="date" id="input-plan-date" class="input-date-control">
-          </div>
+            <div class="meta-inline-item">
+              <label for="input-plan-date" class="meta-inline-label">เริ่มตามแผน:</label>
+              <input type="date" id="input-plan-date" class="input-date-control">
+            </div>
 
-          <div class="meta-field meta-field-notes">
-            <label for="input-cycle-notes" class="meta-label">
-              บันทึกรอบ PM:
-            </label>
-            <input type="text" id="input-cycle-notes" class="input-text-control" placeholder="เช่น แผน PM ประจำไตรมาส 4 / สั่งอะไหล่ล่วงหน้า">
+            <div class="meta-inline-item meta-inline-notes">
+              <label for="input-cycle-notes" class="meta-inline-label">บันทึก:</label>
+              <input type="text" id="input-cycle-notes" class="input-text-control" placeholder="บันทึกรอบ PM เช่น สั่งอะไหล่ล่วงหน้า...">
+            </div>
           </div>
         </div>
 
@@ -1661,7 +1649,7 @@ html, body {
         <div class="form-toolbar">
           <div class="toolbar-left">
             <div class="search-box">
-              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
               <input type="text" id="input-machine-search" placeholder="ค้นหารหัส หรือชื่อเครื่องจักร..." autocomplete="off">
               <button type="button" id="btn-clear-search" class="btn-clear" style="display:none;" title="ล้างคำค้น">×</button>
             </div>
@@ -1732,9 +1720,12 @@ html, body {
     <main id="view-matrix-container" class="pm-view-section">
       <div class="pm-card matrix-card">
         <div class="matrix-card-header">
-          <div>
-            <h2 class="matrix-title">ภาพรวมแผน PM และ Order No. (5 รอบประจำปี <span id="matrix-year-text">2026</span>)</h2>
-            <p class="matrix-subtitle">ติดตามความพร้อมของการเปิด PR แยกตามสายการผลิตและรอบ PM ทั้งหมดในแผนก</p>
+          <div class="matrix-header-inline">
+            <h2 class="matrix-title">
+              <svg class="matrix-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+              ภาพรวมแผน PM และ Order No. (5 รอบประจำปี <span id="matrix-year-text">2026</span>)
+            </h2>
+            <span class="matrix-subtitle">ติดตามความพร้อมของการเปิด PR ทุกสายการผลิต</span>
           </div>
         </div>
 
@@ -2268,11 +2259,7 @@ html, body {
     setupEventHandlers();
     try {
       await loadReferences();
-      if (state.currentTab === 'matrix') {
-        loadMatrixData();
-      } else {
-        loadCycleData();
-      }
+      switchTab(state.currentTab);
     } catch (err) {
       showToast(err.message, true);
     }
@@ -2350,6 +2337,8 @@ html, body {
     const btnMatrix = document.getElementById('tab-btn-matrix');
     const viewForm = document.getElementById('view-form-container');
     const viewMatrix = document.getElementById('view-matrix-container');
+    const roundsBar = document.getElementById('pm-rounds-bar');
+    const lineField = document.getElementById('filter-field-line');
 
     if (tab === 'form') {
       btnForm?.classList.add('active');
@@ -2358,6 +2347,8 @@ html, body {
       btnMatrix?.setAttribute('aria-selected', 'false');
       if (viewForm) viewForm.style.display = 'block';
       if (viewMatrix) viewMatrix.style.display = 'none';
+      if (roundsBar) roundsBar.style.display = 'flex';
+      if (lineField) lineField.style.display = 'flex';
       loadCycleData();
     } else {
       btnForm?.classList.remove('active');
@@ -2366,6 +2357,8 @@ html, body {
       btnMatrix?.setAttribute('aria-selected', 'true');
       if (viewForm) viewForm.style.display = 'none';
       if (viewMatrix) viewMatrix.style.display = 'block';
+      if (roundsBar) roundsBar.style.display = 'none';
+      if (lineField) lineField.style.display = 'none';
       loadMatrixData();
     }
   }

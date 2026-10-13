@@ -63,11 +63,7 @@
     setupEventHandlers();
     try {
       await loadReferences();
-      if (state.currentTab === 'matrix') {
-        loadMatrixData();
-      } else {
-        loadCycleData();
-      }
+      switchTab(state.currentTab);
     } catch (err) {
       showToast(err.message, true);
     }
@@ -145,6 +141,8 @@
     const btnMatrix = document.getElementById('tab-btn-matrix');
     const viewForm = document.getElementById('view-form-container');
     const viewMatrix = document.getElementById('view-matrix-container');
+    const roundsBar = document.getElementById('pm-rounds-bar');
+    const lineField = document.getElementById('filter-field-line');
 
     if (tab === 'form') {
       btnForm?.classList.add('active');
@@ -153,6 +151,8 @@
       btnMatrix?.setAttribute('aria-selected', 'false');
       if (viewForm) viewForm.style.display = 'block';
       if (viewMatrix) viewMatrix.style.display = 'none';
+      if (roundsBar) roundsBar.style.display = 'flex';
+      if (lineField) lineField.style.display = 'flex';
       loadCycleData();
     } else {
       btnForm?.classList.remove('active');
@@ -161,6 +161,8 @@
       btnMatrix?.setAttribute('aria-selected', 'true');
       if (viewForm) viewForm.style.display = 'none';
       if (viewMatrix) viewMatrix.style.display = 'block';
+      if (roundsBar) roundsBar.style.display = 'none';
+      if (lineField) lineField.style.display = 'none';
       loadMatrixData();
     }
   }
