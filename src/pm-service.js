@@ -45,6 +45,7 @@ export async function getPMCycleData(env, { lineId, year, roundNo }) {
 
   // Retrieve all active machines for this line
   let machines = [];
+  const targetMonth = cycle ? cycle.target_month : '';
   if (cycleId) {
     const res = await env.DB.prepare(`
       SELECT 
@@ -56,16 +57,32 @@ export async function getPMCycleData(env, { lineId, year, roundNo }) {
         m.criticality,
         pmo.id as order_id,
         COALESCE(pmo.order_no, '') as order_no,
+        COALESCE(pmo.budget_amount, 0) as budget_amount,
         COALESCE(pmo.pr_no, '') as pr_no,
         COALESCE(pmo.pr_status, 'PENDING') as pr_status,
         COALESCE(pmo.notes, '') as notes,
-        pmo.updated_at
+        pmo.updated_at,
+        COALESCE((
+          SELECT SUM(e.amount)
+          FROM pm_expenses e
+          WHERE (
+            (pmo.order_no IS NOT NULL AND TRIM(pmo.order_no) != '' AND (
+              TRIM(e.pm_order_no) = TRIM(pmo.order_no)
+              OR (e.machine_id = m.id AND TRIM(e.pm_order_no) = TRIM(pmo.order_no))
+            ))
+            OR (
+              (pmo.order_no IS NULL OR TRIM(pmo.order_no) = '')
+              AND (e.machine_id = m.id OR LOWER(e.machine_code) = LOWER(m.code))
+              AND (? != '' AND STRFTIME('%Y-%m', e.doc_date) = ?)
+            )
+          )
+        ), 0) as used_amount
       FROM machines m
       LEFT JOIN pm_machine_orders pmo 
         ON pmo.machine_id = m.id AND pmo.cycle_id = ?
       WHERE m.line_id = ? AND m.is_active = 1
       ORDER BY CASE WHEN m.line_order IS NULL THEN 1 ELSE 0 END, m.line_order, m.code COLLATE NOCASE, m.id
-    `).bind(cycleId, lineId).all();
+    `).bind(targetMonth, targetMonth, cycleId, lineId).all();
     machines = res.results || [];
   } else {
     const res = await env.DB.prepare(`
@@ -78,10 +95,12 @@ export async function getPMCycleData(env, { lineId, year, roundNo }) {
         m.criticality,
         NULL as order_id,
         '' as order_no,
+        0 as budget_amount,
         '' as pr_no,
         'PENDING' as pr_status,
         '' as notes,
-        NULL as updated_at
+        NULL as updated_at,
+        0 as used_amount
       FROM machines m
       WHERE m.line_id = ? AND m.is_active = 1
       ORDER BY CASE WHEN m.line_order IS NULL THEN 1 ELSE 0 END, m.line_order, m.code COLLATE NOCASE, m.id
@@ -143,6 +162,8 @@ export async function getPMCycleData(env, { lineId, year, roundNo }) {
       machineCode: m.machine_code,
       machineName: m.machine_name,
       orderNo: m.order_no,
+      budgetAmount: Number(m.budget_amount) || 0,
+      usedAmount: Number(m.used_amount) || 0,
       prNo: m.pr_no,
       prStatus: m.pr_status,
       notes: m.notes,
@@ -208,6 +229,7 @@ export async function savePMCycleOrders(env, actor, payload) {
   for (const item of orders) {
     if (!item.machineId) continue;
     const orderNo = String(item.orderNo || '').trim();
+    const budgetAmount = Math.max(0, parseFloat(String(item.budgetAmount || '0').replace(/,/g, '')) || 0);
     const prNo = String(item.prNo || '').trim();
     const itemNotes = String(item.notes || '').trim();
     const orderId = `PMO-${cycleId}-${item.machineId}`;
@@ -216,17 +238,18 @@ export async function savePMCycleOrders(env, actor, payload) {
     statements.push(
       env.DB.prepare(`
         INSERT INTO pm_machine_orders (
-          id, cycle_id, machine_id, order_no, pr_no, pr_status, notes,
+          id, cycle_id, machine_id, order_no, budget_amount, pr_no, pr_status, notes,
           created_at, created_by, updated_at, updated_by
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(cycle_id, machine_id) DO UPDATE SET
           order_no = excluded.order_no,
+          budget_amount = excluded.budget_amount,
           pr_no = excluded.pr_no,
           pr_status = excluded.pr_status,
           notes = excluded.notes,
           updated_at = excluded.updated_at,
           updated_by = excluded.updated_by
-      `).bind(orderId, cycleId, item.machineId, orderNo, prNo, prStatus, itemNotes, now, user, now, user)
+      `).bind(orderId, cycleId, item.machineId, orderNo, budgetAmount, prNo, prStatus, itemNotes, now, user, now, user)
     );
   }
 

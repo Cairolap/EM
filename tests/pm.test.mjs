@@ -44,27 +44,44 @@ test('PM Orders service: lifecycle, validation, and machine orders', async () =>
     /รอบ PM ต้องอยู่ระหว่าง 1 ถึง 5/
   );
 
-  // 4. Save orders for Round 1
+  // 4. Save orders and budgets for Round 1
   const saveRes = await savePMCycleOrders(env, actor, {
     lineId: 'L01',
     year: 2026,
     roundNo: 1,
     targetMonth: '2026-10',
     orders: [
-      { machineId: 'M01', orderNo: '13110001' },
-      { machineId: 'M02', orderNo: '13110002' },
-      { machineId: 'M03', orderNo: '13110003' },
-      { machineId: 'M04', orderNo: '13110004' }
+      { machineId: 'M01', orderNo: '13110001', budgetAmount: 50000 },
+      { machineId: 'M02', orderNo: '13110002', budgetAmount: 25000 },
+      { machineId: 'M03', orderNo: '13110003', budgetAmount: 10000 },
+      { machineId: 'M04', orderNo: '13110004', budgetAmount: 0 }
     ]
   });
   assert.equal(saveRes.success, true);
   assert.equal(saveRes.savedCount, 4);
+
+  // Insert an expense record matching M01 and Order 13110001
+  db.raw.exec(`
+    INSERT INTO pm_expenses (
+      id, plant, gl_account, cost_center, machine_code, machine_id, department_id, line_id,
+      pm_order_no, doc_date, doc_no, movement_type, material_no, description, quantity, uom,
+      unit_price, amount, currency, order_type, po_no, functional_loc, work_center, notes,
+      imported_at, imported_by, created_at, created_by, updated_at, updated_by
+    ) VALUES (
+      'EXP-TEST-1', '1200', 'GL01', 'CC01', 'RB2', 'M01', 'D01', 'L01',
+      '13110001', '2026-10-05', 'DOC01', '261', 'MAT01', 'Bearing 6205', 2, 'EA',
+      1250, 2500, 'THB', '1PMO', '', 'L01-RB2', '', '',
+      '2026-10-12', 'sys', '2026-10-12', 'sys', '2026-10-12', 'sys'
+    );
+  `);
 
   // 5. Fetch after save
   const savedData = await getPMCycleData(env, { lineId: 'L01', year: 2026, roundNo: 1 });
   assert.equal(savedData.targetMonth, '2026-10');
   const m1 = savedData.machines.find(m => m.machineCode === 'RB2');
   assert.equal(m1.orderNo, '13110001');
+  assert.equal(m1.budgetAmount, 50000);
+  assert.equal(m1.usedAmount, 2500); // from pm_expenses
   assert.equal(m1.isFilled, true);
 
   // Round 1 is now marked as existing

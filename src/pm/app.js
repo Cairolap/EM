@@ -333,6 +333,11 @@
     if (inputNotes) inputNotes.value = data.notes || '';
   }
 
+  function formatMoney(amount) {
+    if (amount === undefined || amount === null || isNaN(amount)) return '0.00';
+    return Number(amount).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   // Render Machines Table
   function renderMachinesTable() {
     const tbody = document.getElementById('machines-tbody');
@@ -351,16 +356,44 @@
     const countLabel = document.getElementById('text-machine-count');
     if (countLabel) countLabel.textContent = `แสดง ${filtered.length} จากทั้งหมด ${machines.length} เครื่อง`;
 
-    // Update progress chip
+    // Update progress chip and summary row
     updateProgressCounter();
+    updateSummaryRow();
 
     if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-muted">ไม่พบเครื่องจักรที่ตรงกับคำค้นหา</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-muted">ไม่พบเครื่องจักรที่ตรงกับคำค้นหา</td></tr>';
       return;
     }
 
     tbody.innerHTML = filtered.map((m, idx) => {
       const isFilled = m.orderNo && m.orderNo.trim().length > 0;
+      const budget = Number(m.budgetAmount) || 0;
+      const used = Number(m.usedAmount) || 0;
+      const isOver = budget > 0 && used > budget;
+
+      let statusBadge = '';
+      if (isFilled) {
+        if (isOver) {
+          statusBadge = '<span class="status-badge badge-over" title="ค่าใช้จ่ายเกินงบประมาณ">⚠️ เกินงบ</span>';
+        } else if (used > 0) {
+          statusBadge = '<span class="status-badge badge-active" title="มี Order และมี คชจ. ในระบบ">✓ มีค่าใช้จ่าย</span>';
+        } else {
+          statusBadge = '<span class="status-badge badge-ready" title="ระบุ Order No. แล้ว">✓ ระบุ Order</span>';
+        }
+      } else {
+        if (used > 0) {
+          statusBadge = '<span class="status-badge badge-warn" title="มีค่าใช้จ่ายในระบบ แต่ยังไม่ได้ระบุ Order">⚠️ รอกรอก Order</span>';
+        } else {
+          statusBadge = '<span class="status-badge badge-pending" title="ยังไม่ระบุ Order No.">○ รอดำเนินการ</span>';
+        }
+      }
+
+      // Link to expenses search if there is expense or order
+      const expenseSearchTerm = m.orderNo || m.machineCode;
+      const expenseDisplay = used > 0
+        ? `<a href="/pm-expenses/?search=${encodeURIComponent(expenseSearchTerm)}" target="_blank" class="expense-val-link ${isOver ? 'text-danger' : 'text-success'}" title="คลิกเพื่อเปิดดูรายละเอียดในหน้า ค่าใช้จ่าย PM">฿${formatMoney(used)}</a>`
+        : `<span class="expense-val-zero text-muted">฿0.00</span>`;
+
       return `
         <tr data-machine-id="${m.machineId}">
           <td class="col-num">${idx + 1}</td>
@@ -378,10 +411,26 @@
               autocomplete="off"
             />
           </td>
+          <td class="col-budget">
+            <div class="budget-input-wrapper">
+              <span class="currency-prefix">฿</span>
+              <input 
+                type="number" 
+                step="any" 
+                min="0"
+                class="input-machine-budget" 
+                placeholder="0.00" 
+                value="${budget > 0 ? budget : ''}" 
+                data-machine-id="${m.machineId}"
+                autocomplete="off"
+              />
+            </div>
+          </td>
+          <td class="col-used">
+            ${expenseDisplay}
+          </td>
           <td class="col-status">
-            <span class="status-indicator ${isFilled ? 'ready' : 'pending'}" title="${isFilled ? 'ระบุ Order No. แล้ว' : 'ยังไม่ระบุ Order'}">
-              ${isFilled ? '✓' : '○'}
-            </span>
+            ${statusBadge}
           </td>
         </tr>
       `;
@@ -397,25 +446,82 @@
           machine.orderNo = val;
           machine.isFilled = Boolean(val);
         }
-
-        // Toggle filled visual style
-        if (val) {
-          e.target.classList.add('filled');
-        } else {
-          e.target.classList.remove('filled');
-        }
-
-        // Update status indicator in row
-        const row = e.target.closest('tr');
-        const indicator = row?.querySelector('.status-indicator');
-        if (indicator) {
-          indicator.className = `status-indicator ${val ? 'ready' : 'pending'}`;
-          indicator.textContent = val ? '✓' : '○';
-        }
-
+        if (val) e.target.classList.add('filled');
+        else e.target.classList.remove('filled');
         updateProgressCounter();
+        refreshRowStatus(e.target.closest('tr'), machine);
       });
     });
+
+    tbody.querySelectorAll('.input-machine-budget').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 0;
+        const machineId = e.target.getAttribute('data-machine-id');
+        const machine = machines.find(item => item.machineId === machineId);
+        if (machine) {
+          machine.budgetAmount = val;
+        }
+        updateSummaryRow();
+        refreshRowStatus(e.target.closest('tr'), machine);
+      });
+    });
+  }
+
+  function refreshRowStatus(row, m) {
+    if (!row || !m) return;
+    const isFilled = m.orderNo && m.orderNo.trim().length > 0;
+    const budget = Number(m.budgetAmount) || 0;
+    const used = Number(m.usedAmount) || 0;
+    const isOver = budget > 0 && used > budget;
+
+    const statusCol = row.querySelector('.col-status');
+    if (statusCol) {
+      if (isFilled) {
+        if (isOver) {
+          statusCol.innerHTML = '<span class="status-badge badge-over" title="ค่าใช้จ่ายเกินงบประมาณ">⚠️ เกินงบ</span>';
+        } else if (used > 0) {
+          statusCol.innerHTML = '<span class="status-badge badge-active" title="มี Order และมี คชจ. ในระบบ">✓ มีค่าใช้จ่าย</span>';
+        } else {
+          statusCol.innerHTML = '<span class="status-badge badge-ready" title="ระบุ Order No. แล้ว">✓ ระบุ Order</span>';
+        }
+      } else {
+        if (used > 0) {
+          statusCol.innerHTML = '<span class="status-badge badge-warn" title="มีค่าใช้จ่ายในระบบ แต่ยังไม่ได้ระบุ Order">⚠️ รอกรอก Order</span>';
+        } else {
+          statusCol.innerHTML = '<span class="status-badge badge-pending" title="ยังไม่ระบุ Order No.">○ รอดำเนินการ</span>';
+        }
+      }
+    }
+  }
+
+  function updateSummaryRow() {
+    if (!state.cycleData) return;
+    const machines = state.cycleData.machines || [];
+    const totalBudget = machines.reduce((sum, m) => sum + (Number(m.budgetAmount) || 0), 0);
+    const totalUsed = machines.reduce((sum, m) => sum + (Number(m.usedAmount) || 0), 0);
+
+    const budgetEl = document.getElementById('summary-total-budget');
+    const usedEl = document.getElementById('summary-total-used');
+    const diffEl = document.getElementById('summary-budget-diff');
+
+    if (budgetEl) budgetEl.textContent = '฿' + formatMoney(totalBudget);
+    if (usedEl) usedEl.textContent = '฿' + formatMoney(totalUsed);
+
+    if (diffEl) {
+      if (totalBudget > 0) {
+        const diff = totalBudget - totalUsed;
+        if (diff >= 0) {
+          diffEl.className = 'summary-diff-badge within-budget';
+          diffEl.textContent = `คงเหลือ ฿${formatMoney(diff)}`;
+        } else {
+          diffEl.className = 'summary-diff-badge over-budget';
+          diffEl.textContent = `เกินงบ ฿${formatMoney(Math.abs(diff))}`;
+        }
+      } else {
+        diffEl.className = 'summary-diff-badge neutral';
+        diffEl.textContent = totalUsed > 0 ? `ใช้ไป ฿${formatMoney(totalUsed)}` : '-';
+      }
+    }
   }
 
   function updateProgressCounter() {
@@ -463,17 +569,17 @@
     if (!state.cycleData || !state.cycleData.machines.length) return;
     const { lineId, year, roundNo, targetMonth, machines } = state.cycleData;
 
-    let text = `[รายการ Order No. สำหรับ PM]\n`;
+    let text = `[รายการ Order No. และงบประมาณสำหรับ PM]\n`;
     text += `ไลน์: ${lineId} | ปี: ${year} | รอบที่: ${roundNo}/5 | ประจำเดือน: ${formatThaiMonth(targetMonth)}\n`;
-    text += `--------------------------------------------------------\n`;
-    text += `รหัสเครื่องจักร\tชื่อเต็ม\tOrder No.\n`;
+    text += `------------------------------------------------------------------------------------\n`;
+    text += `รหัสเครื่องจักร\tชื่อเต็ม\tOrder No.\tงบประมาณ\tยอดที่ใช้ (ค่าใช้จ่าย PM)\n`;
 
     machines.forEach(m => {
-      text += `${m.machineCode}\t${m.machineName}\t${m.orderNo || '-'}\n`;
+      text += `${m.machineCode}\t${m.machineName}\t${m.orderNo || '-'}\t${m.budgetAmount || 0}\t${m.usedAmount || 0}\n`;
     });
 
     navigator.clipboard.writeText(text).then(() => {
-      showToast('คัดลอกรายการ Order No. ไปยังคลิปบอร์ดแล้ว');
+      showToast('คัดลอกรายการไปยังคลิปบอร์ดแล้ว');
     }).catch(() => {
       showToast('ไม่สามารถคัดลอกข้อความได้ กรุณาลองใหม่', true);
     });
@@ -506,13 +612,14 @@
         orders: state.cycleData.machines.map(m => ({
           machineId: m.machineId,
           orderNo: m.orderNo,
+          budgetAmount: m.budgetAmount || 0,
           prNo: m.prNo,
           notes: m.notes
         }))
       };
 
       const result = await rpcPM('saveOrders', payload);
-      showToast(`บันทึก Order No. สำเร็จ (${result.savedCount} เครื่อง)`);
+      showToast(`บันทึก Order No. และงบประมาณสำเร็จ (${result.savedCount} เครื่อง)`);
       await loadCycleData();
     } catch (err) {
       showToast(err.message, true);

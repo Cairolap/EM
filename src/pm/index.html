@@ -175,17 +175,27 @@
                 <th class="col-code">รหัสเครื่องจักร</th>
                 <th class="col-name">ชื่อเต็ม</th>
                 <th class="col-order">Order No.</th>
+                <th class="col-budget">งบประมาณ</th>
+                <th class="col-used">ยอดที่ใช้ (ค่าใช้จ่าย PM)</th>
                 <th class="col-status">สถานะ</th>
               </tr>
             </thead>
             <tbody id="machines-tbody">
               <!-- Dynamically rendered rows -->
               <tr>
-                <td colspan="5" class="text-center py-8 text-muted">
+                <td colspan="7" class="text-center py-8 text-muted">
                   กำลังโหลดข้อมูลเครื่องจักร...
                 </td>
               </tr>
             </tbody>
+            <tfoot>
+              <tr class="table-summary-row">
+                <td colspan="4" class="summary-label"><strong>รวมทั้งสิ้นในไลน์:</strong></td>
+                <td class="col-budget"><strong id="summary-total-budget">฿0.00</strong></td>
+                <td class="col-used"><strong id="summary-total-used">฿0.00</strong></td>
+                <td class="col-status"><span id="summary-budget-diff" class="summary-diff-badge">-</span></td>
+              </tr>
+            </tfoot>
           </table>
         </div>
 
