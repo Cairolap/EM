@@ -64,9 +64,11 @@ body {
 
 /* App Container */
 .pm-app-container {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 24px 20px 48px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 16px 20px 48px;
+  box-sizing: border-box;
 }
 
 /* Header */

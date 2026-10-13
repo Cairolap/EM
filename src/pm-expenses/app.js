@@ -5,7 +5,7 @@
   // STATE MANAGEMENT
   // =========================================================================
   const state = {
-    activeTab: 'table', // 'table' or 'dashboard'
+    activeTab: 'dashboard', // 'table' or 'dashboard'
     
     // References
     departments: [],

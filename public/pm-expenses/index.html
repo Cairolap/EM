@@ -56,9 +56,11 @@
 
 /* Base Container */
 .exp-app-container {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 24px 20px 60px 20px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 16px 20px 60px 20px;
+  box-sizing: border-box;
   font-family: 'Prompt', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: var(--exp-text-main);
   background-color: var(--exp-bg-page);
@@ -1917,21 +1919,21 @@
             <svg class="title-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
             </svg>
-            <span id="title-text">ค่าใช้จ่าย PM</span>
+            <span id="title-text">Dashboard งบประมาณ</span>
           </h1>
           <p class="page-subtitle" id="page-main-subtitle">
-            บันทึกและจัดการค่าใช้จ่ายงานบำรุงรักษา (PM) เชื่อมโยงเครื่องจักร และติดตามงบประมาณ
+            วิเคราะห์เปรียบเทียบงบประมาณ vs ค่าใช้จ่ายจริง และแนวโน้มเบิกจ่าย
           </p>
         </div>
 
         <!-- View Switcher Tabs -->
         <div class="header-actions">
           <div class="view-toggle-group" role="tablist">
-            <button type="button" id="tab-btn-table" class="view-tab-btn active" role="tab" aria-selected="true">
+            <button type="button" id="tab-btn-table" class="view-tab-btn" role="tab" aria-selected="false">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               รายการค่าใช้จ่าย PM
             </button>
-            <button type="button" id="tab-btn-dashboard" class="view-tab-btn" role="tab" aria-selected="false">
+            <button type="button" id="tab-btn-dashboard" class="view-tab-btn active" role="tab" aria-selected="true">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
               Dashboard งบประมาณ
             </button>
@@ -1943,7 +1945,7 @@
     <!-- =========================================================================
          VIEW 1: ตารางรายการค่าใช้จ่าย PM (Expense Table View ตามภาพที่ 1)
          ========================================================================= -->
-    <main id="view-table-section" class="exp-view-section">
+    <main id="view-table-section" class="exp-view-section" style="display:none;">
       <div class="exp-card">
         
         <!-- Top Toolbar of the Card -->
@@ -2083,7 +2085,7 @@
     <!-- =========================================================================
          VIEW 2: Dashboard ค่าใช้จ่าย & งบประมาณ (Dashboard View ตามภาพที่ 2)
          ========================================================================= -->
-    <main id="view-dashboard-section" class="exp-view-section" style="display:none;">
+    <main id="view-dashboard-section" class="exp-view-section">
       
       <!-- Dashboard Top Filter Strip -->
       <section class="dash-filter-strip">
@@ -2922,7 +2924,7 @@
   // STATE MANAGEMENT
   // =========================================================================
   const state = {
-    activeTab: 'table', // 'table' or 'dashboard'
+    activeTab: 'dashboard', // 'table' or 'dashboard'
     
     // References
     departments: [],

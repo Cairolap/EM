@@ -27,7 +27,7 @@
     selectedRound: 1, // 1 to 5
     cycleData: null,
     searchQuery: '',
-    currentTab: 'form', // 'form' or 'matrix'
+    currentTab: 'matrix', // 'form' or 'matrix'
     isSaving: false
   };
 
@@ -63,6 +63,11 @@
     setupEventHandlers();
     try {
       await loadReferences();
+      if (state.currentTab === 'matrix') {
+        loadMatrixData();
+      } else {
+        loadCycleData();
+      }
     } catch (err) {
       showToast(err.message, true);
     }
@@ -233,7 +238,9 @@
     }
     lineSelect.value = state.selectedLine;
 
-    loadCycleData();
+    if (state.currentTab === 'form') {
+      loadCycleData();
+    }
   }
 
   // Load PM Cycle data for current line, year, round
