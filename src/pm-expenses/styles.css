@@ -43,6 +43,18 @@
   --exp-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background-color: var(--exp-bg-page);
+  -webkit-font-smoothing: antialiased;
+}
+
 /* Base Container */
 .exp-app-container {
   width: 100%;

@@ -54,6 +54,18 @@
   --exp-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background-color: var(--exp-bg-page);
+  -webkit-font-smoothing: antialiased;
+}
+
 /* Base Container */
 .exp-app-container {
   width: 100%;
@@ -1505,11 +1517,22 @@
 
 <style>
 /* --- UNIFIED ELECTRICAL MAINTENANCE NAVIGATION BAR --- */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+.em-main-nav,
+.em-main-nav *,
+.em-main-nav *::before,
+.em-main-nav *::after {
+  box-sizing: border-box;
+}
 .em-main-nav {
   position: sticky;
   top: 0;
   left: 0;
   right: 0;
+  width: 100%;
   z-index: 10000;
   background: #0d1e38;
   color: #ffffff;
@@ -1525,6 +1548,8 @@
   padding: 0 20px;
   height: 54px;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .em-nav-left {
   display: flex;
@@ -3642,7 +3667,7 @@
     }).join('');
 
     container.innerHTML = `
-      <svg width="100%" height="${chartHeight}" viewBox="0 0 ${chartWidth} ${chartHeight}" style="overflow: visible;">
+      <svg width="100%" height="${chartHeight}" viewBox="0 0 ${chartWidth} ${chartHeight}" style="display: block; width: 100%; max-width: 100%; overflow: hidden;">
         ${svgRows}
       </svg>
     `;

@@ -723,7 +723,7 @@
     }).join('');
 
     container.innerHTML = `
-      <svg width="100%" height="${chartHeight}" viewBox="0 0 ${chartWidth} ${chartHeight}" style="overflow: visible;">
+      <svg width="100%" height="${chartHeight}" viewBox="0 0 ${chartWidth} ${chartHeight}" style="display: block; width: 100%; max-width: 100%; overflow: hidden;">
         ${svgRows}
       </svg>
     `;

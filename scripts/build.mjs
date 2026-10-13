@@ -275,11 +275,22 @@ for (const [sourceFile, scope] of [
 
 <style>
 /* --- UNIFIED ELECTRICAL MAINTENANCE NAVIGATION BAR --- */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+.em-main-nav,
+.em-main-nav *,
+.em-main-nav *::before,
+.em-main-nav *::after {
+  box-sizing: border-box;
+}
 .em-main-nav {
   position: sticky;
   top: 0;
   left: 0;
   right: 0;
+  width: 100%;
   z-index: 10000;
   background: #0d1e38;
   color: #ffffff;
@@ -295,6 +306,8 @@ for (const [sourceFile, scope] of [
   padding: 0 20px;
   height: 54px;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .em-nav-left {
   display: flex;
