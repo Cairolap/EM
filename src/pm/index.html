@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จัดการ Order No. รายเครื่อง (PM) - แผนกซ่อมไฟฟ้า</title>
+  <link rel="icon" type="image/png" href="/Logo%20small.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- APP_STYLE -->
+</head>
+<body>
+  <div class="pm-app-container">
+    
+    <!-- Top Header -->
+    <header class="pm-page-header">
+      <div class="header-breadcrumb">
+        <span>แผนกซ่อมบำรุงไฟฟ้า</span>
+        <span class="sep">/</span>
+        <span class="current">PM & Order PR Management</span>
+      </div>
+      <div class="header-main-row">
+        <div class="title-group">
+          <h1 class="page-title">
+            <svg class="title-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+              <path d="m9 16 2 2 4-4"></path>
+            </svg>
+            จัดการ Order No. รายเครื่อง (PM)
+          </h1>
+          <p class="page-description">
+            เก็บข้อมูล ORDER สำหรับเปิด PR ของแต่ละเครื่องจักรตามรอบการทำ Preventive Maintenance (สูงสุด 5 ครั้ง/ปี)
+          </p>
+        </div>
+        <div class="header-actions">
+          <div class="view-toggle-group" role="tablist">
+            <button type="button" id="tab-btn-form" class="view-tab-btn active" role="tab" aria-selected="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              ฟอร์มจัดการ Order No.
+            </button>
+            <button type="button" id="tab-btn-matrix" class="view-tab-btn" role="tab" aria-selected="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+              ภาพรวม 5 รอบประจำปี
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Selection Bar: Dept, Line, Year -->
+    <section class="pm-filter-panel">
+      <div class="filter-controls-row">
+        <!-- Dept selector -->
+        <div class="filter-field">
+          <label for="select-dept" class="field-label">แผนก (Department)</label>
+          <div class="select-wrapper">
+            <select id="select-dept" class="form-select">
+              <option value="">กำลังโหลดแผนก...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Line selector -->
+        <div class="filter-field">
+          <label for="select-line" class="field-label">สายการผลิต (Line)</label>
+          <div class="select-wrapper">
+            <select id="select-line" class="form-select">
+              <option value="">กำลังโหลดสายการผลิต...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Year selector -->
+        <div class="filter-field filter-field-year">
+          <label for="select-year" class="field-label">ปี (Year)</label>
+          <div class="select-wrapper">
+            <select id="select-year" class="form-select">
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Reload Button -->
+        <div class="filter-field-actions">
+          <button type="button" id="btn-refresh" class="btn btn-secondary btn-icon-only" title="โหลดข้อมูลใหม่">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 5 PM Rounds Navigation Pills -->
+      <div class="pm-rounds-bar">
+        <span class="rounds-bar-label">เลือกรอบการทำ PM ประจำปี (สูงสุด 5 ครั้ง):</span>
+        <div class="rounds-pills-list" id="rounds-pills-container">
+          <!-- Populated dynamically: Round 1..5 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content View 1: Form View -->
+    <main id="view-form-container" class="pm-view-section">
+      <div class="pm-card form-card">
+        
+        <!-- Form Header -->
+        <div class="form-card-header">
+          <div class="form-card-title-group">
+            <div class="line-badge" id="badge-line-name">ไลน์: -</div>
+            <h2 class="form-card-title" id="form-heading-title">
+              จัดการ Order No. รายเครื่อง (ไลน์: -)
+            </h2>
+            <div class="round-badge" id="badge-round-info">รอบที่ 1/5</div>
+          </div>
+          <div class="form-card-status-badges">
+            <span class="status-chip" id="chip-progress-status">
+              <span class="chip-dot"></span>
+              <span id="chip-progress-text">กรอกแล้ว 0/0 เครื่อง</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Month & Plan Inputs (ตามภาพ) -->
+        <div class="form-meta-strip">
+          <div class="meta-field">
+            <label for="input-target-month" class="meta-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              เลือกเดือน/ปี (ที่ทำ PM):
+            </label>
+            <div class="month-input-container">
+              <input type="month" id="input-target-month" class="input-month-control" value="2026-10">
+              <span class="month-display-thai" id="text-thai-month">ตุลาคม 2026</span>
+            </div>
+          </div>
+
+          <div class="meta-field">
+            <label for="input-plan-date" class="meta-label">
+              วันที่เริ่มทำ PM (ตามแผน):
+            </label>
+            <input type="date" id="input-plan-date" class="input-date-control">
+          </div>
+
+          <div class="meta-field meta-field-notes">
+            <label for="input-cycle-notes" class="meta-label">
+              บันทึกรอบ PM:
+            </label>
+            <input type="text" id="input-cycle-notes" class="input-text-control" placeholder="เช่น แผน PM ประจำไตรมาส 4 / สั่งอะไหล่ล่วงหน้า">
+          </div>
+        </div>
+
+        <!-- Toolbar for Batch Operations -->
+        <div class="form-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="input-machine-search" placeholder="ค้นหารหัส หรือชื่อเครื่องจักร..." autocomplete="off">
+              <button type="button" id="btn-clear-search" class="btn-clear" style="display:none;" title="ล้างคำค้น">×</button>
+            </div>
+            <span class="machine-count-text" id="text-machine-count">ทั้งหมด 0 เครื่อง</span>
+          </div>
+
+          <div class="toolbar-right">
+            <!-- Quick Fill All -->
+            <div class="bulk-fill-group">
+              <input type="text" id="input-bulk-order" placeholder="Order No. ร่วม..." class="bulk-order-input">
+              <button type="button" id="btn-apply-bulk" class="btn btn-secondary btn-sm" title="ใส่ Order No. นี้ให้กับทุกเครื่องในไลน์">
+                ใส่ทุกเครื่อง
+              </button>
+            </div>
+
+            <!-- Copy Table to Clipboard -->
+            <button type="button" id="btn-copy-summary" class="btn btn-secondary btn-sm" title="คัดลอกรายการ Order No. ไปเปิด PR หรือส่งไลน์">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              คัดลอกสรุป PR
+            </button>
+          </div>
+        </div>
+
+        <!-- Machines Table (ตารางรายชื่อเครื่องจักรตามภาพ) -->
+        <div class="table-container">
+          <table class="pm-table" id="machines-order-table">
+            <thead>
+              <tr>
+                <th class="col-num">#</th>
+                <th class="col-code">รหัสเครื่องจักร</th>
+                <th class="col-name">ชื่อเต็ม</th>
+                <th class="col-order">Order No. (สำหรับเปิด PR)</th>
+                <th class="col-pr">PR No. (ถ้ามี)</th>
+                <th class="col-status">สถานะ</th>
+              </tr>
+            </thead>
+            <tbody id="machines-tbody">
+              <!-- Dynamically rendered rows -->
+              <tr>
+                <td colspan="6" class="text-center py-8 text-muted">
+                  กำลังโหลดข้อมูลเครื่องจักร...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Form Footer Actions (ตามภาพ) -->
+        <div class="form-card-footer">
+          <div class="footer-note">
+            <span class="info-icon">ℹ</span>
+            <span>ระบบจะผูก Order No. แต่ละเครื่องกับรอบ PM และเดือนที่กำหนดอัตโนมัติ</span>
+          </div>
+          <div class="footer-buttons">
+            <button type="button" id="btn-cancel" class="btn btn-secondary">
+              ยกเลิก
+            </button>
+            <button type="button" id="btn-save-all" class="btn btn-primary">
+              <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              <span>บันทึกทั้งหมด</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Main Content View 2: 5-Round Matrix Overview -->
+    <main id="view-matrix-container" class="pm-view-section" style="display:none;">
+      <div class="pm-card matrix-card">
+        <div class="matrix-card-header">
+          <div>
+            <h2 class="matrix-title">ภาพรวมแผน PM และ Order No. (5 รอบประจำปี <span id="matrix-year-text">2026</span>)</h2>
+            <p class="matrix-subtitle">ติดตามความพร้อมของการเปิด PR แยกตามสายการผลิตและรอบ PM ทั้งหมดในแผนก</p>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="pm-table matrix-table">
+            <thead>
+              <tr>
+                <th class="col-line">สายการผลิต</th>
+                <th class="col-dept">แผนก</th>
+                <th class="col-machines-count">จำนวนเครื่อง</th>
+                <th class="col-round text-center">รอบที่ 1</th>
+                <th class="col-round text-center">รอบที่ 2</th>
+                <th class="col-round text-center">รอบที่ 3</th>
+                <th class="col-round text-center">รอบที่ 4</th>
+                <th class="col-round text-center">รอบที่ 5</th>
+              </tr>
+            </thead>
+            <tbody id="matrix-tbody">
+              <tr>
+                <td colspan="8" class="text-center py-8 text-muted">
+                  กำลังโหลดภาพรวม...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Global Toast Notification -->
+  <div id="toast" class="pm-toast" role="alert" aria-live="polite"></div>
+
+  <!-- APP_SCRIPT -->
+</body>
+</html>

@@ -3,6 +3,7 @@ import {dispatch} from './service.js';
 import {Repository} from './repository.js';
 import {listUsers, createUser, updateUser, resetPassword, deleteUser} from './user-service.js';
 import {listAnnouncements, createAnnouncement, deleteAnnouncement, updateAnnouncementSettings, getAnnouncementMedia, forceAnnouncementSlide, reportCurrentAnnouncement, getAnnouncementState} from './announcement-service.js';
+import {getPMReferences, getPMCycleData, savePMCycleOrders, listPMOverview} from './pm-service.js';
 import {AppError,fail,json} from './errors.js';
 
 export default {
@@ -141,6 +142,22 @@ export default {
     else if(method==='updateSettings') result=await updateAnnouncementSettings(env,actor,args[0]);
     else if(method==='forceSlide') result=await forceAnnouncementSlide(env,actor,args[0]);
     else fail('NOT_FOUND','ไม่พบคำสั่งประชาสัมพันธ์นี้',404);
+    return json({ok:true,data:result});
+   }
+
+   // PM (Preventive Maintenance) Orders RPC
+   if(url.pathname==='/api/v1/pm/rpc'){
+    if(request.method!=='POST')fail('METHOD','ใช้ POST สำหรับคำสั่ง PM',405);
+    let body;
+    try{ body=await request.json(); }catch{ fail('VALIDATION','รูปแบบคำขอไม่ถูกต้อง'); }
+    const method = body?.method || '';
+    const args = body?.args || [];
+    let result;
+    if(method==='getReferences') result=await getPMReferences(env);
+    else if(method==='getCycleData') result=await getPMCycleData(env, args[0]);
+    else if(method==='saveOrders') result=await savePMCycleOrders(env, actor, args[0]);
+    else if(method==='listOverview') result=await listPMOverview(env, args[0]);
+    else fail('NOT_FOUND','ไม่พบคำสั่ง PM นี้',404);
     return json({ok:true,data:result});
    }
 

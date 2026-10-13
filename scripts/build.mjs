@@ -42,7 +42,8 @@ for (const [sourceFile, scope] of [
   ['Part List/Index.html', 'parts'],
   ['Equipment BOM/Index.html', 'bom'],
   ['', 'users'],
-  ['', 'announcements']
+  ['', 'announcements'],
+  ['', 'pm']
 ]) {
   let output = '';
   if (scope === 'users') {
@@ -57,6 +58,14 @@ for (const [sourceFile, scope] of [
     const html = await read(new URL('src/announcements/index.html', root));
     const css = await read(new URL('src/announcements/styles.css', root));
     const appJs = await read(new URL('src/announcements/app.js', root));
+    const js = transportJs + '\n' + appJs;
+    output = html
+      .replace('<!-- APP_STYLE -->', () => '<style>\n' + css + '\n</style>')
+      .replace('<!-- APP_SCRIPT -->', () => '<script>\n' + js + '\n</script>');
+  } else if (scope === 'pm') {
+    const html = await read(new URL('src/pm/index.html', root));
+    const css = await read(new URL('src/pm/styles.css', root));
+    const appJs = await read(new URL('src/pm/app.js', root));
     const js = transportJs + '\n' + appJs;
     output = html
       .replace('<!-- APP_STYLE -->', () => '<style>\n' + css + '\n</style>')
@@ -144,7 +153,10 @@ for (const [sourceFile, scope] of [
       <!-- 4. เครื่องจักร -->
       <a class="em-nav-link${scope === 'machines' ? ' active' : ''}" href="/machines/"${scope === 'machines' ? ' aria-current="page"' : ''}>Machines</a>
 
-      <!-- 5. สื่อประชาสัมพันธ์ -->
+      <!-- 5. แผน PM (Order PR) -->
+      <a class="em-nav-link${scope === 'pm' ? ' active' : ''}" href="/pm/"${scope === 'pm' ? ' aria-current="page"' : ''}>Order PR (PM)</a>
+
+      <!-- 6. สื่อประชาสัมพันธ์ -->
       <a class="em-nav-link${scope === 'announcements' ? ' active' : ''}" href="/announcements/"${scope === 'announcements' ? ' aria-current="page"' : ''}>สื่อประชาสัมพันธ์</a>
 
     </div>
@@ -218,7 +230,13 @@ for (const [sourceFile, scope] of [
           Machines
         </a>
 
-        <!-- 5. สื่อประชาสัมพันธ์ -->
+        <!-- 5. แผน PM (Order PR) -->
+        <a class="em-drawer-link${scope === 'pm' ? ' active' : ''}" href="/pm/"${scope === 'pm' ? ' aria-current="page"' : ''}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          Order PR (PM)
+        </a>
+
+        <!-- 6. สื่อประชาสัมพันธ์ -->
         <a class="em-drawer-link${scope === 'announcements' ? ' active' : ''}" href="/announcements/"${scope === 'announcements' ? ' aria-current="page"' : ''}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
           สื่อประชาสัมพันธ์

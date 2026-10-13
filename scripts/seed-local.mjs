@@ -21,7 +21,8 @@ INSERT OR IGNORE INTO lines (id, department_id, name, is_active, remark) VALUES
   ('L-PP01', 'PP', 'Line PP 1', 1, 'สายการผลิตฝาเกลียว 1'),
   ('L-MX01', 'MX', 'Line MX 1', 1, 'สายการผลิตฝาแม็กซี่ 1'),
   ('L-PC01', 'PC', 'Line PC 1', 1, 'สายการผลิตฝาพลาสติก 1'),
-  ('L-PR01', 'PR', 'Line PR 1', 1, 'สายการผลิตงานพิมพ์ 1');
+  ('L-PR01', 'PR', 'Line PR 1', 1, 'สายการผลิตงานพิมพ์ 1'),
+  ('L00', 'MX', 'Line L00 (MAXI)', 1, 'สายการผลิต L00');
 
 INSERT OR IGNORE INTO brands (id, name, normalized_name, is_active, version) VALUES
   ('B001', 'ABB', 'abb', 1, 1),
@@ -40,7 +41,11 @@ INSERT OR IGNORE INTO machines (
 ) VALUES
   ('M000001', 'MC-CC-01', 'mc-cc-01', 'Press Machine 1', 'CC', 'L-CC01', 'Minster', 'P2-100', 'SN-98231', 'Press', '2020-01-15', 'สูง', 'ใช้งาน', 'Zone A', '', '', '', 'เครื่องหลัก', '2026-01-01T00:00:00.000Z', 'system', '2026-01-01T00:00:00.000Z', 'system', 1, 1, 'seed-req-1'),
   ('M000002', 'MC-PP-01', 'mc-pp-01', 'Capping Machine 1', 'PP', 'L-PP01', 'Arol', 'Euro PK', 'SN-44321', 'Capper', '2021-03-20', 'กลาง', 'ใช้งาน', 'Zone B', '', '', '', '', '2026-01-01T00:00:00.000Z', 'system', '2026-01-01T00:00:00.000Z', 'system', 1, 1, 'seed-req-2'),
-  ('M000003', 'MC-MX-01', 'mc-mx-01', 'Lining Machine 1', 'MX', 'L-MX01', 'SACMI', 'PMV-200', 'SN-77123', 'Liner', '2019-11-10', 'สูง', 'ใช้งาน', 'Zone C', '', '', '', '', '2026-01-01T00:00:00.000Z', 'system', '2026-01-01T00:00:00.000Z', 'system', 1, 1, 'seed-req-3');
+  ('M000003', 'MC-MX-01', 'mc-mx-01', 'Lining Machine 1', 'MX', 'L-MX01', 'SACMI', 'PMV-200', 'SN-77123', 'Liner', '2019-11-10', 'สูง', 'ใช้งาน', 'Zone C', '', '', '', '', '2026-01-01T00:00:00.000Z', 'system', '2026-01-01T00:00:00.000Z', 'system', 1, 1, 'seed-req-3'),
+  ('M000004', 'RB2', 'rb2', 'ROBOT PALLETZER', 'MX', 'L00', 'ABB', 'IRB 660', 'SN-88112', 'Robot', '2021-05-10', 'สูง', 'ใช้งาน', 'Palletizer Zone', '', '', '', '', '2026-01-01T00:00:00.000Z', 'system', '2026-01-01T00:00:00.000Z', 'system', 1, 1, 'seed-req-4'),
+  ('M000005', 'AP301', 'ap301', 'Auto Packing 301', 'MX', 'L00', 'PackLine', 'AP-300', 'SN-99101', 'Packer', '2022-01-20', 'กลาง', 'ใช้งาน', 'Packing Zone 1', '', '', '', '', '2026-01-01T00:00:00.000Z', 'system', '2026-01-01T00:00:00.000Z', 'system', 1, 1, 'seed-req-5'),
+  ('M000006', 'AP302', 'ap302', 'Auto Packing 302', 'MX', 'L00', 'PackLine', 'AP-300', 'SN-99102', 'Packer', '2022-01-20', 'กลาง', 'ใช้งาน', 'Packing Zone 2', '', '', '', '', '2026-01-01T00:00:00.000Z', 'system', '2026-01-01T00:00:00.000Z', 'system', 1, 1, 'seed-req-6'),
+  ('M000007', 'MX1000', 'mx1000', 'MAXI : Center', 'MX', 'L00', 'SACMI', 'MX-1000', 'SN-55443', 'Center', '2020-08-15', 'สูง', 'ใช้งาน', 'Center Unit', '', '', '', '', '2026-01-01T00:00:00.000Z', 'system', '2026-01-01T00:00:00.000Z', 'system', 1, 1, 'seed-req-7');
 
 INSERT OR IGNORE INTO parts (
   id, part_number, description, brand_id, legacy_brand_name,
