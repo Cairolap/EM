@@ -135,6 +135,26 @@ Roles:
     return;
   }
 
+  if (command === 'set-role') {
+    const username = args[1]?.toLowerCase().trim();
+    const newRole = args[2]?.toLowerCase();
+    if (!username || !['admin', 'editor', 'viewer'].includes(newRole)) {
+      console.error('Error: Usage: node scripts/user-admin.mjs set-role <username> <admin|editor|viewer>');
+      process.exit(1);
+    }
+    const defaultPerms = newRole === 'admin'
+      ? { machines: 'write', parts: 'write', bom: 'write', announcements: 'write', users: 'admin', can_delete: true }
+      : newRole === 'editor'
+      ? { machines: 'write', parts: 'write', bom: 'write', announcements: 'write', users: 'none', can_delete: false }
+      : { machines: 'read', parts: 'read', bom: 'read', announcements: 'read', users: 'none', can_delete: false };
+    const permsJson = JSON.stringify(defaultPerms).replace(/'/g, "''");
+    const now = new Date().toISOString();
+    const sql = `UPDATE app_users SET role='${newRole}', permissions_json='${permsJson}', updated_at='${now}' WHERE username='${username}';`;
+    runD1(sql);
+    console.log(`✅ User '${username}' role updated to '${newRole}' successfully.`);
+    return;
+  }
+
   console.error('Unknown command. Run with "help" for options.');
 }
 
