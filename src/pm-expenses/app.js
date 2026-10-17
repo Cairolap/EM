@@ -108,11 +108,104 @@
     setupImportModal();
     setupBudgetModal();
     setupExpenseFormModal();
+    setupDeleteRangeModal();
+
+    handleIncomingUrlParams(false);
+
+    window.addEventListener('popstate', () => {
+      handleIncomingUrlParams(true);
+    });
+
+    document.querySelectorAll('a[href*="/pm-expenses/?tab="], a[href*="/pm-expenses?tab="]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const u = new URL(a.href, window.location.origin);
+        const t = u.searchParams.get('tab');
+        if (t === 'table' || t === 'expenses') {
+          e.preventDefault();
+          history.pushState(null, '', a.href);
+          applyViewTab('table', true);
+        } else if (t === 'dashboard' || t === 'budget') {
+          e.preventDefault();
+          history.pushState(null, '', a.href);
+          applyViewTab('dashboard', true);
+        }
+      });
+    });
 
     initDefaultDates();
     await loadReferences();
     await refreshCurrentView();
   });
+
+  function handleIncomingUrlParams(shouldRefresh = false) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search') || urlParams.get('orderNo');
+    const lineParam = urlParams.get('lineId');
+    const deptParam = urlParams.get('deptId');
+    const tabParam = urlParams.get('tab');
+
+    if (searchParam) {
+      state.table.search = searchParam.trim();
+      const inputSearch = document.getElementById('input-expense-search');
+      if (inputSearch) inputSearch.value = state.table.search;
+      const btnClearSearch = document.getElementById('btn-clear-table-search');
+      if (btnClearSearch) btnClearSearch.style.display = 'block';
+    }
+
+    if (lineParam) {
+      state.table.lineId = lineParam.trim();
+      const filterLine = document.getElementById('filter-line-select');
+      if (filterLine) filterLine.value = state.table.lineId;
+    }
+
+    if (deptParam) {
+      state.table.deptId = deptParam.trim();
+      const filterDept = document.getElementById('filter-dept-select');
+      if (filterDept) filterDept.value = state.table.deptId;
+    }
+
+    // Determine target tab:
+    // If searchParam, lineParam, or tabParam === 'table' => switch to table
+    // Otherwise if tabParam === 'dashboard' or default => dashboard
+    const targetTab = (tabParam === 'table' || tabParam === 'expenses' || searchParam || lineParam)
+      ? 'table'
+      : (tabParam === 'dashboard' || tabParam === 'budget' ? 'dashboard' : 'dashboard');
+
+    applyViewTab(targetTab, shouldRefresh);
+    return targetTab;
+  }
+
+  function applyViewTab(tab, shouldRefresh = false) {
+    state.activeTab = tab;
+    const tabTable = document.getElementById('tab-btn-table');
+    const tabDashboard = document.getElementById('tab-btn-dashboard');
+    const viewTable = document.getElementById('view-table-section');
+    const viewDashboard = document.getElementById('view-dashboard-section');
+    const titleText = document.getElementById('title-text');
+    const subtitleText = document.getElementById('page-main-subtitle');
+
+    if (tab === 'table') {
+      tabTable?.classList.add('active');
+      tabDashboard?.classList.remove('active');
+      tabTable?.setAttribute('aria-selected', 'true');
+      tabDashboard?.setAttribute('aria-selected', 'false');
+      if (viewTable) viewTable.style.display = 'block';
+      if (viewDashboard) viewDashboard.style.display = 'none';
+      if (titleText) titleText.textContent = 'ค่าใช้จ่าย PM';
+      if (subtitleText) subtitleText.textContent = 'บันทึกและจัดการค่าใช้จ่ายงานบำรุงรักษา (PM) เชื่อมโยงเครื่องจักร';
+      if (shouldRefresh) refreshTable();
+    } else {
+      tabDashboard?.classList.add('active');
+      tabTable?.classList.remove('active');
+      tabDashboard?.setAttribute('aria-selected', 'true');
+      tabTable?.setAttribute('aria-selected', 'false');
+      if (viewDashboard) viewDashboard.style.display = 'block';
+      if (viewTable) viewTable.style.display = 'none';
+      if (titleText) titleText.textContent = 'Dashboard ค่าใช้จ่าย & งบประมาณ';
+      if (subtitleText) subtitleText.textContent = 'วิเคราะห์เปรียบเทียบงบประมาณ vs ค่าใช้จ่ายจริง และแนวโน้มเบิกจ่าย';
+      if (shouldRefresh) refreshDashboard();
+    }
+  }
 
   function initDefaultDates() {
     const now = new Date();
@@ -133,6 +226,7 @@
       const data = await rpcExpenses('getReferences');
       state.departments = data.departments || [];
       state.lines = data.lines || [];
+      state.machineCatalog = data.machines || [];
 
       populateFilterDropdowns();
     } catch (err) {
@@ -166,6 +260,13 @@
       formLine.innerHTML = '<option value="">เลือกสายการผลิต</option>' +
         state.lines.map(l => `<option value="${escapeHtml(l.lineId)}">${escapeHtml(l.lineName || l.lineId)}</option>`).join('');
     }
+
+    // 3. Delete range modal department dropdown
+    const deleteRangeDept = document.getElementById('delete-range-dept');
+    if (deleteRangeDept) {
+      deleteRangeDept.innerHTML = '<option value="">ทุกแผนก (All Departments)</option>' +
+        state.departments.map(d => `<option value="${escapeHtml(d.deptId)}">${escapeHtml(d.deptName || d.deptId)}</option>`).join('');
+    }
   }
 
   // =========================================================================
@@ -174,35 +275,19 @@
   function setupViewSwitcher() {
     const tabTable = document.getElementById('tab-btn-table');
     const tabDashboard = document.getElementById('tab-btn-dashboard');
-    const viewTable = document.getElementById('view-table-section');
-    const viewDashboard = document.getElementById('view-dashboard-section');
-    const titleText = document.getElementById('title-text');
-    const subtitleText = document.getElementById('page-main-subtitle');
 
     tabTable?.addEventListener('click', () => {
-      state.activeTab = 'table';
-      tabTable.classList.add('active');
-      tabDashboard.classList.remove('active');
-      tabTable.setAttribute('aria-selected', 'true');
-      tabDashboard.setAttribute('aria-selected', 'false');
-      viewTable.style.display = 'block';
-      viewDashboard.style.display = 'none';
-      if (titleText) titleText.textContent = 'ค่าใช้จ่าย PM';
-      if (subtitleText) subtitleText.textContent = 'บันทึกและจัดการค่าใช้จ่ายงานบำรุงรักษา (PM) เชื่อมโยงเครื่องจักร';
-      refreshTable();
+      const u = new URL(window.location.href);
+      u.searchParams.set('tab', 'table');
+      history.pushState(null, '', u.toString());
+      applyViewTab('table', true);
     });
 
     tabDashboard?.addEventListener('click', () => {
-      state.activeTab = 'dashboard';
-      tabDashboard.classList.add('active');
-      tabTable.classList.remove('active');
-      tabDashboard.setAttribute('aria-selected', 'true');
-      tabTable.setAttribute('aria-selected', 'false');
-      viewDashboard.style.display = 'block';
-      viewTable.style.display = 'none';
-      if (titleText) titleText.textContent = 'Dashboard ค่าใช้จ่าย & งบประมาณ';
-      if (subtitleText) subtitleText.textContent = 'วิเคราะห์เปรียบเทียบงบประมาณ vs ค่าใช้จ่ายจริง และแนวโน้มเบิกจ่าย';
-      refreshDashboard();
+      const u = new URL(window.location.href);
+      u.searchParams.set('tab', 'dashboard');
+      history.pushState(null, '', u.toString());
+      applyViewTab('dashboard', true);
     });
   }
 
@@ -240,6 +325,10 @@
       searchTimeout = setTimeout(() => {
         state.table.search = val;
         state.table.page = 1;
+        const u = new URL(window.location.href);
+        if (val) u.searchParams.set('search', val);
+        else u.searchParams.delete('search');
+        history.pushState(null, '', u.toString());
         refreshTable();
       }, 300);
     });
@@ -249,6 +338,10 @@
       btnClearSearch.style.display = 'none';
       state.table.search = '';
       state.table.page = 1;
+      const u = new URL(window.location.href);
+      u.searchParams.delete('search');
+      u.searchParams.delete('orderNo');
+      history.pushState(null, '', u.toString());
       refreshTable();
     });
 
@@ -322,6 +415,22 @@
 
     // Export CSV
     btnExport?.addEventListener('click', exportTableToCsv);
+
+    // Clear all expenses
+    const btnClearAll = document.getElementById('btn-clear-all-expenses');
+    btnClearAll?.addEventListener('click', async () => {
+      if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลค่าใช้จ่าย PM ทั้งหมดในระบบ? (เพื่อเตรียมนำเข้าไฟล์ใหม่)')) return;
+      try {
+        btnClearAll.disabled = true;
+        const res = await rpcExpenses('clearAllExpenses');
+        showToast(`ลบข้อมูลทั้งหมดเรียบร้อยแล้ว (${res?.deletedCount || 0} รายการ)`);
+        await refreshCurrentView();
+      } catch (err) {
+        showToast('ลบข้อมูลไม่สำเร็จ: ' + err.message, true);
+      } finally {
+        btnClearAll.disabled = false;
+      }
+    });
   }
 
   async function refreshTable() {
@@ -383,8 +492,14 @@
     }
 
     tbody.innerHTML = state.table.items.map(item => {
-      const isLinked = Boolean(item.machine_id);
-      const machineCode = item.machine_code || '-';
+      const isLinked = Boolean(item.machine_id || item.machineId);
+      const machineCode = item.machine_code || item.machineCode || '-';
+      const machineName = item.machine_name || item.machineName || '';
+      const docDate = item.doc_date || item.docDate || '';
+      const deptId = item.department_id || item.departmentId || '-';
+      const lineName = item.line_name || item.lineName || item.line_id || item.lineId || '-';
+      const pmOrderNo = item.pm_order_no || item.pmOrderNo || '-';
+      const unitPrice = item.unit_price !== undefined ? item.unit_price : (item.unitPrice !== undefined ? item.unitPrice : 0);
       const isSelected = state.table.selectedIds.has(String(item.id));
 
       return `
@@ -392,18 +507,18 @@
           <td class="td-check">
             <input type="checkbox" class="check-row-item" data-id="${escapeHtml(item.id)}" ${isSelected ? 'checked' : ''}>
           </td>
-          <td class="font-mono">${fmtDate(item.doc_date)}</td>
-          <td><span class="badge-dept">${escapeHtml(item.department_id || '-')}</span></td>
-          <td><span class="badge-dept">${escapeHtml(item.line_name || item.line_id || '-')}</span></td>
+          <td class="font-mono">${fmtDate(docDate)}</td>
+          <td><span class="badge-dept">${escapeHtml(deptId)}</span></td>
+          <td><span class="badge-dept">${escapeHtml(lineName)}</span></td>
           <td>
-            <span class="badge-machine ${isLinked ? '' : 'unlinked'}" title="${isLinked ? 'เชื่อมโยงกับเครื่องจักร: ' + escapeHtml(item.machine_name || '') : 'ยังไม่พบในทะเบียนเครื่องจักร'}">
+            <span class="badge-machine ${isLinked ? '' : 'unlinked'}" title="${isLinked ? 'เชื่อมโยงกับเครื่องจักร: ' + escapeHtml(machineName) : 'ยังไม่พบในทะเบียนเครื่องจักร'}">
               ${escapeHtml(machineCode)}
             </span>
           </td>
-          <td><span class="badge-pmno">${escapeHtml(item.pm_order_no || '-')}</span></td>
+          <td><span class="badge-pmno">${escapeHtml(pmOrderNo)}</span></td>
           <td style="max-width: 280px; word-break: break-word;">${escapeHtml(item.description || '-')}</td>
           <td class="text-right font-mono">${fmtNumber(item.quantity)}</td>
-          <td class="text-right font-mono">${fmtNumber(item.unit_price)}</td>
+          <td class="text-right font-mono">${fmtNumber(unitPrice)}</td>
           <td class="text-right font-mono" style="font-weight: 600; color: #1d4ed8;">${fmtNumber(item.amount)}</td>
           <td style="max-width: 140px; font-size: 12px; color: var(--exp-text-muted);">${escapeHtml(item.notes || '-')}</td>
           <td class="text-center">
@@ -466,14 +581,14 @@
 
     const headers = ['วันที่', 'แผนก', 'ไลน์', 'เครื่องจักร', 'PM No.', 'รายการ', 'จำนวน', 'ราคาต่อหน่วย', 'รวมเงิน(฿)', 'หมายเหตุ'];
     const rows = state.table.items.map(i => [
-      i.doc_date || '',
-      i.department_id || '',
-      i.line_name || i.line_id || '',
-      i.machine_code || '',
-      i.pm_order_no || '',
+      i.doc_date || i.docDate || '',
+      i.department_id || i.departmentId || '',
+      i.line_name || i.lineName || i.line_id || i.lineId || '',
+      i.machine_code || i.machineCode || '',
+      i.pm_order_no || i.pmOrderNo || '',
       `"${(i.description || '').replace(/"/g, '""')}"`,
       i.quantity || 0,
-      i.unit_price || 0,
+      i.unit_price !== undefined ? i.unit_price : (i.unitPrice !== undefined ? i.unitPrice : 0),
       i.amount || 0,
       `"${(i.notes || '').replace(/"/g, '""')}"`
     ]);
@@ -609,11 +724,12 @@
     const kpiVarianceStatus = document.getElementById('kpi-variance-status');
     const kpiLinesCount = document.getElementById('kpi-lines-count');
 
-    const actual = totals.actual || 0;
-    const budget = totals.budget || 0;
-    const variance = totals.variance || 0;
-    const pct = totals.usagePercent || 0;
-    const linesCount = totals.linesCount || 0;
+    const t = totals || {};
+    const actual = t.actual !== undefined ? t.actual : (t.totalActual || 0);
+    const budget = t.budget !== undefined ? t.budget : (t.totalBudget || 0);
+    const variance = t.variance !== undefined ? t.variance : 0;
+    const pct = t.usagePercent !== undefined ? t.usagePercent : (t.budgetUsagePercent || 0);
+    const linesCount = t.linesCount !== undefined ? t.linesCount : (t.activeLinesCount || 0);
 
     if (kpiActual) kpiActual.textContent = fmtMoney(actual);
     if (kpiBudget) kpiBudget.textContent = fmtMoney(budget);
@@ -691,32 +807,46 @@
       const budgetWidth = Math.max(3, Math.round(((d.budget || 0) / maxVal) * barAreaWidth));
       const actualWidth = Math.max(3, Math.round(((d.actual || 0) / maxVal) * barAreaWidth));
       const lineName = d.lineName || d.lineId;
+      const usagePct = (d.budget && d.budget > 0)
+        ? ((d.actual || 0) / d.budget) * 100
+        : (d.usagePercent !== undefined ? d.usagePercent : ((d.actual || 0) > 0 ? 101 : 0));
+
+      // Color rules: Budget = Gray, Actual = Green (<80%), Yellow (80-100%), Red (>100%)
+      let actualColor = '#16a34a'; // < 80% (สีเขียว)
+      let actualTextColor = '#16a34a';
+      if (usagePct > 100) {
+        actualColor = '#dc2626'; // > 100% (สีแดง)
+        actualTextColor = '#dc2626';
+      } else if (usagePct >= 80) {
+        actualColor = '#eab308'; // 80% - 100% (สีเหลือง)
+        actualTextColor = '#b45309'; // text readable on light bg
+      }
 
       return `
-        <g class="svg-bar-group" transform="translate(0, ${y})">
+        <g class="svg-bar-group" transform="translate(0, ${y})" data-line-name="${escapeHtml(lineName)}" data-line-id="${escapeHtml(d.lineId || '')}" style="cursor: pointer;">
           <!-- Line Name Label -->
           <text x="${labelWidth - 12}" y="20" text-anchor="end" class="svg-label-text">
             ${escapeHtml(lineName)}
           </text>
 
-          <!-- Budget Bar (Green) -->
+          <!-- Budget Bar (Gray) -->
           <rect x="${labelWidth}" y="4" width="${barAreaWidth}" height="12" class="svg-bar-bg" rx="3"></rect>
-          <rect x="${labelWidth}" y="4" width="${budgetWidth}" height="12" class="svg-bar-budget" rx="3">
+          <rect x="${labelWidth}" y="4" width="${budgetWidth}" height="12" class="svg-bar-budget" fill="#94a3b8" style="fill: #94a3b8;" rx="3">
             <title>งบประมาณ: ${fmtMoney(d.budget)}</title>
           </rect>
 
-          <!-- Actual Bar (Red) -->
+          <!-- Actual Bar (Dynamic: Green <80%, Yellow 80-100%, Red >100%) -->
           <rect x="${labelWidth}" y="19" width="${barAreaWidth}" height="12" class="svg-bar-bg" rx="3"></rect>
-          <rect x="${labelWidth}" y="19" width="${actualWidth}" height="12" class="svg-bar-actual" rx="3">
-            <title>ค่าใช้จ่ายจริง: ${fmtMoney(d.actual)} (${d.usagePercent.toFixed(1)}%)</title>
+          <rect x="${labelWidth}" y="19" width="${actualWidth}" height="12" class="svg-bar-actual clickable-actual-bar" fill="${actualColor}" style="fill: ${actualColor}; cursor: pointer;" rx="3" data-line-name="${escapeHtml(lineName)}" data-line-id="${escapeHtml(d.lineId || '')}">
+            <title>คลิกเพื่อดูรายการค่าใช้จ่ายจริงของไลน์ ${escapeHtml(lineName)}: ${fmtMoney(d.actual)} (${usagePct.toFixed(1)}%)</title>
           </rect>
 
           <!-- Value / % Label at end of bars -->
           <text x="${labelWidth + Math.max(budgetWidth, actualWidth) + 8}" y="14" class="svg-value-text">
             งบ: ${fmtNumber(d.budget)}
           </text>
-          <text x="${labelWidth + Math.max(budgetWidth, actualWidth) + 8}" y="27" class="svg-value-text" style="fill: #dc2626; font-weight: 600;">
-            จริง: ${fmtNumber(d.actual)} (${d.usagePercent.toFixed(0)}%)
+          <text x="${labelWidth + Math.max(budgetWidth, actualWidth) + 8}" y="27" class="svg-value-text clickable-actual-text" style="fill: ${actualTextColor}; font-weight: 600; cursor: pointer;" data-line-name="${escapeHtml(lineName)}" data-line-id="${escapeHtml(d.lineId || '')}">
+            จริง: ${fmtNumber(d.actual)} (${usagePct.toFixed(0)}%)
           </text>
         </g>
       `;
@@ -727,6 +857,40 @@
         ${svgRows}
       </svg>
     `;
+
+    // Attach click listeners to drill down to line expenses
+    container.querySelectorAll('.svg-bar-group').forEach(group => {
+      group.addEventListener('click', () => {
+        const lineName = group.getAttribute('data-line-name') || '';
+        const lineId = group.getAttribute('data-line-id') || '';
+        drillDownToLine(lineId, lineName);
+      });
+    });
+  }
+
+  function drillDownToLine(lineId, lineName) {
+    const term = (lineName || lineId || '').trim();
+    if (!term) return;
+
+    applyViewTab('table', false);
+
+    state.table.search = term;
+    state.table.page = 1;
+
+    const inputSearch = document.getElementById('input-expense-search');
+    if (inputSearch) inputSearch.value = term;
+
+    const btnClearSearch = document.getElementById('btn-clear-table-search');
+    if (btnClearSearch) btnClearSearch.style.display = 'block';
+
+    const u = new URL(window.location.href);
+    u.searchParams.set('tab', 'table');
+    u.searchParams.set('search', term);
+    history.pushState(null, '', u.toString());
+
+    refreshTable();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showToast(`แสดงรายการค่าใช้จ่ายของไลน์: ${term}`);
   }
 
   function renderBreakdownTable() {
@@ -734,7 +898,7 @@
     const badgeCount = document.getElementById('badge-breakdown-lines-count');
     if (!tbody) return;
 
-    let items = state.dashboard.data?.lineMetrics || [];
+    let items = state.dashboard.data?.lineMetrics || state.dashboard.data?.lineBreakdown || [];
 
     // Filter by status
     if (state.dashboard.statusFilter) {
@@ -768,11 +932,19 @@
       const cappedPct = Math.min(100, Math.max(0, item.usagePercent || 0));
 
       return `
-        <tr>
+        <tr class="breakdown-row" data-line-id="${escapeHtml(item.lineId)}" data-line-name="${escapeHtml(item.lineName || item.lineId)}">
           <td class="text-muted font-mono">${idx + 1}</td>
-          <td><strong>${escapeHtml(item.lineName || item.lineId)}</strong></td>
+          <td>
+            <a href="javascript:void(0)" class="btn-link-line-drill font-semibold" style="color: inherit; text-decoration: underline; text-underline-offset: 3px;" title="คลิกเพื่อดูรายการค่าใช้จ่ายของไลน์นี้">
+              ${escapeHtml(item.lineName || item.lineId)}
+            </a>
+          </td>
           <td class="text-right font-mono">${fmtNumber(item.budget)}</td>
-          <td class="text-right font-mono" style="color: #dc2626; font-weight: 600;">${fmtNumber(item.actual)}</td>
+          <td class="text-right font-mono" style="color: #dc2626; font-weight: 600;">
+            <a href="javascript:void(0)" class="btn-link-line-drill" style="color: inherit; text-decoration: underline; text-underline-offset: 3px;" title="คลิกเพื่อดูรายการค่าใช้จ่ายของไลน์นี้">
+              ${fmtNumber(item.actual)}
+            </a>
+          </td>
           <td class="text-right font-mono" style="color: ${item.variance < 0 ? '#dc2626' : '#16a34a'};">
             ${fmtNumber(item.variance)}
           </td>
@@ -786,6 +958,16 @@
         </tr>
       `;
     }).join('');
+
+    tbody.querySelectorAll('.btn-link-line-drill').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tr = e.target.closest('tr');
+        const lineId = tr?.getAttribute('data-line-id') || '';
+        const lineName = tr?.getAttribute('data-line-name') || '';
+        drillDownToLine(lineId, lineName);
+      });
+    });
   }
 
   // =========================================================================
@@ -862,22 +1044,20 @@
         const buffer = e.target.result;
         let text = '';
 
-        // SAP exports from Thai systems are usually Windows-874 (TIS-620)
+        // Auto-detect UTF-8 vs Windows-874 (TIS-620)
         try {
-          text = new TextDecoder('windows-874').decode(buffer);
-        } catch {
-          text = new TextDecoder('utf-8').decode(buffer);
-        }
-
-        // If Windows-874 yielded strange chars, fallback to UTF-8
-        if (text.includes('')) {
+          text = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+        } catch (_) {
           try {
+            text = new TextDecoder('windows-874').decode(buffer);
+          } catch {
             text = new TextDecoder('utf-8').decode(buffer);
-          } catch (_) {}
+          }
         }
 
         parseSapFileContent(text);
       } catch (err) {
+        console.error('File parsing error:', err);
         showToast('ไม่สามารถอ่านไฟล์ได้: ' + err.message, true);
       }
     };
@@ -886,7 +1066,12 @@
   }
 
   function parseSapFileContent(content) {
-    const lines = content.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (!content || typeof content !== 'string') {
+      showToast('ไฟล์ว่างเปล่า ไม่มีข้อมูล', true);
+      return;
+    }
+
+    const lines = content.split(/\r?\n/).map(l => (l || '').trim()).filter(Boolean);
     if (!lines.length) {
       showToast('ไฟล์ว่างเปล่า ไม่มีข้อมูล', true);
       return;
@@ -900,10 +1085,11 @@
     let headers = [];
 
     for (let i = 0; i < Math.min(10, lines.length); i++) {
-      const cols = lines[i].split(delimiter).map(c => c.trim().toLowerCase());
+      const lineStr = lines[i] || '';
+      const cols = lineStr.split(delimiter).map(c => (c || '').trim().toLowerCase());
       if (cols.some(c => c.includes('equipment') || c.includes('order') || c.includes('amount') || c.includes('doc'))) {
         headerIdx = i;
-        headers = lines[i].split(delimiter).map(c => c.trim());
+        headers = lineStr.split(delimiter).map(c => (c || '').trim());
         break;
       }
     }
@@ -927,13 +1113,13 @@
     };
 
     headers.forEach((h, idx) => {
-      const lower = h.toLowerCase();
+      const lower = String(h || '').toLowerCase().trim();
       if (lower === 'equipment') colIndex.equipment = idx;
       else if (lower === 'order') colIndex.order = idx;
       else if (lower.includes('posting date') || lower === 'date') colIndex.date = idx;
       else if (lower.includes('doc. no.') || lower.includes('doc no')) colIndex.docNo = idx;
       else if (lower.includes('material no') || lower.includes('material')) colIndex.material = idx;
-      else if (lower.includes('description') || lower.includes('text')) colIndex.desc = idx;
+      else if (lower.includes('description')) colIndex.desc = idx;
       else if (lower === 'qty.' || lower === 'qty') colIndex.qty = idx;
       else if (lower === 'amount') colIndex.amount = idx;
       else if (lower.includes('functional loc')) colIndex.funcLoc = idx;
@@ -942,19 +1128,39 @@
     const cutoffDate = getTwoYearCutoff();
     const parsedRecords = [];
 
-    for (let i = headerIdx + 1; i < lines.length; i++) {
-      const rawCols = lines[i].split(delimiter).map(c => c.trim());
-      if (rawCols.length < 3) continue;
+    // SAP number parser (supports trailing minus e.g. 3435.46-, commas)
+    const parseSapNum = (val) => {
+      if (!val) return 0;
+      let s = String(val).trim().replace(/,/g, '');
+      if (s.endsWith('-')) s = '-' + s.slice(0, -1);
+      return parseFloat(s) || 0;
+    };
 
-      const rawEquip = colIndex.equipment >= 0 ? rawCols[colIndex.equipment] : '';
-      const rawOrder = colIndex.order >= 0 ? rawCols[colIndex.order] : '';
-      const rawDate = colIndex.date >= 0 ? rawCols[colIndex.date] : '';
-      const rawAmount = colIndex.amount >= 0 ? rawCols[colIndex.amount] : '0';
-      const rawDesc = colIndex.desc >= 0 ? rawCols[colIndex.desc] : '';
-      const rawQty = colIndex.qty >= 0 ? rawCols[colIndex.qty] : '1';
-      const rawDocNo = colIndex.docNo >= 0 ? rawCols[colIndex.docNo] : '';
-      const rawMat = colIndex.material >= 0 ? rawCols[colIndex.material] : '';
-      const rawFuncLoc = colIndex.funcLoc >= 0 ? rawCols[colIndex.funcLoc] : '';
+    for (let i = headerIdx + 1; i < lines.length; i++) {
+      const lineStr = lines[i];
+      if (!lineStr) continue;
+      const rawCols = lineStr.split(delimiter);
+      if (rawCols.length < 2) continue;
+
+      const getCol = (idx, fallback = '') => {
+        if (idx < 0 || idx >= rawCols.length || rawCols[idx] === undefined || rawCols[idx] === null) {
+          return fallback;
+        }
+        return String(rawCols[idx]).trim();
+      };
+
+      const rawEquip = getCol(colIndex.equipment);
+      const rawOrder = getCol(colIndex.order);
+      const rawDate = getCol(colIndex.date);
+      const rawAmount = getCol(colIndex.amount, '0');
+      const rawDesc = getCol(colIndex.desc);
+      const rawQty = getCol(colIndex.qty, '1');
+      const rawDocNo = getCol(colIndex.docNo);
+      const rawMat = getCol(colIndex.material);
+      const rawFuncLoc = getCol(colIndex.funcLoc);
+
+      // Skip non-data rows
+      if (!rawEquip && !rawOrder && !rawAmount) continue;
 
       // Normalize date (e.g. 20241012 or 2024-10-12)
       let docDate = '';
@@ -966,12 +1172,26 @@
         docDate = rawDate;
       }
 
-      // Clean order number (e.g. 000013117556 -> 13117556)
+      // PM No. = Order (clean order number e.g. 000013117556 -> 13117556)
       const orderNo = rawOrder.replace(/^0+/, '') || rawOrder;
 
-      // Clean amount (remove commas)
-      const cleanAmount = parseFloat(rawAmount.replace(/,/g, '')) || 0;
-      const cleanQty = parseFloat(rawQty.replace(/,/g, '')) || 1;
+      const cleanAmount = parseSapNum(rawAmount);
+      const cleanQty = parseSapNum(rawQty) || 1;
+      const unitPrice = cleanQty !== 0 ? Math.abs(cleanAmount / cleanQty) : 0;
+
+      // รายการ = Description (Material no. (ถ้ามี))
+      const cleanDesc = rawDesc;
+      const cleanMat = rawMat;
+      let formattedDesc = cleanDesc;
+      if (cleanMat) {
+        if (cleanDesc) {
+          if (!cleanDesc.includes(cleanMat)) {
+            formattedDesc = `${cleanDesc} (${cleanMat})`;
+          }
+        } else {
+          formattedDesc = cleanMat;
+        }
+      }
 
       // Check 2-year retention cutoff
       const isOld = docDate && docDate < cutoffDate;
@@ -994,9 +1214,11 @@
         docDate: docDate,
         amount: cleanAmount,
         quantity: cleanQty,
-        description: rawDesc,
+        unitPrice: unitPrice,
+        description: formattedDesc,
+        rawDescription: cleanDesc,
         docNo: rawDocNo,
-        materialNo: rawMat,
+        materialNo: cleanMat,
         functionalLoc: rawFuncLoc,
         departmentId: parsedDept,
         isOld: isOld
@@ -1026,13 +1248,23 @@
     const validRecords = records.filter(r => !r.isOld);
     const totalSum = validRecords.reduce((acc, r) => acc + (r.amount || 0), 0);
 
+    // Build machine lookup map
+    const machineMap = new Map();
+    (state.machineCatalog || []).forEach(m => {
+      if (m.code) machineMap.set(m.code.trim().toUpperCase(), m);
+      if (m.normalizedCode) machineMap.set(m.normalizedCode.trim().toUpperCase(), m);
+    });
+
+    const linkedCount = validRecords.filter(r => r.machineCode && machineMap.has(r.machineCode.toUpperCase())).length;
+
     if (totalCountEl) totalCountEl.textContent = totalCount.toLocaleString();
     if (oldCountEl) oldCountEl.textContent = `${oldCount.toLocaleString()} (ข้าม)`;
-    if (linkedCountEl) linkedCountEl.textContent = validRecords.filter(r => r.machineCode).length.toLocaleString();
+    if (linkedCountEl) linkedCountEl.textContent = linkedCount.toLocaleString();
     if (totalAmountEl) totalAmountEl.textContent = fmtMoney(totalSum);
 
     if (tbody) {
       tbody.innerHTML = records.slice(0, 50).map((r, idx) => {
+        const matched = machineMap.get((r.machineCode || '').toUpperCase());
         return `
           <tr style="${r.isOld ? 'opacity: 0.5; background: #fffbeb;' : ''}">
             <td class="font-mono text-muted">${idx + 1}</td>
@@ -1041,7 +1273,9 @@
             <td>
               ${r.isOld 
                 ? '<span class="status-badge status-warning">เกิน 2 ปี (ข้าม)</span>'
-                : '<span class="status-badge status-normal">พร้อมนำเข้า</span>'}
+                : matched 
+                  ? `<span class="status-badge status-normal" title="เชื่อมโยงเครื่องจักร: ${escapeHtml(matched.name || '')}">พบในระบบ (${escapeHtml(matched.deptId || '')}/${escapeHtml(matched.lineId || '')})</span>`
+                  : '<span class="status-badge" style="background:#f1f5f9;color:#64748b;">รอจับคู่เครื่องจักร</span>'}
             </td>
             <td class="font-mono">${escapeHtml(r.pmOrderNo || '-')}</td>
             <td style="max-width: 220px; word-break: break-word;">${escapeHtml(r.description || '-')}</td>
@@ -1077,8 +1311,9 @@
 
       for (let i = 0; i < validRecords.length; i += batchSize) {
         const batch = validRecords.slice(i, i + batchSize);
-        const res = await rpcExpenses('importRecords', { records: batch });
-        totalImported += res.importedCount || batch.length;
+        // Pass array directly as first argument to rpcExpenses
+        const res = await rpcExpenses('importRecords', batch);
+        totalImported += res?.importedCount || batch.length;
       }
 
       showToast(`นำเข้าสำเร็จ ${totalImported.toLocaleString()} รายการ (เชื่อมโยงเครื่องจักรอัตโนมัติ)`);
@@ -1258,14 +1493,14 @@
     if (item) {
       if (title) title.textContent = 'แก้ไขรายการค่าใช้จ่าย PM';
       if (idInput) idInput.value = item.id || '';
-      if (dateInput) dateInput.value = item.doc_date || '';
-      if (machineInput) machineInput.value = item.machine_code || '';
-      if (pmnoInput) pmnoInput.value = item.pm_order_no || '';
-      if (deptInput) deptInput.value = item.department_id || '';
-      if (lineInput) lineInput.value = item.line_id || '';
+      if (dateInput) dateInput.value = item.doc_date || item.docDate || '';
+      if (machineInput) machineInput.value = item.machine_code || item.machineCode || '';
+      if (pmnoInput) pmnoInput.value = item.pm_order_no || item.pmOrderNo || '';
+      if (deptInput) deptInput.value = item.department_id || item.departmentId || '';
+      if (lineInput) lineInput.value = item.line_id || item.lineId || '';
       if (descInput) descInput.value = item.description || '';
       if (qtyInput) qtyInput.value = item.quantity || 1;
-      if (priceInput) priceInput.value = item.unit_price || 0;
+      if (priceInput) priceInput.value = item.unit_price !== undefined ? item.unit_price : (item.unitPrice !== undefined ? item.unitPrice : 0);
       if (amountInput) amountInput.value = item.amount || 0;
       if (notesInput) notesInput.value = item.notes || '';
     } else {
@@ -1328,6 +1563,157 @@
     } catch (err) {
       showToast('ไม่สามารถบันทึกได้: ' + err.message, true);
     }
+  }
+
+  // =========================================================================
+  // MODAL: DELETE EXPENSES BY DATE RANGE
+  // =========================================================================
+  function setupDeleteRangeModal() {
+    const modal = document.getElementById('modal-delete-range');
+    const btnOpen = document.getElementById('btn-open-delete-range-modal');
+    const btnClose = document.getElementById('btn-close-delete-range-modal');
+    const btnCancel = document.getElementById('btn-cancel-delete-range');
+    const btnConfirm = document.getElementById('btn-confirm-delete-range');
+    const inputStart = document.getElementById('delete-range-start');
+    const inputEnd = document.getElementById('delete-range-end');
+    const selectDept = document.getElementById('delete-range-dept');
+    const previewText = document.getElementById('delete-range-preview-text');
+
+    let previewCount = 0;
+    let previewAmount = 0;
+
+    const closeModal = () => {
+      if (modal) modal.style.display = 'none';
+    };
+
+    btnOpen?.addEventListener('click', () => {
+      if (!modal) return;
+      const now = new Date();
+      const curYear = now.getFullYear();
+      const pad = (n) => String(n).padStart(2, '0');
+      const curMonth = pad(now.getMonth() + 1);
+      const lastDay = pad(new Date(curYear, now.getMonth() + 1, 0).getDate());
+
+      // If user had table filter dates, use them; otherwise default to current month
+      if (inputStart && !inputStart.value) {
+        inputStart.value = state.table.startDate || `${curYear}-${curMonth}-01`;
+      }
+      if (inputEnd && !inputEnd.value) {
+        inputEnd.value = state.table.endDate || `${curYear}-${curMonth}-${lastDay}`;
+      }
+      if (selectDept && !selectDept.value) {
+        selectDept.value = state.table.deptId || '';
+      }
+
+      modal.style.display = 'flex';
+      checkPreview();
+    });
+
+    btnClose?.addEventListener('click', closeModal);
+    btnCancel?.addEventListener('click', closeModal);
+
+    async function checkPreview() {
+      const start = inputStart?.value?.trim();
+      const end = inputEnd?.value?.trim();
+      const dept = selectDept?.value?.trim();
+
+      if (!start || !end) {
+        if (previewText) previewText.textContent = 'กรุณาระบุทั้งตั้งแต่วันที่และถึงวันที่';
+        if (btnConfirm) {
+          btnConfirm.disabled = true;
+          btnConfirm.style.cursor = 'not-allowed';
+          btnConfirm.style.opacity = '0.6';
+        }
+        return;
+      }
+
+      if (start > end) {
+        if (previewText) previewText.textContent = 'วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด';
+        if (btnConfirm) {
+          btnConfirm.disabled = true;
+          btnConfirm.style.cursor = 'not-allowed';
+          btnConfirm.style.opacity = '0.6';
+        }
+        return;
+      }
+
+      if (previewText) previewText.textContent = 'กำลังตรวจสอบจำนวนรายการ...';
+
+      try {
+        const res = await rpcExpenses('listExpenses', {
+          startDate: start,
+          endDate: end,
+          deptId: dept || undefined,
+          limit: 1
+        });
+
+        previewCount = res?.totalCount || 0;
+        previewAmount = res?.totalAmount || 0;
+
+        if (previewCount === 0) {
+          if (previewText) previewText.textContent = 'ไม่พบรายการข้อมูลในช่วงวันที่และเงื่อนไขที่ระบุ';
+          if (btnConfirm) {
+            btnConfirm.disabled = true;
+            btnConfirm.style.cursor = 'not-allowed';
+            btnConfirm.style.opacity = '0.6';
+          }
+        } else {
+          if (previewText) {
+            const deptLabel = dept ? ` (แผนก ${escapeHtml(dept)})` : ' (ทุกแผนก)';
+            previewText.innerHTML = `พบ <strong style="font-size:1.05rem; color:#dc2626;">${previewCount.toLocaleString()}</strong> รายการ${deptLabel}<br>ยอดเงินรวม: <strong>${fmtMoney(previewAmount)}</strong>`;
+          }
+          if (btnConfirm) {
+            btnConfirm.disabled = false;
+            btnConfirm.style.cursor = 'pointer';
+            btnConfirm.style.opacity = '1';
+          }
+        }
+      } catch (err) {
+        if (previewText) previewText.textContent = 'เกิดข้อผิดพลาดในการตรวจสอบข้อมูล: ' + err.message;
+        if (btnConfirm) {
+          btnConfirm.disabled = true;
+          btnConfirm.style.cursor = 'not-allowed';
+          btnConfirm.style.opacity = '0.6';
+        }
+      }
+    }
+
+    inputStart?.addEventListener('change', checkPreview);
+    inputEnd?.addEventListener('change', checkPreview);
+    selectDept?.addEventListener('change', checkPreview);
+
+    btnConfirm?.addEventListener('click', async () => {
+      const start = inputStart?.value?.trim();
+      const end = inputEnd?.value?.trim();
+      const dept = selectDept?.value?.trim();
+
+      if (!start || !end || previewCount <= 0) return;
+
+      const confirmMsg = `ยืนยันการลบรายการค่าใช้จ่าย PM จำนวน ${previewCount.toLocaleString()} รายการ (${start} ถึง ${end}) ใช่หรือไม่?\n\nข้อมูลที่ถูกลบจะไม่สามารถกู้คืนได้!`;
+      if (!confirm(confirmMsg)) return;
+
+      try {
+        btnConfirm.disabled = true;
+        btnConfirm.textContent = 'กำลังลบ...';
+
+        const res = await rpcExpenses('deleteExpensesByRange', {
+          startDate: start,
+          endDate: end,
+          deptId: dept || undefined
+        });
+
+        showToast(`ลบข้อมูลเรียบร้อยแล้ว (${res?.deletedCount || 0} รายการ)`);
+        closeModal();
+        await refreshCurrentView();
+      } catch (err) {
+        showToast('ลบข้อมูลไม่สำเร็จ: ' + err.message, true);
+      } finally {
+        if (btnConfirm) {
+          btnConfirm.disabled = false;
+          btnConfirm.textContent = 'ยืนยันการลบข้อมูล';
+        }
+      }
+    });
   }
 
   // Escape HTML Helper

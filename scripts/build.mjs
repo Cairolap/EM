@@ -44,7 +44,8 @@ for (const [sourceFile, scope] of [
   ['', 'users'],
   ['', 'announcements'],
   ['', 'pm'],
-  ['', 'pm-expenses']
+  ['', 'pm-expenses'],
+  ['', 'pr-tracker']
 ]) {
   let output = '';
   if (scope === 'users') {
@@ -75,6 +76,14 @@ for (const [sourceFile, scope] of [
     const html = await read(new URL('src/pm-expenses/index.html', root));
     const css = await read(new URL('src/pm-expenses/styles.css', root));
     const appJs = await read(new URL('src/pm-expenses/app.js', root));
+    const js = transportJs + '\n' + appJs;
+    output = html
+      .replace('<!-- APP_STYLE -->', () => '<style>\n' + css + '\n</style>')
+      .replace('<!-- APP_SCRIPT -->', () => '<script>\n' + js + '\n</script>');
+  } else if (scope === 'pr-tracker') {
+    const html = await read(new URL('src/pr-tracker/index.html', root));
+    const css = await read(new URL('src/pr-tracker/styles.css', root));
+    const appJs = await read(new URL('src/pr-tracker/app.js', root));
     const js = transportJs + '\n' + appJs;
     output = html
       .replace('<!-- APP_STYLE -->', () => '<style>\n' + css + '\n</style>')
@@ -137,6 +146,7 @@ for (const [sourceFile, scope] of [
         </a>
         <div class="em-dropdown-menu">
           <div class="em-dropdown-header">เลือกแผนก</div>
+          <a class="em-dropdown-item" href="/bom/"><span class="em-dept-badge">ALL</span> ทุกแผนก</a>
           <a class="em-dropdown-item" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
           <a class="em-dropdown-item" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
           <a class="em-dropdown-item" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
@@ -162,14 +172,46 @@ for (const [sourceFile, scope] of [
       <!-- 4. เครื่องจักร -->
       <a class="em-nav-link${scope === 'machines' ? ' active' : ''}" href="/machines/"${scope === 'machines' ? ' aria-current="page"' : ''}>Machines</a>
 
-      <!-- 5. จัดการ Order PM -->
-      <a class="em-nav-link${scope === 'pm' ? ' active' : ''}" href="/pm/"${scope === 'pm' ? ' aria-current="page"' : ''}>Order PM</a>
+      <!-- 5. จัดการ Order PM with Dropdown -->
+      <div class="em-dropdown em-dropdown-pm">
+        <a href="/pm/" class="em-nav-link em-dropdown-trigger${scope === 'pm' ? ' active' : ''}"${scope === 'pm' ? ' aria-current="page"' : ''}>
+          <span>Order PM</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
+          <a class="em-dropdown-item" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+        </div>
+      </div>
 
-      <!-- 6. ค่าใช้จ่าย PM -->
-      <a class="em-nav-link${scope === 'pm-expenses' ? ' active' : ''}" href="/pm-expenses/"${scope === 'pm-expenses' ? ' aria-current="page"' : ''}>ค่าใช้จ่าย PM</a>
+      <!-- 6. ค่าใช้จ่าย PM with Dropdown -->
+      <div class="em-dropdown em-dropdown-pm-expenses">
+        <a href="/pm-expenses/" class="em-nav-link em-dropdown-trigger${scope === 'pm-expenses' ? ' active' : ''}"${scope === 'pm-expenses' ? ' aria-current="page"' : ''}>
+          <span>ค่าใช้จ่าย PM</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
+          <a class="em-dropdown-item" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+        </div>
+      </div>
 
-      <!-- 7. สื่อประชาสัมพันธ์ -->
-      <a class="em-nav-link${scope === 'announcements' ? ' active' : ''}" href="/announcements/"${scope === 'announcements' ? ' aria-current="page"' : ''}>สื่อประชาสัมพันธ์</a>
+      <!-- 7. จัดซื้อ & สโตร์ (PR & Store Tracker) -->
+      <a class="em-nav-link${scope === 'pr-tracker' ? ' active' : ''}" href="/pr-tracker/"${scope === 'pr-tracker' ? ' aria-current="page"' : ''}>
+        <span>จัดซื้อ &amp; สโตร์</span>
+      </a>
+
+      <!-- 8. สื่อประชาสัมพันธ์ with Dropdown -->
+      <div class="em-dropdown em-dropdown-announcements">
+        <a href="/announcements/" class="em-nav-link em-dropdown-trigger${scope === 'announcements' ? ' active' : ''}"${scope === 'announcements' ? ' aria-current="page"' : ''}>
+          <span>สื่อประชาสัมพันธ์</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/announcements/"><span class="em-item-icon">⚙️</span> สื่อประชาสัมพันธ์</a>
+          <a class="em-dropdown-item" href="/announcements/tv.html" target="_blank"><span class="em-item-icon">📺</span> เปิดหน้า TV</a>
+        </div>
+      </div>
 
     </div>
 
@@ -211,6 +253,7 @@ for (const [sourceFile, scope] of [
             <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
           <div class="em-drawer-sublist"${scope === 'bom' ? '' : ' style="display:none;"'}>
+            <a class="em-drawer-subitem" href="/bom/"><span class="em-dept-badge">ALL</span> ทุกแผนก</a>
             <a class="em-drawer-subitem" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
             <a class="em-drawer-subitem" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
             <a class="em-drawer-subitem" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
@@ -242,23 +285,56 @@ for (const [sourceFile, scope] of [
           Machines
         </a>
 
-        <!-- 5. จัดการ Order PM -->
-        <a class="em-drawer-link${scope === 'pm' ? ' active' : ''}" href="/pm/"${scope === 'pm' ? ' aria-current="page"' : ''}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          Order PM
+        <!-- 5. จัดการ Order PM Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="${scope === 'pm' ? 'true' : 'false'}">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              Order PM
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist"${scope === 'pm' ? '' : ' style="display:none;"'}>
+            <a class="em-drawer-subitem" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
+            <a class="em-drawer-subitem" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+          </div>
+        </div>
+
+        <!-- 6. ค่าใช้จ่าย PM Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="${scope === 'pm-expenses' ? 'true' : 'false'}">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              ค่าใช้จ่าย PM
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist"${scope === 'pm-expenses' ? '' : ' style="display:none;"'}>
+            <a class="em-drawer-subitem" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
+            <a class="em-drawer-subitem" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+          </div>
+        </div>
+
+        <!-- 7. จัดซื้อ & สโตร์ (PR & Store Tracker) -->
+        <a class="em-drawer-link${scope === 'pr-tracker' ? ' active' : ''}" href="/pr-tracker/"${scope === 'pr-tracker' ? ' aria-current="page"' : ''}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          จัดซื้อ &amp; สโตร์
         </a>
 
-        <!-- 6. ค่าใช้จ่าย PM -->
-        <a class="em-drawer-link${scope === 'pm-expenses' ? ' active' : ''}" href="/pm-expenses/"${scope === 'pm-expenses' ? ' aria-current="page"' : ''}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-          ค่าใช้จ่าย PM
-        </a>
-
-        <!-- 7. สื่อประชาสัมพันธ์ -->
-        <a class="em-drawer-link${scope === 'announcements' ? ' active' : ''}" href="/announcements/"${scope === 'announcements' ? ' aria-current="page"' : ''}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-          สื่อประชาสัมพันธ์
-        </a>
+        <!-- 8. สื่อประชาสัมพันธ์ Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="${scope === 'announcements' ? 'true' : 'false'}">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              สื่อประชาสัมพันธ์
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist"${scope === 'announcements' ? '' : ' style="display:none;"'}>
+            <a class="em-drawer-subitem" href="/announcements/"><span class="em-item-icon">⚙️</span> สื่อประชาสัมพันธ์</a>
+            <a class="em-drawer-subitem" href="/announcements/tv.html" target="_blank"><span class="em-item-icon">📺</span> เปิดหน้า TV</a>
+          </div>
+        </div>
 
         <!-- 6. จัดการผู้ใช้งาน -->
         <a id="em-drawer-nav-users" class="em-drawer-link${scope === 'users' ? ' active' : ''}" style="display:${scope === 'users' ? 'flex' : 'none'}" href="/users/"${scope === 'users' ? ' aria-current="page"' : ''}>

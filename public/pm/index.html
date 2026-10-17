@@ -334,6 +334,50 @@ body {
   flex-wrap: wrap;
 }
 
+.btn-back-overview {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--pm-primary);
+  background: var(--pm-primary-surface);
+  border: 1px solid rgba(20, 86, 111, 0.28);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.btn-back-overview svg {
+  flex-shrink: 0;
+  transition: transform var(--duration-fast) var(--ease);
+}
+
+.btn-back-overview:hover {
+  background: var(--pm-primary);
+  color: #ffffff;
+  border-color: var(--pm-primary);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.btn-back-overview:hover svg {
+  transform: translateX(-2px);
+}
+
+.btn-back-overview:active {
+  transform: translateY(0);
+}
+
+.btn-back-overview:focus-visible {
+  outline: 2px solid var(--pm-primary);
+  outline-offset: 2px;
+}
+
 .line-badge {
   font-size: 11px;
   font-weight: 700;
@@ -1108,6 +1152,7 @@ body {
         </a>
         <div class="em-dropdown-menu">
           <div class="em-dropdown-header">เลือกแผนก</div>
+          <a class="em-dropdown-item" href="/bom/"><span class="em-dept-badge">ALL</span> ทุกแผนก</a>
           <a class="em-dropdown-item" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
           <a class="em-dropdown-item" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
           <a class="em-dropdown-item" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
@@ -1133,14 +1178,46 @@ body {
       <!-- 4. เครื่องจักร -->
       <a class="em-nav-link" href="/machines/">Machines</a>
 
-      <!-- 5. จัดการ Order PM -->
-      <a class="em-nav-link active" href="/pm/" aria-current="page">Order PM</a>
+      <!-- 5. จัดการ Order PM with Dropdown -->
+      <div class="em-dropdown em-dropdown-pm">
+        <a href="/pm/" class="em-nav-link em-dropdown-trigger active" aria-current="page">
+          <span>Order PM</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
+          <a class="em-dropdown-item" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+        </div>
+      </div>
 
-      <!-- 6. ค่าใช้จ่าย PM -->
-      <a class="em-nav-link" href="/pm-expenses/">ค่าใช้จ่าย PM</a>
+      <!-- 6. ค่าใช้จ่าย PM with Dropdown -->
+      <div class="em-dropdown em-dropdown-pm-expenses">
+        <a href="/pm-expenses/" class="em-nav-link em-dropdown-trigger">
+          <span>ค่าใช้จ่าย PM</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
+          <a class="em-dropdown-item" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+        </div>
+      </div>
 
-      <!-- 7. สื่อประชาสัมพันธ์ -->
-      <a class="em-nav-link" href="/announcements/">สื่อประชาสัมพันธ์</a>
+      <!-- 7. จัดซื้อ & สโตร์ (PR & Store Tracker) -->
+      <a class="em-nav-link" href="/pr-tracker/">
+        <span>จัดซื้อ &amp; สโตร์</span>
+      </a>
+
+      <!-- 8. สื่อประชาสัมพันธ์ with Dropdown -->
+      <div class="em-dropdown em-dropdown-announcements">
+        <a href="/announcements/" class="em-nav-link em-dropdown-trigger">
+          <span>สื่อประชาสัมพันธ์</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/announcements/"><span class="em-item-icon">⚙️</span> สื่อประชาสัมพันธ์</a>
+          <a class="em-dropdown-item" href="/announcements/tv.html" target="_blank"><span class="em-item-icon">📺</span> เปิดหน้า TV</a>
+        </div>
+      </div>
 
     </div>
 
@@ -1182,6 +1259,7 @@ body {
             <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
           <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/bom/"><span class="em-dept-badge">ALL</span> ทุกแผนก</a>
             <a class="em-drawer-subitem" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
             <a class="em-drawer-subitem" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
             <a class="em-drawer-subitem" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
@@ -1213,23 +1291,56 @@ body {
           Machines
         </a>
 
-        <!-- 5. จัดการ Order PM -->
-        <a class="em-drawer-link active" href="/pm/" aria-current="page">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          Order PM
+        <!-- 5. จัดการ Order PM Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="true">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              Order PM
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist">
+            <a class="em-drawer-subitem" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
+            <a class="em-drawer-subitem" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+          </div>
+        </div>
+
+        <!-- 6. ค่าใช้จ่าย PM Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              ค่าใช้จ่าย PM
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
+            <a class="em-drawer-subitem" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+          </div>
+        </div>
+
+        <!-- 7. จัดซื้อ & สโตร์ (PR & Store Tracker) -->
+        <a class="em-drawer-link" href="/pr-tracker/">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          จัดซื้อ &amp; สโตร์
         </a>
 
-        <!-- 6. ค่าใช้จ่าย PM -->
-        <a class="em-drawer-link" href="/pm-expenses/">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-          ค่าใช้จ่าย PM
-        </a>
-
-        <!-- 7. สื่อประชาสัมพันธ์ -->
-        <a class="em-drawer-link" href="/announcements/">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-          สื่อประชาสัมพันธ์
-        </a>
+        <!-- 8. สื่อประชาสัมพันธ์ Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              สื่อประชาสัมพันธ์
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/announcements/"><span class="em-item-icon">⚙️</span> สื่อประชาสัมพันธ์</a>
+            <a class="em-drawer-subitem" href="/announcements/tv.html" target="_blank"><span class="em-item-icon">📺</span> เปิดหน้า TV</a>
+          </div>
+        </div>
 
         <!-- 6. จัดการผู้ใช้งาน -->
         <a id="em-drawer-nav-users" class="em-drawer-link" style="display:none" href="/users/">
@@ -1754,6 +1865,13 @@ html, body {
         <div class="form-compact-ribbon">
           <!-- Line Context & Status Badges -->
           <div class="ribbon-context">
+            <button type="button" id="btn-back-overview" class="btn-back-overview" title="ย้อนกลับไปหน้าภาพรวม 5 รอบ (หน้ารวม)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span>กลับหน้ารวม</span>
+            </button>
             <span class="line-badge" id="badge-line-name">ไลน์: -</span>
             <span class="round-badge" id="badge-round-info">รอบที่ 1/5</span>
             <span class="status-chip" id="chip-progress-status">
@@ -1999,6 +2117,8 @@ html, body {
     const result = await res.json();
     if (!result.ok) throw new Error(result.error?.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
     currentUser = result.data;
+    window.currentUser = currentUser;
+    window.EM_CURRENT_USER = currentUser;
     updateBadge();
     modal.style.display = 'none';
 
@@ -2156,6 +2276,11 @@ html, body {
           sessionStorage.removeItem('BOM_LAST_LINE');
           sessionStorage.removeItem('BOM_LAST_MACHINE');
         } catch (_) {}
+      } else if (!location.search && !sessionStorage.getItem('BOM_LAST_MACHINE')) {
+        try {
+          sessionStorage.removeItem('BOM_LAST_DEPT');
+          sessionStorage.removeItem('BOM_LAST_LINE');
+        } catch (_) {}
       }
     }
 
@@ -2273,6 +2398,8 @@ html, body {
         .then(async res => {
           if (res.ok && res.data) {
             currentUser = res.data;
+            window.currentUser = currentUser;
+            window.EM_CURRENT_USER = currentUser;
             updateBadge();
             if (res.data.mustChangePassword) {
               await promptForceChangePassword();
@@ -2339,6 +2466,7 @@ html, body {
     return doRequest();
   };
 
+  window.isAdmin = () => Boolean(currentUser && (currentUser.role === 'admin' || currentUser.permissions?.bom === 'admin'));
   window.callRPC = async (method, ...args) => {
     return window.EM_RPC(method, ...args);
   };
@@ -2404,9 +2532,21 @@ html, body {
     return result.data;
   }
 
+  function checkUrlTab() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    if (tab === 'form' || tab === 'orders') return 'form';
+    if (tab === 'matrix' || tab === 'overview') return 'matrix';
+    return null;
+  }
+
   // Initialize Page
   async function init() {
     setupEventHandlers();
+    const targetTab = checkUrlTab();
+    if (targetTab) {
+      state.currentTab = targetTab;
+    }
     try {
       await loadReferences();
       switchTab(state.currentTab);
@@ -2420,11 +2560,41 @@ html, body {
     // Tab toggles
     document.getElementById('tab-btn-form')?.addEventListener('click', () => switchTab('form'));
     document.getElementById('tab-btn-matrix')?.addEventListener('click', () => switchTab('matrix'));
+    document.getElementById('btn-back-overview')?.addEventListener('click', () => {
+      switchTab('matrix');
+      const url = new URL(window.location);
+      url.searchParams.set('tab', 'overview');
+      window.history.pushState({}, '', url);
+    });
+
+    window.addEventListener('popstate', () => {
+      const t = checkUrlTab();
+      if (t) switchTab(t);
+    });
+
+    document.querySelectorAll('a[href*="/pm/?tab="], a[href*="/pm?tab="]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const u = new URL(a.href, window.location.origin);
+        const t = u.searchParams.get('tab');
+        if (t === 'form' || t === 'orders') {
+          e.preventDefault();
+          history.pushState(null, '', a.href);
+          switchTab('form');
+        } else if (t === 'matrix' || t === 'overview') {
+          e.preventDefault();
+          history.pushState(null, '', a.href);
+          switchTab('matrix');
+        }
+      });
+    });
 
     // Filter selectors
     document.getElementById('select-dept')?.addEventListener('change', (e) => {
       state.selectedDept = e.target.value;
       updateLineDropdown();
+      if (state.currentTab === 'matrix') {
+        loadMatrixData();
+      }
     });
 
     document.getElementById('select-line')?.addEventListener('change', (e) => {
@@ -2529,6 +2699,7 @@ html, body {
     // Default select first line or L00 if available
     const urlParams = new URLSearchParams(window.location.search);
     const lineParam = urlParams.get('line');
+    const deptParam = urlParams.get('dept');
     const yearParam = urlParams.get('year');
     const roundParam = urlParams.get('round');
 
@@ -2541,23 +2712,17 @@ html, body {
       state.selectedRound = Math.min(5, Math.max(1, Number(roundParam) || 1));
     }
 
+    if (deptParam && state.departments.some(d => d.deptId === deptParam)) {
+      state.selectedDept = deptParam;
+    } else {
+      state.selectedDept = ''; // ทุกแผนก (Default)
+    }
+    if (deptSelect) deptSelect.value = state.selectedDept;
+
     if (lineParam && state.lines.some(l => l.lineId === lineParam)) {
-      const targetLine = state.lines.find(l => l.lineId === lineParam);
-      state.selectedDept = targetLine.deptId;
-      if (deptSelect) deptSelect.value = state.selectedDept;
       updateLineDropdown(lineParam);
     } else {
-      // Prefer L00 if exists
-      const l00 = state.lines.find(l => l.lineId === 'L00');
-      if (l00) {
-        state.selectedDept = l00.deptId;
-        if (deptSelect) deptSelect.value = state.selectedDept;
-        updateLineDropdown('L00');
-      } else if (state.lines.length > 0) {
-        state.selectedDept = state.lines[0].deptId;
-        if (deptSelect) deptSelect.value = state.selectedDept;
-        updateLineDropdown(state.lines[0].lineId);
-      }
+      updateLineDropdown(state.lines.find(l => l.lineId === 'L00')?.lineId || state.lines[0]?.lineId || '');
     }
   }
 
@@ -2575,12 +2740,29 @@ html, body {
       return;
     }
 
-    lineSelect.innerHTML = filteredLines.map(l => 
-      `<option value="${l.lineId}">${l.lineName} (${l.lineId})</option>`
-    ).join('');
+    if (!state.selectedDept) {
+      let html = '';
+      state.departments.forEach(d => {
+        const dLines = state.lines.filter(l => l.deptId === d.deptId);
+        if (dLines.length > 0) {
+          html += `<optgroup label="${d.deptName} (${d.deptId})">`;
+          dLines.forEach(l => {
+            html += `<option value="${l.lineId}">${l.lineName} (${l.lineId})</option>`;
+          });
+          html += `</optgroup>`;
+        }
+      });
+      lineSelect.innerHTML = html;
+    } else {
+      lineSelect.innerHTML = filteredLines.map(l => 
+        `<option value="${l.lineId}">${l.lineName} (${l.lineId})</option>`
+      ).join('');
+    }
 
     if (preferredLineId && filteredLines.some(l => l.lineId === preferredLineId)) {
       state.selectedLine = preferredLineId;
+    } else if (state.selectedLine && filteredLines.some(l => l.lineId === state.selectedLine)) {
+      // Keep current line
     } else {
       state.selectedLine = filteredLines[0].lineId;
     }
@@ -2735,10 +2917,21 @@ html, body {
       }
 
       // Link to expenses search if there is expense or order
-      const expenseSearchTerm = m.orderNo || m.machineCode;
-      const expenseDisplay = used > 0
-        ? `<a href="/pm-expenses/?search=${encodeURIComponent(expenseSearchTerm)}" target="_blank" class="expense-val-link ${isOver ? 'text-danger' : 'text-success'}" title="คลิกเพื่อเปิดดูรายละเอียดในหน้า ค่าใช้จ่าย PM">฿${formatMoney(used)}</a>`
-        : `<span class="expense-val-zero text-muted">฿0.00</span>`;
+      const orderNoTrimmed = (m.orderNo || '').trim();
+      const expenseSearchTerm = orderNoTrimmed || (m.machineCode || '').trim();
+      const isClickable = used > 0 || Boolean(orderNoTrimmed);
+
+      let expenseDisplay = `<span class="expense-val-zero text-muted">฿0.00</span>`;
+      if (isClickable && expenseSearchTerm) {
+        const linkClass = used > 0
+          ? (isOver ? 'text-danger' : 'text-success')
+          : 'text-muted';
+        const linkTitle = orderNoTrimmed
+          ? `คลิกเพื่อดูรายการค่าใช้จ่ายของ Order No. ${orderNoTrimmed}`
+          : `คลิกเพื่อค้นหารายการค่าใช้จ่ายของเครื่อง ${m.machineCode}`;
+
+        expenseDisplay = `<a href="/pm-expenses/?tab=table&search=${encodeURIComponent(expenseSearchTerm)}" target="_blank" class="expense-val-link ${linkClass}" title="${escapeHtml(linkTitle)}">฿${formatMoney(used)}</a>`;
+      }
 
       return `
         <tr data-machine-id="${m.machineId}">
@@ -3038,9 +3231,11 @@ html, body {
             const deptId = e.currentTarget.getAttribute('data-dept');
             const roundNo = Number(e.currentTarget.getAttribute('data-round'));
 
-            state.selectedDept = deptId;
-            const deptSelect = document.getElementById('select-dept');
-            if (deptSelect) deptSelect.value = deptId;
+            if (state.selectedDept && state.selectedDept !== deptId) {
+              state.selectedDept = deptId;
+              const deptSelect = document.getElementById('select-dept');
+              if (deptSelect) deptSelect.value = deptId;
+            }
 
             updateLineDropdown(lineId);
             state.selectedRound = roundNo;

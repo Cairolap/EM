@@ -93,6 +93,8 @@
     const result = await res.json();
     if (!result.ok) throw new Error(result.error?.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
     currentUser = result.data;
+    window.currentUser = currentUser;
+    window.EM_CURRENT_USER = currentUser;
     updateBadge();
     modal.style.display = 'none';
 
@@ -356,7 +358,7 @@
 body{margin:0;font-family:var(--font-body)}body:has(dialog[open]){overflow:hidden}h1,h2,h3,p{margin:0}h1{font-size:clamp(1.5rem,2.6vw,2.15rem);line-height:1.5;letter-spacing:-.02em}h2{font-size:1.3rem}h3{font-size:1rem}button,input,select,textarea{font:inherit}button,summary,select,input[type=checkbox]{cursor:pointer}button{transition:background .16s,border-color .16s,transform .12s ease;color:inherit}button:disabled,input:disabled,select:disabled{cursor:not-allowed;opacity:.5}button:active:not(:disabled){transform:translateY(1px)}a{color:var(--primary)}:focus-visible{outline:3px solid var(--primary);outline-offset:3px}[hidden]{display:none !important}/* Native hidden must override layout declarations. */
 input,select,textarea{min-width:0;width:100%;border:1px solid var(--border);border-radius:var(--radius-control);background:var(--surface);color:var(--ink);padding:9px 12px;min-height:var(--control-height)}input:hover,select:hover,textarea:hover{border-color:var(--muted)}input[aria-invalid=true],textarea[aria-invalid=true],select[aria-invalid=true]{border-color:var(--danger)}input[type=checkbox]{width:18px;min-height:18px;height:18px;accent-color:var(--primary);flex-shrink:0}textarea{resize:none;min-height:100px}label{display:block;font-size:.86rem;font-weight:600;margin-bottom:6px}small,.muted{color:var(--muted)}small{display:block}.mono{font-family:var(--font-mono)}.eyebrow{font:600 .73rem/1.6 var(--font-body);letter-spacing:.07em;color:var(--primary);margin-bottom:6px}.footnote{font-size:.78rem;color:var(--muted);margin-top:16px}.button{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:var(--control-height);padding:8px 16px;border:1px solid transparent;border-radius:var(--radius-control);font-size:.88rem;font-weight:500;white-space:nowrap;background:transparent}.button.primary{background:linear-gradient(180deg,#215386,#18416c);color:var(--onPrimary);box-shadow:0 1px 2px rgba(18,50,84,0.18)}.button.primary:hover{background:linear-gradient(180deg,#18416c,#123254)}.button.outline{background:var(--surface);border-color:var(--border)}.button.outline:hover,.button.ghost:hover{background:var(--selection);border-color:#b4c8dc}.button.danger{background:linear-gradient(180deg,#9c2234,#80182a);color:var(--onPrimary);box-shadow:0 1px 2px rgba(128,24,42,0.2)}.button.danger:hover{background:#6b1322}.button.wide{width:100%}.button[aria-busy=true]{opacity:.65}.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 32px;border-bottom:1px solid var(--border);background:var(--surface)}.identity{display:flex;gap:16px;align-items:center}.identity strong{font-size:.98rem;font-weight:600}.identity small{font-size:.72rem}.brand-mark{font:700 28px var(--font-display);letter-spacing:-2px;color:var(--primary);border-right:1px solid var(--border);padding-right:20px}.brand-mark span{color:var(--accent)}.demo-banner{text-align:center;padding:5px 16px;font-size:.78rem;background:var(--warningSurface);color:var(--warning)}
 .header-logo-wrap{display:flex;align-items:center;width:164px;height:44px;padding-right:16px;border-right:1px solid var(--border);flex:0 0 auto;overflow:hidden}.header-logo{display:block;width:148px;height:44px;object-fit:contain;object-position:left center}.app-identity{min-width:0}
-.login-layout{display:grid;grid-template-columns:1.15fr 1fr;gap:80px;max-width:1100px;margin:80px auto;padding:24px;align-items:center}.login-intro h1{font-size:clamp(2rem,4vw,3rem);line-height:1.6;margin:20px 0}.login-intro>p:not(.eyebrow){color:var(--muted)}.journey{display:flex;flex-wrap:wrap;gap:18px;margin-top:32px;font-size:.9rem;color:var(--primary)}.login-card{padding:32px;background:var(--surface);border:1px solid var(--border);border-top:4px solid var(--primary);border-radius:var(--radius-panel);box-shadow:0 4px 20px rgba(20,34,51,0.04)}.login-card>.muted{margin:8px 0 24px}.secret{display:flex;position:relative}.secret input{padding-right:74px}.secret button{position:absolute;right:1px;top:1px;min-height:42px}.field-error{min-height:26px;color:var(--danger);font-size:.85rem;margin-top:6px;white-space:pre-wrap}.login-card .field-error{margin-bottom:16px}.workspace{display:grid;grid-template-columns:216px minmax(0,1fr);max-width:1600px;margin:auto}.sidebar{padding:30px 16px;border-right:1px solid var(--border);min-height:calc(100vh - 88px)}.sidebar h2{margin-bottom:20px;padding-left:12px}.sidebar .eyebrow{padding-left:12px}.sidebar nav{display:grid;gap:6px}.department-button{text-align:left;display:flex;align-items:center;gap:12px;padding:12px;border:1px solid transparent;border-radius:var(--radius-control);background:transparent;font-size:.88rem;width:100%}.department-button:hover{background:var(--surface)}.department-button[aria-current=true]{background:var(--surface);border-color:#b4c8dc;color:var(--primary);font-weight:600;box-shadow:0 1px 4px rgba(30,73,118,0.08)}.department-button .code{font:600 .82rem var(--font-mono);min-width:34px;padding:5px 0;border-right:2px solid var(--border)}.department-button[aria-current=true] .code{border-color:var(--accent);color:var(--accent)}.sidebar-note{font-size:.75rem;color:var(--muted);padding:24px 12px}.content{padding:26px 32px;min-width:0}.breadcrumb{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.78rem;color:var(--muted);min-height:30px;margin-bottom:16px}.breadcrumb button{background:none;border:0;color:var(--primary);padding:4px}.breadcrumb button:hover{text-decoration:underline}.section-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:16px 0 24px}.choose-controls{display:flex;align-items:center;gap:12px;margin:12px 0 16px;padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-panel);box-shadow:0 1px 3px rgba(20,34,51,0.04);flex-wrap:wrap}.choose-controls .line-select,.choose-controls .machine-sort-control{display:inline-flex;align-items:center;gap:8px;margin:0;flex:0 1 auto}.choose-controls label{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:600;color:var(--ink);white-space:nowrap;margin:0;cursor:pointer}.choose-controls .control-icon{width:15px;height:15px;color:var(--primary);flex-shrink:0}.choose-controls-divider{width:1px;height:22px;background:var(--border);flex-shrink:0}.choose-controls select{min-height:36px;height:36px;padding:4px 28px 4px 10px;font-size:.82rem;border:1px solid var(--border);border-radius:var(--radius-control);background-color:var(--surface);color:var(--ink);appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23576b7e' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;background-size:12px 12px;cursor:pointer;transition:border-color .16s ease,background-color .16s ease,box-shadow .16s ease}.choose-controls select:hover:not(:disabled){border-color:var(--primary);background-color:var(--surfaceMuted)}.choose-controls select:focus-visible{border-color:var(--primary);box-shadow:0 0 0 3px var(--selection);outline:none}.choose-controls select:disabled{background-color:var(--surfaceMuted);color:var(--muted);border-color:var(--border);cursor:not-allowed;opacity:.7}.choose-controls .line-select select{min-width:170px;max-width:260px}.choose-controls .machine-sort-control select{min-width:200px;max-width:270px}.machine-count-badge{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:.74rem;font-weight:600;color:var(--muted);background:var(--surfaceMuted);border:1px solid var(--border);border-radius:999px;padding:3px 10px;line-height:1.4;white-space:nowrap}.machine-count-badge[hidden]{display:none !important}@media(max-width:780px){.choose-controls{flex-direction:column;align-items:stretch;gap:10px;padding:12px;margin:10px 0 14px}.choose-controls-divider{display:none}.choose-controls .line-select,.choose-controls .machine-sort-control{display:flex;flex-direction:column;align-items:stretch;gap:5px;width:100%;max-width:none}.choose-controls .line-select select,.choose-controls .machine-sort-control select{width:100%;max-width:none;min-height:40px;height:40px}.machine-count-badge{margin-left:0;align-self:flex-start}}.line-select{max-width:380px;margin:16px 0}.machine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));grid-auto-rows:max-content;align-content:start;align-items:start;gap:14px}.machine-card{text-align:left;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:8px;padding:14px 16px;min-height:auto;display:flex;flex-direction:column;gap:4px;box-shadow:0 1px 3px rgba(20,34,51,.04);transition:all .18s ease}.machine-card:hover{background:var(--surface);border-color:var(--primary);border-left-color:var(--primaryStrong);transform:translateY(-2px);box-shadow:0 4px 14px rgba(30,73,118,.12)}.machine-card strong{display:block;margin:3px 0 6px;font-size:.92rem;font-weight:600;color:var(--ink);line-height:1.35;word-break:break-word}.machine-card small{display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--muted);font-weight:500;margin-top:auto;padding-top:6px;border-top:1px dashed var(--border)}.machine-card:hover small{color:var(--primary)}.machine-card .mono{display:inline-block;font-size:.74rem;font-weight:600;color:var(--primary);background:var(--selection);padding:2px 7px;border-radius:4px;width:fit-content;letter-spacing:.02em}.machine-card-head{display:flex;align-items:center;gap:6px}.machine-card .order-badge{display:inline-block;font-size:.7rem;font-weight:600;color:var(--primaryStrong);background:var(--surfaceMuted);padding:1px 6px;border-radius:4px;font-family:var(--font-mono);border:1px solid var(--border);letter-spacing:.02em}.totals{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius-panel);background:var(--surface);margin-bottom:24px}.total{padding:16px 24px;flex:1;border-right:1px solid var(--border)}.total:last-child{border:0}.total strong{font:500 1.7rem var(--font-display);margin-right:10px}.total span{font-size:.82rem;color:var(--muted)}.total.attention strong{color:var(--danger)}.register{border:1px solid var(--border);border-radius:var(--radius-panel);background:var(--surface);overflow:clip}.filterbar{display:grid;grid-template-columns:minmax(180px,1fr) 165px 165px;align-items:end;gap:12px;padding:20px}.search-control{position:relative}.search-control input{padding-right:44px}.clear-button{position:absolute;right:4px;top:3px;min-width:38px;min-height:38px;background:transparent;border:0;border-radius:6px;font-size:20px}.clear-button:hover{background:var(--selection)}.selection-bar{min-height:66px;padding:10px 20px;display:flex;align-items:center;gap:16px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surfaceMuted);flex-wrap:wrap}.checkbox-label{display:flex;align-items:center;gap:8px;margin:0;font-weight:400;font-size:.8rem}.selection-bar>span{font-size:.78rem;color:var(--muted);margin-left:auto}.selection-bar .button{min-height:38px;font-size:.8rem}.list-status{font-size:.8rem;color:var(--muted);min-height:32px;padding:6px 20px}.groups{min-height:280px}.group{border-top:1px solid var(--border)}.group summary{display:flex;align-items:center;gap:16px;padding:16px 20px;list-style:none;background:var(--surface)}.group summary::-webkit-details-marker{display:none}.group summary:after{content:'＋';color:var(--muted);font-size:18px}.group[open] summary:after{content:'−'}.group summary:hover{background:var(--surfaceMuted)}.part-image{width:52px;height:52px;flex-shrink:0;display:grid;place-items:center;border:1px solid var(--border);border-radius:8px;color:var(--muted);background:var(--surfaceMuted);font-family:var(--font-mono);font-size:.72rem;overflow:hidden}.part-image img{width:100%;height:100%;object-fit:contain}.part-info{flex:1;min-width:0;overflow-wrap:anywhere}.part-info strong{font-size:.95rem}.part-info p{font-size:.83rem;color:var(--muted)}.part-info small{font: .73rem var(--font-mono);margin-top:4px}.group-quantity{text-align:right;font-size:.8rem;min-width:70px}.group-quantity strong{font:500 1.25rem var(--font-display);display:block}.summary-label-preview{display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden;white-space:nowrap}.summary-label-preview .label-tag{flex-shrink:0;font-size:.72rem;padding:1px 5px;border-radius:4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--surfaceMuted);color:var(--ink);border:1px solid var(--border);line-height:1.4}.summary-label-preview .label-more{flex-shrink:0;font-size:.7rem;font-weight:600;padding:1px 5px;border-radius:4px;background:var(--selection);color:var(--primary);border:1px solid #b4c8dc;line-height:1.4}.group-tools{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:7px 20px 7px 88px;border-top:1px solid var(--border);background:var(--surfaceMuted)}.group-tools>span{margin-right:auto;font-size:.72rem;color:var(--muted)}.add-label-button{min-height:30px;padding:3px 10px;font-size:.75rem;background:var(--surface)}.label-list{padding:0 20px 12px 88px}.label-row{display:grid;grid-template-columns:24px minmax(110px,1fr) minmax(170px,1.4fr) minmax(160px,1.2fr) auto;gap:12px;align-items:center;border-top:1px solid var(--border);padding:15px 0}.label-tag{display:inline-block;font:.8rem var(--font-mono);border:1px solid var(--border);padding:2px 6px;background:var(--surfaceMuted);overflow-wrap:anywhere}.label-row small{font-size:.75rem;margin-top:4px}.label-row .button{padding:6px 8px;min-height:36px;font-size:.76rem}.badge{display:inline-block;padding:3px 8px;border-radius:5px;background:var(--surfaceMuted);color:var(--muted);font-size:.75rem}.badge.overdue,.badge.today{background:var(--dangerSurface);color:var(--danger)}.badge.soon{background:var(--warningSurface);color:var(--warning)}.badge.normal{background:var(--selection);color:var(--primary)}.pagination{border-top:1px solid var(--border);padding:16px 20px;display:flex;gap:16px;align-items:center;justify-content:space-between;font-size:.8rem;flex-wrap:wrap;min-height:80px}.page-size{display:flex;align-items:center;gap:8px;font-weight:400;margin:0}.page-size select{width:74px}.empty{padding:48px 24px;text-align:center;color:var(--muted)}.empty h3{font-size:1.1rem;color:var(--ink);margin-bottom:8px}.empty .button{margin-top:16px}.loading{padding:24px;min-height:80px;color:var(--primary)}.error-banner{padding:16px;background:var(--dangerSurface);color:var(--danger);border:1px solid var(--danger);border-radius:8px;margin-bottom:16px}.error-banner .button{margin-left:12px}
+.login-layout{display:grid;grid-template-columns:1.15fr 1fr;gap:80px;max-width:1100px;margin:80px auto;padding:24px;align-items:center}.login-intro h1{font-size:clamp(2rem,4vw,3rem);line-height:1.6;margin:20px 0}.login-intro>p:not(.eyebrow){color:var(--muted)}.journey{display:flex;flex-wrap:wrap;gap:18px;margin-top:32px;font-size:.9rem;color:var(--primary)}.login-card{padding:32px;background:var(--surface);border:1px solid var(--border);border-top:4px solid var(--primary);border-radius:var(--radius-panel);box-shadow:0 4px 20px rgba(20,34,51,0.04)}.login-card>.muted{margin:8px 0 24px}.secret{display:flex;position:relative}.secret input{padding-right:74px}.secret button{position:absolute;right:1px;top:1px;min-height:42px}.field-error{min-height:26px;color:var(--danger);font-size:.85rem;margin-top:6px;white-space:pre-wrap}.login-card .field-error{margin-bottom:16px}.workspace{display:grid;grid-template-columns:216px minmax(0,1fr);max-width:1600px;margin:auto}.sidebar{padding:30px 16px;border-right:1px solid var(--border);min-height:calc(100vh - 88px)}.sidebar h2{margin-bottom:20px;padding-left:12px}.sidebar .eyebrow{padding-left:12px}.sidebar nav{display:grid;gap:6px}.department-button{text-align:left;display:flex;align-items:center;gap:12px;padding:12px;border:1px solid transparent;border-radius:var(--radius-control);background:transparent;font-size:.88rem;width:100%}.department-button:hover{background:var(--surface)}.department-button[aria-current=true]{background:var(--surface);border-color:#b4c8dc;color:var(--primary);font-weight:600;box-shadow:0 1px 4px rgba(30,73,118,0.08)}.department-button .code{font:600 .82rem var(--font-mono);min-width:34px;padding:5px 0;border-right:2px solid var(--border)}.department-button[aria-current=true] .code{border-color:var(--accent);color:var(--accent)}.sidebar-note{font-size:.75rem;color:var(--muted);padding:24px 12px}.content{padding:26px 32px;min-width:0}.breadcrumb{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.78rem;color:var(--muted);min-height:30px;margin-bottom:16px}.breadcrumb button{background:none;border:0;color:var(--primary);padding:4px}.breadcrumb button:hover{text-decoration:underline}.section-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:16px 0 24px}.choose-controls{display:flex;align-items:center;gap:12px;margin:12px 0 16px;padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-panel);box-shadow:0 1px 3px rgba(20,34,51,0.04);flex-wrap:wrap}.choose-controls .line-select,.choose-controls .machine-sort-control{display:inline-flex;align-items:center;gap:8px;margin:0;flex:0 1 auto}.choose-controls label{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:600;color:var(--ink);white-space:nowrap;margin:0;cursor:pointer}.choose-controls .control-icon{width:15px;height:15px;color:var(--primary);flex-shrink:0}.choose-controls-divider{width:1px;height:22px;background:var(--border);flex-shrink:0}.choose-controls select{min-height:36px;height:36px;padding:4px 28px 4px 10px;font-size:.82rem;border:1px solid var(--border);border-radius:var(--radius-control);background-color:var(--surface);color:var(--ink);appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23576b7e' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;background-size:12px 12px;cursor:pointer;transition:border-color .16s ease,background-color .16s ease,box-shadow .16s ease}.choose-controls select:hover:not(:disabled){border-color:var(--primary);background-color:var(--surfaceMuted)}.choose-controls select:focus-visible{border-color:var(--primary);box-shadow:0 0 0 3px var(--selection);outline:none}.choose-controls select:disabled{background-color:var(--surfaceMuted);color:var(--muted);border-color:var(--border);cursor:not-allowed;opacity:.7}.choose-controls .line-select select{min-width:170px;max-width:260px}.choose-controls .machine-sort-control select{min-width:200px;max-width:270px}.machine-count-badge{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:.74rem;font-weight:600;color:var(--muted);background:var(--surfaceMuted);border:1px solid var(--border);border-radius:999px;padding:3px 10px;line-height:1.4;white-space:nowrap}.machine-count-badge[hidden]{display:none !important}@media(max-width:780px){.choose-controls{flex-direction:column;align-items:stretch;gap:10px;padding:12px;margin:10px 0 14px}.choose-controls-divider{display:none}.choose-controls .line-select,.choose-controls .machine-sort-control{display:flex;flex-direction:column;align-items:stretch;gap:5px;width:100%;max-width:none}.choose-controls .line-select select,.choose-controls .machine-sort-control select{width:100%;max-width:none;min-height:40px;height:40px}.machine-count-badge{margin-left:0;align-self:flex-start}}.line-select{max-width:380px;margin:16px 0}.machine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));grid-auto-rows:max-content;align-content:start;align-items:start;gap:14px}.machine-card{text-align:left;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:8px;padding:14px 16px;min-height:auto;display:flex;flex-direction:column;gap:4px;box-shadow:0 1px 3px rgba(20,34,51,.04);transition:all .18s ease}.machine-card:hover{background:var(--surface);border-color:var(--primary);border-left-color:var(--primaryStrong);transform:translateY(-2px);box-shadow:0 4px 14px rgba(30,73,118,.12)}.machine-card strong{display:block;margin:3px 0 6px;font-size:.92rem;font-weight:600;color:var(--ink);line-height:1.35;word-break:break-word}.machine-card small{display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--muted);font-weight:500;margin-top:auto;padding-top:6px;border-top:1px dashed var(--border)}.machine-card:hover small{color:var(--primary)}.machine-card .mono{display:inline-block;font-size:.74rem;font-weight:600;color:var(--primary);background:var(--selection);padding:2px 7px;border-radius:4px;width:fit-content;letter-spacing:.02em}.machine-card-head{display:flex;align-items:center;gap:6px}.machine-card .order-badge{display:inline-block;font-size:.7rem;font-weight:600;color:var(--primaryStrong);background:var(--surfaceMuted);padding:1px 6px;border-radius:4px;font-family:var(--font-mono);border:1px solid var(--border);letter-spacing:.02em}.totals{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius-panel);background:var(--surface);margin-bottom:24px}.total{padding:16px 24px;flex:1;border-right:1px solid var(--border)}.total:last-child{border:0}.total strong{font:500 1.7rem var(--font-display);margin-right:10px}.total span{font-size:.82rem;color:var(--muted)}.total.attention strong{color:var(--danger)}.register{border:1px solid var(--border);border-radius:var(--radius-panel);background:var(--surface);overflow:clip}.filterbar{display:grid;grid-template-columns:minmax(180px,1fr) 165px 165px;align-items:end;gap:12px;padding:20px}input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-decoration,input[type="search"]::-webkit-search-results-button,input[type="search"]::-webkit-search-results-decoration{-webkit-appearance:none;appearance:none;display:none !important}input[type="search"]::-ms-clear,input[type="search"]::-ms-reveal{display:none !important;width:0;height:0}.search-control{position:relative;display:flex;align-items:center}.search-control input{padding-right:36px !important}.clear-button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:26px;height:26px;min-width:26px;min-height:26px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:50%;font-size:18px;line-height:1;color:var(--muted);cursor:pointer;padding:0;z-index:3;user-select:none;-webkit-user-select:none;transition:background .15s ease,color .15s ease,transform .12s ease}.clear-button:hover:not(:disabled){background:var(--selection);color:var(--primary)}.clear-button:active:not(:disabled){transform:translateY(-50%) scale(.92)}.clear-button:focus-visible{outline:2px solid var(--primary);outline-offset:1px}.selection-bar{min-height:66px;padding:10px 20px;display:flex;align-items:center;gap:16px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surfaceMuted);flex-wrap:wrap}.checkbox-label{display:flex;align-items:center;gap:8px;margin:0;font-weight:400;font-size:.8rem}.selection-bar>span{font-size:.78rem;color:var(--muted);margin-left:auto}.selection-bar .button{min-height:38px;font-size:.8rem}.list-status{font-size:.8rem;color:var(--muted);min-height:32px;padding:6px 20px}.groups{min-height:280px}.group{border-top:1px solid var(--border)}.group summary{display:flex;align-items:center;gap:16px;padding:16px 20px;list-style:none;background:var(--surface)}.group summary::-webkit-details-marker{display:none}.group summary:after{content:'＋';color:var(--muted);font-size:18px}.group[open] summary:after{content:'−'}.group summary:hover{background:var(--surfaceMuted)}.part-image{width:52px;height:52px;flex-shrink:0;display:grid;place-items:center;border:1px solid var(--border);border-radius:8px;color:var(--muted);background:var(--surfaceMuted);font-family:var(--font-mono);font-size:.72rem;overflow:hidden}.part-image img{width:100%;height:100%;object-fit:contain}.part-info{flex:1;min-width:0;overflow-wrap:anywhere}.part-info strong{font-size:.95rem}.part-info p{font-size:.83rem;color:var(--muted)}.part-info small{font: .73rem var(--font-mono);margin-top:4px}.group-quantity{text-align:right;font-size:.8rem;min-width:70px}.group-quantity strong{font:500 1.25rem var(--font-display);display:block}.summary-label-preview{display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden;white-space:nowrap}.summary-label-preview .label-tag{flex-shrink:0;font-size:.72rem;padding:1px 5px;border-radius:4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--surfaceMuted);color:var(--ink);border:1px solid var(--border);line-height:1.4}.summary-label-preview .label-more{flex-shrink:0;font-size:.7rem;font-weight:600;padding:1px 5px;border-radius:4px;background:var(--selection);color:var(--primary);border:1px solid #b4c8dc;line-height:1.4}.group-tools{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:7px 20px 7px 88px;border-top:1px solid var(--border);background:var(--surfaceMuted)}.group-tools>span{margin-right:auto;font-size:.72rem;color:var(--muted)}.add-label-button{min-height:30px;padding:3px 10px;font-size:.75rem;background:var(--surface)}.label-list{padding:0 20px 12px 88px}.label-row{display:grid;grid-template-columns:24px minmax(110px,1fr) minmax(170px,1.4fr) minmax(160px,1.2fr) auto;gap:12px;align-items:center;border-top:1px solid var(--border);padding:15px 0}.label-tag{display:inline-block;font:.8rem var(--font-mono);border:1px solid var(--border);padding:2px 6px;background:var(--surfaceMuted);overflow-wrap:anywhere}.label-row small{font-size:.75rem;margin-top:4px}.label-row .button{padding:6px 8px;min-height:36px;font-size:.76rem}.badge{display:inline-block;padding:3px 8px;border-radius:5px;background:var(--surfaceMuted);color:var(--muted);font-size:.75rem}.badge.overdue,.badge.today{background:var(--dangerSurface);color:var(--danger)}.badge.soon{background:var(--warningSurface);color:var(--warning)}.badge.normal{background:var(--selection);color:var(--primary)}.pagination{border-top:1px solid var(--border);padding:16px 20px;display:flex;gap:16px;align-items:center;justify-content:space-between;font-size:.8rem;flex-wrap:wrap;min-height:80px}.page-size{display:flex;align-items:center;gap:8px;font-weight:400;margin:0}.page-size select{width:74px}.empty{padding:48px 24px;text-align:center;color:var(--muted)}.empty h3{font-size:1.1rem;color:var(--ink);margin-bottom:8px}.empty .button{margin-top:16px}.loading{padding:24px;min-height:80px;color:var(--primary)}.error-banner{padding:16px;background:var(--dangerSurface);color:var(--danger);border:1px solid var(--danger);border-radius:8px;margin-bottom:16px}.error-banner .button{margin-left:12px}
 .machine-card-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:5px 0 7px;padding:7px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);min-height:48px}.machine-stat{min-width:0;text-align:center;border-right:1px solid var(--border)}.machine-stat:last-child{border-right:0}.machine-stat dt{font-size:.66rem;line-height:1.2;color:var(--muted);white-space:nowrap}.machine-stat dd{margin:0;font:600 .94rem/1.25 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--ink)}.machine-stat.attention.needs-attention{background:var(--warningSurface)}.machine-stat.attention.needs-attention dd{color:var(--danger)}.machine-card-stats[aria-busy="true"] .machine-stat-value{color:var(--muted)}.machine-stats-error{grid-column:1/-1;min-height:44px;display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 10px;border:1px solid var(--warning);border-radius:var(--radius-control);background:var(--warningSurface);color:var(--warning);font-size:.76rem}.machine-stats-error .button{min-height:30px;padding:3px 10px;font-size:.74rem}
 dialog{border:1px solid var(--border);border-radius:var(--radius-panel);padding:0;background:var(--surface);color:var(--ink);width:min(var(--dialog-width),calc(100% - 32px));max-height:calc(100dvh - 32px);box-shadow:0 24px 80px #18313d40;overflow:auto;scrollbar-gutter:stable}dialog::backdrop{background:#18313d70}dialog form{display:flex;flex-direction:column;max-height:calc(100dvh - 34px)}.dialog-header{padding:20px 24px;display:flex;gap:16px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}.dialog-header h2{font-size:1.15rem}.dialog-body{padding:24px;overflow:auto;min-height:0;scrollbar-gutter:stable}.dialog-footer{padding:16px 24px;display:flex;gap:12px;align-items:center;justify-content:flex-end;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin:18px 0}.field.full{grid-column:1/-1}.field small{font-size:.76rem}.part-choice{padding:16px;background:var(--surfaceMuted);border:1px solid var(--border);border-radius:8px;margin:16px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.part-choice p{flex:1;min-width:150px}.label-editor{padding:12px;border:1px solid var(--border);border-radius:8px;display:grid;grid-template-columns:1fr 90px 1fr 1fr auto;gap:10px;margin:12px 0;align-items:start}.label-editor label{font-size:.75rem}.label-editor input{font-size:.85rem;padding:9px}.label-editor .button{margin-top:27px;padding:8px;min-width:38px}.label-editor .field-error:empty{display:none}.review{padding:16px;background:var(--selection);border:1px solid var(--primary);border-radius:8px;margin-top:16px}.review ul{margin-bottom:0;padding-left:20px}.review li{margin-top:8px;overflow-wrap:anywhere}.review p{font-size:.85rem}.part-results{display:grid;gap:8px;min-height:200px}.part-result{text-align:left;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--surface)}.part-result:hover{background:var(--selection);border-color:var(--primary)}.part-result strong{display:block}.part-result small{font-size:.78rem}.data-fields{display:grid;grid-template-columns:160px 1fr;gap:8px 16px;margin:16px 0}.data-fields dt{color:var(--muted);font-size:.85rem}.data-fields dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.timeline{padding:0;margin:0;list-style:none}.timeline li{position:relative;padding:0 0 18px 20px;border-left:2px solid var(--border);display:grid;gap:2px}.timeline li:before{content:'';position:absolute;width:8px;height:8px;border-radius:50%;left:-5px;top:6px;background:var(--primary);box-shadow:0 0 0 3px var(--selection)}.timeline li:last-child{padding-bottom:0}.timeline small{font-size:.75rem;color:var(--muted)}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:8px;background:var(--ink);color:var(--onPrimary);max-width:calc(100% - 32px);z-index:10;font-size:.9rem}#discard{max-width:460px}
 .sidebar-main{min-height:0}
@@ -416,7 +418,7 @@ dialog{border:1px solid var(--border);border-radius:var(--radius-panel);padding:
   .filterbar{padding:8px 14px;gap:12px;align-items:flex-end;grid-template-columns:minmax(240px,1fr) 140px 140px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border)}
   .filterbar label{font-size:.72rem;margin-bottom:3px;font-weight:600;color:var(--muted)}
   .filterbar input,.filterbar select{min-height:34px;padding:4px 10px;font-size:.82rem;border-radius:6px}
-  .filterbar .clear-button{min-width:26px;min-height:26px;top:4px;right:4px;font-size:15px}
+  .filterbar .search-control input{padding-right:30px !important}.filterbar .clear-button{width:22px;height:22px;min-width:22px;min-height:22px;font-size:15px;right:5px;top:50%;transform:translateY(-50%)}.filterbar .clear-button:hover:not(:disabled){background:var(--selection);color:var(--primary)}.filterbar .clear-button:active:not(:disabled){transform:translateY(-50%) scale(.92)}
   #refresh .refresh-icon{transition:transform .24s cubic-bezier(0.16,1,0.3,1);flex-shrink:0}
   #refresh:hover:not(:disabled) .refresh-icon{transform:rotate(60deg)}
   #refresh[aria-busy="true"] .refresh-icon{animation:spin .75s linear infinite}
@@ -586,25 +588,45 @@ dialog#editor.mode-add #editor-fields{flex:1;min-height:0;display:flex;flex-dire
 .batch-remove-summary strong{font-size:.84rem;color:var(--danger);display:block;margin-bottom:6px}
 .batch-remove-summary ul{margin:0;padding-left:18px;font-size:.78rem;color:var(--ink)}
 .batch-remove-summary li{margin-bottom:3px}
-.multi-edit-list{display:grid;align-content:start;gap:5px;flex:1;min-height:0;margin:0;overflow-y:auto;padding:6px 4px 8px 0;scrollbar-gutter:stable}
-.multi-edit-head,.multi-edit-row{display:grid;grid-template-columns:32px minmax(160px,1.35fr) 85px minmax(145px,1fr);gap:8px;align-items:start}
-.multi-edit-head.has-manual-expiry,.multi-edit-list.has-manual-expiry .multi-edit-row{grid-template-columns:32px minmax(150px,1.25fr) 80px minmax(135px,1fr) minmax(135px,1fr)}
-.multi-edit-head{padding:6px 14px 5px 10px;border-bottom:1px solid var(--border);font-size:.72rem;font-weight:600;color:var(--muted);flex-shrink:0}
-.multi-edit-row{padding:5px 10px;border:1px solid var(--border);border-radius:5px;background:var(--surface);transition:background .15s,border-color .15s}
-.multi-edit-row:hover{background:var(--surfaceMuted);border-color:#b4c8dc}
-.multi-edit-row input{font-size:.82rem;padding:5px 8px;min-height:34px}
-.multi-edit-row .field-error:empty{display:none}
-.multi-edit-row .row-num{font:600 .75rem var(--font-mono);display:flex;align-items:center;justify-content:center;height:34px;color:var(--muted)}
-.bulk-edit-shared{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(220px,.7fr);gap:8px 16px;padding-bottom:12px;flex-shrink:0}
-.bulk-edit-shared>.form-grid{grid-column:1/-1;margin:0}
-.bulk-edit-shared>.actions{grid-column:1/-1;margin:0}
-.bulk-edit-shared textarea{min-height:64px;height:64px}
-dialog#editor.mode-bulk-edit{width:min(1080px,calc(100vw - 24px));height:min(94vh,820px);max-height:calc(100dvh - 24px);overflow:hidden}
+/* Bulk Edit Redesigned & Compact */
+dialog#editor.mode-bulk-edit{width:min(1080px,calc(100vw - 24px));height:min(94vh,840px);max-height:calc(100dvh - 20px);overflow:hidden}
 dialog#editor.mode-bulk-edit form{height:100%;max-height:100%}
-dialog#editor.mode-bulk-edit .dialog-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;padding:16px 20px}
+dialog#editor.mode-bulk-edit .dialog-header{padding:12px 20px}
+dialog#editor.mode-bulk-edit .dialog-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;padding:10px 18px;gap:6px}
 dialog#editor.mode-bulk-edit #editor-fields{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+dialog#editor.mode-bulk-edit .dialog-footer{padding:10px 20px}
+
+.bulk-edit-panel{display:flex;flex-direction:column;gap:6px;padding:8px 12px;background:var(--surfaceMuted);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;flex-shrink:0}
+.bulk-edit-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.bulk-part-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);padding:3px 8px;border-radius:6px;font-size:.8rem;min-width:0}
+.bulk-part-chip .chip-label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.bulk-part-chip #chosen-part{font-size:.84rem;font-weight:700;color:var(--primary);font-family:var(--font-mono, monospace);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.bulk-part-chip .mini-btn{min-height:24px;padding:1px 7px;font-size:.72rem}
+
+.bulk-date-sync-group{display:inline-flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-left:auto}
+.bulk-date-sync-group .field{margin:0}
+.bulk-date-sync-group label{font-size:.7rem;font-weight:600;color:var(--muted);margin-bottom:2px;display:block}
+.bulk-date-sync-group input,.bulk-date-sync-group select{height:28px;min-height:28px;padding:2px 6px;font-size:.78rem;border-radius:4px}
+.bulk-sync-btn{height:28px;min-height:28px;padding:0 10px;font-size:.75rem;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;font-weight:600;border-color:var(--primary);color:#ffffff;background:var(--primary);border-radius:4px;cursor:pointer;transition:all .15s}
+.bulk-sync-btn:hover{background:var(--primary-hover,#114c67)}
+
+.bulk-edit-meta-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bulk-edit-meta-row .field{margin:0}
+.bulk-edit-meta-row label{font-size:.7rem;font-weight:600;color:var(--ink-secondary,#536a78);margin-bottom:2px;display:block}
+.bulk-edit-meta-row input{height:30px;min-height:30px;padding:2px 8px;font-size:.8rem;border-radius:4px;width:100%}
+.bulk-edit-meta-row .field-error:empty{display:none}
+
+.multi-edit-head{padding:6px 10px;background:var(--surfaceMuted);border:1px solid var(--border);border-bottom:2px solid var(--border);border-radius:6px 6px 0 0;font-size:.72rem;font-weight:700;color:var(--muted);flex-shrink:0;z-index:2}
+.multi-edit-list{display:grid;align-content:start;gap:3px;flex:1;min-height:0;margin:0;overflow-y:auto;padding:3px 2px 6px 0;scrollbar-gutter:stable}
+.multi-edit-head,.multi-edit-row{display:grid;grid-template-columns:32px minmax(160px,1.35fr) 85px minmax(145px,1fr);gap:8px;align-items:center}
+.multi-edit-head.has-manual-expiry,.multi-edit-list.has-manual-expiry .multi-edit-row{grid-template-columns:32px minmax(150px,1.25fr) 80px minmax(135px,1fr) minmax(135px,1fr)}
+.multi-edit-row{padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);transition:all .15s ease}
+.multi-edit-row:hover{background:var(--selection);border-color:#93c5fd}
+.multi-edit-row input{font-size:.8rem;padding:3px 6px;min-height:30px}
+.multi-edit-row .field-error:empty{display:none}
+.multi-edit-row .row-num{font:600 .75rem var(--font-mono);display:flex;align-items:center;justify-content:center;height:28px;color:var(--muted);background:var(--surfaceMuted);border-radius:4px}
 @media(min-width:781px){.multi-edit-row label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}}
-@media(max-width:780px){dialog#editor.mode-bulk-edit{height:calc(100dvh - 16px)}dialog#editor.mode-bulk-edit .dialog-body{overflow-y:auto}.mode-bulk-edit #editor-fields{display:block;overflow:visible}.bulk-edit-shared{grid-template-columns:1fr}.bulk-edit-shared>.form-grid,.bulk-edit-shared>.actions{grid-column:1}.multi-edit-head{display:none}.multi-edit-list{display:grid;overflow:visible;padding:0}.multi-edit-row,.multi-edit-list.has-manual-expiry .multi-edit-row{grid-template-columns:32px 1fr 84px;gap:8px;padding:10px}.multi-edit-row .row-num{grid-row:1;margin-top:19px}.multi-edit-row>.field:nth-of-type(1){grid-column:2}.multi-edit-row>.field:nth-of-type(2){grid-column:3}.multi-edit-row>.field:nth-of-type(n+3){grid-column:2/-1}.multi-edit-row label{font-size:.72rem;margin-bottom:2px}}
+@media(max-width:780px){dialog#editor.mode-bulk-edit{height:calc(100dvh - 16px)}dialog#editor.mode-bulk-edit .dialog-body{overflow-y:auto}.mode-bulk-edit #editor-fields{display:block;overflow:visible}.bulk-edit-topbar{flex-direction:column;align-items:stretch;gap:6px}.bulk-part-chip{max-width:100%}.bulk-date-sync-group{margin-left:0;width:100%;justify-content:space-between}.bulk-sync-btn{width:100%;justify-content:center;margin-top:2px}.bulk-edit-meta-row{grid-template-columns:1fr;gap:6px}.multi-edit-head{display:none}.multi-edit-list{display:grid;overflow:visible;padding:0}.multi-edit-row,.multi-edit-list.has-manual-expiry .multi-edit-row{grid-template-columns:32px 1fr 84px;gap:8px;padding:8px}.multi-edit-row .row-num{grid-row:1;margin-top:19px}.multi-edit-row>.field:nth-of-type(1){grid-column:2}.multi-edit-row>.field:nth-of-type(2){grid-column:3}.multi-edit-row>.field:nth-of-type(n+3){grid-column:2/-1}.multi-edit-row label{font-size:.72rem;margin-bottom:2px}}
 .edit-part-labels-button, .edit-part-button{min-height:30px;padding:3px 10px;font-size:.75rem;background:var(--surface)}
 .mini-btn{min-height:26px;padding:2px 8px;font-size:.72rem;border-radius:4px}
 
@@ -693,7 +715,7 @@ dialog#editor.mode-bulk-edit #editor-fields{flex:1;min-height:0;display:flex;fle
           <div class="section-heading"><div><p id="machine-code" class="eyebrow mono"></p><h1 id="machine-name" tabindex="-1"></h1><p id="machine-context" class="muted"></p></div><div class="actions"><button id="refresh" class="button outline" title="รีเฟรชข้อมูลอุปกรณ์ของเครื่องจักรนี้" data-ready="true" disabled><svg class="refresh-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><polyline points="3 21 3 16 8 16"/></svg><span>รีเฟรช</span></button><button id="back-machines" class="button outline" data-ready="true" disabled>เลือกเครื่องจักร</button><button id="add" class="button primary" data-ready="true" disabled>+ เพิ่มอุปกรณ์</button></div></div>
           <div id="totals" class="totals"></div>
           <div class="register">
-            <div class="filterbar"><div class="search-field"><label for="query">ค้นหาในเครื่องจักร</label><div class="search-control"><input id="query" type="search" placeholder="Part number, Description หรือ Label"><button id="clear-query" class="clear-button" aria-label="ล้างคำค้นหา" hidden data-ready="true" disabled>×</button></div></div><div><label for="status">สถานะอายุ</label><select id="status"><option value="">ทุกสถานะ</option><option value="overdue">เกินกำหนด</option><option value="today">ครบกำหนดวันนี้</option><option value="soon">ใกล้ครบกำหนด</option><option value="normal">ปกติ</option><option value="unknown">ยังไม่ทราบกำหนด</option></select></div><div><label for="history-view">ข้อมูลที่แสดง</label><select id="history-view"><option value="">ติดตั้งปัจจุบัน</option><option value="all">รวมรอบที่ผ่านมา</option></select></div></div>
+            <div class="filterbar"><div class="search-field"><label for="query">ค้นหาในเครื่องจักร</label><div class="search-control"><input id="query" type="search" placeholder="Part number, Description หรือ Label"><button type="button" id="clear-query" class="clear-button" aria-label="ล้างคำค้นหา" title="ล้างคำค้นหา" hidden>×</button></div></div><div><label for="status">สถานะอายุ</label><select id="status"><option value="">ทุกสถานะ</option><option value="overdue">เกินกำหนด</option><option value="today">ครบกำหนดวันนี้</option><option value="soon">ใกล้ครบกำหนด</option><option value="normal">ปกติ</option><option value="unknown">ยังไม่ทราบกำหนด</option></select></div><div><label for="history-view">ข้อมูลที่แสดง</label><select id="history-view"><option value="">ติดตั้งปัจจุบัน</option><option value="all">รวมรอบที่ผ่านมา</option></select></div></div>
             <div class="selection-bar"><label class="checkbox-label"><input id="select-page" type="checkbox">เลือกรายการปัจจุบันในหน้านี้</label><span id="selected-count">เลือก 0 รายการ</span><button id="replace" class="button outline" disabled>บันทึกการเปลี่ยนพร้อมกัน</button><button id="remove-selected" class="button outline" disabled>ถอดออกพร้อมกัน</button></div>
             <p id="list-status" class="list-status" role="status"></p>
             <div id="groups" class="groups" aria-busy="false"></div>
@@ -712,7 +734,7 @@ dialog#editor.mode-bulk-edit #editor-fields{flex:1;min-height:0;display:flex;fle
   </main>
   <dialog id="editor" aria-labelledby="editor-title"><form id="editor-form" novalidate><header class="dialog-header"><div><p class="eyebrow">อุปกรณ์ประจำเครื่องจักร</p><h2 id="editor-title"></h2></div><button type="button" id="editor-close" class="modal-close-btn" aria-label="ปิดหน้าต่าง" data-ready="true" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></header><div class="dialog-body"><p id="editor-context" class="muted"></p><div id="editor-fields"></div><div id="editor-error" class="field-error" role="alert" tabindex="-1"></div><div id="review" class="review" hidden></div></div><footer class="dialog-footer"><button type="button" id="editor-retry-new" class="button ghost" hidden data-ready="true" disabled>ลองเป็นคำสั่งใหม่</button><button type="button" id="editor-cancel" class="button outline" data-ready="true" disabled>ยกเลิก</button><button id="save" class="button primary" type="submit">บันทึก</button></footer></form></dialog>
   <dialog id="legacy-import" aria-labelledby="legacy-import-title"><header class="dialog-header"><div><p class="eyebrow">นำเข้าข้อมูล</p><h2 id="legacy-import-title">นำเข้าจากฐานข้อมูลเดิม (.xls / .xlsx / .csv)</h2></div><button type="button" id="legacy-import-close" class="modal-close-btn" aria-label="ปิดหน้าต่างนำเข้า"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></header><div class="dialog-body"><input type="file" id="legacy-file-input" accept=".xls,.xlsx,.csv,.tsv,.json" hidden><div id="legacy-dropzone" class="legacy-dropzone" role="button" tabindex="0" aria-label="เลือกไฟล์เพื่อนำเข้า"><div class="dropzone-content"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="dropzone-icon" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg><p class="dropzone-title">คลิกเพื่อเลือกไฟล์ หรือ ลากไฟล์มาวางที่นี่</p><p class="dropzone-hint">รองรับไฟล์ <strong>.xls</strong> (เช่น PRS224.xls), <strong>.xlsx</strong> หรือ <strong>.csv</strong></p></div></div><div id="legacy-preview-section" hidden><div class="legacy-file-bar"><div class="legacy-file-info"><span class="file-icon" aria-hidden="true">📄</span><div><strong id="legacy-filename"></strong><small id="legacy-filesize" class="muted"></small></div></div><button type="button" id="legacy-change-file" class="button outline mini-btn">เลือกไฟล์ใหม่</button></div><div class="legacy-preview-summary"><span id="legacy-item-count" class="badge normal"></span><span id="legacy-match-summary" class="muted"></span><span id="legacy-unmatched-badge" class="badge soon" hidden></span></div><div id="legacy-matched-only-wrap" class="legacy-filter-wrap" hidden><label class="checkbox-label"><input type="checkbox" id="legacy-matched-only" checked><span>นำเข้าเฉพาะรายการที่ตรงทะเบียน (ข้ามรายการที่ไม่พบในทะเบียน)</span></label></div><div class="legacy-table-wrap"><table class="legacy-preview-table"><thead><tr><th>#</th><th>Part Number</th><th>ชื่อ Part ในระบบ</th><th>Label</th><th>วันติดตั้ง</th><th>จำนวน</th><th>สถานะ</th></tr></thead><tbody id="legacy-preview-body"></tbody></table></div><p id="legacy-table-hint" class="muted footnote" style="margin-top:6px;margin-bottom:8px;" hidden></p><div id="legacy-progress-container" class="legacy-progress-container" hidden><div class="legacy-progress-header"><span id="legacy-progress-title" class="legacy-progress-title">กำลังนำเข้าข้อมูลสู่ระบบ…</span><span id="legacy-progress-percent" class="legacy-progress-percent">0%</span></div><div class="legacy-progress-bar"><div id="legacy-progress-fill" class="legacy-progress-fill" style="width: 0%;"></div></div><p id="legacy-progress-status" class="legacy-progress-status muted"></p></div><div id="legacy-import-mode-wrap" class="legacy-mode-wrap" hidden><span class="legacy-mode-label">รูปแบบการนำเข้าสู่ตาราง:</span><div class="legacy-mode-options"><label><input type="radio" name="legacy-mode" value="replace" checked> ล้างตารางเดิมและแทนที่ทั้งหมด</label><label><input type="radio" name="legacy-mode" value="append"> เพิ่มต่อท้ายรายการเดิมในตาราง</label></div></div></div><div id="legacy-import-error" class="field-error" role="alert"></div></div><footer class="dialog-footer"><button type="button" id="legacy-import-cancel" class="button outline">ยกเลิก</button><button type="button" id="legacy-import-to-editor" class="button outline" hidden disabled>📝 ใส่ลงตารางแก้ไข</button><button type="button" id="legacy-import-apply" class="button primary" disabled>🚀 บันทึกเข้าเครื่องจักรทันที</button></footer></dialog>
-  <dialog id="picker" aria-labelledby="picker-title"><header class="dialog-header"><div><p class="eyebrow">ทะเบียนอุปกรณ์</p><h2 id="picker-title">เลือกอุปกรณ์จาก Part list</h2></div><div class="actions"><button type="button" id="part-refresh" class="button ghost" title="รีเฟรชข้อมูล Part จากชีต" data-ready="true" disabled style="padding:4px 10px;font-size:.78rem">รีเฟรช Part</button><button id="picker-close" class="modal-close-btn" aria-label="ปิดรายการ Part" data-ready="true" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div></header><div class="dialog-body"><label for="part-query">ค้นหา Part</label><div class="search-control"><input id="part-query" type="search" placeholder="ID, Part number, Description หรือ Brand"><button id="clear-part-query" class="clear-button" aria-label="ล้างคำค้นหา Part" hidden data-ready="true" disabled>×</button></div><p id="picker-status" class="list-status" role="status"></p><div id="part-results" class="part-results"></div><button id="part-retry" class="button outline" hidden data-ready="true" disabled>ลองใหม่</button></div><footer class="dialog-footer"><button id="part-previous" class="button outline" data-ready="true" disabled>ก่อนหน้า</button><span id="part-page"></span><button id="part-next" class="button outline" data-ready="true" disabled>ถัดไป</button></footer></dialog>
+  <dialog id="picker" aria-labelledby="picker-title"><header class="dialog-header"><div><p class="eyebrow">ทะเบียนอุปกรณ์</p><h2 id="picker-title">เลือกอุปกรณ์จาก Part list</h2></div><div class="actions"><button type="button" id="part-refresh" class="button ghost" title="รีเฟรชข้อมูล Part จากชีต" data-ready="true" disabled style="padding:4px 10px;font-size:.78rem">รีเฟรช Part</button><button id="picker-close" class="modal-close-btn" aria-label="ปิดรายการ Part" data-ready="true" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div></header><div class="dialog-body"><label for="part-query">ค้นหา Part</label><div class="search-control"><input id="part-query" type="search" placeholder="ID, Part number, Description หรือ Brand"><button type="button" id="clear-part-query" class="clear-button" aria-label="ล้างคำค้นหา Part" title="ล้างคำค้นหา Part" hidden>×</button></div><p id="picker-status" class="list-status" role="status"></p><div id="part-results" class="part-results"></div><button id="part-retry" class="button outline" hidden data-ready="true" disabled>ลองใหม่</button></div><footer class="dialog-footer"><button id="part-previous" class="button outline" data-ready="true" disabled>ก่อนหน้า</button><span id="part-page"></span><button id="part-next" class="button outline" data-ready="true" disabled>ถัดไป</button></footer></dialog>
   <dialog id="detail" aria-labelledby="detail-title"><header class="dialog-header"><div><p class="eyebrow">ทะเบียนการติดตั้ง</p><h2 id="detail-title">รายละเอียดและประวัติ</h2></div><button id="detail-close" class="modal-close-btn" aria-label="ปิดรายละเอียด" data-ready="true" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></header><div id="detail-body" class="dialog-body"></div></dialog>
   <dialog id="discard" aria-labelledby="discard-title"><div class="dialog-body"><h2 id="discard-title">ปิดโดยไม่บันทึก?</h2><p>ข้อมูลที่แก้ไขในฟอร์มนี้ยังไม่ได้บันทึก</p></div><footer class="dialog-footer"><button id="keep-editing" class="button outline" autofocus data-ready="true" disabled>กลับไปแก้ไข</button><button id="discard-changes" class="button danger" data-ready="true" disabled>ปิดโดยไม่บันทึก</button></footer></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
@@ -1487,6 +1509,13 @@ if (typeof module!=='undefined') module.exports=BomCore;
     toggleManual();
     updateRowCountUI();
   }
+  function isAdmin() {
+    if (state && state.reference && state.reference.role === 'admin') return true;
+    const user = window.currentUser || (typeof currentUser !== 'undefined' ? currentUser : null);
+    if (user && (user.role === 'admin' || user.permissions?.bom === 'admin')) return true;
+    if (typeof window !== 'undefined' && typeof window.isAdmin === 'function' && window.isAdmin()) return true;
+    return false;
+  }
   function openEditor(kind,rows=[],presetPart=null){
     state.editor = {
       kind,
@@ -1527,25 +1556,55 @@ if (typeof module!=='undefined') module.exports=BomCore;
       root.append(el('p', 'footnote', 'ถ้าเลือก Part ใหม่ จะใช้ Part นั้นกับทุกรายการที่เลือก'));
       root.append(commonDateFields(row, kind, rows.length > 1));
     }
-    if(kind === 'edit'){
+        if(kind === 'edit'){
+      const currentPartNumbers = [...new Set(rows.map(r => r.part?.['Part number'] || r.PartID).filter(Boolean))];
       if(rows.length > 1){
-        $('editor-title').textContent = 'แก้ไข Label ใน Part ' + (state.editor.part?.['Part number'] || '');
+        const partNum = state.editor.part?.['Part number'] || (currentPartNumbers.length === 1 ? currentPartNumbers[0] : '');
+        $('editor-title').textContent = 'แก้ไข Label ใน Part ' + partNum;
         $('editor-context').textContent = state.result.machine.MachineCode + ' · แก้ไขข้อมูล ' + rows.length + ' รายการพร้อมกัน';
-        const shared = el('section', 'bulk-edit-shared');
-        shared.append(commonDateFields(rows[0], kind, true));
-        const syncBar = el('div', 'actions');
-        syncBar.append(button('ใช้วันที่ด้านบนกับทุกรายการ', () => {
+
+        const panel = el('section', 'bulk-edit-panel');
+
+        // Row 1: Part Info + Inline Date Sync Strip
+        const topBar = el('div', 'bulk-edit-topbar');
+
+        const partChip = el('div', 'bulk-part-chip');
+        const partLabel = el('span', 'chip-label', 'Part');
+        const chosenPart = el('strong', 'chip-value', currentPartNumbers.length === 1 ? currentPartNumbers[0] : 'ใช้ Part เดิมของแต่ละรายการ');
+        chosenPart.id = 'chosen-part';
+        const changePartBtn = button('เปลี่ยน Part', () => openPicker({type: 'edit'}), 'button outline mini-btn');
+        partChip.append(partLabel, chosenPart, changePartBtn);
+
+        const syncStrip = el('div', 'bulk-date-sync-group');
+        const defaultDate = rows[0]?.InstalledAt || '';
+        const fInstShared = field('InstalledAt', 'วันติดตั้งเริ่มต้น', defaultDate, 'date');
+        const fDueShared = field('DueMode', 'กำหนดวันหมดอายุ', rows[0]?.DueMode || 'PART_LIFE', 'select', [['PART_LIFE', 'ตามอายุจาก Part list'], ['MANUAL', 'ระบุวันหมดอายุเอง']]);
+        const fManualExpShared = field('ManualExpiryDate', 'วันหมดอายุที่ระบุเอง', rows[0]?.ManualExpiryDate || '', 'date');
+
+        const syncBtn = button('⚡ ปรับใช้วันที่กับทุกรายการ', () => {
           rows.forEach((_, i) => {
             if($('f-InstalledAt-' + i)) $('f-InstalledAt-' + i).value = fv('InstalledAt');
             if($('f-ManualExpiryDate-' + i)) $('f-ManualExpiryDate-' + i).value = fv('ManualExpiryDate');
           });
           editorChanged();
-        }, 'button outline'));
-        shared.append(syncBar);
-        shared.append(
-          field('reason', 'เหตุผลการแก้ไข (ใช้กับทุกรายการ)', '', 'textarea'),
-          field('Notes', 'หมายเหตุการติดตั้ง (เว้นว่างเพื่อคงข้อมูลเดิม)', '', 'textarea')
-        );
+        }, 'button outline bulk-sync-btn');
+        syncBtn.title = 'นำวันติดตั้งด้านบนไปใส่ในทุกแถวด้านล่าง';
+
+        syncStrip.append(fInstShared, fDueShared, fManualExpShared, syncBtn);
+        topBar.append(partChip, syncStrip);
+
+        // Row 2: Slim compact inputs for Reason and Notes
+        const metaRow = el('div', 'bulk-edit-meta-row');
+        const fReason = field('reason', 'เหตุผลการแก้ไข (เว้นว่างได้)', '', 'text');
+        const rInput = fReason.querySelector('input');
+        if(rInput) rInput.placeholder = 'ระบุเหตุผล (เว้นว่างได้)';
+        const fNotes = field('Notes', 'หมายเหตุการติดตั้ง (เว้นว่างเพื่อคงข้อมูลเดิม)', '', 'text');
+        const nInput = fNotes.querySelector('input');
+        if(nInput) nInput.placeholder = 'เว้นว่างเพื่อคงข้อมูลเดิม';
+        metaRow.append(fReason, fNotes);
+
+        panel.append(topBar, metaRow);
+
         const listHead = el('div', 'multi-edit-head');
         listHead.id = 'multi-edit-head';
         listHead.append(
@@ -1556,6 +1615,7 @@ if (typeof module!=='undefined') module.exports=BomCore;
           el('span', '', 'วันหมดอายุเอง')
         );
         listHead.children[4].id = 'multi-edit-expiry-head';
+
         const listWrap = el('div', 'multi-edit-list');
         listWrap.id = 'multi-edit-rows';
         rows.forEach((r, i) => {
@@ -1569,8 +1629,15 @@ if (typeof module!=='undefined') module.exports=BomCore;
           rowEl.append(num, fLabel, fQty, fInst, fExp);
           listWrap.append(rowEl);
         });
-        root.append(shared, listHead, listWrap);
+
+        root.append(panel, listHead, listWrap);
       } else {
+        const partChoice = el('div', 'part-choice');
+        const chosenPart = el('p', '', currentPartNumbers.length === 1 ? currentPartNumbers[0] : 'ใช้ Part เดิมของแต่ละรายการ');
+        chosenPart.id = 'chosen-part';
+        partChoice.append(chosenPart, button('เปลี่ยน Part', () => openPicker({type: 'edit'}), 'button outline'));
+        root.append(partChoice);
+
         const grid = el('div', 'form-grid');
         grid.append(field('Label', 'Label (เว้นว่างได้)', row.Label || ''), field('Quantity', 'จำนวน', row.Quantity || 1, 'number'));
         root.append(grid);
@@ -1583,8 +1650,7 @@ if (typeof module!=='undefined') module.exports=BomCore;
           root.append(splitCallout);
         }
       }
-    }
-    if(kind === 'split'){
+    }if(kind === 'split'){
       const quantity=Number(row.Quantity);
       const labels=splitCandidateLabels(row.Label,quantity);
       $('editor-title').textContent='แยก '+quantity+' ชิ้นเป็น Label ละ 1 ชิ้น';
@@ -1825,7 +1891,7 @@ if (typeof module!=='undefined') module.exports=BomCore;
       }
     }
     const isBulkEdit = kind === 'edit' && rows.length > 1;
-    if((kind === 'edit' && !isBulkEdit) || kind === 'split' || kind === 'remove') root.append(field('reason', kind === 'split' ? 'เหตุผลการแยกจำนวน' : kind === 'edit' ? 'เหตุผลการแก้ไข' : 'เหตุผลการถอดออก', '', 'textarea'));
+    if((kind === 'edit' && !isBulkEdit) || kind === 'split' || kind === 'remove') root.append(field('reason', kind === 'split' ? (isAdmin() ? 'เหตุผลการแยกจำนวน (เว้นว่างได้)' : 'เหตุผลการแยกจำนวน') : kind === 'edit' ? 'เหตุผลการแก้ไข (เว้นว่างได้)' : (isAdmin() ? 'เหตุผลการถอดออก (เว้นว่างได้)' : 'เหตุผลการถอดออก'), '', 'textarea'));
     if(kind !== 'remove' && kind !== 'add' && !isBulkEdit) root.append(field('Notes', 'หมายเหตุการติดตั้ง', kind === 'edit' || kind === 'split' ? row.Notes : '', 'textarea'));
     if(kind === 'replace') root.append(el('p', 'footnote', 'เว้นหมายเหตุว่างเพื่อคงหมายเหตุเดิมของแต่ละรายการ'));
     if($('f-DueMode')) $('f-DueMode').addEventListener('change', toggleManual);
@@ -1889,7 +1955,7 @@ if (typeof module!=='undefined') module.exports=BomCore;
       }
     }else if(editor.kind==='split'){
       const r=editor.rows[0],reason=fv('reason');
-      if(!reason.trim())C.fail('กรอกเหตุผลการแยกจำนวน','VALIDATION',{reason:'กรอกเหตุผลที่แยกรายการ'});
+      if(!isAdmin() && !reason.trim())C.fail('กรอกเหตุผลการแยกจำนวน','VALIDATION',{reason:'กรอกเหตุผลที่แยกรายการ'});
       p.recordId=r.RecordID;p.expectedVersion=r.Version;p.reason=reason;
       p.labels=Array.from({length:Number(r.Quantity)},(_,i)=>fv('SplitLabel-'+i).trim());
       p.values={InstalledAt:installedAt,DueMode:dueMode,ManualExpiryDate:manualExpiryDate,Notes:fv('Notes')};
@@ -1905,7 +1971,7 @@ if (typeof module!=='undefined') module.exports=BomCore;
       editor.rows.forEach(r=>C.validate({...r,InstalledAt:installedAt,DueMode:dueMode,ManualExpiryDate:manualExpiryDate},today()));
     }else{
       const reason=fv('reason');
-      if(!reason.trim())C.fail('กรอกเหตุผลการถอด','VALIDATION',{reason:'กรอกเหตุผล'});
+      if(!isAdmin() && !reason.trim())C.fail('กรอกเหตุผลการถอด','VALIDATION',{reason:'กรอกเหตุผล'});
       if(!C.date(installedAt)||installedAt>today())C.fail('ตรวจวันที่ถอดอุปกรณ์','VALIDATION',{InstalledAt:'วันถอดต้องไม่เกินวันนี้'});
       p.endedAt=installedAt;p.reason=reason;
       if(editor.rows.length>1){
@@ -1951,7 +2017,7 @@ if (typeof module!=='undefined') module.exports=BomCore;
       root.append(ul,el('p','footnote',p.items?`จะอัปเดตข้อมูล ${p.items.length} รายการพร้อมกัน (เหตุผล: ${p.reason})`:`ข้อมูลจะอัปเดตในเครื่องจักรที่เลือก (เหตุผล: ${p.reason})`));
     }else if(e.kind==='split'){
       p.labels.forEach(label=>ul.append(el('li','',`${label} · 1 ชิ้น · ติดตั้ง ${dateText(p.values.InstalledAt)}`)));
-      root.append(ul,el('p','footnote',`จะแยกรายการเดิม ${e.rows[0].Quantity} ชิ้นเป็น ${p.labels.length} Label โดยยอดรวมคงเดิม (เหตุผล: ${p.reason})`));
+      root.append(ul,el('p','footnote',`จะแยกรายการเดิม ${e.rows[0].Quantity} ชิ้นเป็น ${p.labels.length} Label โดยยอดรวมคงเดิม${p.reason?' (เหตุผล: '+p.reason+')':''}`));
     }else if(e.kind==='replace'){
       e.rows.forEach(r=>{
         const value={...r,InstalledAt:p.installedAt,DueMode:p.dueMode,ManualExpiryDate:p.manualExpiryDate};
@@ -1964,16 +2030,16 @@ if (typeof module!=='undefined') module.exports=BomCore;
         e.rows.forEach(r=>{
           ul.append(el('li','',`${r.Label||'(ไม่ระบุ Label)'} · ${r.Quantity} ชิ้น · ถอด ${dateText(p.endedAt)}`));
         });
-        root.append(ul,el('p','footnote',`รายการทั้งหมด ${p.targets.length} รายการจะออกจาก BOM ปัจจุบัน โดยยังดูประวัติได้ (เหตุผล: ${p.reason})`));
+        root.append(ul,el('p','footnote',`รายการทั้งหมด ${p.targets.length} รายการจะออกจาก BOM ปัจจุบัน โดยยังดูประวัติได้${p.reason?' (เหตุผล: '+p.reason+')':''}`));
       }else{
         const r=e.rows[0];
         const isPartial=p.quantity&&p.quantity<r.Quantity;
         if(isPartial){
           ul.append(el('li','',`${r.Label||'(ไม่ระบุ Label)'} · ถอดออก ${p.quantity} ชิ้น (คงเหลือ ${r.Quantity-p.quantity} ชิ้นใน BOM) · ถอด ${dateText(p.endedAt)}`));
-          root.append(ul,el('p','footnote',`ระบบจะลดจำนวนในรายการปัจจุบันเหลือ ${r.Quantity-p.quantity} ชิ้น และบันทึกประวัติการถอดออก ${p.quantity} ชิ้นแยกไว้ (เหตุผล: ${p.reason})`));
+          root.append(ul,el('p','footnote',`ระบบจะลดจำนวนในรายการปัจจุบันเหลือ ${r.Quantity-p.quantity} ชิ้น และบันทึกประวัติการถอดออก ${p.quantity} ชิ้นแยกไว้${p.reason?' (เหตุผล: '+p.reason+')':''}`));
         }else{
           ul.append(el('li','',`${r.Label||'(ไม่ระบุ Label)'} · ถอดออกทั้งหมด ${r.Quantity} ชิ้น · ถอด ${dateText(p.endedAt)}`));
-          root.append(ul,el('p','footnote',`รายการจะออกจาก BOM ปัจจุบัน โดยยังดูประวัติได้ (เหตุผล: ${p.reason})`));
+          root.append(ul,el('p','footnote',`รายการจะออกจาก BOM ปัจจุบัน โดยยังดูประวัติได้${p.reason?' (เหตุผล: '+p.reason+')':''}`));
         }
       }
     }
@@ -2225,36 +2291,78 @@ if (typeof module!=='undefined') module.exports=BomCore;
   on('select-page','change',()=>{const checked=$('select-page').checked;visibleRows().filter(r=>r.RecordStatus==='ACTIVE').forEach(r=>{checked?state.selected.add(r.RecordID):state.selected.delete(r.RecordID);});document.querySelectorAll('[data-record]').forEach(n=>{if(!n.disabled)n.checked=checked;});updateSelection();});
   const debouncedClientFilter=debounce(()=>{state.page=1;applyClientFilter();},150);
   let queryComposing=false;
-  $('query').addEventListener('compositionstart',()=>{queryComposing=true;});
-  $('query').addEventListener('compositionend',()=>{queryComposing=false;$('clear-query').hidden=!$('query').value;debouncedClientFilter();});
-  $('query').addEventListener('input',()=>{
-    $('clear-query').hidden=!$('query').value;
-    if(!queryComposing)debouncedClientFilter();
-  });
-  $('clear-query').addEventListener('click',()=>{
-    debouncedClientFilter.cancel();
-    state.page=1;
-    $('query').value='';
-    $('clear-query').hidden=true;
-    $('query').focus();
-    applyClientFilter();
-  });
+  const queryInput=$('query'),clearQueryBtn=$('clear-query');
+  if(clearQueryBtn){
+    clearQueryBtn.disabled=false;
+    clearQueryBtn.addEventListener('click',e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      debouncedClientFilter.cancel();
+      state.page=1;
+      if(queryInput){queryInput.value='';queryInput.focus();}
+      clearQueryBtn.hidden=true;
+      applyClientFilter();
+    });
+  }
+  if(queryInput){
+    queryInput.addEventListener('compositionstart',()=>{queryComposing=true;});
+    queryInput.addEventListener('compositionend',()=>{queryComposing=false;if(clearQueryBtn)clearQueryBtn.hidden=!queryInput.value;debouncedClientFilter();});
+    queryInput.addEventListener('input',()=>{
+      if(clearQueryBtn)clearQueryBtn.hidden=!queryInput.value;
+      if(!queryComposing)debouncedClientFilter();
+    });
+    queryInput.addEventListener('search',()=>{
+      if(clearQueryBtn)clearQueryBtn.hidden=!queryInput.value;
+      debouncedClientFilter();
+    });
+    queryInput.addEventListener('keydown',e=>{
+      if(e.key==='Escape'&&queryInput.value){
+        e.preventDefault();
+        queryInput.value='';
+        if(clearQueryBtn)clearQueryBtn.hidden=true;
+        debouncedClientFilter.cancel();
+        state.page=1;
+        applyClientFilter();
+      }
+    });
+  }
   const debouncedPartFilter=debounce(()=>{state.partPage=1;applyPartFilter();},150);
   let partQueryComposing=false;
-  $('part-query').addEventListener('compositionstart',()=>{partQueryComposing=true;});
-  $('part-query').addEventListener('compositionend',()=>{partQueryComposing=false;$('clear-part-query').hidden=!$('part-query').value;debouncedPartFilter();});
-  $('part-query').addEventListener('input',()=>{
-    $('clear-part-query').hidden=!$('part-query').value;
-    if(!partQueryComposing)debouncedPartFilter();
-  });
-  $('clear-part-query').addEventListener('click',()=>{
-    debouncedPartFilter.cancel();
-    state.partPage=1;
-    $('part-query').value='';
-    $('clear-part-query').hidden=true;
-    $('part-query').focus();
-    applyPartFilter();
-  });
+  const partQueryInput=$('part-query'),clearPartQueryBtn=$('clear-part-query');
+  if(clearPartQueryBtn){
+    clearPartQueryBtn.disabled=false;
+    clearPartQueryBtn.addEventListener('click',e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      debouncedPartFilter.cancel();
+      state.partPage=1;
+      if(partQueryInput){partQueryInput.value='';partQueryInput.focus();}
+      clearPartQueryBtn.hidden=true;
+      applyPartFilter();
+    });
+  }
+  if(partQueryInput){
+    partQueryInput.addEventListener('compositionstart',()=>{partQueryComposing=true;});
+    partQueryInput.addEventListener('compositionend',()=>{partQueryComposing=false;if(clearPartQueryBtn)clearPartQueryBtn.hidden=!partQueryInput.value;debouncedPartFilter();});
+    partQueryInput.addEventListener('input',()=>{
+      if(clearPartQueryBtn)clearPartQueryBtn.hidden=!partQueryInput.value;
+      if(!partQueryComposing)debouncedPartFilter();
+    });
+    partQueryInput.addEventListener('search',()=>{
+      if(clearPartQueryBtn)clearPartQueryBtn.hidden=!partQueryInput.value;
+      debouncedPartFilter();
+    });
+    partQueryInput.addEventListener('keydown',e=>{
+      if(e.key==='Escape'&&partQueryInput.value){
+        e.preventDefault();
+        partQueryInput.value='';
+        if(clearPartQueryBtn)clearPartQueryBtn.hidden=true;
+        debouncedPartFilter.cancel();
+        state.partPage=1;
+        applyPartFilter();
+      }
+    });
+  }
   // === LEGACY DATABASE IMPORT (.xls / .xlsx / .csv) ===
   let legacyImportParsedItems = [];
   function parseLegacyDate(val) {

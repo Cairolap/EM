@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ทะเบียนงานจัดซื้อและเบิกสโตร์ (PR & Store Tracker) - แผนกซ่อมบำรุงไฟฟ้า</title>
+  <link rel="icon" type="image/png" href="/Logo%20small.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- APP_STYLE -->
+</head>
+<body>
+  <div class="pr-inbox-app">
+
+    <!-- Top Operations Header (Slim & Modern) -->
+    <header class="pr-header">
+      <div class="pr-header-left">
+        <div class="pr-brand-title">
+          <svg class="pr-title-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <span class="pr-title-text">งานจัดซื้อ &amp; เบิกสโตร์</span>
+          <span class="pr-mode-pill" id="current-folder-pill">กล่องงาน (Inbox)</span>
+          <span class="retention-badge" title="ระบบจัดเก็บข้อมูลย้อนหลัง 2 ปีอัตโนมัติ เพื่อป้องกันฐานข้อมูลบวม">🕒 ย้อนหลัง 2 ปี</span>
+        </div>
+      </div>
+
+      <!-- Center: Gmail-style Global Search Box -->
+      <div class="pr-header-search">
+        <div class="search-input-box">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="global-search-input" placeholder="ค้นหา Order PM, รายการอะไหล่, พื้นที่, PR, PO, เลขที่เบิก..." autocomplete="off">
+          <button type="button" id="btn-clear-search" class="btn-clear-search" title="ล้างคำค้นหา" style="display:none;">×</button>
+        </div>
+      </div>
+
+      <!-- Right: Summary Metrics & Action Buttons -->
+      <div class="pr-header-right">
+        <div class="live-metrics-pill" id="live-metrics-bar" title="สรุปตามเงื่อนไขที่กำลังแสดง">
+          <span class="metric-count" id="metric-total-count">0 รายการ</span>
+          <span class="metric-sep">·</span>
+          <span class="metric-qty" id="metric-total-qty">0 ชิ้น</span>
+          <span class="metric-sep">·</span>
+          <span class="metric-amount" id="metric-total-price">฿ 0.00</span>
+        </div>
+
+        <div class="header-action-buttons">
+          <button type="button" id="btn-export-csv" class="btn btn-secondary btn-sm" title="ส่งออกเป็น Excel CSV (ภาษาไทย UTF-8)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span class="btn-text">ส่งออก CSV</span>
+          </button>
+          <button type="button" id="btn-refresh" class="btn btn-secondary btn-icon-sm" title="รีเฟรชข้อมูล">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="pr-workspace-layout">
+
+      <!-- ===================================================================
+           LEFT SIDEBAR (Streamlined & Minimal Gmail Rail)
+           =================================================================== -->
+      <aside class="pr-sidebar">
+        
+        <!-- Large Compose Button -->
+        <div class="sidebar-compose-wrap">
+          <button type="button" id="btn-compose" class="btn-compose">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>เปิดคำขอ / เพิ่มรายการ</span>
+          </button>
+        </div>
+
+        <nav class="sidebar-nav-scroll">
+          
+          <!-- Primary Folders -->
+          <ul class="nav-folder-list">
+            <li class="nav-folder-item active" data-folder="inbox">
+              <a href="#inbox" class="nav-folder-link">
+                <span class="nav-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+                </span>
+                <span class="nav-text">กล่องงาน (Inbox)</span>
+                <span class="nav-badge badge-primary" id="badge-count-inbox">0</span>
+              </a>
+            </li>
+            <li class="nav-folder-item" data-folder="archive">
+              <a href="#archive" class="nav-folder-link">
+                <span class="nav-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                </span>
+                <span class="nav-text">รายการที่เก็บ (Archive)</span>
+                <span class="nav-badge" id="badge-count-archive">0</span>
+              </a>
+            </li>
+            <li class="nav-folder-item" data-folder="all">
+              <a href="#all" class="nav-folder-link">
+                <span class="nav-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                </span>
+                <span class="nav-text">รายการทั้งหมด (All)</span>
+                <span class="nav-badge" id="badge-count-all">0</span>
+              </a>
+            </li>
+          </ul>
+
+          <div class="sidebar-divider"></div>
+
+          <!-- Quick Urgent Filters -->
+          <div class="sidebar-section-title">ตัวกรองด่วน</div>
+          <div class="quick-chips-stack">
+            <button type="button" class="chip-item chip-urgent" data-step="NEAR_DELIVERY" title="กำหนดส่งมอบภายใน 7 วันข้างหน้า">
+              <span class="chip-indicator"></span>
+              <span class="chip-text">ส่งมอบเร็วๆ นี้ (7 วัน)</span>
+              <span class="chip-count" id="badge-count-near-delivery">0</span>
+            </button>
+            <button type="button" class="chip-item chip-overdue" data-step="OVERDUE" title="เกินกำหนดวันที่ส่งมอบแล้ว">
+              <span class="chip-indicator"></span>
+              <span class="chip-text">เกินกำหนด (Overdue)</span>
+              <span class="chip-count" id="badge-count-overdue">0</span>
+            </button>
+          </div>
+
+          <div class="sidebar-divider"></div>
+
+          <!-- Document Type Filter -->
+          <div class="sidebar-section-title">ประเภทเอกสาร</div>
+          <div class="doc-type-pills">
+            <button type="button" class="btn-doc-pill active" data-doctype="">ทั้งหมด</button>
+            <button type="button" class="btn-doc-pill btn-pill-pr" data-doctype="PR">ซื้อ</button>
+            <button type="button" class="btn-doc-pill btn-pill-store" data-doctype="STORE">เบิก</button>
+          </div>
+
+        </nav>
+      </aside>
+
+      <!-- ===================================================================
+           MAIN INBOX TABLE WORKSPACE (Full Width & Clean)
+           =================================================================== -->
+      <main class="pr-main-content">
+        
+        <!-- Horizontal Segmented Pipeline Bar & Quick Filter Controls -->
+        <section class="inbox-filter-bar">
+          
+          <!-- Left: 3-Step Pipeline Tracker Segmented Tabs -->
+          <div class="pipeline-tabs-group" role="tablist">
+            <button type="button" class="pipeline-tab active" data-step="" role="tab">
+              <span class="tab-label">ทั้งหมด</span>
+            </button>
+            <button type="button" class="pipeline-tab tab-amber" data-step="PENDING_PR" role="tab">
+              <span class="tab-dot dot-amber"></span>
+              <span class="tab-label">1. รอออก PR / สโตร์</span>
+              <span class="tab-count" id="badge-count-pending-pr">0</span>
+            </button>
+            <button type="button" class="pipeline-tab tab-blue" data-step="PENDING_PO" role="tab">
+              <span class="tab-dot dot-blue"></span>
+              <span class="tab-label">2. รอออก PO</span>
+              <span class="tab-count" id="badge-count-pending-po">0</span>
+            </button>
+            <button type="button" class="pipeline-tab tab-purple" data-step="PENDING_RECEIPT" role="tab">
+              <span class="tab-dot dot-purple"></span>
+              <span class="tab-label">3. รอรับของ</span>
+              <span class="tab-count" id="badge-count-pending-receipt">0</span>
+            </button>
+          </div>
+
+          <!-- Right: Compact Dropdown Filters (Dept, Line, Date) -->
+          <div class="inline-filters-group">
+            <!-- Dept Filter -->
+            <div class="filter-dropdown-wrap">
+              <select id="filter-dept" class="filter-select-sm">
+                <option value="">ทุกแผนก (CC, PP, ...)</option>
+              </select>
+            </div>
+
+            <!-- Line Filter -->
+            <div class="filter-dropdown-wrap">
+              <select id="filter-line" class="filter-select-sm">
+                <option value="">ทุกสายการผลิต</option>
+              </select>
+            </div>
+
+            <!-- Date Filter Toggle -->
+            <div class="filter-date-group">
+              <input type="date" id="filter-start-date" class="filter-date-input" title="ตั้งแต่วันที่">
+              <span class="date-sep">-</span>
+              <input type="date" id="filter-end-date" class="filter-date-input" title="ถึงวันที่">
+              <button type="button" id="btn-clear-date-filter" class="btn-clear-dates" title="ล้างวันที่" style="display:none;">✕</button>
+            </div>
+
+            <!-- Page Size -->
+            <div class="page-size-wrap">
+              <select id="select-page-limit" class="filter-select-sm">
+                <option value="50">50 แถว</option>
+                <option value="100" selected>100 แถว</option>
+                <option value="200">200 แถว</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Active Search / Filter Chips (if any) -->
+        <div class="active-filter-chips-bar" id="active-filter-chips" style="display:none;"></div>
+
+        <!-- Table Card -->
+        <div class="table-container-card">
+
+          <!-- Table Contextual Selection Toolbar -->
+          <div class="table-action-strip">
+            <div class="strip-left">
+              <label class="custom-checkbox-wrap" title="เลือกทั้งหมดในหน้านี้">
+                <input type="checkbox" id="check-select-all" class="custom-checkbox">
+                <span class="checkbox-box"></span>
+              </label>
+
+              <!-- Contextual Bulk Actions -->
+              <div class="bulk-actions-group" id="bulk-actions-group" style="display:none;">
+                <span class="selected-count-badge" id="selected-count-badge">เลือก 0 รายการ</span>
+                
+                <button type="button" id="btn-bulk-copy" class="btn btn-sm btn-primary" title="คัดลอกรายการที่เลือก เพื่อนำไปวางส่งอีเมลตามงาน (พื้นที่ | Order | รายละเอียด | จำนวน | ราคา | PR ถ้ามี)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <span>คัดลอกส่งอีเมล</span>
+                </button>
+
+                <button type="button" id="btn-bulk-inline-edit" class="btn btn-sm btn-secondary" title="แก้ไขแถวที่เลือกบนตารางโดยตรง">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  <span>แก้ไขในตาราง</span>
+                </button>
+
+                <button type="button" id="btn-open-bulk-area-modal" class="btn btn-sm btn-secondary" title="ย้ายแผนก/ไลน์/เครื่องจักร">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  <span>เปลี่ยนพื้นที่</span>
+                </button>
+
+                <button type="button" id="btn-bulk-archive" class="btn btn-sm btn-secondary" title="ย้ายเข้ารายการจัดเก็บ">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                  <span id="btn-bulk-archive-text">จัดเก็บพร้อมกัน</span>
+                </button>
+
+                <button type="button" id="btn-open-bulk-delete-modal" class="btn btn-sm btn-danger" title="ลบถาวร (ต้องใส่รหัสแอดมิน)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>ลบถาวร</span>
+                </button>
+
+                <button type="button" id="btn-deselect-all" class="btn-link-sm" title="ยกเลิกการเลือก">ยกเลิก</button>
+              </div>
+
+              <!-- Table Edit Mode Banner -->
+              <div class="table-edit-banner" id="table-edit-banner" style="display:none;">
+                <span class="edit-mode-tag">✏️ โหมดแก้ไขข้อมูลในตาราง</span>
+                <div class="edit-banner-actions">
+                  <button type="button" id="btn-cancel-table-edit" class="btn btn-sm btn-secondary">ยกเลิก</button>
+                  <button type="button" id="btn-save-table-edit" class="btn btn-sm btn-primary">บันทึกทั้งหมด</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="strip-right">
+              <span class="pagination-info-text" id="text-pagination-info">แสดง 0 จาก 0 รายการ</span>
+            </div>
+          </div>
+
+          <!-- Main Table Scroll Wrapper -->
+          <div class="table-scroll-wrap">
+            <table class="pr-table" id="pr-items-table">
+              <thead>
+                <tr>
+                  <th class="th-check"><span class="sr-only">เลือก</span></th>
+                  <th class="th-stage">สถานะขั้นตอน</th>
+                  <th class="th-doc">ประเภท &amp; เลขเอกสาร</th>
+                  <th class="th-date">วันที่สร้าง</th>
+                  <th class="th-area">พื้นที่ / เครื่องจักร</th>
+                  <th class="th-order">เลข ORDER</th>
+                  <th class="th-desc">รายละเอียดสินค้า / บริการ / อะไหล่</th>
+                  <th class="th-qty text-right">จำนวน</th>
+                  <th class="th-price text-right">ราคา/หน่วย</th>
+                  <th class="th-total text-right">ราคารวม (฿)</th>
+                  <th class="th-po">เลขที่ PO</th>
+                  <th class="th-delivery">กำหนดส่งมอบ</th>
+                  <th class="th-archived" id="th-archived-date" style="display:none;">จัดเก็บเมื่อ</th>
+                  <th class="th-actions text-center">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="pr-table-tbody">
+                <tr>
+                  <td colspan="14" class="text-center py-12 text-muted">
+                    กำลังโหลดข้อมูลงานจัดซื้อ &amp; เบิกสโตร์...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Table Footer Summary -->
+          <div class="table-card-footer">
+            <div class="footer-left">
+              <span class="footer-note-text">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 3px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                นโยบายจัดเก็บ 2 ปี (Storage Retention): จัดเก็บข้อมูลย้อนหลังไม่เกิน 2 ปีอัตโนมัติ เพื่อป้องกันฐานข้อมูลบวม
+              </span>
+            </div>
+            <div class="footer-right">
+              <div class="footer-summary-chips">
+                <span class="chip-label">รวมที่แสดง:</span>
+                <span class="chip-val" id="footer-sum-qty">0 ชิ้น</span>
+                <span class="chip-sep">|</span>
+                <span class="chip-label">มูลค่ารวม:</span>
+                <span class="chip-val highlight" id="footer-sum-price">฿ 0.00</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+
+    <!-- =========================================================================
+         GMAIL-STYLE DOCKED COMPOSE WINDOW (ลอยมุมขวาล่าง โปร่งโล่ง ไม่เกะกะ)
+         ========================================================================= -->
+    <div class="gmail-compose-dock" id="pr-form-pane" style="display:none;">
+      <div class="compose-window-card">
+        
+        <!-- Compose Window Header -->
+        <div class="compose-header">
+          <div class="compose-header-title">
+            <span class="compose-tag" id="form-mode-badge">คำขอใหม่</span>
+            <strong id="form-pane-title">บันทึกคำขอจัดซื้อ / เบิกสโตร์</strong>
+          </div>
+          <div class="compose-header-controls">
+            <button type="button" id="btn-minimize-form" class="compose-btn-tool" title="ย่อหน้าต่าง">─</button>
+            <button type="button" id="btn-close-form" class="compose-btn-tool" title="ปิดหน้าต่าง">✕</button>
+          </div>
+        </div>
+
+        <!-- Compose Window Body (2-Column Clean Form) -->
+        <form id="pr-entry-form" class="compose-body" autocomplete="off">
+          <input type="hidden" id="form-item-id">
+
+          <!-- Row 1: Document Type & Created Date -->
+          <div class="compose-row-2">
+            <div class="form-field">
+              <label class="field-label">ประเภทคำขอ <span class="req">*</span></label>
+              <div class="doc-type-toggle">
+                <label class="toggle-btn toggle-pr">
+                  <input type="radio" name="docType" value="PR" checked id="radio-type-pr">
+                  <span>📄 ซื้อ</span>
+                </label>
+                <label class="toggle-btn toggle-store">
+                  <input type="radio" name="docType" value="STORE" id="radio-type-store">
+                  <span>🏬 เบิก</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="form-created-date" class="field-label">วันที่สร้างรายการ <span class="req">*</span></label>
+              <input type="date" id="form-created-date" required class="form-input">
+            </div>
+          </div>
+
+          <!-- Row 2: Area (Dept -> Line -> Machine) -->
+          <div class="compose-row-3">
+            <div class="form-field">
+              <label for="form-dept" class="field-label">แผนก (Dept)</label>
+              <select id="form-dept" class="form-select">
+                <option value="">เลือกแผนก...</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="form-line" class="field-label">สายการผลิต (Line)</label>
+              <select id="form-line" class="form-select">
+                <option value="">เลือกสายการผลิต...</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="form-machine" class="field-label">เครื่องจักร</label>
+              <select id="form-machine" class="form-select">
+                <option value="">เลือกเครื่องจักร (ถ้ามี)...</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 3: Order PM & Doc Number -->
+          <div class="compose-row-2">
+            <div class="form-field">
+              <label for="form-order-no" class="field-label">
+                <span>เลข ORDER (Order PM)</span>
+              </label>
+              <input type="text" id="form-order-no" list="pm-orders-datalist" placeholder="เช่น 13110001 (เลือกจาก PM หรือพิมพ์เอง)" class="form-input font-mono">
+              <datalist id="pm-orders-datalist"></datalist>
+            </div>
+
+            <div class="form-field">
+              <label for="form-doc-no" class="field-label" id="label-doc-no">
+                <span>หมายเลข PR / เลขที่เบิก</span>
+              </label>
+              <input type="text" id="form-doc-no" placeholder="เช่น PR-69001 หรือ ST-88001" class="form-input font-mono">
+            </div>
+          </div>
+
+          <!-- Row 4: Description (Prominent) -->
+          <div class="form-field">
+            <label for="form-description" class="field-label">
+              <span>รายละเอียดสินค้า / บริการ / อะไหล่ <span class="req">*</span></span>
+            </label>
+            <textarea id="form-description" rows="2" required placeholder="ระบุชื่อสินค้า สเปก ขนาด หรือรายการอะไหล่..." class="form-textarea"></textarea>
+          </div>
+
+          <!-- Row 5: Qty, Unit, Price, Total -->
+          <div class="compose-row-4">
+            <div class="form-field">
+              <label for="form-qty" class="field-label">จำนวน <span class="req">*</span></label>
+              <input type="number" id="form-qty" step="any" min="0.01" value="1" required class="form-input font-mono text-right">
+            </div>
+
+            <div class="form-field">
+              <label for="form-unit" class="field-label">หน่วยนับ</label>
+              <input type="text" id="form-unit" value="ชิ้น" list="units-datalist" class="form-input">
+              <datalist id="units-datalist">
+                <option value="ชิ้น">
+                <option value="ตัว">
+                <option value="ชุด">
+                <option value="อัน">
+                <option value="กล่อง">
+                <option value="ม้วน">
+                <option value="ตลับ">
+                <option value="เมตร">
+                <option value="งาน">
+                <option value="EA">
+                <option value="SET">
+              </datalist>
+            </div>
+
+            <div class="form-field">
+              <label for="form-price" class="field-label">ราคา/หน่วย (฿)</label>
+              <input type="number" id="form-price" step="any" min="0" placeholder="0.00" class="form-input font-mono text-right">
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">รวมเงิน (฿)</label>
+              <div class="calc-total-pill font-mono" id="form-calc-total">฿ 0.00</div>
+            </div>
+          </div>
+
+          <!-- Row 6: PO Number & Delivery Date -->
+          <div class="compose-row-2">
+            <div class="form-field">
+              <label for="form-po-no" class="field-label">เลขที่ PO (เมื่อสั่งซื้อแล้ว)</label>
+              <input type="text" id="form-po-no" placeholder="เช่น PO-2026-0045" class="form-input font-mono">
+            </div>
+
+            <div class="form-field">
+              <label for="form-delivery-date" class="field-label">กำหนดส่งมอบ (Delivery Date)</label>
+              <input type="date" id="form-delivery-date" class="form-input">
+            </div>
+          </div>
+
+          <!-- Row 7: Notes -->
+          <div class="form-field">
+            <label for="form-notes" class="field-label">หมายเหตุเพิ่มเติม</label>
+            <input type="text" id="form-notes" placeholder="ข้อความกำกับ เช่น อะไหล่สำรองด่วน, รอของจากญี่ปุ่น..." class="form-input">
+          </div>
+
+          <!-- Compose Footer Actions -->
+          <div class="compose-footer">
+            <button type="button" id="btn-cancel-form" class="btn btn-secondary">ยกเลิก</button>
+            <div class="compose-actions-right">
+              <button type="submit" id="btn-save-and-continue" class="btn btn-outline-primary" data-next="true">
+                บันทึก &amp; เพิ่มต่อ
+              </button>
+              <button type="submit" id="btn-save-form" class="btn btn-primary" data-next="false">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                <span>บันทึกรายการ</span>
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =========================================================================
+       MODALS
+       ========================================================================= -->
+  <!-- 1. เปลี่ยนพื้นที่พร้อมกัน -->
+  <div id="modal-bulk-area" class="modal-backdrop" style="display:none;">
+    <div class="modal-box modal-md">
+      <div class="modal-header">
+        <h2 class="modal-title">ย้ายพื้นที่ / สายการผลิต สำหรับรายการที่เลือก</h2>
+        <button type="button" class="btn-close-modal" id="btn-close-bulk-area">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc" id="bulk-area-summary-text">กำลังอัปเดตพื้นที่สำหรับรายการที่เลือก:</p>
+        <div class="form-field" style="margin-bottom: 12px;">
+          <label for="bulk-area-dept" class="field-label">แผนก (Department):</label>
+          <select id="bulk-area-dept" class="form-select">
+            <option value="">เลือกแผนกใหม่...</option>
+          </select>
+        </div>
+        <div class="form-field" style="margin-bottom: 12px;">
+          <label for="bulk-area-line" class="field-label">สายการผลิต (Line):</label>
+          <select id="bulk-area-line" class="form-select">
+            <option value="">เลือกสายการผลิตใหม่...</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="bulk-area-machine" class="field-label">เครื่องจักร (Machine - ถ้ามี):</label>
+          <select id="bulk-area-machine" class="form-select">
+            <option value="">เลือกเครื่องจักร...</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-bulk-area">ยกเลิก</button>
+        <button type="button" class="btn btn-primary" id="btn-confirm-bulk-area">ยืนยันการเปลี่ยนพื้นที่</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ยืนยันลบถาวรด้วยรหัสแอดมิน -->
+  <div id="modal-admin-delete" class="modal-backdrop" style="display:none;">
+    <div class="modal-box modal-sm">
+      <div class="modal-header header-danger">
+        <div class="modal-title-danger">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <h2 class="modal-title">ยืนยันการลบข้อมูลถาวร</h2>
+        </div>
+        <button type="button" class="btn-close-modal" id="btn-close-admin-delete">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="danger-warning-box">
+          <strong>⚠️ นโยบายความปลอดภัยข้อมูล</strong>
+          <p>
+            รายการที่เสร็จสิ้นหรือรับของแล้ว แนะนำให้ใช้ปุ่ม <strong>"จัดเก็บ (Archive)"</strong> แทนการลบ 
+            หากต้องการลบรายการนี้ออกจากระบบอย่างถาวร กรุณากรอกรหัสผ่านผู้ดูแลระบบ (Admin)
+          </p>
+        </div>
+
+        <div class="delete-target-preview" id="delete-target-preview"></div>
+
+        <div class="form-field" style="margin-top: 14px;">
+          <label for="input-admin-password" class="field-label">รหัสผ่านผู้ดูแลระบบ (Admin Password) <span class="req">*</span></label>
+          <input type="password" id="input-admin-password" required placeholder="กรอกรหัสแอดมินเพื่อยืนยัน" class="form-input" autocomplete="current-password">
+          <span class="field-error-text" id="admin-password-error" style="display:none;"></span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-admin-delete">ยกเลิก</button>
+        <button type="button" class="btn btn-danger" id="btn-confirm-admin-delete">ยืนยันลบถาวร</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. รายละเอียดฉบับเต็ม -->
+  <div id="modal-item-detail" class="modal-backdrop" style="display:none;">
+    <div class="modal-box modal-md">
+      <div class="modal-header">
+        <div class="detail-header-group">
+          <span class="detail-type-badge" id="detail-type-badge">PR</span>
+          <h2 class="modal-title" id="detail-modal-title">รายละเอียดงานจัดซื้อ / เบิกสโตร์</h2>
+        </div>
+        <button type="button" class="btn-close-modal" id="btn-close-detail">✕</button>
+      </div>
+      <div class="modal-body detail-modal-body" id="detail-modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-detail-close-btn">ปิด</button>
+        <button type="button" class="btn btn-primary" id="btn-detail-edit-btn">แก้ไขข้อมูลนี้</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Toast Notification -->
+  <div id="toast" class="pr-toast" role="alert" aria-live="polite"></div>
+
+  <!-- APP_SCRIPT -->
+</body>
+</html>

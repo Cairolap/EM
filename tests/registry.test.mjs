@@ -188,7 +188,7 @@ test('BOM reads and mutations (add, edit, split, replace, remove, history, stats
   machineId,
   operationId:opRemove,
   endedAt:'2026-09-01',
-  reason:'ถอดออกเพื่อซ่อมแซม',
+  reason:'',
   targets:[{recordId:kmRec.RecordID,expectedVersion:kmRec.Version,quantity:1}]
  }],opRemove);
  assert.equal(remRes.status,200);
@@ -427,5 +427,67 @@ test('machine types lifecycle: create, duplicate, dynamic validation in machine,
  const reactivated = await rpc(env, 'machines', 'createMachineType', ['CNC', true]);
  assert.equal(reactivated.status, 200);
  assert.equal(reactivated.data.active, true);
+});
+
+test('BOM mutations: admin does not require reason, non-admin requires reason for remove and split', async () => {
+ const DB = database(); seed(DB);
+ const env = { DB, ENVIRONMENT: 'local', DEV_AUTH: 'local-admin', MAINTENANCE_MODE: 'false' };
+ const machineRes = await rpc(env, 'machines', 'createMachine', [{ machineCode: 'M-REASON', machineName: 'M Reason', deptId: 'D01', lineId: 'L01', status: 'ใช้งาน', criticality: 'สูง', machineType: 'Press', isActive: true, requestId: crypto.randomUUID() }]);
+ const machineId = machineRes.data.machineId;
+ const partRes = await rpc(env, 'parts', 'createPart', [{ partNumber: 'P-REASON', description: 'Test Part', brandId: 'B01', price: 10, lifespan: 1, requestId: crypto.randomUUID() }]);
+ const partId = partRes.data.id;
+
+ const opAdd = crypto.randomUUID();
+ await rpc(env, 'bom', 'add', [{ machineId, operationId: opAdd, labels: [{ PartID: partId, Label: 'L1', Quantity: 2, InstalledAt: '2026-01-01', DueMode: 'PART_LIFE', ManualExpiryDate: '' }] }], opAdd);
+ const list1 = await rpc(env, 'bom', 'list', [{ machineId }]);
+ const record = list1.data.items[0].labels[0];
+
+ // 1. Admin split without reason -> succeeds
+ const opSplitAdmin = crypto.randomUUID();
+ const splitAdminRes = await rpc(env, 'bom', 'split', [{ machineId, operationId: opSplitAdmin, recordId: record.RecordID, expectedVersion: record.Version, reason: '', labels: ['L1-A', 'L1-B'], values: { InstalledAt: '2026-01-01', DueMode: 'PART_LIFE', ManualExpiryDate: '' } }], opSplitAdmin);
+ assert.equal(splitAdminRes.status, 200);
+
+ // 2. Admin remove without reason -> succeeds
+ const list2 = await rpc(env, 'bom', 'list', [{ machineId }]);
+ const targetRecord = list2.data.items[0].labels[0];
+ const opRemoveAdmin = crypto.randomUUID();
+ const remAdminRes = await rpc(env, 'bom', 'remove', [{ machineId, operationId: opRemoveAdmin, endedAt: '2026-05-01', reason: '', targets: [{ recordId: targetRecord.RecordID, expectedVersion: targetRecord.Version, quantity: 1 }] }], opRemoveAdmin);
+ assert.equal(remAdminRes.status, 200);
+
+ // 3. Create non-admin editor and test that reason is REQUIRED
+ const prodEnv = { DB, ENVIRONMENT: 'production', DEV_AUTH: null, MAINTENANCE_MODE: 'false' };
+ await worker.fetch(new Request('http://localhost/api/v1/users/rpc', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', 'Origin': 'http://localhost', 'Idempotency-Key': crypto.randomUUID() },
+  body: JSON.stringify({ method: 'createUser', args: [{ username: 'editoruser', password: 'password123', displayName: 'Editor', role: 'editor', userType: 'permanent', permissions: { machines: 'write', parts: 'write', bom: 'write', users: 'none', can_delete: true } }] })
+ }), env);
+
+ const loginRes = await worker.fetch(new Request('http://localhost/api/v1/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', 'Origin': 'http://localhost' },
+  body: JSON.stringify({ username: 'editoruser', password: 'password123' })
+ }), prodEnv);
+ const editorCookie = loginRes.headers.get('Set-Cookie').split(';')[0];
+
+ const list3 = await rpc(env, 'bom', 'list', [{ machineId }]);
+ const remainingRecord = list3.data.items[0].labels[0];
+
+ // Non-admin remove without reason -> FAILS (422)
+ const opRemoveEditor = crypto.randomUUID();
+ const remEditorFail = await worker.fetch(new Request('http://localhost/api/v1/bom/rpc', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', 'Origin': 'http://localhost', Cookie: editorCookie, 'Idempotency-Key': opRemoveEditor },
+  body: JSON.stringify({ method: 'remove', args: [{ machineId, operationId: opRemoveEditor, endedAt: '2026-05-01', reason: '', targets: [{ recordId: remainingRecord.RecordID, expectedVersion: remainingRecord.Version, quantity: 1 }] }] })
+ }), prodEnv);
+ assert.equal(remEditorFail.status, 422);
+
+ // Non-admin remove with reason -> SUCCEEDS (200)
+ const opRemoveEditorOk = crypto.randomUUID();
+ const remEditorOk = await worker.fetch(new Request('http://localhost/api/v1/bom/rpc', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', 'Origin': 'http://localhost', Cookie: editorCookie, 'Idempotency-Key': opRemoveEditorOk },
+  body: JSON.stringify({ method: 'remove', args: [{ machineId, operationId: opRemoveEditorOk, endedAt: '2026-05-01', reason: 'ถอดตามกำหนดการ', targets: [{ recordId: remainingRecord.RecordID, expectedVersion: remainingRecord.Version, quantity: 1 }] }] })
+ }), prodEnv);
+ assert.equal(remEditorOk.status, 200);
 });
 

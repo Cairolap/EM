@@ -1,0 +1,4704 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ทะเบียนงานจัดซื้อและเบิกสโตร์ (PR & Store Tracker) - แผนกซ่อมบำรุงไฟฟ้า</title>
+  <link rel="icon" type="image/png" href="/Logo%20small.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+/* ==========================================================================
+   PR & STORE TRACKER - CLEAN OPERATIONS INBOX (GMAIL / LINEAR STYLE)
+   ========================================================================== */
+
+:root {
+  /* Brand & Neutrals */
+  --pr-brand-dark: #0d1e38;
+  --pr-primary: #176487;
+  --pr-primary-hover: #114c67;
+  --pr-primary-surface: #eaf3f7;
+  --pr-accent: #80182a;
+
+  --pr-ink: #192a38;
+  --pr-ink-secondary: #536a78;
+  --pr-ink-muted: #8499a6;
+  --pr-bg-page: #f1f5f9;
+  --pr-bg-surface: #ffffff;
+  --pr-border: #cbd5e1;
+  --pr-border-subtle: #e2e8f0;
+
+  /* Document Types */
+  --pr-blue: #2563eb;
+  --pr-blue-bg: #eff6ff;
+  --pr-blue-border: #bfdbfe;
+
+  --store-teal: #0d9488;
+  --store-teal-bg: #f0fdfa;
+  --store-teal-border: #99f6e4;
+
+  /* Pipeline Stages */
+  --stage-amber: #b45309;
+  --stage-amber-bg: #fef3c7;
+  --stage-amber-border: #fde68a;
+
+  --stage-blue: #0284c7;
+  --stage-blue-bg: #e0f2fe;
+  --stage-blue-border: #bae6fd;
+
+  --stage-purple: #7c3aed;
+  --stage-purple-bg: #f3e8ff;
+  --stage-purple-border: #ddd6fe;
+
+  --stage-archived: #475569;
+  --stage-archived-bg: #f1f5f9;
+
+  /* Typography */
+  --font-body: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', Consolas, monospace;
+
+  /* Shape & Shadows */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 9999px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-dock: 0 12px 36px rgba(15, 23, 42, 0.22);
+  --shadow-modal: 0 24px 48px rgba(15, 23, 42, 0.3);
+
+  /* Transitions */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 140ms;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--pr-bg-page);
+  color: var(--pr-ink);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--pr-ink-muted) transparent;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.pr-inbox-app {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 54px);
+  background: var(--pr-bg-page);
+}
+
+/* ==========================================================================
+   TOP HEADER (SLIM & CLEAN)
+   ========================================================================== */
+
+.pr-header {
+  background: #ffffff;
+  border-bottom: 1px solid var(--pr-border-subtle);
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 54px;
+  z-index: 100;
+}
+
+.pr-header-left {
+  display: flex;
+  align-items: center;
+  min-width: 240px;
+}
+
+.pr-brand-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pr-title-icon {
+  color: var(--pr-primary);
+  flex-shrink: 0;
+}
+
+.pr-title-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--pr-brand-dark);
+  letter-spacing: -0.01em;
+}
+
+.pr-mode-pill {
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--pr-primary-surface);
+  color: var(--pr-primary);
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+}
+
+.retention-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  cursor: help;
+}
+
+/* Center Search */
+.pr-header-search {
+  flex: 1;
+  max-width: 520px;
+}
+
+.search-input-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-input-box .search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--pr-ink-muted);
+  pointer-events: none;
+}
+
+.search-input-box input {
+  width: 100%;
+  height: 36px;
+  padding: 0 32px 0 36px;
+  background: #f8fafc;
+  border: 1px solid var(--pr-border);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--pr-ink);
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.search-input-box input:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: var(--pr-primary);
+  box-shadow: 0 0 0 3px rgba(23, 100, 135, 0.12);
+}
+
+.btn-clear-search {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--pr-ink-muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.btn-clear-search:hover {
+  background: rgba(0,0,0,0.06);
+  color: var(--pr-ink);
+}
+
+/* Header Right Metrics & Buttons */
+.pr-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.live-metrics-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: #f8fafc;
+  border: 1px solid var(--pr-border-subtle);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+}
+
+.metric-count {
+  color: var(--pr-ink-secondary);
+}
+.metric-qty {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--pr-ink);
+}
+.metric-amount {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #0369a1;
+}
+.metric-sep {
+  opacity: 0.35;
+}
+
+.header-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-icon-sm {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   WORKSPACE LAYOUT (SIDEBAR + MAIN TABLE)
+   ========================================================================== */
+
+.pr-workspace-layout {
+  display: flex;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   LEFT SIDEBAR (CLEAN & COMPACT GMAIL RAIL)
+   ========================================================================== */
+
+.pr-sidebar {
+  width: 215px;
+  min-width: 215px;
+  background: #ffffff;
+  border-right: 1px solid var(--pr-border-subtle);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar-compose-wrap {
+  padding: 14px 14px 10px;
+}
+
+.btn-compose {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.35);
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.btn-compose:hover {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45);
+}
+
+.sidebar-nav-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 10px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nav-folder-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-folder-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 12px;
+  color: var(--pr-ink-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-pill);
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.nav-folder-link:hover {
+  background: #f1f5f9;
+  color: var(--pr-ink);
+}
+
+.nav-folder-item.active .nav-folder-link {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-weight: 600;
+}
+
+.nav-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--pr-ink-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.nav-badge.badge-primary {
+  background: #bae6fd;
+  color: #0369a1;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--pr-border-subtle);
+  margin: 4px 6px;
+}
+
+.sidebar-section-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pr-ink-muted);
+  padding: 4px 8px 2px;
+}
+
+/* Quick Chips Stack in Sidebar */
+.quick-chips-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chip-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.chip-item.chip-urgent {
+  color: #9a3412;
+}
+.chip-item.chip-urgent:hover, .chip-item.chip-urgent.active {
+  background: #fff7ed;
+  border-color: #ffedd5;
+}
+
+.chip-item.chip-overdue {
+  color: #991b1b;
+}
+.chip-item.chip-overdue:hover, .chip-item.chip-overdue.active {
+  background: #fef2f2;
+  border-color: #fee2e2;
+}
+
+.chip-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.chip-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chip-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Document Type Pills */
+.doc-type-pills {
+  display: flex;
+  gap: 3px;
+  background: #f8fafc;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--pr-border-subtle);
+}
+
+.btn-doc-pill {
+  flex: 1;
+  padding: 4px 6px;
+  border: none;
+  background: transparent;
+  color: var(--pr-ink-secondary);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.btn-doc-pill.active {
+  background: #ffffff;
+  color: var(--pr-ink);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+/* ==========================================================================
+   MAIN INBOX CONTENT & HORIZONTAL FILTER BAR
+   ========================================================================== */
+
+.pr-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 12px 16px;
+  background: var(--pr-bg-page);
+}
+
+/* Horizontal Segmented Pipeline Bar */
+.inbox-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.pipeline-tabs-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #ffffff;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--pr-border-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+.pipeline-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: none;
+  background: transparent;
+  color: var(--pr-ink-secondary);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 500;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+  white-space: nowrap;
+}
+
+.pipeline-tab:hover {
+  color: var(--pr-ink);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.pipeline-tab.active {
+  background: #1e293b;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.pipeline-tab.tab-amber.active {
+  background: var(--stage-amber-bg);
+  color: var(--stage-amber);
+  border: 1px solid var(--stage-amber-border);
+}
+.pipeline-tab.tab-blue.active {
+  background: var(--stage-blue-bg);
+  color: var(--stage-blue);
+  border: 1px solid var(--stage-blue-border);
+}
+.pipeline-tab.tab-purple.active {
+  background: var(--stage-purple-bg);
+  color: var(--stage-purple);
+  border: 1px solid var(--stage-purple-border);
+}
+
+.tab-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.dot-amber { background: var(--stage-amber); }
+.dot-blue { background: var(--stage-blue); }
+.dot-purple { background: var(--stage-purple); }
+
+.tab-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.08);
+}
+.pipeline-tab.active .tab-count {
+  background: rgba(255, 255, 255, 0.2);
+}
+.pipeline-tab.tab-amber.active .tab-count,
+.pipeline-tab.tab-blue.active .tab-count,
+.pipeline-tab.tab-purple.active .tab-count {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Inline Filters Group on the Right */
+.inline-filters-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-select-sm {
+  height: 32px;
+  padding: 4px 8px;
+  border: 1px solid var(--pr-border);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--pr-ink);
+  cursor: pointer;
+}
+
+.filter-date-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #ffffff;
+  padding: 2px 6px;
+  border: 1px solid var(--pr-border);
+  border-radius: var(--radius-sm);
+  height: 32px;
+}
+.filter-date-input {
+  border: none;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  color: var(--pr-ink);
+  background: transparent;
+  padding: 0;
+  width: 105px;
+}
+.filter-date-input:focus {
+  outline: none;
+}
+.date-sep {
+  color: var(--pr-ink-muted);
+  font-size: 11px;
+}
+.btn-clear-dates {
+  background: none;
+  border: none;
+  color: var(--pr-ink-muted);
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: 11px;
+}
+.btn-clear-dates:hover {
+  color: #dc2626;
+}
+
+/* Active Filter Chips Bar */
+.active-filter-chips-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  background: #ffffff;
+  border: 1px solid var(--pr-border);
+  border-radius: var(--radius-pill);
+  font-size: 11.5px;
+  color: var(--pr-ink);
+}
+.filter-pill .remove-pill {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--pr-ink-muted);
+  font-weight: 700;
+}
+.filter-pill .remove-pill:hover {
+  color: #dc2626;
+}
+
+/* ==========================================================================
+   TABLE CONTAINER CARD
+   ========================================================================== */
+
+.table-container-card {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid var(--pr-border-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.table-action-strip {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--pr-border-subtle);
+  background: #fafbfc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+}
+
+.strip-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.strip-right {
+  display: flex;
+  align-items: center;
+}
+
+.pagination-info-text {
+  font-size: 11.5px;
+  color: var(--pr-ink-muted);
+}
+
+/* Checkboxes */
+.custom-checkbox-wrap {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+.custom-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.checkbox-box {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--pr-border);
+  border-radius: 4px;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-fast) var(--ease);
+}
+.custom-checkbox:hover ~ .checkbox-box {
+  border-color: var(--pr-primary);
+}
+.custom-checkbox:checked ~ .checkbox-box {
+  background: var(--pr-primary);
+  border-color: var(--pr-primary);
+}
+.custom-checkbox:checked ~ .checkbox-box::after {
+  content: '';
+  width: 3.5px;
+  height: 7.5px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+.custom-checkbox:indeterminate ~ .checkbox-box {
+  background: var(--pr-primary);
+  border-color: var(--pr-primary);
+}
+.custom-checkbox:indeterminate ~ .checkbox-box::after {
+  content: '';
+  width: 7px;
+  height: 2px;
+  background: #ffffff;
+}
+
+/* Bulk Toolbar */
+.bulk-actions-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--pr-border);
+}
+.selected-count-badge {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--pr-primary);
+  margin-right: 2px;
+}
+
+/* Table Edit Banner */
+.table-edit-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #fefce8;
+  border: 1px solid #fef08a;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+}
+.edit-mode-tag {
+  font-size: 12px;
+  font-weight: 600;
+  color: #854d0e;
+}
+.edit-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Table Scroll and Formatting */
+.table-scroll-wrap {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+.pr-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  color: var(--pr-ink);
+}
+
+.pr-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  color: var(--pr-ink-secondary);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--pr-border);
+  text-align: left;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.pr-table tbody tr {
+  transition: background-color var(--duration-fast) var(--ease);
+}
+.pr-table tbody tr:hover {
+  background-color: var(--pr-primary-surface);
+}
+.pr-table tbody tr.row-selected {
+  background-color: #e0f2fe;
+}
+.pr-table tbody td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--pr-border-subtle);
+  vertical-align: middle;
+}
+
+/* Table Cell Details */
+.th-check, .td-check { width: 34px; text-align: center; }
+.th-stage, .td-stage { width: 100px; }
+.th-doc, .td-doc { width: 175px; min-width: 160px; }
+.th-date, .td-date { width: 92px; font-family: var(--font-mono); font-size: 11.5px; }
+.th-area, .td-area { width: 125px; }
+.th-order, .td-order { width: 98px; }
+.th-desc, .td-desc { min-width: 220px; }
+.th-qty, .td-qty { width: 75px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.th-price, .td-price { width: 85px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.th-total, .td-total { width: 100px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; }
+.th-po, .td-po { width: 105px; }
+.th-delivery, .td-delivery { width: 110px; }
+.th-archived, .td-archived { width: 105px; font-size: 11px; color: var(--pr-ink-muted); }
+.th-actions, .td-actions { width: 75px; text-align: center; }
+
+/* Status Badges */
+.badge-stage {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-stage.pending-pr {
+  background: var(--stage-amber-bg);
+  color: var(--stage-amber);
+  border: 1px solid var(--stage-amber-border);
+}
+.badge-stage.pending-po {
+  background: var(--stage-blue-bg);
+  color: var(--stage-blue);
+  border: 1px solid var(--stage-blue-border);
+}
+.badge-stage.pending-receipt {
+  background: var(--stage-purple-bg);
+  color: var(--stage-purple);
+  border: 1px solid var(--stage-purple-border);
+}
+.badge-stage.archived {
+  background: var(--stage-archived-bg);
+  color: var(--stage-archived);
+}
+
+/* Document Type Badge (Horizontal Single-Line Pill) */
+.doc-badge-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.badge-doc-type {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+.badge-doc-type.type-pr {
+  background: var(--pr-blue-bg);
+  color: var(--pr-blue);
+  border: 1px solid var(--pr-blue-border);
+}
+.badge-doc-type.type-store {
+  background: var(--store-teal-bg);
+  color: var(--store-teal);
+  border: 1px solid var(--store-teal-border);
+}
+.doc-no-text {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--pr-ink);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.order-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 5px;
+  background: rgba(23, 100, 135, 0.08);
+  color: var(--pr-primary);
+  border-radius: var(--radius-xs);
+}
+
+.area-badge-wrap {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.area-line {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--pr-brand-dark);
+  letter-spacing: -0.01em;
+}
+.area-machine {
+  font-size: 11px;
+  color: #475569;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.desc-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  line-height: 1.35;
+  cursor: pointer;
+}
+.desc-text:hover {
+  color: var(--pr-primary);
+  text-decoration: underline;
+}
+
+.delivery-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.delivery-date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.tag-overdue {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 0 4px;
+  border-radius: var(--radius-xs);
+  background: #fee2e2;
+  color: #991b1b;
+  width: fit-content;
+}
+.tag-near {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 0 4px;
+  border-radius: var(--radius-xs);
+  background: #ffedd5;
+  color: #9a3412;
+  width: fit-content;
+}
+
+.row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.btn-row-action {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--pr-ink-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-row-action:hover {
+  background: rgba(0, 0, 0, 0.07);
+  color: var(--pr-ink);
+}
+.btn-row-action.action-delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Inline Edit Row Inputs */
+.pr-table tbody tr.row-inline-editing td {
+  padding: 3px 5px;
+  background-color: #fefce8;
+}
+.table-input {
+  width: 100%;
+  height: 26px;
+  padding: 2px 4px;
+  border: 1px solid #facc15;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 11.5px;
+  background: #ffffff;
+}
+
+/* Table Footer */
+.table-card-footer {
+  padding: 6px 14px;
+  border-top: 1px solid var(--pr-border-subtle);
+  background: #fafbfc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: var(--pr-ink-secondary);
+}
+.footer-note-text {
+  color: var(--pr-ink-muted);
+}
+.footer-summary-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chip-label {
+  color: var(--pr-ink-muted);
+}
+.chip-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--pr-ink);
+}
+.chip-val.highlight {
+  color: #0369a1;
+}
+
+/* ==========================================================================
+   GMAIL-STYLE DOCKED COMPOSE WINDOW (FLOATING BOTTOM-RIGHT)
+   ========================================================================== */
+
+.gmail-compose-dock {
+  position: fixed;
+  bottom: 0;
+  right: 28px;
+  width: 580px;
+  max-width: 92vw;
+  z-index: 1000;
+  transition: transform 0.24s var(--ease), height 0.24s var(--ease);
+}
+
+.compose-window-card {
+  background: #ffffff;
+  border-radius: 12px 12px 0 0;
+  box-shadow: var(--shadow-dock);
+  border: 1px solid var(--pr-border);
+  border-bottom: none;
+  display: flex;
+  flex-direction: column;
+  max-height: 86vh;
+  overflow: hidden;
+}
+
+.compose-header {
+  padding: 10px 16px;
+  background: #1e293b;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.compose-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+}
+
+.compose-tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.18);
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+}
+
+.compose-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.compose-btn-tool {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+.compose-btn-tool:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+/* Minimized State */
+.gmail-compose-dock.minimized .compose-body {
+  display: none !important;
+}
+.gmail-compose-dock.minimized {
+  width: 320px;
+}
+.gmail-compose-dock.minimized .compose-window-card {
+  border-radius: 8px 8px 0 0;
+}
+
+.compose-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.compose-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.compose-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.compose-row-4 {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1.1fr 1.3fr;
+  gap: 8px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--pr-ink);
+}
+.field-label .req {
+  color: #dc2626;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  height: 36px;
+  padding: 5px 9px;
+  background: #ffffff;
+  border: 1px solid var(--pr-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--pr-ink);
+  transition: all var(--duration-fast) var(--ease);
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--pr-primary);
+  box-shadow: 0 0 0 3px rgba(23, 100, 135, 0.12);
+}
+.form-textarea {
+  height: auto;
+  resize: vertical;
+}
+
+/* Document Type Toggle Pill */
+.doc-type-toggle {
+  display: flex;
+  gap: 6px;
+}
+.toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  border: 1px solid var(--pr-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  background: #ffffff;
+  transition: all var(--duration-fast) var(--ease);
+}
+.toggle-btn input { display: none; }
+.toggle-btn.toggle-pr:has(input:checked) {
+  border-color: var(--pr-blue);
+  background: var(--pr-blue-bg);
+  color: var(--pr-blue);
+  font-weight: 600;
+}
+.toggle-btn.toggle-store:has(input:checked) {
+  border-color: var(--store-teal);
+  background: var(--store-teal-bg);
+  color: var(--store-teal);
+  font-weight: 600;
+}
+
+.calc-total-pill {
+  height: 36px;
+  padding: 6px 10px;
+  background: #f8fafc;
+  border: 1px solid var(--pr-border-subtle);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-weight: 700;
+  color: #0369a1;
+  font-size: 13px;
+}
+
+.compose-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--pr-border-subtle);
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.compose-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--duration-fast) var(--ease);
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: var(--pr-primary);
+  color: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover {
+  background: var(--pr-primary-hover);
+}
+
+.btn-outline-primary {
+  background: #ffffff;
+  color: var(--pr-primary);
+  border-color: var(--pr-primary);
+}
+.btn-outline-primary:hover {
+  background: var(--pr-primary-surface);
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: var(--pr-ink);
+  border-color: var(--pr-border);
+}
+.btn-secondary:hover {
+  background: #f8fafc;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.btn-sm {
+  height: 28px;
+  padding: 0 9px;
+  font-size: 11.5px;
+}
+
+.btn-link-sm {
+  background: none;
+  border: none;
+  color: var(--pr-primary);
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   MODALS
+   ========================================================================== */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 10005;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-box {
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal);
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalEnter 0.18s var(--ease);
+}
+@keyframes modalEnter {
+  from { opacity: 0; transform: scale(0.97) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-sm { max-width: 420px; }
+.modal-md { max-width: 540px; }
+
+.modal-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--pr-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-header.header-danger {
+  background: #fef2f2;
+}
+.modal-title-danger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.modal-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--pr-brand-dark);
+}
+.modal-header.header-danger .modal-title {
+  color: #991b1b;
+}
+.btn-close-modal {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  color: var(--pr-ink-muted);
+  cursor: pointer;
+  padding: 4px;
+}
+.modal-body {
+  padding: 18px;
+  overflow-y: auto;
+}
+.modal-desc {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  color: var(--pr-ink-secondary);
+}
+.modal-footer {
+  padding: 12px 18px;
+  border-top: 1px solid var(--pr-border-subtle);
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.danger-warning-box {
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  font-size: 12px;
+  color: #991b1b;
+}
+.danger-warning-box strong { display: block; margin-bottom: 2px; }
+.danger-warning-box p { margin: 0; line-height: 1.35; }
+.delete-target-preview {
+  margin-top: 10px;
+  padding: 8px;
+  background: #f8fafc;
+  border: 1px solid var(--pr-border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.field-error-text {
+  font-size: 11px;
+  color: #dc2626;
+  margin-top: 4px;
+}
+
+.detail-header-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.detail-type-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+}
+.detail-type-badge.type-pr {
+  background: var(--pr-blue-bg);
+  color: var(--pr-blue);
+  border: 1px solid var(--pr-blue-border);
+}
+.detail-type-badge.type-store {
+  background: var(--store-teal-bg);
+  color: var(--store-teal);
+  border: 1px solid var(--store-teal-border);
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+  font-size: 12.5px;
+}
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.detail-item.col-full { grid-column: span 2; }
+.detail-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--pr-ink-muted);
+}
+.detail-value {
+  color: var(--pr-ink);
+}
+
+/* Toast */
+.pr-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 10010;
+  padding: 10px 16px;
+  background: #1e293b;
+  color: #ffffff;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+  font-size: 13px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.2s var(--ease);
+  pointer-events: none;
+}
+.pr-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.pr-toast.success { background: #15803d; }
+.pr-toast.error { background: #dc2626; }
+.pr-toast.info { background: #176487; }
+
+/* Empty state */
+.empty-state-box {
+  padding: 44px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.empty-icon {
+  font-size: 32px;
+}
+.empty-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--pr-ink);
+}
+.empty-desc {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--pr-ink-muted);
+  max-width: 320px;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .pr-sidebar {
+    width: 60px;
+    min-width: 60px;
+  }
+  .btn-compose span,
+  .nav-text,
+  .nav-badge,
+  .sidebar-section-title,
+  .chip-text,
+  .chip-count,
+  .doc-type-pills {
+    display: none !important;
+  }
+  .btn-compose {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    margin: 0 auto;
+  }
+  .nav-folder-link {
+    justify-content: center;
+    padding: 8px;
+  }
+  .live-metrics-pill {
+    display: none;
+  }
+  .gmail-compose-dock {
+    width: 100%;
+    right: 0;
+  }
+}
+
+</style>
+</head>
+<body>
+<nav aria-label="ระบบซ่อมบำรุงไฟฟ้า" class="em-main-nav">
+  <div class="em-nav-container">
+    <div class="em-nav-left">
+      <!-- Hamburger Toggle Button -->
+      <button type="button" id="em-hamburger-btn" class="em-hamburger-btn" aria-label="เปิดเมนูนำทาง" aria-expanded="false" aria-controls="em-drawer">
+        <svg class="em-icon-menu" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Logo แผนกซ่อมไฟฟ้า -->
+      <a href="/bom/" class="em-brand-link" title="แผนกซ่อมไฟฟ้า">
+        <img class="em-brand-logo" src="/Logo%20small.png" alt="แผนกซ่อมไฟฟ้า">
+        <span class="em-brand-text">แผนกซ่อมไฟฟ้า</span>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <div class="em-nav-center">
+      <!-- 2. อุปกรณ์ประจำเครื่องจักร with Dropdown -->
+      <div class="em-dropdown em-dropdown-bom">
+        <a href="/bom/" class="em-nav-link em-dropdown-trigger">
+          <span>BoM Parts</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <div class="em-dropdown-header">เลือกแผนก</div>
+          <a class="em-dropdown-item" href="/bom/"><span class="em-dept-badge">ALL</span> ทุกแผนก</a>
+          <a class="em-dropdown-item" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
+          <a class="em-dropdown-item" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PC"><span class="em-dept-badge">PC</span> ฝาพลาสติก</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PR"><span class="em-dept-badge">PR</span> งานพิมพ์</a>
+          <a class="em-dropdown-item" href="/bom/?dept=OT"><span class="em-dept-badge">OT</span> อื่นๆ</a>
+        </div>
+      </div>
+
+      <!-- 3. Master อะไหล่ with Dropdown -->
+      <div class="em-dropdown em-dropdown-parts">
+        <a href="/parts/" class="em-nav-link em-dropdown-trigger">
+          <span>Master List</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/parts/"><span class="em-item-icon">▤</span> รายการอะไหล่</a>
+          <a class="em-dropdown-item" href="/parts/?action=add"><span class="em-item-icon">＋</span> เพิ่มแบบตาราง</a>
+          <a class="em-dropdown-item" href="/parts/?view=batch"><span class="em-item-icon">🖼</span> อัปโหลดรูปชุด</a>
+        </div>
+      </div>
+
+      <!-- 4. เครื่องจักร -->
+      <a class="em-nav-link" href="/machines/">Machines</a>
+
+      <!-- 5. จัดการ Order PM with Dropdown -->
+      <div class="em-dropdown em-dropdown-pm">
+        <a href="/pm/" class="em-nav-link em-dropdown-trigger">
+          <span>Order PM</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
+          <a class="em-dropdown-item" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+        </div>
+      </div>
+
+      <!-- 6. ค่าใช้จ่าย PM with Dropdown -->
+      <div class="em-dropdown em-dropdown-pm-expenses">
+        <a href="/pm-expenses/" class="em-nav-link em-dropdown-trigger">
+          <span>ค่าใช้จ่าย PM</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
+          <a class="em-dropdown-item" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+        </div>
+      </div>
+
+      <!-- 7. จัดซื้อ & สโตร์ (PR & Store Tracker) -->
+      <a class="em-nav-link active" href="/pr-tracker/" aria-current="page">
+        <span>จัดซื้อ &amp; สโตร์</span>
+      </a>
+
+      <!-- 8. สื่อประชาสัมพันธ์ with Dropdown -->
+      <div class="em-dropdown em-dropdown-announcements">
+        <a href="/announcements/" class="em-nav-link em-dropdown-trigger">
+          <span>สื่อประชาสัมพันธ์</span>
+          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/announcements/"><span class="em-item-icon">⚙️</span> สื่อประชาสัมพันธ์</a>
+          <a class="em-dropdown-item" href="/announcements/tv.html" target="_blank"><span class="em-item-icon">📺</span> เปิดหน้า TV</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: User management and account -->
+    <div class="em-nav-right">
+      <a id="em-nav-users" class="em-nav-link" style="display:none" href="/users/">จัดการผู้ใช้งาน</a>
+      <span id="em-user-badge" class="em-user-badge"></span>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Overlay & Sidebar -->
+  <div id="em-drawer-overlay" class="em-drawer-overlay" aria-hidden="true"></div>
+  <aside id="em-drawer" class="em-drawer" aria-label="เมนูนำทางหลัก">
+    <div class="em-drawer-header">
+      <div class="em-drawer-brand">
+        <img class="em-brand-logo" src="/Logo%20small.png" alt="แผนกซ่อมไฟฟ้า">
+        <div class="em-drawer-brand-text">
+          <strong>แผนกซ่อมไฟฟ้า</strong>
+          <small>ระบบซ่อมบำรุงไฟฟ้า</small>
+        </div>
+      </div>
+      <button type="button" id="em-drawer-close" class="em-drawer-close" aria-label="ปิดเมนู">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="em-drawer-content">
+      <!-- User Info Card in Drawer -->
+      <div id="em-drawer-user-card" class="em-drawer-user-card"></div>
+
+      <nav class="em-drawer-nav">
+        <!-- 2. อุปกรณ์ประจำเครื่องจักร Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              BoM Parts
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/bom/"><span class="em-dept-badge">ALL</span> ทุกแผนก</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PC"><span class="em-dept-badge">PC</span> ฝาพลาสติก</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PR"><span class="em-dept-badge">PR</span> งานพิมพ์</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=OT"><span class="em-dept-badge">OT</span> อื่นๆ</a>
+          </div>
+        </div>
+
+        <!-- 3. Master อะไหล่ Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              Master List
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/parts/"><span class="em-item-icon">▤</span> รายการอะไหล่</a>
+            <a class="em-drawer-subitem" href="/parts/?action=add"><span class="em-item-icon">＋</span> เพิ่มแบบตาราง</a>
+            <a class="em-drawer-subitem" href="/parts/?view=batch"><span class="em-item-icon">🖼</span> อัปโหลดรูปชุด</a>
+          </div>
+        </div>
+
+        <!-- 4. เครื่องจักร -->
+        <a class="em-drawer-link" href="/machines/">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+          Machines
+        </a>
+
+        <!-- 5. จัดการ Order PM Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              Order PM
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
+            <a class="em-drawer-subitem" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+          </div>
+        </div>
+
+        <!-- 6. ค่าใช้จ่าย PM Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              ค่าใช้จ่าย PM
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
+            <a class="em-drawer-subitem" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+          </div>
+        </div>
+
+        <!-- 7. จัดซื้อ & สโตร์ (PR & Store Tracker) -->
+        <a class="em-drawer-link active" href="/pr-tracker/" aria-current="page">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          จัดซื้อ &amp; สโตร์
+        </a>
+
+        <!-- 8. สื่อประชาสัมพันธ์ Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              สื่อประชาสัมพันธ์
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/announcements/"><span class="em-item-icon">⚙️</span> สื่อประชาสัมพันธ์</a>
+            <a class="em-drawer-subitem" href="/announcements/tv.html" target="_blank"><span class="em-item-icon">📺</span> เปิดหน้า TV</a>
+          </div>
+        </div>
+
+        <!-- 6. จัดการผู้ใช้งาน -->
+        <a id="em-drawer-nav-users" class="em-drawer-link" style="display:none" href="/users/">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          จัดการผู้ใช้งาน
+        </a>
+      </nav>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div id="em-drawer-footer" class="em-drawer-footer"></div>
+  </aside>
+</nav>
+
+<style>
+/* --- UNIFIED ELECTRICAL MAINTENANCE NAVIGATION BAR --- */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+.em-main-nav,
+.em-main-nav *,
+.em-main-nav *::before,
+.em-main-nav *::after {
+  box-sizing: border-box;
+}
+.em-main-nav {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 10000;
+  background: #0d1e38;
+  color: #ffffff;
+  font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.18);
+  box-shadow: 0 4px 20px rgba(10, 25, 47, 0.35);
+}
+.em-nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 20px;
+  height: 54px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.em-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.em-hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #f1f5f9;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+.em-hamburger-btn:hover {
+  background: rgba(128, 24, 42, 0.28);
+  border-color: #80182a;
+  color: #ffffff;
+  transform: scale(1.04);
+}
+.em-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #ffffff;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: opacity 0.2s;
+}
+.em-brand-link:hover { opacity: 0.92; }
+.em-brand-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 2px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.em-brand-text {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* Nav Links & Dropdowns */
+.em-nav-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+.em-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 7px 12px;
+  border-radius: 6px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.em-nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+.em-nav-link.active {
+  color: #ffffff;
+  font-weight: 600;
+  background: rgba(128, 24, 42, 0.22);
+  border-bottom-color: #80182a;
+}
+.em-caret {
+  transition: transform 0.2s ease;
+  opacity: 0.7;
+}
+
+/* Dropdown Menu */
+.em-dropdown {
+  position: relative;
+}
+.em-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 200px;
+  background: #18313d;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  z-index: 10001;
+}
+.em-dropdown:hover .em-dropdown-menu,
+.em-dropdown.is-open .em-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.em-dropdown:hover .em-caret,
+.em-dropdown.is-open .em-caret {
+  transform: rotate(180deg);
+}
+.em-dropdown-header {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  padding: 6px 10px 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 4px;
+}
+.em-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  color: #e2e8f0;
+  text-decoration: none;
+  font-size: 13px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.em-dropdown-item:hover {
+  background: rgba(128, 24, 42, 0.3);
+  color: #ffffff;
+}
+.em-dept-badge {
+  display: inline-block;
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 2px 6px;
+  background: rgba(128, 24, 42, 0.38);
+  color: #f3c4ce;
+  border: 1px solid rgba(243, 196, 206, 0.45);
+  border-radius: 4px;
+}
+.em-item-icon {
+  font-size: 14px;
+  width: 18px;
+  text-align: center;
+  color: #d68a9a;
+}
+
+/* Right User Info Badge */
+.em-nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.em-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+/* Mobile Drawer Elements */
+.em-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 10002;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+.em-drawer-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+.em-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(320px, 86vw);
+  background: #13242e;
+  color: #ffffff;
+  z-index: 10003;
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+}
+.em-drawer.is-active {
+  transform: translateX(0);
+}
+.em-drawer-header {
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.em-drawer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.em-drawer-brand-text strong {
+  display: block;
+  font-size: 14.5px;
+  color: #ffffff;
+}
+.em-drawer-brand-text small {
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+.em-drawer-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.em-drawer-close:hover {
+  color: #ffffff;
+  background: rgba(255,255,255,0.08);
+}
+.em-drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.em-drawer-user-card {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+.em-drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.em-drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+.em-drawer-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+.em-drawer-link.active {
+  background: rgba(128, 24, 42, 0.3);
+  color: #f3c4ce;
+  font-weight: 600;
+  border-left: 3px solid #80182a;
+}
+.em-drawer-group {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  margin-bottom: 2px;
+  overflow: hidden;
+}
+.em-drawer-group-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.em-drawer-group-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+.em-drawer-group-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.em-drawer-arrow {
+  transition: transform 0.2s ease;
+  color: #94a3b8;
+}
+.em-drawer-group-btn[aria-expanded="true"] .em-drawer-arrow {
+  transform: rotate(180deg);
+  color: #f3c4ce;
+}
+.em-drawer-sublist {
+  padding: 4px 8px 10px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.em-drawer-subitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: #94a3b8;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.em-drawer-subitem:hover {
+  color: #ffffff;
+  background: rgba(128, 24, 42, 0.22);
+}
+.em-drawer-footer {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .em-hamburger-btn {
+    display: inline-flex;
+  }
+  .em-nav-center {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .em-nav-right {
+    display: none;
+  }
+  .em-nav-container {
+    padding: 0 14px;
+  }
+  .em-nav-left {
+    min-width: 0;
+  }
+  .em-brand-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+</style>
+
+  <div class="pr-inbox-app">
+
+    <!-- Top Operations Header (Slim & Modern) -->
+    <header class="pr-header">
+      <div class="pr-header-left">
+        <div class="pr-brand-title">
+          <svg class="pr-title-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <span class="pr-title-text">งานจัดซื้อ &amp; เบิกสโตร์</span>
+          <span class="pr-mode-pill" id="current-folder-pill">กล่องงาน (Inbox)</span>
+          <span class="retention-badge" title="ระบบจัดเก็บข้อมูลย้อนหลัง 2 ปีอัตโนมัติ เพื่อป้องกันฐานข้อมูลบวม">🕒 ย้อนหลัง 2 ปี</span>
+        </div>
+      </div>
+
+      <!-- Center: Gmail-style Global Search Box -->
+      <div class="pr-header-search">
+        <div class="search-input-box">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="global-search-input" placeholder="ค้นหา Order PM, รายการอะไหล่, พื้นที่, PR, PO, เลขที่เบิก..." autocomplete="off">
+          <button type="button" id="btn-clear-search" class="btn-clear-search" title="ล้างคำค้นหา" style="display:none;">×</button>
+        </div>
+      </div>
+
+      <!-- Right: Summary Metrics & Action Buttons -->
+      <div class="pr-header-right">
+        <div class="live-metrics-pill" id="live-metrics-bar" title="สรุปตามเงื่อนไขที่กำลังแสดง">
+          <span class="metric-count" id="metric-total-count">0 รายการ</span>
+          <span class="metric-sep">·</span>
+          <span class="metric-qty" id="metric-total-qty">0 ชิ้น</span>
+          <span class="metric-sep">·</span>
+          <span class="metric-amount" id="metric-total-price">฿ 0.00</span>
+        </div>
+
+        <div class="header-action-buttons">
+          <button type="button" id="btn-export-csv" class="btn btn-secondary btn-sm" title="ส่งออกเป็น Excel CSV (ภาษาไทย UTF-8)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span class="btn-text">ส่งออก CSV</span>
+          </button>
+          <button type="button" id="btn-refresh" class="btn btn-secondary btn-icon-sm" title="รีเฟรชข้อมูล">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="pr-workspace-layout">
+
+      <!-- ===================================================================
+           LEFT SIDEBAR (Streamlined & Minimal Gmail Rail)
+           =================================================================== -->
+      <aside class="pr-sidebar">
+        
+        <!-- Large Compose Button -->
+        <div class="sidebar-compose-wrap">
+          <button type="button" id="btn-compose" class="btn-compose">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>เปิดคำขอ / เพิ่มรายการ</span>
+          </button>
+        </div>
+
+        <nav class="sidebar-nav-scroll">
+          
+          <!-- Primary Folders -->
+          <ul class="nav-folder-list">
+            <li class="nav-folder-item active" data-folder="inbox">
+              <a href="#inbox" class="nav-folder-link">
+                <span class="nav-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+                </span>
+                <span class="nav-text">กล่องงาน (Inbox)</span>
+                <span class="nav-badge badge-primary" id="badge-count-inbox">0</span>
+              </a>
+            </li>
+            <li class="nav-folder-item" data-folder="archive">
+              <a href="#archive" class="nav-folder-link">
+                <span class="nav-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                </span>
+                <span class="nav-text">รายการที่เก็บ (Archive)</span>
+                <span class="nav-badge" id="badge-count-archive">0</span>
+              </a>
+            </li>
+            <li class="nav-folder-item" data-folder="all">
+              <a href="#all" class="nav-folder-link">
+                <span class="nav-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                </span>
+                <span class="nav-text">รายการทั้งหมด (All)</span>
+                <span class="nav-badge" id="badge-count-all">0</span>
+              </a>
+            </li>
+          </ul>
+
+          <div class="sidebar-divider"></div>
+
+          <!-- Quick Urgent Filters -->
+          <div class="sidebar-section-title">ตัวกรองด่วน</div>
+          <div class="quick-chips-stack">
+            <button type="button" class="chip-item chip-urgent" data-step="NEAR_DELIVERY" title="กำหนดส่งมอบภายใน 7 วันข้างหน้า">
+              <span class="chip-indicator"></span>
+              <span class="chip-text">ส่งมอบเร็วๆ นี้ (7 วัน)</span>
+              <span class="chip-count" id="badge-count-near-delivery">0</span>
+            </button>
+            <button type="button" class="chip-item chip-overdue" data-step="OVERDUE" title="เกินกำหนดวันที่ส่งมอบแล้ว">
+              <span class="chip-indicator"></span>
+              <span class="chip-text">เกินกำหนด (Overdue)</span>
+              <span class="chip-count" id="badge-count-overdue">0</span>
+            </button>
+          </div>
+
+          <div class="sidebar-divider"></div>
+
+          <!-- Document Type Filter -->
+          <div class="sidebar-section-title">ประเภทเอกสาร</div>
+          <div class="doc-type-pills">
+            <button type="button" class="btn-doc-pill active" data-doctype="">ทั้งหมด</button>
+            <button type="button" class="btn-doc-pill btn-pill-pr" data-doctype="PR">ซื้อ</button>
+            <button type="button" class="btn-doc-pill btn-pill-store" data-doctype="STORE">เบิก</button>
+          </div>
+
+        </nav>
+      </aside>
+
+      <!-- ===================================================================
+           MAIN INBOX TABLE WORKSPACE (Full Width & Clean)
+           =================================================================== -->
+      <main class="pr-main-content">
+        
+        <!-- Horizontal Segmented Pipeline Bar & Quick Filter Controls -->
+        <section class="inbox-filter-bar">
+          
+          <!-- Left: 3-Step Pipeline Tracker Segmented Tabs -->
+          <div class="pipeline-tabs-group" role="tablist">
+            <button type="button" class="pipeline-tab active" data-step="" role="tab">
+              <span class="tab-label">ทั้งหมด</span>
+            </button>
+            <button type="button" class="pipeline-tab tab-amber" data-step="PENDING_PR" role="tab">
+              <span class="tab-dot dot-amber"></span>
+              <span class="tab-label">1. รอออก PR / สโตร์</span>
+              <span class="tab-count" id="badge-count-pending-pr">0</span>
+            </button>
+            <button type="button" class="pipeline-tab tab-blue" data-step="PENDING_PO" role="tab">
+              <span class="tab-dot dot-blue"></span>
+              <span class="tab-label">2. รอออก PO</span>
+              <span class="tab-count" id="badge-count-pending-po">0</span>
+            </button>
+            <button type="button" class="pipeline-tab tab-purple" data-step="PENDING_RECEIPT" role="tab">
+              <span class="tab-dot dot-purple"></span>
+              <span class="tab-label">3. รอรับของ</span>
+              <span class="tab-count" id="badge-count-pending-receipt">0</span>
+            </button>
+          </div>
+
+          <!-- Right: Compact Dropdown Filters (Dept, Line, Date) -->
+          <div class="inline-filters-group">
+            <!-- Dept Filter -->
+            <div class="filter-dropdown-wrap">
+              <select id="filter-dept" class="filter-select-sm">
+                <option value="">ทุกแผนก (CC, PP, ...)</option>
+              </select>
+            </div>
+
+            <!-- Line Filter -->
+            <div class="filter-dropdown-wrap">
+              <select id="filter-line" class="filter-select-sm">
+                <option value="">ทุกสายการผลิต</option>
+              </select>
+            </div>
+
+            <!-- Date Filter Toggle -->
+            <div class="filter-date-group">
+              <input type="date" id="filter-start-date" class="filter-date-input" title="ตั้งแต่วันที่">
+              <span class="date-sep">-</span>
+              <input type="date" id="filter-end-date" class="filter-date-input" title="ถึงวันที่">
+              <button type="button" id="btn-clear-date-filter" class="btn-clear-dates" title="ล้างวันที่" style="display:none;">✕</button>
+            </div>
+
+            <!-- Page Size -->
+            <div class="page-size-wrap">
+              <select id="select-page-limit" class="filter-select-sm">
+                <option value="50">50 แถว</option>
+                <option value="100" selected>100 แถว</option>
+                <option value="200">200 แถว</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Active Search / Filter Chips (if any) -->
+        <div class="active-filter-chips-bar" id="active-filter-chips" style="display:none;"></div>
+
+        <!-- Table Card -->
+        <div class="table-container-card">
+
+          <!-- Table Contextual Selection Toolbar -->
+          <div class="table-action-strip">
+            <div class="strip-left">
+              <label class="custom-checkbox-wrap" title="เลือกทั้งหมดในหน้านี้">
+                <input type="checkbox" id="check-select-all" class="custom-checkbox">
+                <span class="checkbox-box"></span>
+              </label>
+
+              <!-- Contextual Bulk Actions -->
+              <div class="bulk-actions-group" id="bulk-actions-group" style="display:none;">
+                <span class="selected-count-badge" id="selected-count-badge">เลือก 0 รายการ</span>
+                
+                <button type="button" id="btn-bulk-copy" class="btn btn-sm btn-primary" title="คัดลอกรายการที่เลือก เพื่อนำไปวางส่งอีเมลตามงาน (พื้นที่ | Order | รายละเอียด | จำนวน | ราคา | PR ถ้ามี)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <span>คัดลอกส่งอีเมล</span>
+                </button>
+
+                <button type="button" id="btn-bulk-inline-edit" class="btn btn-sm btn-secondary" title="แก้ไขแถวที่เลือกบนตารางโดยตรง">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  <span>แก้ไขในตาราง</span>
+                </button>
+
+                <button type="button" id="btn-open-bulk-area-modal" class="btn btn-sm btn-secondary" title="ย้ายแผนก/ไลน์/เครื่องจักร">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  <span>เปลี่ยนพื้นที่</span>
+                </button>
+
+                <button type="button" id="btn-bulk-archive" class="btn btn-sm btn-secondary" title="ย้ายเข้ารายการจัดเก็บ">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                  <span id="btn-bulk-archive-text">จัดเก็บพร้อมกัน</span>
+                </button>
+
+                <button type="button" id="btn-open-bulk-delete-modal" class="btn btn-sm btn-danger" title="ลบถาวร (ต้องใส่รหัสแอดมิน)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>ลบถาวร</span>
+                </button>
+
+                <button type="button" id="btn-deselect-all" class="btn-link-sm" title="ยกเลิกการเลือก">ยกเลิก</button>
+              </div>
+
+              <!-- Table Edit Mode Banner -->
+              <div class="table-edit-banner" id="table-edit-banner" style="display:none;">
+                <span class="edit-mode-tag">✏️ โหมดแก้ไขข้อมูลในตาราง</span>
+                <div class="edit-banner-actions">
+                  <button type="button" id="btn-cancel-table-edit" class="btn btn-sm btn-secondary">ยกเลิก</button>
+                  <button type="button" id="btn-save-table-edit" class="btn btn-sm btn-primary">บันทึกทั้งหมด</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="strip-right">
+              <span class="pagination-info-text" id="text-pagination-info">แสดง 0 จาก 0 รายการ</span>
+            </div>
+          </div>
+
+          <!-- Main Table Scroll Wrapper -->
+          <div class="table-scroll-wrap">
+            <table class="pr-table" id="pr-items-table">
+              <thead>
+                <tr>
+                  <th class="th-check"><span class="sr-only">เลือก</span></th>
+                  <th class="th-stage">สถานะขั้นตอน</th>
+                  <th class="th-doc">ประเภท &amp; เลขเอกสาร</th>
+                  <th class="th-date">วันที่สร้าง</th>
+                  <th class="th-area">พื้นที่ / เครื่องจักร</th>
+                  <th class="th-order">เลข ORDER</th>
+                  <th class="th-desc">รายละเอียดสินค้า / บริการ / อะไหล่</th>
+                  <th class="th-qty text-right">จำนวน</th>
+                  <th class="th-price text-right">ราคา/หน่วย</th>
+                  <th class="th-total text-right">ราคารวม (฿)</th>
+                  <th class="th-po">เลขที่ PO</th>
+                  <th class="th-delivery">กำหนดส่งมอบ</th>
+                  <th class="th-archived" id="th-archived-date" style="display:none;">จัดเก็บเมื่อ</th>
+                  <th class="th-actions text-center">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="pr-table-tbody">
+                <tr>
+                  <td colspan="14" class="text-center py-12 text-muted">
+                    กำลังโหลดข้อมูลงานจัดซื้อ &amp; เบิกสโตร์...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Table Footer Summary -->
+          <div class="table-card-footer">
+            <div class="footer-left">
+              <span class="footer-note-text">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 3px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                นโยบายจัดเก็บ 2 ปี (Storage Retention): จัดเก็บข้อมูลย้อนหลังไม่เกิน 2 ปีอัตโนมัติ เพื่อป้องกันฐานข้อมูลบวม
+              </span>
+            </div>
+            <div class="footer-right">
+              <div class="footer-summary-chips">
+                <span class="chip-label">รวมที่แสดง:</span>
+                <span class="chip-val" id="footer-sum-qty">0 ชิ้น</span>
+                <span class="chip-sep">|</span>
+                <span class="chip-label">มูลค่ารวม:</span>
+                <span class="chip-val highlight" id="footer-sum-price">฿ 0.00</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+
+    <!-- =========================================================================
+         GMAIL-STYLE DOCKED COMPOSE WINDOW (ลอยมุมขวาล่าง โปร่งโล่ง ไม่เกะกะ)
+         ========================================================================= -->
+    <div class="gmail-compose-dock" id="pr-form-pane" style="display:none;">
+      <div class="compose-window-card">
+        
+        <!-- Compose Window Header -->
+        <div class="compose-header">
+          <div class="compose-header-title">
+            <span class="compose-tag" id="form-mode-badge">คำขอใหม่</span>
+            <strong id="form-pane-title">บันทึกคำขอจัดซื้อ / เบิกสโตร์</strong>
+          </div>
+          <div class="compose-header-controls">
+            <button type="button" id="btn-minimize-form" class="compose-btn-tool" title="ย่อหน้าต่าง">─</button>
+            <button type="button" id="btn-close-form" class="compose-btn-tool" title="ปิดหน้าต่าง">✕</button>
+          </div>
+        </div>
+
+        <!-- Compose Window Body (2-Column Clean Form) -->
+        <form id="pr-entry-form" class="compose-body" autocomplete="off">
+          <input type="hidden" id="form-item-id">
+
+          <!-- Row 1: Document Type & Created Date -->
+          <div class="compose-row-2">
+            <div class="form-field">
+              <label class="field-label">ประเภทคำขอ <span class="req">*</span></label>
+              <div class="doc-type-toggle">
+                <label class="toggle-btn toggle-pr">
+                  <input type="radio" name="docType" value="PR" checked id="radio-type-pr">
+                  <span>📄 ซื้อ</span>
+                </label>
+                <label class="toggle-btn toggle-store">
+                  <input type="radio" name="docType" value="STORE" id="radio-type-store">
+                  <span>🏬 เบิก</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="form-created-date" class="field-label">วันที่สร้างรายการ <span class="req">*</span></label>
+              <input type="date" id="form-created-date" required class="form-input">
+            </div>
+          </div>
+
+          <!-- Row 2: Area (Dept -> Line -> Machine) -->
+          <div class="compose-row-3">
+            <div class="form-field">
+              <label for="form-dept" class="field-label">แผนก (Dept)</label>
+              <select id="form-dept" class="form-select">
+                <option value="">เลือกแผนก...</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="form-line" class="field-label">สายการผลิต (Line)</label>
+              <select id="form-line" class="form-select">
+                <option value="">เลือกสายการผลิต...</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="form-machine" class="field-label">เครื่องจักร</label>
+              <select id="form-machine" class="form-select">
+                <option value="">เลือกเครื่องจักร (ถ้ามี)...</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 3: Order PM & Doc Number -->
+          <div class="compose-row-2">
+            <div class="form-field">
+              <label for="form-order-no" class="field-label">
+                <span>เลข ORDER (Order PM)</span>
+              </label>
+              <input type="text" id="form-order-no" list="pm-orders-datalist" placeholder="เช่น 13110001 (เลือกจาก PM หรือพิมพ์เอง)" class="form-input font-mono">
+              <datalist id="pm-orders-datalist"></datalist>
+            </div>
+
+            <div class="form-field">
+              <label for="form-doc-no" class="field-label" id="label-doc-no">
+                <span>หมายเลข PR / เลขที่เบิก</span>
+              </label>
+              <input type="text" id="form-doc-no" placeholder="เช่น PR-69001 หรือ ST-88001" class="form-input font-mono">
+            </div>
+          </div>
+
+          <!-- Row 4: Description (Prominent) -->
+          <div class="form-field">
+            <label for="form-description" class="field-label">
+              <span>รายละเอียดสินค้า / บริการ / อะไหล่ <span class="req">*</span></span>
+            </label>
+            <textarea id="form-description" rows="2" required placeholder="ระบุชื่อสินค้า สเปก ขนาด หรือรายการอะไหล่..." class="form-textarea"></textarea>
+          </div>
+
+          <!-- Row 5: Qty, Unit, Price, Total -->
+          <div class="compose-row-4">
+            <div class="form-field">
+              <label for="form-qty" class="field-label">จำนวน <span class="req">*</span></label>
+              <input type="number" id="form-qty" step="any" min="0.01" value="1" required class="form-input font-mono text-right">
+            </div>
+
+            <div class="form-field">
+              <label for="form-unit" class="field-label">หน่วยนับ</label>
+              <input type="text" id="form-unit" value="ชิ้น" list="units-datalist" class="form-input">
+              <datalist id="units-datalist">
+                <option value="ชิ้น">
+                <option value="ตัว">
+                <option value="ชุด">
+                <option value="อัน">
+                <option value="กล่อง">
+                <option value="ม้วน">
+                <option value="ตลับ">
+                <option value="เมตร">
+                <option value="งาน">
+                <option value="EA">
+                <option value="SET">
+              </datalist>
+            </div>
+
+            <div class="form-field">
+              <label for="form-price" class="field-label">ราคา/หน่วย (฿)</label>
+              <input type="number" id="form-price" step="any" min="0" placeholder="0.00" class="form-input font-mono text-right">
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">รวมเงิน (฿)</label>
+              <div class="calc-total-pill font-mono" id="form-calc-total">฿ 0.00</div>
+            </div>
+          </div>
+
+          <!-- Row 6: PO Number & Delivery Date -->
+          <div class="compose-row-2">
+            <div class="form-field">
+              <label for="form-po-no" class="field-label">เลขที่ PO (เมื่อสั่งซื้อแล้ว)</label>
+              <input type="text" id="form-po-no" placeholder="เช่น PO-2026-0045" class="form-input font-mono">
+            </div>
+
+            <div class="form-field">
+              <label for="form-delivery-date" class="field-label">กำหนดส่งมอบ (Delivery Date)</label>
+              <input type="date" id="form-delivery-date" class="form-input">
+            </div>
+          </div>
+
+          <!-- Row 7: Notes -->
+          <div class="form-field">
+            <label for="form-notes" class="field-label">หมายเหตุเพิ่มเติม</label>
+            <input type="text" id="form-notes" placeholder="ข้อความกำกับ เช่น อะไหล่สำรองด่วน, รอของจากญี่ปุ่น..." class="form-input">
+          </div>
+
+          <!-- Compose Footer Actions -->
+          <div class="compose-footer">
+            <button type="button" id="btn-cancel-form" class="btn btn-secondary">ยกเลิก</button>
+            <div class="compose-actions-right">
+              <button type="submit" id="btn-save-and-continue" class="btn btn-outline-primary" data-next="true">
+                บันทึก &amp; เพิ่มต่อ
+              </button>
+              <button type="submit" id="btn-save-form" class="btn btn-primary" data-next="false">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                <span>บันทึกรายการ</span>
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =========================================================================
+       MODALS
+       ========================================================================= -->
+  <!-- 1. เปลี่ยนพื้นที่พร้อมกัน -->
+  <div id="modal-bulk-area" class="modal-backdrop" style="display:none;">
+    <div class="modal-box modal-md">
+      <div class="modal-header">
+        <h2 class="modal-title">ย้ายพื้นที่ / สายการผลิต สำหรับรายการที่เลือก</h2>
+        <button type="button" class="btn-close-modal" id="btn-close-bulk-area">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc" id="bulk-area-summary-text">กำลังอัปเดตพื้นที่สำหรับรายการที่เลือก:</p>
+        <div class="form-field" style="margin-bottom: 12px;">
+          <label for="bulk-area-dept" class="field-label">แผนก (Department):</label>
+          <select id="bulk-area-dept" class="form-select">
+            <option value="">เลือกแผนกใหม่...</option>
+          </select>
+        </div>
+        <div class="form-field" style="margin-bottom: 12px;">
+          <label for="bulk-area-line" class="field-label">สายการผลิต (Line):</label>
+          <select id="bulk-area-line" class="form-select">
+            <option value="">เลือกสายการผลิตใหม่...</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="bulk-area-machine" class="field-label">เครื่องจักร (Machine - ถ้ามี):</label>
+          <select id="bulk-area-machine" class="form-select">
+            <option value="">เลือกเครื่องจักร...</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-bulk-area">ยกเลิก</button>
+        <button type="button" class="btn btn-primary" id="btn-confirm-bulk-area">ยืนยันการเปลี่ยนพื้นที่</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ยืนยันลบถาวรด้วยรหัสแอดมิน -->
+  <div id="modal-admin-delete" class="modal-backdrop" style="display:none;">
+    <div class="modal-box modal-sm">
+      <div class="modal-header header-danger">
+        <div class="modal-title-danger">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <h2 class="modal-title">ยืนยันการลบข้อมูลถาวร</h2>
+        </div>
+        <button type="button" class="btn-close-modal" id="btn-close-admin-delete">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="danger-warning-box">
+          <strong>⚠️ นโยบายความปลอดภัยข้อมูล</strong>
+          <p>
+            รายการที่เสร็จสิ้นหรือรับของแล้ว แนะนำให้ใช้ปุ่ม <strong>"จัดเก็บ (Archive)"</strong> แทนการลบ 
+            หากต้องการลบรายการนี้ออกจากระบบอย่างถาวร กรุณากรอกรหัสผ่านผู้ดูแลระบบ (Admin)
+          </p>
+        </div>
+
+        <div class="delete-target-preview" id="delete-target-preview"></div>
+
+        <div class="form-field" style="margin-top: 14px;">
+          <label for="input-admin-password" class="field-label">รหัสผ่านผู้ดูแลระบบ (Admin Password) <span class="req">*</span></label>
+          <input type="password" id="input-admin-password" required placeholder="กรอกรหัสแอดมินเพื่อยืนยัน" class="form-input" autocomplete="current-password">
+          <span class="field-error-text" id="admin-password-error" style="display:none;"></span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-admin-delete">ยกเลิก</button>
+        <button type="button" class="btn btn-danger" id="btn-confirm-admin-delete">ยืนยันลบถาวร</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. รายละเอียดฉบับเต็ม -->
+  <div id="modal-item-detail" class="modal-backdrop" style="display:none;">
+    <div class="modal-box modal-md">
+      <div class="modal-header">
+        <div class="detail-header-group">
+          <span class="detail-type-badge" id="detail-type-badge">PR</span>
+          <h2 class="modal-title" id="detail-modal-title">รายละเอียดงานจัดซื้อ / เบิกสโตร์</h2>
+        </div>
+        <button type="button" class="btn-close-modal" id="btn-close-detail">✕</button>
+      </div>
+      <div class="modal-body detail-modal-body" id="detail-modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-detail-close-btn">ปิด</button>
+        <button type="button" class="btn btn-primary" id="btn-detail-edit-btn">แก้ไขข้อมูลนี้</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Toast Notification -->
+  <div id="toast" class="pr-toast" role="alert" aria-live="polite"></div>
+
+  <script>
+(() => {
+ 'use strict';
+ const scope = location.pathname.startsWith('/parts') ? 'parts' : location.pathname.startsWith('/bom') ? 'bom' : location.pathname.startsWith('/announcements') ? 'announcements' : location.pathname.startsWith('/users') ? 'users' : 'machines';
+ const inFlight = new Map();
+
+ let loginPromise = null;
+ let currentUser = null;
+
+ function ensureLoginModal() {
+  let modal = document.getElementById('em-auth-overlay');
+  if (modal) return modal;
+
+  const style = document.createElement('style');
+  style.textContent = `
+   #em-auth-overlay {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; z-index: 99999;
+   }
+   .em-auth-card {
+    background: #ffffff; color: #1e293b; border-radius: 12px; width: 100%; max-width: 380px;
+    padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    font-family: inherit;
+   }
+   .em-auth-title { font-size: 18px; font-weight: 700; color: #18313d; margin-bottom: 6px; }
+   .em-auth-sub { font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.4; }
+   .em-auth-field { margin-bottom: 14px; text-align: left; }
+   .em-auth-label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; }
+   .em-auth-input {
+    width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;
+    box-sizing: border-box; transition: border-color 0.2s;
+   }
+   .em-auth-input:focus { outline: none; border-color: #cc681c; box-shadow: 0 0 0 3px rgba(204, 104, 28, 0.15); }
+   .em-auth-btn {
+    width: 100%; padding: 10px; background: #cc681c; color: #ffffff; border: none; border-radius: 6px;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 8px;
+   }
+   .em-auth-btn:hover { background: #b25814; }
+   .em-auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+   .em-auth-err { font-size: 13px; color: #dc2626; margin-top: 10px; min-height: 18px; text-align: center; }
+  `;
+  document.head.appendChild(style);
+
+  modal = document.createElement('div');
+  modal.id = 'em-auth-overlay';
+  modal.style.display = 'none';
+  modal.innerHTML = `
+   <div class="em-auth-card">
+    <div class="em-auth-title">เข้าสู่ระบบ Electrical Maintenance</div>
+    <div class="em-auth-sub">กรุณาเข้าสู่ระบบเพื่อใช้งานระบบทะเบียนและอุปกรณ์<br><small style="color:#94a3b8">(บัญชีเริ่มต้น: admin / admin1234)</small></div>
+    <form id="em-auth-form">
+     <div class="em-auth-field">
+      <label class="em-auth-label" for="em-auth-user">ชื่อผู้ใช้ (Username)</label>
+      <input class="em-auth-input" id="em-auth-user" type="text" autocomplete="username" required placeholder="admin">
+     </div>
+     <div class="em-auth-field">
+      <label class="em-auth-label" for="em-auth-pass">รหัสผ่าน (Password)</label>
+      <input class="em-auth-input" id="em-auth-pass" type="password" autocomplete="current-password" required placeholder="••••••••">
+     </div>
+     <button class="em-auth-btn" id="em-auth-submit" type="submit">เข้าสู่ระบบ</button>
+     <div class="em-auth-err" id="em-auth-error"></div>
+    </form>
+   </div>
+  `;
+  document.body.appendChild(modal);
+
+  const form = modal.querySelector('#em-auth-form');
+  const errEl = modal.querySelector('#em-auth-error');
+  const btn = modal.querySelector('#em-auth-submit');
+
+  form.onsubmit = async (e) => {
+   e.preventDefault();
+   errEl.textContent = '';
+   btn.disabled = true;
+   btn.textContent = 'กำลังเข้าสู่ระบบ...';
+
+   const username = modal.querySelector('#em-auth-user').value.trim();
+   const password = modal.querySelector('#em-auth-pass').value;
+
+   try {
+    const res = await fetch('/api/v1/auth/login', {
+     method: 'POST',
+     credentials: 'same-origin',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({ username, password })
+    });
+    const result = await res.json();
+    if (!result.ok) throw new Error(result.error?.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+    currentUser = result.data;
+    window.currentUser = currentUser;
+    window.EM_CURRENT_USER = currentUser;
+    updateBadge();
+    modal.style.display = 'none';
+
+    if (result.data.mustChangePassword) {
+     await promptForceChangePassword();
+    }
+
+    if (loginPromise) {
+     const resolve = loginPromise.resolve;
+     loginPromise = null;
+     resolve(currentUser);
+    }
+   } catch (err) {
+    errEl.textContent = err.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่';
+   } finally {
+    btn.disabled = false;
+    btn.textContent = 'เข้าสู่ระบบ';
+   }
+  };
+
+  return modal;
+ }
+
+ function promptForceChangePassword() {
+  return new Promise((resolve) => {
+   let modal = document.getElementById('em-force-pass-overlay');
+   if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'em-force-pass-overlay';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.8);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:100000;';
+    modal.innerHTML = `
+     <div class="em-auth-card">
+      <div class="em-auth-title" style="color:#dc2626">⚠️ บังคับตั้งรหัสผ่านใหม่</div>
+      <div class="em-auth-sub">รหัสผ่านปัจจุบันต่ำกว่า 5 ตัวอักษร หรือได้รับการรีเซ็ต เพื่อความปลอดภัยกรุณาตั้งรหัสผ่านใหม่ (อย่างน้อย 5 ตัวอักษร)</div>
+      <form id="em-force-pass-form">
+       <div class="em-auth-field">
+        <label class="em-auth-label" for="em-new-pass">รหัสผ่านใหม่</label>
+        <input class="em-auth-input" id="em-new-pass" type="password" required minlength="5" placeholder="อย่างน้อย 5 ตัวอักษร">
+       </div>
+       <div class="em-auth-field">
+        <label class="em-auth-label" for="em-conf-pass">ยืนยันรหัสผ่านใหม่</label>
+        <input class="em-auth-input" id="em-conf-pass" type="password" required minlength="5" placeholder="พิมพ์ซ้ำอีกครั้ง">
+       </div>
+       <button class="em-auth-btn" id="em-force-submit" type="submit">บันทึกรหัสผ่านใหม่</button>
+       <div class="em-auth-err" id="em-force-err"></div>
+      </form>
+     </div>
+    `;
+    document.body.appendChild(modal);
+   }
+
+   modal.style.display = 'flex';
+   const form = modal.querySelector('#em-force-pass-form');
+   const errEl = modal.querySelector('#em-force-err');
+   const btn = modal.querySelector('#em-force-submit');
+   errEl.textContent = '';
+
+   form.onsubmit = async (e) => {
+    e.preventDefault();
+    errEl.textContent = '';
+    const p1 = modal.querySelector('#em-new-pass').value;
+    const p2 = modal.querySelector('#em-conf-pass').value;
+    if (p1 !== p2) {
+     errEl.textContent = 'รหัสผ่านทั้งสองช่องไม่ตรงกัน';
+     return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'กำลังบันทึก...';
+    try {
+     const res = await fetch('/api/v1/auth/change-password', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newPassword: p1 })
+     });
+     const r = await res.json();
+     if (!r.ok) throw new Error(r.error?.message || 'เปลี่ยนรหัสผ่านไม่สำเร็จ');
+     modal.style.display = 'none';
+     if (currentUser) currentUser.mustChangePassword = false;
+     resolve();
+    } catch (err) {
+     errEl.textContent = err.message || 'บันทึกรหัสผ่านไม่สำเร็จ';
+    } finally {
+     btn.disabled = false;
+     btn.textContent = 'บันทึกรหัสผ่านใหม่';
+    }
+   };
+  });
+ }
+
+ function promptLogin() {
+  if (loginPromise) return loginPromise.promise;
+  const modal = ensureLoginModal();
+  modal.style.display = 'flex';
+  const errEl = modal.querySelector('#em-auth-error');
+  if (errEl) errEl.textContent = '';
+  const userInput = modal.querySelector('#em-auth-user');
+  if (userInput) { userInput.value = ''; userInput.focus(); }
+  const passInput = modal.querySelector('#em-auth-pass');
+  if (passInput) passInput.value = '';
+
+  let resolve, reject;
+  const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
+  loginPromise = { promise, resolve, reject };
+  return promise;
+ }
+
+ function initNavUI() {
+    const hamburgerBtn = document.getElementById('em-hamburger-btn');
+    const drawer = document.getElementById('em-drawer');
+    const overlay = document.getElementById('em-drawer-overlay');
+    const closeBtn = document.getElementById('em-drawer-close');
+
+    function openDrawer() {
+      if (drawer) {
+        drawer.classList.add('is-active');
+        hamburgerBtn?.setAttribute('aria-expanded', 'true');
+      }
+      if (overlay) overlay.classList.add('is-active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      if (drawer) {
+        drawer.classList.remove('is-active');
+        hamburgerBtn?.setAttribute('aria-expanded', 'false');
+      }
+      if (overlay) overlay.classList.remove('is-active');
+      document.body.style.overflow = '';
+    }
+
+    if (hamburgerBtn) hamburgerBtn.onclick = openDrawer;
+    if (closeBtn) closeBtn.onclick = closeDrawer;
+    if (overlay) overlay.onclick = closeDrawer;
+
+    // Drawer accordions
+    document.querySelectorAll('.em-drawer-group-btn').forEach(btn => {
+      btn.onclick = () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!expanded));
+        const sublist = btn.nextElementSibling;
+        if (sublist) {
+          sublist.style.display = expanded ? 'none' : 'flex';
+        }
+      };
+    });
+
+    // Auto-handle ?dept= in Equipment BOM
+    if (location.pathname.startsWith('/bom')) {
+      const params = new URLSearchParams(location.search);
+      const targetDept = params.get('dept');
+      if (targetDept) {
+        try {
+          sessionStorage.setItem('BOM_LAST_DEPT', targetDept);
+          sessionStorage.removeItem('BOM_LAST_LINE');
+          sessionStorage.removeItem('BOM_LAST_MACHINE');
+        } catch (_) {}
+      } else if (!location.search && !sessionStorage.getItem('BOM_LAST_MACHINE')) {
+        try {
+          sessionStorage.removeItem('BOM_LAST_DEPT');
+          sessionStorage.removeItem('BOM_LAST_LINE');
+        } catch (_) {}
+      }
+    }
+
+    // Auto-handle ?action=add in Parts
+    if (location.pathname.startsWith('/parts')) {
+      const params = new URLSearchParams(location.search);
+      if (params.get('action') === 'add') {
+        const checkAddBtn = () => {
+          const btn = document.getElementById('add-part');
+          if (btn && !btn.disabled) {
+            btn.click();
+          } else {
+            setTimeout(checkAddBtn, 100);
+          }
+        };
+        setTimeout(checkAddBtn, 300);
+      }
+    }
+  }
+
+  function updateBadge() {
+    const badge = document.getElementById('em-user-badge');
+    const navUsers = document.getElementById('em-nav-users');
+    const drawerNavUsers = document.getElementById('em-drawer-nav-users');
+    const drawerUserCard = document.getElementById('em-drawer-user-card');
+    const drawerFooter = document.getElementById('em-drawer-footer');
+
+    const canManageUsers = currentUser && (currentUser.role === 'admin' || currentUser.permissions?.users === 'admin');
+    if (navUsers) navUsers.style.display = canManageUsers ? 'inline-flex' : 'none';
+    if (drawerNavUsers) drawerNavUsers.style.display = canManageUsers ? 'flex' : 'none';
+
+    if (!currentUser) {
+      if (badge) {
+        badge.innerHTML = '<button id="em-open-login" style="background:#cc681c;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s">เข้าสู่ระบบ</button>';
+        const btn = document.getElementById('em-open-login');
+        if (btn) btn.onclick = () => promptLogin();
+      }
+      if (drawerUserCard) {
+        drawerUserCard.innerHTML = '<div style="font-size:13px;color:#94a3b8;margin-bottom:8px">ยังไม่ได้เข้าสู่ระบบ</div><button id="em-drawer-open-login" style="width:100%;background:#cc681c;color:#fff;border:none;border-radius:6px;padding:8px;font-size:13px;font-weight:600;cursor:pointer">เข้าสู่ระบบ</button>';
+        const dBtn = document.getElementById('em-drawer-open-login');
+        if (dBtn) dBtn.onclick = () => {
+          const overlay = document.getElementById('em-drawer-overlay');
+          const drawer = document.getElementById('em-drawer');
+          if (drawer) drawer.classList.remove('is-active');
+          if (overlay) overlay.classList.remove('is-active');
+          document.body.style.overflow = '';
+          promptLogin();
+        };
+      }
+      if (drawerFooter) drawerFooter.innerHTML = '';
+      return;
+    }
+
+    const roleTh = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : currentUser.role === 'editor' ? 'แก้ไขได้' : 'ดูอย่างเดียว';
+
+    if (badge) {
+      badge.innerHTML = `
+        <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <strong style="font-weight:600">${currentUser.displayName || currentUser.username}</strong>
+          <span style="font-size:11.5px;color:#94a3b8">(${roleTh})</span>
+        </span>
+        <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
+      `;
+      const logoutBtn = document.getElementById('em-btn-logout');
+      if (logoutBtn) {
+        logoutBtn.onclick = async () => {
+          try {
+            await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+          } catch (_) {}
+          location.reload();
+        };
+      }
+    }
+
+    if (drawerUserCard) {
+      drawerUserCard.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:50%;background:#cc681c;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">
+            ${(currentUser.displayName || currentUser.username).charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:14px;color:#fff">${currentUser.displayName || currentUser.username}</div>
+            <div style="font-size:12px;color:#94a3b8">${roleTh}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (drawerFooter) {
+      drawerFooter.innerHTML = `
+        <button id="em-drawer-btn-logout" style="width:100%;background:rgba(239, 68, 68, 0.15);color:#fca5a5;border:1px solid rgba(239, 68, 68, 0.3);border-radius:6px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          ออกจากระบบ
+        </button>
+      `;
+      const dLogoutBtn = document.getElementById('em-drawer-btn-logout');
+      if (dLogoutBtn) {
+        dLogoutBtn.onclick = async () => {
+          try {
+            await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+          } catch (_) {}
+          location.reload();
+        };
+      }
+    }
+  }
+
+
+  if (typeof window !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initNavUI();
+      fetch('/api/v1/auth/me', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(async res => {
+          if (res.ok && res.data) {
+            currentUser = res.data;
+            window.currentUser = currentUser;
+            window.EM_CURRENT_USER = currentUser;
+            updateBadge();
+            if (res.data.mustChangePassword) {
+              await promptForceChangePassword();
+            }
+          } else {
+            updateBadge();
+          }
+        })
+        .catch(() => updateBadge());
+    });
+  }
+
+ window.EM_RPC = async (method, ...args) => {
+  const signature = JSON.stringify([method, args]);
+  const payload = args.findLast(a => a && typeof a === 'object' && !Array.isArray(a));
+  const requestId = payload?.requestId || payload?.operationId || inFlight.get(signature) || crypto.randomUUID();
+  inFlight.set(signature, requestId);
+
+  const doRequest = async () => {
+   const controller = new AbortController();
+   const timer = setTimeout(() => controller.abort(), 60000);
+   try {
+    const response = await fetch(`/api/v1/${scope}/rpc`, {
+     method: 'POST',
+     credentials: 'same-origin',
+     headers: { 'Content-Type': 'application/json', 'Idempotency-Key': requestId },
+     body: JSON.stringify({ method, args }),
+     signal: controller.signal
+    });
+
+    if (response.status === 401) {
+     // Wait for user to log in via modal dialog
+     await promptLogin();
+     // Retry the request after successful login
+     return await doRequest();
+    }
+
+    if (response.redirected || !response.headers.get('Content-Type')?.includes('application/json')) {
+     throw Object.assign(new Error('กรุณาเข้าสู่ระบบใหม่ แล้วลองคำขอเดิมอีกครั้ง'), { code: 'AUTH' });
+    }
+
+    const result = await response.json();
+    if (!result.ok) {
+     if (result.error?.code === 'AUTH') {
+      await promptLogin();
+      return await doRequest();
+     }
+     throw Object.assign(new Error(result.error?.message || 'เชื่อมต่อไม่สำเร็จ'), result.error);
+    }
+
+    inFlight.delete(signature);
+    return result.data;
+   } catch (error) {
+    if (error.name === 'AbortError') {
+     throw Object.assign(new Error('ยังยืนยันผลไม่ได้ กรุณาตรวจข้อมูลล่าสุดหรือลองคำขอเดิมอีกครั้ง'), { code: 'TIMEOUT' });
+    }
+    if (!error.code) error.message = 'เชื่อมต่อไม่สำเร็จ ข้อมูลที่กรอกยังอยู่ กรุณาลองใหม่';
+    throw error;
+   } finally {
+    clearTimeout(timer);
+   }
+  };
+
+    return doRequest();
+  };
+
+  window.isAdmin = () => Boolean(currentUser && (currentUser.role === 'admin' || currentUser.permissions?.bom === 'admin'));
+  window.callRPC = async (method, ...args) => {
+    return window.EM_RPC(method, ...args);
+  };
+})();
+
+// ==========================================================================
+// PR & STORE TRACKER (CLEAN OPERATIONS INBOX) - CLIENT SCRIPT
+// ==========================================================================
+
+(() => {
+  'use strict';
+
+  // State
+  const state = {
+    folder: 'inbox', // 'inbox' | 'archive' | 'all'
+    pipelineStep: '', // '' | 'PENDING_PR' | 'PENDING_PO' | 'PENDING_RECEIPT' | 'NEAR_DELIVERY' | 'OVERDUE'
+    docType: '', // '' | 'PR' | 'STORE'
+    deptId: '',
+    lineId: '',
+    search: '',
+    startDate: '',
+    endDate: '',
+    limit: 100,
+    offset: 0,
+    items: [],
+    references: { departments: [], lines: [], machines: [], pmOrders: [] },
+    selectedIds: new Set(),
+    isInlineEditing: false,
+    editedRows: new Map(),
+    isFormOpen: false,
+    formMode: 'create', // 'create' | 'edit'
+    activeEditId: null,
+    pendingDeleteIds: [],
+    searchTimer: null
+  };
+
+  // DOM Cache
+  const el = {
+    globalSearch: document.getElementById('global-search-input'),
+    btnClearSearch: document.getElementById('btn-clear-search'),
+    btnRefresh: document.getElementById('btn-refresh'),
+    btnExportCsv: document.getElementById('btn-export-csv'),
+    btnCompose: document.getElementById('btn-compose'),
+    currentFolderPill: document.getElementById('current-folder-pill'),
+
+    // Live Metrics
+    metricTotalCount: document.getElementById('metric-total-count'),
+    metricTotalQty: document.getElementById('metric-total-qty'),
+    metricTotalPrice: document.getElementById('metric-total-price'),
+    footerSumQty: document.getElementById('footer-sum-qty'),
+    footerSumPrice: document.getElementById('footer-sum-price'),
+    textPaginationInfo: document.getElementById('text-pagination-info'),
+
+    // Sidebar Counters
+    badgeCountInbox: document.getElementById('badge-count-inbox'),
+    badgeCountArchive: document.getElementById('badge-count-archive'),
+    badgeCountAll: document.getElementById('badge-count-all'),
+    badgeCountNearDelivery: document.getElementById('badge-count-near-delivery'),
+    badgeCountOverdue: document.getElementById('badge-count-overdue'),
+
+    // Pipeline Tabs Counters
+    badgeCountPendingPr: document.getElementById('badge-count-pending-pr'),
+    badgeCountPendingPo: document.getElementById('badge-count-pending-po'),
+    badgeCountPendingReceipt: document.getElementById('badge-count-pending-receipt'),
+
+    // Filters
+    filterDept: document.getElementById('filter-dept'),
+    filterLine: document.getElementById('filter-line'),
+    filterStartDate: document.getElementById('filter-start-date'),
+    filterEndDate: document.getElementById('filter-end-date'),
+    btnClearDateFilter: document.getElementById('btn-clear-date-filter'),
+    selectPageLimit: document.getElementById('select-page-limit'),
+    activeFilterChips: document.getElementById('active-filter-chips'),
+
+    // Compose Dock Elements
+    formPane: document.getElementById('pr-form-pane'),
+    form: document.getElementById('pr-entry-form'),
+    formTitle: document.getElementById('form-pane-title'),
+    formModeBadge: document.getElementById('form-mode-badge'),
+    btnMinimizeForm: document.getElementById('btn-minimize-form'),
+    btnCloseForm: document.getElementById('btn-close-form'),
+    btnCancelForm: document.getElementById('btn-cancel-form'),
+    formItemId: document.getElementById('form-item-id'),
+    formCreatedDate: document.getElementById('form-created-date'),
+    radioTypePr: document.getElementById('radio-type-pr'),
+    radioTypeStore: document.getElementById('radio-type-store'),
+    formDept: document.getElementById('form-dept'),
+    formLine: document.getElementById('form-line'),
+    formMachine: document.getElementById('form-machine'),
+    formOrderNo: document.getElementById('form-order-no'),
+    formDocNo: document.getElementById('form-doc-no'),
+    labelDocNo: document.getElementById('label-doc-no'),
+    formDescription: document.getElementById('form-description'),
+    formQty: document.getElementById('form-qty'),
+    formUnit: document.getElementById('form-unit'),
+    formPrice: document.getElementById('form-price'),
+    formCalcTotal: document.getElementById('form-calc-total'),
+    formPoNo: document.getElementById('form-po-no'),
+    formDeliveryDate: document.getElementById('form-delivery-date'),
+    formNotes: document.getElementById('form-notes'),
+    pmOrdersDatalist: document.getElementById('pm-orders-datalist'),
+
+    // Table
+    checkSelectAll: document.getElementById('check-select-all'),
+    bulkActionsGroup: document.getElementById('bulk-actions-group'),
+    selectedCountBadge: document.getElementById('selected-count-badge'),
+    btnBulkCopy: document.getElementById('btn-bulk-copy'),
+    btnBulkInlineEdit: document.getElementById('btn-bulk-inline-edit'),
+    btnOpenBulkAreaModal: document.getElementById('btn-open-bulk-area-modal'),
+    btnBulkArchive: document.getElementById('btn-bulk-archive'),
+    btnBulkArchiveText: document.getElementById('btn-bulk-archive-text'),
+    btnOpenBulkDeleteModal: document.getElementById('btn-open-bulk-delete-modal'),
+    btnDeselectAll: document.getElementById('btn-deselect-all'),
+    tableEditBanner: document.getElementById('table-edit-banner'),
+    btnCancelTableEdit: document.getElementById('btn-cancel-table-edit'),
+    btnSaveTableEdit: document.getElementById('btn-save-table-edit'),
+    tbody: document.getElementById('pr-table-tbody'),
+    thArchivedDate: document.getElementById('th-archived-date'),
+
+    // Modals
+    modalBulkArea: document.getElementById('modal-bulk-area'),
+    bulkAreaDept: document.getElementById('bulk-area-dept'),
+    bulkAreaLine: document.getElementById('bulk-area-line'),
+    bulkAreaMachine: document.getElementById('bulk-area-machine'),
+    bulkAreaSummaryText: document.getElementById('bulk-area-summary-text'),
+    btnCancelBulkArea: document.getElementById('btn-cancel-bulk-area'),
+    btnConfirmBulkArea: document.getElementById('btn-confirm-bulk-area'),
+    btnCloseBulkArea: document.getElementById('btn-close-bulk-area'),
+
+    modalAdminDelete: document.getElementById('modal-admin-delete'),
+    deleteTargetPreview: document.getElementById('delete-target-preview'),
+    inputAdminPassword: document.getElementById('input-admin-password'),
+    adminPasswordError: document.getElementById('admin-password-error'),
+    btnCancelAdminDelete: document.getElementById('btn-cancel-admin-delete'),
+    btnConfirmAdminDelete: document.getElementById('btn-confirm-admin-delete'),
+    btnCloseAdminDelete: document.getElementById('btn-close-admin-delete'),
+
+    modalItemDetail: document.getElementById('modal-item-detail'),
+    detailModalTitle: document.getElementById('detail-modal-title'),
+    detailTypeBadge: document.getElementById('detail-type-badge'),
+    detailModalBody: document.getElementById('detail-modal-body'),
+    btnCloseDetail: document.getElementById('btn-close-detail'),
+    btnDetailCloseBtn: document.getElementById('btn-detail-close-btn'),
+    btnDetailEditBtn: document.getElementById('btn-detail-edit-btn'),
+
+    toast: document.getElementById('toast')
+  };
+
+  // Helper Formatters
+  const fmtNumber = n => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  const fmtCurrency = n => '฿ ' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const escapeHtml = str => String(str || '').replace(/[&<>'"]/g, tag => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  }[tag] || tag));
+
+  let toastTimer = null;
+  function showToast(message, type = 'info') {
+    if (!el.toast) return;
+    el.toast.textContent = message;
+    el.toast.className = `pr-toast show ${type}`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      el.toast.className = 'pr-toast';
+    }, 3200);
+  }
+
+  // RPC Client
+  async function callRpc(method, ...args) {
+    const res = await fetch('/api/v1/pr-tracker/rpc', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ method, args })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.ok) {
+      const msg = json?.error?.message || 'การเชื่อมต่อระบบล้มเหลว';
+      throw new Error(msg);
+    }
+    return json.data;
+  }
+
+  // 1. References Loading
+  async function loadReferences() {
+    try {
+      const data = await callRpc('getReferences');
+      state.references = data || { departments: [], lines: [], machines: [], pmOrders: [] };
+      populateDropdowns();
+    } catch (err) {
+      console.error('Failed to load references', err);
+      showToast('โหลดข้อมูลอ้างอิงไม่สำเร็จ: ' + err.message, 'error');
+    }
+  }
+
+  function populateDropdowns() {
+    const { departments = [], pmOrders = [] } = state.references;
+
+    const deptOpts = '<option value="">ทุกแผนก (CC, PP, ...)</option>' +
+      departments.map(d => `<option value="${escapeHtml(d.deptId)}">${escapeHtml(d.deptName)} (${escapeHtml(d.deptId)})</option>`).join('');
+    el.filterDept.innerHTML = deptOpts;
+
+    const formDeptOpts = '<option value="">เลือกแผนก...</option>' +
+      departments.map(d => `<option value="${escapeHtml(d.deptId)}">${escapeHtml(d.deptName)} (${escapeHtml(d.deptId)})</option>`).join('');
+    el.formDept.innerHTML = formDeptOpts;
+    el.bulkAreaDept.innerHTML = '<option value="">เลือกแผนกใหม่...</option>' +
+      departments.map(d => `<option value="${escapeHtml(d.deptId)}">${escapeHtml(d.deptName)} (${escapeHtml(d.deptId)})</option>`).join('');
+
+    updateLineDropdown(el.filterLine, el.filterDept.value, 'ทุกสายการผลิต');
+    updateLineDropdown(el.formLine, el.formDept.value, 'เลือกสายการผลิต...');
+    updateLineDropdown(el.bulkAreaLine, el.bulkAreaDept.value, 'เลือกสายการผลิตใหม่...');
+
+    if (el.pmOrdersDatalist) {
+      el.pmOrdersDatalist.innerHTML = pmOrders.map(o =>
+        `<option value="${escapeHtml(o.orderNo)}">Order PM: ${escapeHtml(o.orderNo)}</option>`
+      ).join('');
+    }
+  }
+
+  function updateLineDropdown(selectEl, selectedDeptId, defaultLabel) {
+    const { lines = [] } = state.references;
+    const filtered = selectedDeptId
+      ? lines.filter(l => l.deptId === selectedDeptId)
+      : lines;
+
+    selectEl.innerHTML = `<option value="">${defaultLabel}</option>` +
+      filtered.map(l => `<option value="${escapeHtml(l.lineId)}">${escapeHtml(l.lineName)}</option>`).join('');
+  }
+
+  function updateMachineDropdown(selectEl, selectedLineId, selectedDeptId, defaultLabel) {
+    const { machines = [] } = state.references;
+    let filtered = machines;
+    if (selectedLineId) {
+      filtered = filtered.filter(m => m.lineId === selectedLineId);
+    } else if (selectedDeptId) {
+      filtered = filtered.filter(m => m.deptId === selectedDeptId);
+    }
+
+    selectEl.innerHTML = `<option value="">${defaultLabel}</option>` +
+      filtered.map(m => `<option value="${escapeHtml(m.id)}">${escapeHtml(m.code)} - ${escapeHtml(m.name)}</option>`).join('');
+  }
+
+  // 2. Load PR Items
+  async function loadItems() {
+    try {
+      el.tbody.innerHTML = `
+        <tr>
+          <td colspan="14" class="text-center py-12 text-muted">
+            <span class="inline-spinner"></span> กำลังดึงข้อมูล...
+          </td>
+        </tr>
+      `;
+
+      const params = {
+        folder: state.folder,
+        pipelineStep: state.pipelineStep,
+        docType: state.docType,
+        deptId: state.deptId,
+        lineId: state.lineId,
+        search: state.search,
+        startDate: state.startDate,
+        endDate: state.endDate,
+        limit: state.limit,
+        offset: state.offset
+      };
+
+      const result = await callRpc('listItems', params);
+      state.items = result.items || [];
+      if (result.retentionCutoff) {
+        state.retentionCutoff = result.retentionCutoff;
+        if (el.formCreatedDate) el.formCreatedDate.min = result.retentionCutoff;
+        if (el.filterStartDate) el.filterStartDate.min = result.retentionCutoff;
+      }
+      renderCounters(result.pipelineCounts, result.metrics);
+      renderTable();
+      updateActiveFilterChips();
+    } catch (err) {
+      console.error('Failed to load items', err);
+      el.tbody.innerHTML = `
+        <tr>
+          <td colspan="14" class="text-center py-12 text-muted text-danger">
+            เกิดข้อผิดพลาดในการโหลดข้อมูล: ${escapeHtml(err.message)}
+          </td>
+        </tr>
+      `;
+      showToast('โหลดข้อมูลล้มเหลว: ' + err.message, 'error');
+    }
+  }
+
+  // 3. Render Counters
+  function renderCounters(counts = {}, metrics = {}) {
+    el.badgeCountInbox.textContent = fmtNumber(counts.inbox);
+    el.badgeCountArchive.textContent = fmtNumber(counts.archive);
+    el.badgeCountAll.textContent = fmtNumber(counts.all);
+
+    // Pipeline Tabs
+    el.badgeCountPendingPr.textContent = fmtNumber(counts.pendingPr);
+    el.badgeCountPendingPo.textContent = fmtNumber(counts.pendingPo);
+    el.badgeCountPendingReceipt.textContent = fmtNumber(counts.pendingReceipt);
+
+    // Quick Chips
+    el.badgeCountNearDelivery.textContent = fmtNumber(counts.nearDelivery);
+    el.badgeCountOverdue.textContent = fmtNumber(counts.overdue);
+
+    // Header Metrics
+    el.metricTotalCount.textContent = `${fmtNumber(metrics.totalCount)} รายการ`;
+    el.metricTotalQty.textContent = `${fmtNumber(metrics.totalQty)} ชิ้น`;
+    el.metricTotalPrice.textContent = fmtCurrency(metrics.totalAmount);
+
+    // Footer Metrics
+    el.footerSumQty.textContent = `${fmtNumber(metrics.totalQty)} ชิ้น`;
+    el.footerSumPrice.textContent = fmtCurrency(metrics.totalAmount);
+    el.textPaginationInfo.textContent = `แสดง ${state.items.length} จาก ${fmtNumber(metrics.totalCount)} รายการ`;
+
+    // Folder Pill
+    if (state.folder === 'inbox') el.currentFolderPill.textContent = 'กล่องงาน (Inbox)';
+    else if (state.folder === 'archive') el.currentFolderPill.textContent = 'รายการที่เก็บ (Archive)';
+    else el.currentFolderPill.textContent = 'รายการทั้งหมด (All)';
+
+    if (el.btnBulkArchiveText) {
+      el.btnBulkArchiveText.textContent = state.folder === 'archive' ? 'กู้คืนกลับหน้าหลัก' : 'จัดเก็บพร้อมกัน';
+    }
+    if (el.thArchivedDate) {
+      el.thArchivedDate.style.display = state.folder === 'archive' ? 'table-cell' : 'none';
+    }
+  }
+
+  // 4. Render Table
+  function renderTable() {
+    if (!state.items || state.items.length === 0) {
+      const isFiltered = Boolean(state.search || state.pipelineStep || state.docType || state.deptId || state.startDate);
+      el.tbody.innerHTML = `
+        <tr>
+          <td colspan="14">
+            <div class="empty-state-box">
+              <div class="empty-icon">📦</div>
+              <h3 class="empty-title">${isFiltered ? 'ไม่พบรายการที่ตรงกับเงื่อนไข' : 'ไม่มีรายการในกล่องนี้'}</h3>
+              <p class="empty-desc">${isFiltered ? 'ลองเปลี่ยนคำค้นหา หรือรีเซ็ตตัวกรองเพื่อดูรายการทั้งหมด' : 'คุณสามารถกดปุ่ม "เปิดคำขอ / เพิ่มรายการ" เพื่อเริ่มบันทึกงานจัดซื้อหรือเบิกสโตร์'}</p>
+              ${isFiltered ? '<button type="button" id="btn-empty-reset" class="btn btn-secondary btn-sm">ล้างตัวกรองทั้งหมด</button>' : '<button type="button" id="btn-empty-add" class="btn btn-primary btn-sm">+ เพิ่มรายการใหม่</button>'}
+            </div>
+          </td>
+        </tr>
+      `;
+      const btnReset = document.getElementById('btn-empty-reset');
+      if (btnReset) btnReset.onclick = resetAllFilters;
+      const btnAdd = document.getElementById('btn-empty-add');
+      if (btnAdd) btnAdd.onclick = openCreateForm;
+      updateSelectionUI();
+      return;
+    }
+
+    const html = state.items.map(item => {
+      const isSelected = state.selectedIds.has(item.id);
+      const isEditingThisRow = state.isInlineEditing && (state.selectedIds.size === 0 || isSelected);
+
+      let stageClass = 'pending-pr';
+      let stageText = 'รอออก PR';
+      if (item.pipelineStatus === 'ARCHIVED') {
+        stageClass = 'archived';
+        stageText = 'จัดเก็บแล้ว';
+      } else if (item.pipelineStatus === 'PENDING_PO') {
+        stageClass = 'pending-po';
+        stageText = 'รอออก PO';
+      } else if (item.pipelineStatus === 'PENDING_RECEIPT') {
+        stageClass = 'pending-receipt';
+        stageText = 'รอรับของ';
+      }
+
+      const isStore = item.docType === 'STORE';
+      const docBadgeClass = isStore ? 'type-store' : 'type-pr';
+      const docLabel = isStore ? 'เบิก' : 'ซื้อ';
+      const cleanDocNo = item.docNo ? item.docNo.replace(/\s*\/\s*/g, '/') : '';
+
+      let deliveryHtml = '<span class="text-muted">-</span>';
+      if (item.deliveryDate) {
+        let tag = '';
+        if (item.isOverdue) tag = '<span class="tag-overdue">เกินกำหนด</span>';
+        else if (item.isNearDelivery) tag = '<span class="tag-near">เร็วๆ นี้</span>';
+        deliveryHtml = `
+          <div class="delivery-cell">
+            <span class="delivery-date">${escapeHtml(item.deliveryDate)}</span>
+            ${tag}
+          </div>
+        `;
+      }
+
+      const orderHtml = item.orderNo
+        ? `<span class="order-badge" title="Order PM: ${escapeHtml(item.orderNo)}">${escapeHtml(item.orderNo)}</span>`
+        : '<span class="text-muted">-</span>';
+
+      let areaLineText = '';
+      if (item.departmentId && item.lineName) {
+        areaLineText = `${item.departmentId}/${item.lineName}`;
+      } else if (item.lineName) {
+        areaLineText = item.lineName;
+      } else if (item.departmentName) {
+        areaLineText = item.departmentName;
+      } else {
+        areaLineText = '-';
+      }
+
+      const areaHtml = `
+        <div class="area-badge-wrap">
+          <span class="area-line">${escapeHtml(areaLineText)}</span>
+          ${item.machineCode ? `<span class="area-machine">${escapeHtml(item.machineCode)}</span>` : ''}
+        </div>
+      `;
+
+      const priceText = item.price !== null ? fmtNumber(item.price) : '-';
+      const totalText = item.totalPrice !== null ? fmtCurrency(item.totalPrice) : '-';
+
+      if (isEditingThisRow) {
+        return `
+          <tr class="row-inline-editing ${isSelected ? 'row-selected' : ''}" data-id="${escapeHtml(item.id)}">
+            <td class="td-check">
+              <label class="custom-checkbox-wrap">
+                <input type="checkbox" class="custom-checkbox row-select-checkbox" data-id="${escapeHtml(item.id)}" ${isSelected ? 'checked' : ''}>
+                <span class="checkbox-box"></span>
+              </label>
+            </td>
+            <td class="td-stage"><span class="badge-stage ${stageClass}">${stageText}</span></td>
+            <td class="td-doc">
+              <div style="display:flex; gap:3px;">
+                <select class="table-input inline-edit-field" data-field="docType" style="width:60px;">
+                  <option value="PR" ${item.docType === 'PR' ? 'selected' : ''}>ซื้อ</option>
+                  <option value="STORE" ${item.docType === 'STORE' ? 'selected' : ''}>เบิก</option>
+                </select>
+                <input type="text" class="table-input inline-edit-field" data-field="docNo" value="${escapeHtml(item.docNo)}" placeholder="เลขที่เอกสาร">
+              </div>
+            </td>
+            <td class="td-date">${escapeHtml(item.createdDate)}</td>
+            <td class="td-area">${areaHtml}</td>
+            <td class="td-order">
+              <input type="text" class="table-input inline-edit-field font-mono" data-field="orderNo" value="${escapeHtml(item.orderNo)}" placeholder="Order PM">
+            </td>
+            <td class="td-desc">
+              <input type="text" class="table-input inline-edit-field" data-field="description" value="${escapeHtml(item.description)}" required>
+            </td>
+            <td class="td-qty text-right">
+              <div style="display:flex; gap:2px;">
+                <input type="number" step="any" class="table-input inline-edit-field font-mono text-right" data-field="qty" value="${item.qty}" style="width:48px;">
+                <input type="text" class="table-input inline-edit-field" data-field="unit" value="${escapeHtml(item.unit)}" style="width:36px;">
+              </div>
+            </td>
+            <td class="td-price text-right">
+              <input type="number" step="any" class="table-input inline-edit-field font-mono text-right" data-field="price" value="${item.price !== null ? item.price : ''}" placeholder="0">
+            </td>
+            <td class="td-total text-right">${totalText}</td>
+            <td class="td-po">
+              <input type="text" class="table-input inline-edit-field font-mono" data-field="poNo" value="${escapeHtml(item.poNo)}" placeholder="PO No.">
+            </td>
+            <td class="td-delivery">
+              <input type="date" class="table-input inline-edit-field" data-field="deliveryDate" value="${escapeHtml(item.deliveryDate)}">
+            </td>
+            ${state.folder === 'archive' ? `<td class="td-archived">${escapeHtml(item.archivedAt?.slice(0, 10) || '-')}</td>` : ''}
+            <td class="td-actions">
+              <button type="button" class="btn-row-action btn-row-save" data-id="${escapeHtml(item.id)}" title="บันทึก">💾</button>
+            </td>
+          </tr>
+        `;
+      }
+
+      return `
+        <tr class="${isSelected ? 'row-selected' : ''}" data-id="${escapeHtml(item.id)}">
+          <td class="td-check">
+            <label class="custom-checkbox-wrap">
+              <input type="checkbox" class="custom-checkbox row-select-checkbox" data-id="${escapeHtml(item.id)}" ${isSelected ? 'checked' : ''}>
+              <span class="checkbox-box"></span>
+            </label>
+          </td>
+          <td class="td-stage">
+            <span class="badge-stage ${stageClass}">${stageText}</span>
+          </td>
+          <td class="td-doc">
+            <div class="doc-badge-wrap" title="${item.docNo ? escapeHtml(item.docNo) : 'ยังไม่ออกเลข'}">
+              <span class="badge-doc-type ${docBadgeClass}">${docLabel}</span>
+              <span class="doc-no-text">${cleanDocNo ? escapeHtml(cleanDocNo) : '<span class="text-muted" style="font-weight:normal; font-size:11px;">ยังไม่ออกเลข</span>'}</span>
+            </div>
+          </td>
+          <td class="td-date">${escapeHtml(item.createdDate)}</td>
+          <td class="td-area">${areaHtml}</td>
+          <td class="td-order">${orderHtml}</td>
+          <td class="td-desc">
+            <div class="desc-text" data-action="detail" data-id="${escapeHtml(item.id)}" title="คลิกเพื่อดูรายละเอียด: ${escapeHtml(item.description)}">
+              ${escapeHtml(item.description)}
+            </div>
+          </td>
+          <td class="td-qty text-right font-mono">
+            <strong>${fmtNumber(item.qty)}</strong> <small class="text-muted">${escapeHtml(item.unit)}</small>
+          </td>
+          <td class="td-price text-right font-mono">${priceText}</td>
+          <td class="td-total text-right font-mono text-primary">${totalText}</td>
+          <td class="td-po">
+            ${item.poNo ? `<span class="font-mono" style="font-weight:600; color:#1e293b;">${escapeHtml(item.poNo)}</span>` : '<span class="text-muted">-</span>'}
+          </td>
+          <td class="td-delivery">${deliveryHtml}</td>
+          ${state.folder === 'archive' ? `<td class="td-archived">${escapeHtml(item.archivedAt?.slice(0, 10) || '-')}</td>` : ''}
+          <td class="td-actions">
+            <div class="row-actions">
+              <button type="button" class="btn-row-action btn-row-edit" data-id="${escapeHtml(item.id)}" title="แก้ไขรายการ">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </button>
+              <button type="button" class="btn-row-action btn-row-archive" data-id="${escapeHtml(item.id)}" data-archived="${item.isArchived}" title="${item.isArchived ? 'กู้คืนสู่กล่องงาน' : 'ย้ายไปจัดเก็บ'}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+              </button>
+              <button type="button" class="btn-row-action action-delete btn-row-delete" data-id="${escapeHtml(item.id)}" title="ลบถาวร (ใส่รหัสแอดมิน)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    el.tbody.innerHTML = html;
+    updateSelectionUI();
+  }
+
+  // 5. Active Filter Chips
+  function updateActiveFilterChips() {
+    const chips = [];
+
+    if (state.pipelineStep) {
+      const labels = {
+        PENDING_PR: 'ขั้นตอน: 1. รอออก PR / สโตร์',
+        PENDING_PO: 'ขั้นตอน: 2. รอออก PO',
+        PENDING_RECEIPT: 'ขั้นตอน: 3. รอรับของ',
+        NEAR_DELIVERY: 'ส่งมอบเร็วๆ นี้ (7 วัน)',
+        OVERDUE: 'เกินกำหนดส่งมอบ (Overdue)'
+      };
+      chips.push({ key: 'pipelineStep', label: labels[state.pipelineStep] || state.pipelineStep });
+    }
+
+    if (state.docType) {
+      chips.push({ key: 'docType', label: state.docType === 'PR' ? 'ประเภท: ซื้อ' : 'ประเภท: เบิก' });
+    }
+
+    if (state.deptId) {
+      chips.push({ key: 'deptId', label: `แผนก: ${state.deptId}` });
+    }
+
+    if (state.lineId) {
+      const lineObj = state.references.lines.find(l => l.lineId === state.lineId);
+      chips.push({ key: 'lineId', label: `ไลน์: ${lineObj ? lineObj.lineName : state.lineId}` });
+    }
+
+    if (state.startDate || state.endDate) {
+      chips.push({ key: 'date', label: `วันที่: ${state.startDate || '...'} ถึง ${state.endDate || '...'}` });
+    }
+
+    if (chips.length === 0) {
+      el.activeFilterChips.style.display = 'none';
+      el.activeFilterChips.innerHTML = '';
+      return;
+    }
+
+    el.activeFilterChips.style.display = 'flex';
+    el.activeFilterChips.innerHTML = chips.map(c => `
+      <span class="filter-pill">
+        <span>${escapeHtml(c.label)}</span>
+        <button type="button" class="remove-pill" data-key="${escapeHtml(c.key)}" title="นำออก">×</button>
+      </span>
+    `).join('') + '<button type="button" id="btn-clear-all-chips" class="btn-link-sm" style="margin-left:4px;">ล้างตัวกรองทั้งหมด</button>';
+
+    const btnClearAll = document.getElementById('btn-clear-all-chips');
+    if (btnClearAll) btnClearAll.onclick = resetAllFilters;
+  }
+
+  function resetAllFilters() {
+    state.pipelineStep = '';
+    state.docType = '';
+    state.deptId = '';
+    state.lineId = '';
+    state.startDate = '';
+    state.endDate = '';
+    state.search = '';
+    el.globalSearch.value = '';
+    el.filterDept.value = '';
+    el.filterLine.value = '';
+    el.filterStartDate.value = '';
+    el.filterEndDate.value = '';
+    el.btnClearSearch.style.display = 'none';
+    el.btnClearDateFilter.style.display = 'none';
+
+    document.querySelectorAll('.btn-doc-pill').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.doctype === '');
+    });
+    document.querySelectorAll('.pipeline-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.step === '');
+    });
+    document.querySelectorAll('.chip-item').forEach(btn => btn.classList.remove('active'));
+
+    loadItems();
+  }
+
+  // 6. Selection
+  function updateSelectionUI() {
+    const totalVisible = state.items.length;
+    const selectedCount = state.selectedIds.size;
+
+    el.checkSelectAll.checked = totalVisible > 0 && selectedCount === totalVisible;
+    el.checkSelectAll.indeterminate = selectedCount > 0 && selectedCount < totalVisible;
+
+    if (selectedCount > 0) {
+      el.bulkActionsGroup.style.display = 'inline-flex';
+      el.selectedCountBadge.textContent = `เลือก ${selectedCount} รายการ`;
+    } else {
+      el.bulkActionsGroup.style.display = 'none';
+    }
+  }
+
+  // 7. Compose Dock Operations
+  function openCreateForm() {
+    state.formMode = 'create';
+    state.activeEditId = null;
+    el.form.reset();
+    el.formItemId.value = '';
+    el.formCreatedDate.value = new Date().toISOString().slice(0, 10);
+    if (state.retentionCutoff) el.formCreatedDate.min = state.retentionCutoff;
+    el.radioTypePr.checked = true;
+    el.formQty.value = '1';
+    el.formUnit.value = 'ชิ้น';
+    el.formPrice.value = '';
+    el.formCalcTotal.textContent = '฿ 0.00';
+    el.formTitle.textContent = 'บันทึกคำขอจัดซื้อ / เบิกสโตร์';
+    el.formModeBadge.textContent = 'คำขอใหม่';
+
+    if (state.deptId) el.formDept.value = state.deptId;
+    updateLineDropdown(el.formLine, el.formDept.value, 'เลือกสายการผลิต...');
+    if (state.lineId) el.formLine.value = state.lineId;
+    updateMachineDropdown(el.formMachine, el.formLine.value, el.formDept.value, 'เลือกเครื่องจักร (ถ้ามี)...');
+
+    el.formPane.classList.remove('minimized');
+    el.formPane.style.display = 'block';
+    state.isFormOpen = true;
+    el.formDescription.focus();
+  }
+
+  async function openEditForm(id) {
+    try {
+      const item = state.items.find(i => i.id === id) || await callRpc('getItem', id);
+      if (!item) return;
+
+      state.formMode = 'edit';
+      state.activeEditId = id;
+      el.formItemId.value = item.id;
+      el.formCreatedDate.value = item.createdDate || item.created_date || '';
+      if (state.retentionCutoff) el.formCreatedDate.min = state.retentionCutoff;
+
+      const docType = item.docType || item.doc_type || 'PR';
+      if (docType === 'STORE') el.radioTypeStore.checked = true;
+      else el.radioTypePr.checked = true;
+
+      el.formDept.value = item.departmentId || item.department_id || '';
+      updateLineDropdown(el.formLine, el.formDept.value, 'เลือกสายการผลิต...');
+      el.formLine.value = item.lineId || item.line_id || '';
+      updateMachineDropdown(el.formMachine, el.formLine.value, el.formDept.value, 'เลือกเครื่องจักร (ถ้ามี)...');
+      el.formMachine.value = item.machineId || item.machine_id || '';
+
+      el.formOrderNo.value = item.orderNo || item.order_no || '';
+      el.formDocNo.value = item.docNo || item.doc_no || '';
+      el.formDescription.value = item.description || '';
+      el.formQty.value = item.qty || 1;
+      el.formUnit.value = item.unit || 'ชิ้น';
+      el.formPrice.value = item.price !== null && item.price !== undefined ? item.price : '';
+      updateFormCalcTotal();
+
+      el.formPoNo.value = item.poNo || item.po_no || '';
+      el.formDeliveryDate.value = item.deliveryDate || item.delivery_date || '';
+      el.formNotes.value = item.notes || '';
+
+      el.formTitle.textContent = `แก้ไข: ${item.docNo || item.id}`;
+      el.formModeBadge.textContent = 'แก้ไข';
+
+      el.formPane.classList.remove('minimized');
+      el.formPane.style.display = 'block';
+      state.isFormOpen = true;
+      el.formDescription.focus();
+    } catch (err) {
+      console.error(err);
+      showToast('ไม่สามารถเปิดข้อมูล: ' + err.message, 'error');
+    }
+  }
+
+  function updateFormCalcTotal() {
+    const qty = parseFloat(el.formQty.value) || 0;
+    const price = parseFloat(el.formPrice.value) || 0;
+    el.formCalcTotal.textContent = fmtCurrency(qty * price);
+  }
+
+  async function handleFormSubmit(e) {
+    e.preventDefault();
+    const isSaveAndNext = e.submitter && e.submitter.dataset.next === 'true';
+
+    const payload = {
+      id: el.formItemId.value || undefined,
+      createdDate: el.formCreatedDate.value,
+      docType: el.radioTypeStore.checked ? 'STORE' : 'PR',
+      docNo: el.formDocNo.value.trim(),
+      departmentId: el.formDept.value,
+      lineId: el.formLine.value,
+      machineId: el.formMachine.value,
+      orderNo: el.formOrderNo.value.trim(),
+      description: el.formDescription.value.trim(),
+      qty: parseFloat(el.formQty.value) || 1,
+      unit: el.formUnit.value.trim() || 'ชิ้น',
+      price: el.formPrice.value !== '' ? parseFloat(el.formPrice.value) : null,
+      poNo: el.formPoNo.value.trim(),
+      deliveryDate: el.formDeliveryDate.value,
+      notes: el.formNotes.value.trim()
+    };
+
+    if (!payload.description) {
+      showToast('กรุณากรอกรายละเอียดสินค้าหรือบริการ', 'error');
+      el.formDescription.focus();
+      return;
+    }
+
+    if (state.retentionCutoff && payload.createdDate && payload.createdDate < state.retentionCutoff) {
+      showToast(`วันที่สร้าง (${payload.createdDate}) เกินกำหนดนโยบายจัดเก็บข้อมูลย้อนหลัง 2 ปี (ระบบจัดเก็บข้อมูลไม่เก่ากว่า ${state.retentionCutoff})`, 'error');
+      el.formCreatedDate.focus();
+      return;
+    }
+
+    try {
+      await callRpc('saveItem', payload);
+      showToast(state.formMode === 'create' ? 'บันทึกคำขอใหม่เรียบร้อย' : 'บันทึกการแก้ไขเรียบร้อย', 'success');
+
+      if (isSaveAndNext) {
+        el.formDescription.value = '';
+        el.formDocNo.value = '';
+        el.formPoNo.value = '';
+        el.formPrice.value = '';
+        el.formNotes.value = '';
+        el.formCalcTotal.textContent = '฿ 0.00';
+        el.formDescription.focus();
+      } else {
+        el.formPane.style.display = 'none';
+        state.isFormOpen = false;
+      }
+
+      await loadItems();
+    } catch (err) {
+      showToast('บันทึกล้มเหลว: ' + err.message, 'error');
+    }
+  }
+
+  // 7.5 Bulk Copy to Clipboard for Email
+  async function handleBulkCopyEmail() {
+    if (state.selectedIds.size === 0) {
+      showToast('กรุณาเลือกรายการที่ต้องการคัดลอก', 'info');
+      return;
+    }
+
+    const selectedItems = state.items.filter(i => state.selectedIds.has(i.id));
+    if (selectedItems.length === 0) return;
+
+    // Plain text table (TSV for clean paste in email/chat/excel)
+    const headers = ['พื้นที่', 'Order', 'รายละเอียด', 'จำนวน', 'ราคา', 'PR ถ้ามี'];
+    const tsvLines = [
+      headers.join('\t'),
+      ...selectedItems.map(item => {
+        const areaLine = item.departmentId && item.lineName ? `${item.departmentId}/${item.lineName}` : (item.lineName || item.departmentName || '-');
+        const areaStr = [areaLine, item.machineCode || ''].filter(Boolean).join(' ');
+        const order = item.orderNo || '-';
+        const desc = item.description || '-';
+        const qty = `${fmtNumber(item.qty)} ${item.unit || 'ชิ้น'}`;
+        const price = item.price !== null ? fmtNumber(item.price) : '-';
+        const pr = item.docNo || '-';
+
+        return [areaStr, order, desc, qty, price, pr].join('\t');
+      })
+    ];
+    const plainText = tsvLines.join('\r\n');
+
+    // Rich HTML Table with clean inline styles for Email (Outlook/Gmail)
+    const htmlRows = selectedItems.map((item, idx) => {
+      const areaLine = item.departmentId && item.lineName ? `${item.departmentId}/${item.lineName}` : (item.lineName || item.departmentName || '-');
+      const areaHtml = `<strong>${escapeHtml(areaLine)}</strong>${item.machineCode ? `<br><span style="color:#64748b; font-size:11px;">${escapeHtml(item.machineCode)}</span>` : ''}`;
+      const order = item.orderNo ? `<span style="font-family:monospace; font-weight:600;">${escapeHtml(item.orderNo)}</span>` : '-';
+      const desc = escapeHtml(item.description || '-');
+      const qty = `<span style="font-family:monospace;">${fmtNumber(item.qty)}</span> ${escapeHtml(item.unit || 'ชิ้น')}`;
+      const price = item.price !== null ? `<span style="font-family:monospace;">${fmtNumber(item.price)}</span>` : '-';
+      const pr = item.docNo ? `<span style="font-family:monospace; font-weight:600; color:#0284c7;">${escapeHtml(item.docNo)}</span>` : '-';
+      const bg = idx % 2 === 1 ? '#f8fafc' : '#ffffff';
+
+      return `
+        <tr style="background-color:${bg};">
+          <td style="padding:8px 12px; border:1px solid #cbd5e1; vertical-align:top;">${areaHtml}</td>
+          <td style="padding:8px 12px; border:1px solid #cbd5e1; vertical-align:top;">${order}</td>
+          <td style="padding:8px 12px; border:1px solid #cbd5e1; vertical-align:top; line-height:1.4;">${desc}</td>
+          <td style="padding:8px 12px; border:1px solid #cbd5e1; text-align:right; vertical-align:top; white-space:nowrap;">${qty}</td>
+          <td style="padding:8px 12px; border:1px solid #cbd5e1; text-align:right; vertical-align:top; white-space:nowrap;">${price}</td>
+          <td style="padding:8px 12px; border:1px solid #cbd5e1; vertical-align:top; white-space:nowrap;">${pr}</td>
+        </tr>
+      `;
+    }).join('');
+
+    const htmlTable = `
+      <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse; font-family:Tahoma, 'Segoe UI', Arial, sans-serif; font-size:13px; color:#1e293b; border:1px solid #cbd5e1; width:100%; max-width:850px;">
+        <thead>
+          <tr style="background-color:#0f172a; color:#ffffff; font-weight:bold; text-align:left;">
+            <th style="padding:10px 12px; border:1px solid #334155;">พื้นที่</th>
+            <th style="padding:10px 12px; border:1px solid #334155;">Order</th>
+            <th style="padding:10px 12px; border:1px solid #334155;">รายละเอียด</th>
+            <th style="padding:10px 12px; border:1px solid #334155; text-align:right;">จำนวน</th>
+            <th style="padding:10px 12px; border:1px solid #334155; text-align:right;">ราคา</th>
+            <th style="padding:10px 12px; border:1px solid #334155;">PR ถ้ามี</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${htmlRows}
+        </tbody>
+      </table>
+    `;
+
+    try {
+      if (navigator.clipboard && window.ClipboardItem) {
+        const item = new ClipboardItem({
+          'text/html': new Blob([htmlTable], { type: 'text/html' }),
+          'text/plain': new Blob([plainText], { type: 'text/plain' })
+        });
+        await navigator.clipboard.write([item]);
+      } else {
+        await navigator.clipboard.writeText(plainText);
+      }
+      showToast(`คัดลอก ${selectedItems.length} รายการลงคลิปบอร์ดแล้ว พร้อมนำไปวางส่งอีเมล`, 'success');
+    } catch (err) {
+      console.warn('ClipboardItem write failed, trying text fallback', err);
+      try {
+        await navigator.clipboard.writeText(plainText);
+        showToast(`คัดลอก ${selectedItems.length} รายการลงคลิปบอร์ดแล้ว`, 'success');
+      } catch (e) {
+        showToast('ไม่สามารถคัดลอกคลิปบอร์ดได้: ' + e.message, 'error');
+      }
+    }
+  }
+
+  // 8. Bulk Area
+  function openBulkAreaModal() {
+    if (state.selectedIds.size === 0) return;
+    el.bulkAreaSummaryText.textContent = `กำลังอัปเดตพื้นที่สำหรับ ${state.selectedIds.size} รายการที่เลือก:`;
+    el.bulkAreaDept.value = '';
+    updateLineDropdown(el.bulkAreaLine, '', 'เลือกสายการผลิตใหม่...');
+    updateMachineDropdown(el.bulkAreaMachine, '', '', 'เลือกเครื่องจักร...');
+    el.modalBulkArea.style.display = 'flex';
+  }
+
+  async function handleConfirmBulkArea() {
+    const deptId = el.bulkAreaDept.value;
+    const lineId = el.bulkAreaLine.value;
+    const machineId = el.bulkAreaMachine.value;
+
+    if (!deptId && !lineId && !machineId) {
+      showToast('กรุณาเลือกพื้นที่ใหม่อย่างน้อย 1 รายการ', 'error');
+      return;
+    }
+
+    try {
+      await callRpc('bulkUpdateArea', {
+        ids: Array.from(state.selectedIds),
+        departmentId: deptId,
+        lineId: lineId,
+        machineId: machineId
+      });
+      showToast(`เปลี่ยนพื้นที่เรียบร้อยแล้ว (${state.selectedIds.size} รายการ)`, 'success');
+      el.modalBulkArea.style.display = 'none';
+      state.selectedIds.clear();
+      await loadItems();
+    } catch (err) {
+      showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    }
+  }
+
+  // 9. Bulk Archive
+  async function handleArchiveSelected(shouldArchive = true) {
+    if (state.selectedIds.size === 0) return;
+    const actionLabel = shouldArchive ? 'จัดเก็บ' : 'กู้คืน';
+
+    try {
+      await callRpc('archiveItems', {
+        ids: Array.from(state.selectedIds),
+        archive: shouldArchive
+      });
+      showToast(`${actionLabel}เรียบร้อยแล้ว (${state.selectedIds.size} รายการ)`, 'success');
+      state.selectedIds.clear();
+      await loadItems();
+    } catch (err) {
+      showToast('ดำเนินการไม่สำเร็จ: ' + err.message, 'error');
+    }
+  }
+
+  // 10. Admin Delete Modal
+  function openAdminDeleteModal(ids) {
+    state.pendingDeleteIds = ids;
+    el.inputAdminPassword.value = '';
+    el.adminPasswordError.style.display = 'none';
+
+    const targets = state.items.filter(i => ids.includes(i.id));
+    el.deleteTargetPreview.innerHTML = targets.map(t => `
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">
+        <span><strong>${escapeHtml(t.docNo || t.id)}</strong> - ${escapeHtml(t.description)}</span>
+        <span class="font-mono text-muted">${fmtNumber(t.qty)} ${escapeHtml(t.unit)}</span>
+      </div>
+    `).join('');
+
+    el.modalAdminDelete.style.display = 'flex';
+    el.inputAdminPassword.focus();
+  }
+
+  async function handleConfirmAdminDelete() {
+    const password = el.inputAdminPassword.value.trim();
+    if (!password) {
+      el.adminPasswordError.textContent = 'กรุณากรอกรหัสผ่านผู้ดูแลระบบ';
+      el.adminPasswordError.style.display = 'block';
+      el.inputAdminPassword.focus();
+      return;
+    }
+
+    try {
+      await callRpc('deleteItems', {
+        ids: state.pendingDeleteIds,
+        adminPassword: password
+      });
+      showToast(`ลบข้อมูลถาวรเรียบร้อยแล้ว (${state.pendingDeleteIds.length} รายการ)`, 'success');
+      el.modalAdminDelete.style.display = 'none';
+      state.pendingDeleteIds.forEach(id => state.selectedIds.delete(id));
+      await loadItems();
+    } catch (err) {
+      el.adminPasswordError.textContent = err.message || 'รหัสผ่านไม่ถูกต้อง';
+      el.adminPasswordError.style.display = 'block';
+      el.inputAdminPassword.focus();
+    }
+  }
+
+  // 11. Detail Modal
+  async function openItemDetail(id) {
+    try {
+      const item = state.items.find(i => i.id === id) || await callRpc('getItem', id);
+      if (!item) return;
+
+      const isStore = (item.docType || item.doc_type) === 'STORE';
+      el.detailTypeBadge.className = isStore ? 'detail-type-badge type-store' : 'detail-type-badge type-pr';
+      el.detailTypeBadge.textContent = isStore ? 'เบิก' : 'ซื้อ';
+      el.detailModalTitle.textContent = `${item.docNo || item.id} - ${item.description}`;
+
+      const priceVal = item.price !== null ? fmtCurrency(item.price) : 'ไม่ได้ระบุ';
+      const totalVal = item.totalPrice !== null ? fmtCurrency(item.totalPrice) : (item.price !== null ? fmtCurrency(item.price * item.qty) : 'ไม่ได้ระบุ');
+
+      el.detailModalBody.innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">หมายเลขเอกสาร:</span>
+            <span class="detail-value font-mono"><strong>${escapeHtml(item.docNo || 'ยังไม่ออกเลข')}</strong></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">วันที่เปิดคำขอ:</span>
+            <span class="detail-value font-mono">${escapeHtml(item.createdDate || item.created_date || '-')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">พื้นที่ / แผนก:</span>
+            <span class="detail-value">${escapeHtml(item.departmentName || item.department_id || '-')} &gt; ${escapeHtml(item.lineName || item.line_id || '-')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">เครื่องจักร:</span>
+            <span class="detail-value font-mono">${escapeHtml(item.machineCode || item.machine_code || '-')} ${item.machineName ? `(${escapeHtml(item.machineName)})` : ''}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">เลข ORDER (PM):</span>
+            <span class="detail-value font-mono">${escapeHtml(item.orderNo || item.order_no || '-')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">เลขที่ PO:</span>
+            <span class="detail-value font-mono">${escapeHtml(item.poNo || item.po_no || 'ยังไม่ออก PO')}</span>
+          </div>
+          <div class="detail-item col-full">
+            <span class="detail-label">รายละเอียดสินค้า / บริการ / อะไหล่:</span>
+            <span class="detail-value" style="font-size:14px; font-weight:500;">${escapeHtml(item.description)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">จำนวน:</span>
+            <span class="detail-value font-mono"><strong>${fmtNumber(item.qty)}</strong> ${escapeHtml(item.unit)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">ราคา/หน่วย:</span>
+            <span class="detail-value font-mono">${priceVal}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">ราคารวม (฿):</span>
+            <span class="detail-value font-mono text-primary" style="font-weight:700;">${totalVal}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">กำหนดส่งมอบ:</span>
+            <span class="detail-value font-mono">${escapeHtml(item.deliveryDate || item.delivery_date || '-')}</span>
+          </div>
+          <div class="detail-item col-full">
+            <span class="detail-label">หมายเหตุ:</span>
+            <span class="detail-value text-muted">${escapeHtml(item.notes || '-')}</span>
+          </div>
+        </div>
+      `;
+
+      el.btnDetailEditBtn.onclick = () => {
+        el.modalItemDetail.style.display = 'none';
+        openEditForm(id);
+      };
+
+      el.modalItemDetail.style.display = 'flex';
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // 12. Inline Table Edit
+  function toggleInlineTableEdit() {
+    state.isInlineEditing = !state.isInlineEditing;
+    el.tableEditBanner.style.display = state.isInlineEditing ? 'inline-flex' : 'none';
+    renderTable();
+  }
+
+  async function handleSaveTableEdit() {
+    const rows = document.querySelectorAll('.pr-table tbody tr.row-inline-editing');
+    const updateList = [];
+
+    rows.forEach(tr => {
+      const id = tr.dataset.id;
+      if (!id) return;
+      const getVal = field => {
+        const input = tr.querySelector(`[data-field="${field}"]`);
+        return input ? input.value : '';
+      };
+
+      updateList.push({
+        id,
+        docType: getVal('docType'),
+        docNo: getVal('docNo'),
+        orderNo: getVal('orderNo'),
+        description: getVal('description'),
+        qty: parseFloat(getVal('qty')) || 1,
+        unit: getVal('unit'),
+        price: getVal('price') !== '' ? parseFloat(getVal('price')) : null,
+        poNo: getVal('poNo'),
+        deliveryDate: getVal('deliveryDate')
+      });
+    });
+
+    if (updateList.length === 0) {
+      toggleInlineTableEdit();
+      return;
+    }
+
+    try {
+      await callRpc('bulkSaveItems', updateList);
+      showToast(`บันทึกการแก้ไข ${updateList.length} รายการเรียบร้อยแล้ว`, 'success');
+      state.isInlineEditing = false;
+      el.tableEditBanner.style.display = 'none';
+      await loadItems();
+    } catch (err) {
+      showToast('บันทึกล้มเหลว: ' + err.message, 'error');
+    }
+  }
+
+  // 13. CSV Export
+  function exportToCsv() {
+    if (!state.items || state.items.length === 0) {
+      showToast('ไม่มีข้อมูลสำหรับส่งออก', 'info');
+      return;
+    }
+
+    const headers = [
+      'ID', 'วันที่สร้าง', 'ประเภทเอกสาร', 'หมายเลข PR / เลขที่เบิก', 'แผนก', 'สายการผลิต', 'เครื่องจักร',
+      'เลข ORDER (PM)', 'รายละเอียด', 'จำนวน', 'หน่วย', 'ราคาต่อหน่วย (บาท)', 'ราคารวม (บาท)',
+      'เลขที่ PO', 'กำหนดส่งมอบ', 'สถานะขั้นตอน', 'สถานะการจัดเก็บ', 'จัดเก็บเมื่อ', 'หมายเหตุ'
+    ];
+
+    const escapeCsv = val => {
+      const s = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
+      return `"${s}"`;
+    };
+
+    const rows = state.items.map(item => [
+      escapeCsv(item.id),
+      escapeCsv(item.createdDate),
+      escapeCsv(item.docType === 'STORE' ? 'เบิก' : 'ซื้อ'),
+      escapeCsv(item.docNo),
+      escapeCsv(item.departmentName),
+      escapeCsv(item.lineName),
+      escapeCsv(item.machineCode),
+      escapeCsv(item.orderNo),
+      escapeCsv(item.description),
+      escapeCsv(item.qty),
+      escapeCsv(item.unit),
+      escapeCsv(item.price !== null ? item.price : ''),
+      escapeCsv(item.totalPrice !== null ? item.totalPrice : ''),
+      escapeCsv(item.poNo),
+      escapeCsv(item.deliveryDate),
+      escapeCsv(item.pipelineStatus),
+      escapeCsv(item.isArchived ? 'จัดเก็บแล้ว' : 'รอดำเนินการ'),
+      escapeCsv(item.archivedAt || ''),
+      escapeCsv(item.notes)
+    ].join(','));
+
+    const csvContent = '\uFEFF' + headers.map(escapeCsv).join(',') + '\r\n' + rows.join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const nowStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `PR_Store_Ledger_${nowStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showToast('ส่งออกไฟล์ CSV สำเร็จ', 'success');
+  }
+
+  // 14. Event Listeners
+  function setupEventListeners() {
+    // Search
+    el.globalSearch.addEventListener('input', e => {
+      const q = e.target.value;
+      el.btnClearSearch.style.display = q ? 'flex' : 'none';
+      clearTimeout(state.searchTimer);
+      state.searchTimer = setTimeout(() => {
+        state.search = q;
+        loadItems();
+      }, 300);
+    });
+
+    el.btnClearSearch.addEventListener('click', () => {
+      el.globalSearch.value = '';
+      el.btnClearSearch.style.display = 'none';
+      state.search = '';
+      loadItems();
+    });
+
+    el.btnRefresh.addEventListener('click', loadItems);
+    el.btnExportCsv.addEventListener('click', exportToCsv);
+    el.btnCompose.addEventListener('click', openCreateForm);
+
+    // Sidebar Folder Navigation
+    document.querySelectorAll('.nav-folder-item').forEach(item => {
+      item.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelectorAll('.nav-folder-item').forEach(li => li.classList.remove('active'));
+        item.classList.add('active');
+        state.folder = item.dataset.folder;
+        state.selectedIds.clear();
+        loadItems();
+      });
+    });
+
+    // Horizontal Segmented Pipeline Tabs
+    document.querySelectorAll('.pipeline-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.pipeline-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        state.pipelineStep = tab.dataset.step;
+        // Uncheck sidebar quick chips
+        document.querySelectorAll('.chip-item').forEach(c => c.classList.remove('active'));
+        loadItems();
+      });
+    });
+
+    // Sidebar Quick Urgent Chips
+    document.querySelectorAll('.chip-item').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const step = chip.dataset.step;
+        if (state.pipelineStep === step) {
+          state.pipelineStep = '';
+          chip.classList.remove('active');
+          document.querySelector('.pipeline-tab[data-step=""]')?.classList.add('active');
+        } else {
+          document.querySelectorAll('.chip-item').forEach(c => c.classList.remove('active'));
+          document.querySelectorAll('.pipeline-tab').forEach(t => t.classList.remove('active'));
+          chip.classList.add('active');
+          state.pipelineStep = step;
+        }
+        loadItems();
+      });
+    });
+
+    // Sidebar Document Type Pills
+    document.querySelectorAll('.btn-doc-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-doc-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.docType = btn.dataset.doctype;
+        loadItems();
+      });
+    });
+
+    // Inline Filter Bar Dropdowns
+    el.filterDept.addEventListener('change', () => {
+      state.deptId = el.filterDept.value;
+      updateLineDropdown(el.filterLine, state.deptId, 'ทุกสายการผลิต');
+      state.lineId = '';
+      loadItems();
+    });
+
+    el.filterLine.addEventListener('change', () => {
+      state.lineId = el.filterLine.value;
+      loadItems();
+    });
+
+    const handleDateChange = () => {
+      state.startDate = el.filterStartDate.value;
+      state.endDate = el.filterEndDate.value;
+      el.btnClearDateFilter.style.display = (state.startDate || state.endDate) ? 'inline-block' : 'none';
+      loadItems();
+    };
+    el.filterStartDate.addEventListener('change', handleDateChange);
+    el.filterEndDate.addEventListener('change', handleDateChange);
+    el.btnClearDateFilter.addEventListener('click', () => {
+      el.filterStartDate.value = '';
+      el.filterEndDate.value = '';
+      handleDateChange();
+    });
+
+    el.selectPageLimit.addEventListener('change', () => {
+      state.limit = Number(el.selectPageLimit.value) || 100;
+      loadItems();
+    });
+
+    // Compose Dock Header Tool Buttons
+    el.btnMinimizeForm.addEventListener('click', () => {
+      el.formPane.classList.toggle('minimized');
+    });
+    el.btnCloseForm.addEventListener('click', () => {
+      el.formPane.style.display = 'none';
+      state.isFormOpen = false;
+    });
+    el.btnCancelForm.addEventListener('click', () => {
+      el.formPane.style.display = 'none';
+      state.isFormOpen = false;
+    });
+
+    el.form.addEventListener('submit', handleFormSubmit);
+    el.formQty.addEventListener('input', updateFormCalcTotal);
+    el.formPrice.addEventListener('input', updateFormCalcTotal);
+
+    el.formDept.addEventListener('change', () => {
+      updateLineDropdown(el.formLine, el.formDept.value, 'เลือกสายการผลิต...');
+      updateMachineDropdown(el.formMachine, '', el.formDept.value, 'เลือกเครื่องจักร (ถ้ามี)...');
+    });
+    el.formLine.addEventListener('change', () => {
+      updateMachineDropdown(el.formMachine, el.formLine.value, el.formDept.value, 'เลือกเครื่องจักร (ถ้ามี)...');
+    });
+
+    // Table Select All
+    el.checkSelectAll.addEventListener('change', () => {
+      if (el.checkSelectAll.checked) {
+        state.items.forEach(i => state.selectedIds.add(i.id));
+      } else {
+        state.selectedIds.clear();
+      }
+      renderTable();
+    });
+
+    // Table Clicks
+    el.tbody.addEventListener('click', e => {
+      const checkbox = e.target.closest('.row-select-checkbox');
+      if (checkbox) {
+        const id = checkbox.dataset.id;
+        if (checkbox.checked) state.selectedIds.add(id);
+        else state.selectedIds.delete(id);
+        const tr = checkbox.closest('tr');
+        if (tr) tr.classList.toggle('row-selected', checkbox.checked);
+        updateSelectionUI();
+        return;
+      }
+
+      const btnEdit = e.target.closest('.btn-row-edit');
+      if (btnEdit) {
+        openEditForm(btnEdit.dataset.id);
+        return;
+      }
+
+      const btnArchive = e.target.closest('.btn-row-archive');
+      if (btnArchive) {
+        const isCurrentlyArchived = btnArchive.dataset.archived === 'true';
+        state.selectedIds.clear();
+        state.selectedIds.add(btnArchive.dataset.id);
+        handleArchiveSelected(!isCurrentlyArchived);
+        return;
+      }
+
+      const btnDelete = e.target.closest('.btn-row-delete');
+      if (btnDelete) {
+        openAdminDeleteModal([btnDelete.dataset.id]);
+        return;
+      }
+
+      const descText = e.target.closest('[data-action="detail"]');
+      if (descText) {
+        openItemDetail(descText.dataset.id);
+        return;
+      }
+    });
+
+    // Bulk Buttons
+    el.btnDeselectAll.addEventListener('click', () => {
+      state.selectedIds.clear();
+      renderTable();
+    });
+    if (el.btnBulkCopy) el.btnBulkCopy.addEventListener('click', handleBulkCopyEmail);
+    el.btnBulkInlineEdit.addEventListener('click', toggleInlineTableEdit);
+    el.btnOpenBulkAreaModal.addEventListener('click', openBulkAreaModal);
+    el.btnBulkArchive.addEventListener('click', () => {
+      handleArchiveSelected(state.folder !== 'archive');
+    });
+    el.btnOpenBulkDeleteModal.addEventListener('click', () => {
+      if (state.selectedIds.size === 0) return;
+      openAdminDeleteModal(Array.from(state.selectedIds));
+    });
+
+    // Table Edit Mode Buttons
+    el.btnCancelTableEdit.addEventListener('click', toggleInlineTableEdit);
+    el.btnSaveTableEdit.addEventListener('click', handleSaveTableEdit);
+
+    // Bulk Area Modal Controls
+    el.bulkAreaDept.addEventListener('change', () => {
+      updateLineDropdown(el.bulkAreaLine, el.bulkAreaDept.value, 'เลือกสายการผลิตใหม่...');
+      updateMachineDropdown(el.bulkAreaMachine, '', el.bulkAreaDept.value, 'เลือกเครื่องจักร...');
+    });
+    el.bulkAreaLine.addEventListener('change', () => {
+      updateMachineDropdown(el.bulkAreaMachine, el.bulkAreaLine.value, el.bulkAreaDept.value, 'เลือกเครื่องจักร...');
+    });
+    el.btnCancelBulkArea.addEventListener('click', () => el.modalBulkArea.style.display = 'none');
+    el.btnCloseBulkArea.addEventListener('click', () => el.modalBulkArea.style.display = 'none');
+    el.btnConfirmBulkArea.addEventListener('click', handleConfirmBulkArea);
+
+    // Admin Delete Modal Controls
+    el.btnCancelAdminDelete.addEventListener('click', () => el.modalAdminDelete.style.display = 'none');
+    el.btnCloseAdminDelete.addEventListener('click', () => el.modalAdminDelete.style.display = 'none');
+    el.btnConfirmAdminDelete.addEventListener('click', handleConfirmAdminDelete);
+    el.inputAdminPassword.addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleConfirmAdminDelete();
+    });
+
+    // Detail Modal Controls
+    el.btnCloseDetail.addEventListener('click', () => el.modalItemDetail.style.display = 'none');
+    el.btnDetailCloseBtn.addEventListener('click', () => el.modalItemDetail.style.display = 'none');
+
+    // Backdrop Click
+    [el.modalBulkArea, el.modalAdminDelete, el.modalItemDetail].forEach(modal => {
+      modal.addEventListener('click', e => {
+        if (e.target === modal) modal.style.display = 'none';
+      });
+    });
+
+    // Escape Key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        el.modalBulkArea.style.display = 'none';
+        el.modalAdminDelete.style.display = 'none';
+        el.modalItemDetail.style.display = 'none';
+      }
+    });
+
+    // Active Filter Chips Removal
+    el.activeFilterChips.addEventListener('click', e => {
+      const btnRemove = e.target.closest('.remove-pill');
+      if (!btnRemove) return;
+      const key = btnRemove.dataset.key;
+      if (key === 'pipelineStep') {
+        state.pipelineStep = '';
+        document.querySelectorAll('.pipeline-tab').forEach(t => t.classList.toggle('active', t.dataset.step === ''));
+        document.querySelectorAll('.chip-item').forEach(c => c.classList.remove('active'));
+      } else if (key === 'docType') {
+        state.docType = '';
+        document.querySelectorAll('.btn-doc-pill').forEach(b => b.classList.toggle('active', b.dataset.doctype === ''));
+      } else if (key === 'deptId') {
+        state.deptId = '';
+        el.filterDept.value = '';
+      } else if (key === 'lineId') {
+        state.lineId = '';
+        el.filterLine.value = '';
+      } else if (key === 'date') {
+        state.startDate = '';
+        state.endDate = '';
+        el.filterStartDate.value = '';
+        el.filterEndDate.value = '';
+        el.btnClearDateFilter.style.display = 'none';
+      }
+      loadItems();
+    });
+  }
+
+  // Initialization
+  async function init() {
+    setupEventListeners();
+    await loadReferences();
+    await loadItems();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+</script>
+</body>
+</html>

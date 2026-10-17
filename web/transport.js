@@ -86,6 +86,8 @@
     const result = await res.json();
     if (!result.ok) throw new Error(result.error?.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
     currentUser = result.data;
+    window.currentUser = currentUser;
+    window.EM_CURRENT_USER = currentUser;
     updateBadge();
     modal.style.display = 'none';
 
@@ -243,6 +245,11 @@
           sessionStorage.removeItem('BOM_LAST_LINE');
           sessionStorage.removeItem('BOM_LAST_MACHINE');
         } catch (_) {}
+      } else if (!location.search && !sessionStorage.getItem('BOM_LAST_MACHINE')) {
+        try {
+          sessionStorage.removeItem('BOM_LAST_DEPT');
+          sessionStorage.removeItem('BOM_LAST_LINE');
+        } catch (_) {}
       }
     }
 
@@ -360,6 +367,8 @@
         .then(async res => {
           if (res.ok && res.data) {
             currentUser = res.data;
+            window.currentUser = currentUser;
+            window.EM_CURRENT_USER = currentUser;
             updateBadge();
             if (res.data.mustChangePassword) {
               await promptForceChangePassword();
@@ -426,6 +435,7 @@
     return doRequest();
   };
 
+  window.isAdmin = () => Boolean(currentUser && (currentUser.role === 'admin' || currentUser.permissions?.bom === 'admin'));
   window.callRPC = async (method, ...args) => {
     return window.EM_RPC(method, ...args);
   };

@@ -16,12 +16,14 @@ export const isRead=(scope,method)=>(scope==='machines'?machineReads:scope==='pa
 const publicMachine=({requestId,photoFileId,...m})=>({...m,hasPhoto:!!photoFileId});
 const publicPart=({requestId,...p})=>p;
 
-async function bomReferences(repo){
+async function bomReferences(repo, actor){
  const ref=await repo.references(),rawMachines=await repo.catalog('machines');
  const bomRef={
   departments:ref.departments.map(d=>({DeptID:d.deptId,DeptName:d.deptName,Code:d.deptId,IsActive:d.isActive})),
   lines:ref.lines.map(l=>({LineID:l.lineId,DeptID:l.deptId,LineName:l.lineName,IsActive:l.isActive})),
-  machines:rawMachines.map(m=>({MachineID:m.machineId,MachineCode:m.machineCode,MachineName:m.machineName,DeptID:m.deptId,LineID:m.lineId,LineOrder:m.lineOrder,IsActive:m.isActive,Status:m.status}))
+  machines:rawMachines.map(m=>({MachineID:m.machineId,MachineCode:m.machineCode,MachineName:m.machineName,DeptID:m.deptId,LineID:m.lineId,LineOrder:m.lineOrder,IsActive:m.isActive,Status:m.status})),
+  role:actor?.role,
+  permissions:actor?.permissions
  };
  return bomRef;
 }
@@ -66,7 +68,7 @@ export async function dispatch(env,actor,scope,method,args,key){
    return args[0]?.all?{all:true,allTotal:rows.length,total:rows.length,items:rows.map(publicPart)}:{...PartCore.query(rows,args[0]||{}),items:PartCore.query(rows,args[0]||{}).items.map(publicPart)};
   }
   if(scope==='bom'){
-   if(method==='references')return bomReferences(repo);
+   if(method==='references')return bomReferences(repo, actor);
    if(method==='searchParts'){
     const query=args[0]||{};
     const {bomParts}=await bomContext(repo);
@@ -129,6 +131,7 @@ async function saveBomMutation(repo,actor,method,args,key){
  if(!payload||typeof payload!=='object')fail('VALIDATION','ไม่พบข้อมูลคำขอ');
  const opId=payload.operationId||key||crypto.randomUUID();
  payload.operationId=opId;
+ if(actor&&(actor.role==='admin'||actor.permissions?.bom==='admin'))payload.isAdmin=true;
  const req=await repo.request(actor,'bom:'+method,args,opId);
  if(req.replay)return req.replay;
  const prior=await repo.bomOperation(opId);

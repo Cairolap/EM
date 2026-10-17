@@ -72,9 +72,9 @@ export async function listExpenses(env, query = {}) {
     // Split space-separated search words
     const words = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
     words.forEach(word => {
-      conditions.push('(LOWER(e.description) LIKE ? OR LOWER(e.machine_code) LIKE ? OR LOWER(e.pm_order_no) LIKE ? OR LOWER(e.material_no) LIKE ? OR LOWER(e.doc_no) LIKE ?)');
+      conditions.push('(LOWER(e.description) LIKE ? OR LOWER(e.machine_code) LIKE ? OR LOWER(e.pm_order_no) LIKE ? OR LOWER(e.material_no) LIKE ? OR LOWER(e.doc_no) LIKE ? OR LOWER(e.line_id) LIKE ?)');
       const pattern = `%${word}%`;
-      params.push(pattern, pattern, pattern, pattern, pattern);
+      params.push(pattern, pattern, pattern, pattern, pattern, pattern);
     });
   }
 
@@ -117,23 +117,37 @@ export async function listExpenses(env, query = {}) {
     items: (rows.results || []).map(r => ({
       id: r.id,
       docDate: r.doc_date,
+      doc_date: r.doc_date,
       departmentId: r.department_id,
+      department_id: r.department_id,
       departmentName: r.department_name,
+      department_name: r.department_name,
       lineId: r.line_id,
+      line_id: r.line_id,
       lineName: r.line_name,
+      line_name: r.line_name,
       machineCode: r.machine_code,
+      machine_code: r.machine_code,
       machineId: r.machine_id,
+      machine_id: r.machine_id,
       machineName: r.machine_name,
+      machine_name: r.machine_name,
       pmOrderNo: r.pm_order_no,
+      pm_order_no: r.pm_order_no,
       materialNo: r.material_no,
+      material_no: r.material_no,
       description: r.description,
       quantity: r.quantity,
       uom: r.uom,
       unitPrice: r.unit_price,
+      unit_price: r.unit_price,
       amount: r.amount,
       docNo: r.doc_no,
+      doc_no: r.doc_no,
       costCenter: r.cost_center,
+      cost_center: r.cost_center,
       functionalLoc: r.functional_loc,
+      functional_loc: r.functional_loc,
       notes: r.notes
     })),
     totalCount,
@@ -153,7 +167,14 @@ export async function importExpenseRecords(env, actor, rawItems = []) {
     authorizeWrite(actor, env, 'machines');
   }
 
-  if (!Array.isArray(rawItems) || !rawItems.length) {
+  // Support both raw array and { records: [...] } or { items: [...] }
+  const items = Array.isArray(rawItems)
+    ? rawItems
+    : (Array.isArray(rawItems?.records)
+        ? rawItems.records
+        : (Array.isArray(rawItems?.items) ? rawItems.items : []));
+
+  if (!items.length) {
     fail('VALIDATION', 'ไม่พบรายการข้อมูลสำหรับนำเข้า');
   }
 
@@ -161,18 +182,19 @@ export async function importExpenseRecords(env, actor, rawItems = []) {
   await pruneOldExpenses(env);
   const cutoff = getTwoYearCutoffDate();
 
-  // 2. Pre-load active machines for fast in-memory auto-linking
+  // 2. Pre-load machines for fast in-memory auto-linking (active machines prioritized)
   const machinesRes = await env.DB.prepare(
-    'SELECT id, code, normalized_code, name, department_id, line_id FROM machines WHERE is_active = 1'
+    'SELECT id, code, normalized_code, name, department_id, line_id, is_active FROM machines'
   ).all();
   const machineList = machinesRes.results || [];
+  machineList.sort((a, b) => (a.is_active || 0) - (b.is_active || 0));
   const machineMap = new Map();
   machineList.forEach(m => {
-    machineMap.set(m.code.toUpperCase(), m);
-    machineMap.set(m.normalized_code.toUpperCase(), m);
+    if (m.code) machineMap.set(m.code.trim().toUpperCase(), m);
+    if (m.normalized_code) machineMap.set(m.normalized_code.trim().toUpperCase(), m);
   });
 
-  // Pre-load lines for functional location matching
+  // Pre-load lines for fallback matching
   const linesRes = await env.DB.prepare(
     'SELECT id, department_id, name FROM lines WHERE is_active = 1'
   ).all();
@@ -189,8 +211,18 @@ export async function importExpenseRecords(env, actor, rawItems = []) {
 
   const statements = [];
 
-  for (let i = 0; i < rawItems.length; i++) {
-    const item = rawItems[i];
+  // SAP Number Parser (handles trailing minus e.g. "3435.46-", commas e.g. "1,234.50")
+  const parseSapNumber = (val) => {
+    if (val === null || val === undefined) return 0;
+    let s = String(val).trim().replace(/,/g, '');
+    if (s.endsWith('-')) {
+      s = '-' + s.slice(0, -1);
+    }
+    return parseFloat(s) || 0;
+  };
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
     let docDate = String(item.docDate || item['Posting date'] || '').trim();
 
     // Normalize date format: e.g. '20261003' -> '2026-10-03' or '03/10/2026' -> '2026-10-03'
@@ -202,16 +234,35 @@ export async function importExpenseRecords(env, actor, rawItems = []) {
     }
 
     // Skip items older than 2 years to preserve D1 storage
-    if (docDate < cutoff) {
+    if (docDate && docDate < cutoff) {
       skippedOldCount++;
       continue;
     }
 
-    const machineCode = String(item.machineCode || item.Equipment || '').trim();
-    const pmOrderNo = String(item.pmOrderNo || item.Order || '').replace(/^0+/, '').trim();
+    // Column mapping according to requirements:
+    // เครื่องจักร = Equipment
+    const machineCode = String(item.machineCode || item.Equipment || item.equipment || '').trim();
+
+    // PM No. = Order (strip leading zeros)
+    const rawOrder = String(item.pmOrderNo || item.Order || item.order || '').trim();
+    const pmOrderNo = rawOrder.replace(/^0+/, '') || rawOrder;
+
     const docNo = String(item.docNo || item['Doc. no.'] || '').trim();
-    const materialNo = String(item.materialNo || item['Material no.'] || '').trim();
-    const description = String(item.description || item.Description || '').trim();
+    const materialNo = String(item.materialNo || item['Material no.'] || item.material || '').trim();
+    const rawDesc = String(item.description || item.Description || '').trim();
+
+    // รายการ = Description (Material no. (ถ้ามี))
+    let description = rawDesc;
+    if (materialNo) {
+      if (description) {
+        if (!description.includes(materialNo)) {
+          description = `${description} (${materialNo})`;
+        }
+      } else {
+        description = materialNo;
+      }
+    }
+
     const costCenter = String(item.costCenter || item['Cost ctr.'] || '').trim();
     const functionalLoc = String(item.functionalLoc || item['Functional Loc.'] || '').trim();
     const uom = String(item.uom || item.UOM || 'EA').trim();
@@ -219,14 +270,25 @@ export async function importExpenseRecords(env, actor, rawItems = []) {
     const movementType = String(item.movementType || item['Mvt.'] || '261').trim();
     const orderType = String(item.orderType || item.type || '1PMO').trim();
 
-    const quantity = parseFloat(String(item.quantity || item['Qty.'] || '0').replace(/,/g, '')) || 0;
-    const amount = parseFloat(String(item.amount || item.Amount || '0').replace(/,/g, '')) || 0;
-    const unitPrice = quantity > 0 ? (amount / quantity) : 0;
+    // จำนวน = Qty.
+    const quantity = parseSapNumber(item.quantity !== undefined ? item.quantity : item['Qty.']);
 
-    // Auto-link machine
+    // รวม (฿) = Amount
+    const amount = parseSapNumber(item.amount !== undefined ? item.amount : item.Amount);
+
+    // ราคา/หน่วย = Amount / Qty.
+    let unitPrice = 0;
+    if (item.unitPrice !== undefined && Number(item.unitPrice) > 0) {
+      unitPrice = Number(item.unitPrice);
+    } else if (quantity !== 0) {
+      unitPrice = Math.abs(amount / quantity);
+    }
+
+    // แผนก = Equipment ไปเทียบในรายการเครื่องจักร
+    // ไลน์ = Equipment ไปเทียบในรายการเครื่องจักร
     let machineId = null;
-    let departmentId = item.departmentId || null;
-    let lineId = item.lineId || null;
+    let departmentId = null;
+    let lineId = null;
 
     if (machineCode) {
       const matchedMachine = machineMap.get(machineCode.toUpperCase());
@@ -238,7 +300,7 @@ export async function importExpenseRecords(env, actor, rawItems = []) {
       }
     }
 
-    // Fallback: parse Department and Line from Functional Location (e.g. '1RS-MX1-L01', '3RS-PR1-L03')
+    // Fallback: if machine not found in registry, attempt functional location parse
     if (!lineId && functionalLoc) {
       const match = functionalLoc.match(/-([A-Z0-9]+)-(L[A-Z0-9_-]+)/i);
       if (match) {
@@ -254,8 +316,10 @@ export async function importExpenseRecords(env, actor, rawItems = []) {
         }
       }
     }
+    if (!departmentId && item.departmentId) departmentId = item.departmentId;
+    if (!lineId && item.lineId) lineId = item.lineId;
 
-    const id = `EXP-${docNo || 'NO'}-${docDate}-${materialNo || 'MAT'}-${i}`;
+    const id = item.id || `EXP-${docNo || 'NO'}-${docDate || 'DATE'}-${materialNo || 'MAT'}-${i}-${Date.now().toString(36)}`;
 
     statements.push(
       env.DB.prepare(`
@@ -303,12 +367,13 @@ export async function importExpenseRecords(env, actor, rawItems = []) {
 
   return {
     success: true,
+    totalRecords: items.length,
     importedCount,
     skippedOldCount,
     linkedMachineCount,
     retentionCutoff: cutoff
   };
-}
+};
 
 /**
  * Single Expense Update/Delete
@@ -318,6 +383,57 @@ export async function deleteExpenseItem(env, actor, id) {
   if (!id) fail('VALIDATION', 'ไม่พบรหัสรายการ');
   await env.DB.prepare('DELETE FROM pm_expenses WHERE id = ?').bind(id).run();
   return { success: true, deletedId: id };
+}
+
+export async function clearAllExpenses(env, actor) {
+  try {
+    authorizeDelete(actor, env, 'pm');
+  } catch (_) {
+    authorizeDelete(actor, env, 'machines');
+  }
+  const res = await env.DB.prepare('DELETE FROM pm_expenses').run();
+  return { success: true, deletedCount: res.meta?.changes || 0 };
+}
+
+export async function deleteExpensesByRange(env, actor, { startDate, endDate, deptId } = {}) {
+  try {
+    authorizeDelete(actor, env, 'pm');
+  } catch (_) {
+    authorizeDelete(actor, env, 'machines');
+  }
+
+  const conditions = [];
+  const params = [];
+
+  if (startDate) {
+    conditions.push('doc_date >= ?');
+    params.push(startDate.trim());
+  }
+
+  if (endDate) {
+    conditions.push('doc_date <= ?');
+    params.push(endDate.trim());
+  }
+
+  if (deptId && deptId.trim()) {
+    conditions.push('department_id = ?');
+    params.push(deptId.trim());
+  }
+
+  if (!conditions.length) {
+    fail('VALIDATION', 'กรุณาระบุช่วงวันที่ที่ต้องการลบ');
+  }
+
+  const sql = `DELETE FROM pm_expenses WHERE ${conditions.join(' AND ')}`;
+  const res = await env.DB.prepare(sql).bind(...params).run();
+
+  return {
+    success: true,
+    deletedCount: res.meta?.changes || 0,
+    startDate,
+    endDate,
+    deptId
+  };
 }
 
 export async function saveExpenseItem(env, actor, payload) {
@@ -363,12 +479,13 @@ export async function saveExpenseItem(env, actor, payload) {
 }
 
 /**
- * Dashboard & Analytics: Budget vs Actual per Line
+ * Dashboard & Analytics: Budget vs Actual per Line (from PM Expenses)
  */
-export async function getDashboardData(env, { startDate, endDate, deptId } = {}) {
+export async function getDashboardData(env, { startDate, endDate, deptId, dept } = {}) {
   const cutoff = getTwoYearCutoffDate();
   const start = startDate || `${new Date().getFullYear()}-01-01`;
   const end = endDate || `${new Date().getFullYear()}-12-31`;
+  const targetDept = (deptId || dept || '').trim();
   const year = parseInt(start.slice(0, 4), 10) || new Date().getFullYear();
 
   // 1. Get all active lines
@@ -383,27 +500,38 @@ export async function getDashboardData(env, { startDate, endDate, deptId } = {})
     WHERE l.is_active = 1
   `;
   const lineParams = [];
-  if (deptId) {
+  if (targetDept) {
     linesSql += ' AND l.department_id = ?';
-    lineParams.push(deptId);
+    lineParams.push(targetDept);
   }
   linesSql += ' ORDER BY d.name ASC, l.name ASC';
   const linesRes = await env.DB.prepare(linesSql).bind(...lineParams).all();
   const lines = linesRes.results || [];
 
-  // 2. Query Actual Expenses grouped by line_id in the selected date range
+  const lineMap = new Map();
+  lines.forEach(l => {
+    lineMap.set(l.line_id, {
+      lineId: l.line_id,
+      lineName: l.line_name,
+      deptId: l.department_id,
+      deptName: l.department_name
+    });
+  });
+
+  // 2. Query Actual Expenses grouped by line_id directly from pm_expenses
   let expenseSql = `
     SELECT 
-      COALESCE(e.line_id, 'UNKNOWN') as line_id,
+      COALESCE(e.line_id, '') as line_id,
+      COALESCE(e.department_id, '') as department_id,
       SUM(e.amount) as actual_amount,
       COUNT(*) as expense_count
     FROM pm_expenses e
     WHERE e.doc_date >= ? AND e.doc_date <= ? AND e.doc_date >= ?
   `;
   const expParams = [start, end, cutoff];
-  if (deptId) {
+  if (targetDept) {
     expenseSql += ' AND e.department_id = ?';
-    expParams.push(deptId);
+    expParams.push(targetDept);
   }
   expenseSql += ' GROUP BY e.line_id';
   const expenseRes = await env.DB.prepare(expenseSql).bind(...expParams).all();
@@ -411,7 +539,8 @@ export async function getDashboardData(env, { startDate, endDate, deptId } = {})
   (expenseRes.results || []).forEach(r => {
     expenseMap.set(r.line_id, {
       actualAmount: r.actual_amount || 0,
-      count: r.expense_count || 0
+      count: r.expense_count || 0,
+      deptId: r.department_id
     });
   });
 
@@ -424,59 +553,88 @@ export async function getDashboardData(env, { startDate, endDate, deptId } = {})
     budgetMap.set(b.line_id, b.budget_amount || 0);
   });
 
-  // 4. Calculate KPI totals and Line Breakdown
+  // 4. Combine all lines (from registered lines + any lines present in pm_expenses)
+  const allLineIds = new Set([...lineMap.keys(), ...expenseMap.keys()]);
   let totalActual = 0;
   let totalBudget = 0;
+  let totalExpenseCount = 0;
 
-  const lineBreakdown = lines.map(line => {
-    const expInfo = expenseMap.get(line.line_id) || { actualAmount: 0, count: 0 };
+  const lineBreakdown = [];
+
+  for (const lid of allLineIds) {
+    if (!lid) continue;
+    const regLine = lineMap.get(lid);
+    const expInfo = expenseMap.get(lid) || { actualAmount: 0, count: 0, deptId: '' };
+    const budget = budgetMap.get(lid) || 0;
     const actual = expInfo.actualAmount;
-    const budget = budgetMap.get(line.line_id) || 0;
+    const count = expInfo.count;
+
+    const lineDept = regLine?.deptId || expInfo.deptId || '';
+    if (targetDept && lineDept && lineDept !== targetDept) {
+      continue;
+    }
+
     const variance = budget - actual;
     const percent = budget > 0 ? (actual / budget) * 100 : (actual > 0 ? 100 : 0);
 
     totalActual += actual;
     totalBudget += budget;
+    totalExpenseCount += count;
 
-    let status = 'NORMAL'; // ปกติ
+    let status = 'NORMAL';
     if (budget === 0 && actual === 0) {
-      status = 'NO_DATA'; // ไม่มีรายการ
+      status = 'NO_DATA';
     } else if (actual > budget && budget > 0) {
-      status = 'OVER_BUDGET'; // เกินงบ
+      status = 'OVER_BUDGET';
     } else if (percent >= 80) {
-      status = 'WARNING'; // เฝ้าระวัง
+      status = 'WARNING';
     }
 
-    return {
-      lineId: line.line_id,
-      lineName: line.line_name,
-      deptId: line.department_id,
-      deptName: line.department_name,
+    lineBreakdown.push({
+      lineId: lid,
+      lineName: regLine?.lineName || lid,
+      deptId: lineDept,
+      deptName: regLine?.deptName || lineDept,
       budget,
       actual,
       variance,
       percent: Math.round(percent * 100) / 100,
+      usagePercent: Math.round(percent * 100) / 100,
       status,
-      count: expInfo.count
-    };
-  });
+      count
+    });
+  }
 
-  const variance = totalBudget - totalActual;
+  // Sort by actual expenses descending
+  lineBreakdown.sort((a, b) => (b.actual || 0) - (a.actual || 0));
+
+  const totalVariance = totalBudget - totalActual;
   const budgetUsagePercent = totalBudget > 0 ? Math.round((totalActual / totalBudget) * 10000) / 100 : 0;
+
+  const totals = {
+    actual: totalActual,
+    budget: totalBudget,
+    variance: totalVariance,
+    usagePercent: budgetUsagePercent,
+    linesCount: lineBreakdown.length,
+    expenseCount: totalExpenseCount
+  };
 
   return {
     year,
     startDate: start,
     endDate: end,
-    deptId,
+    deptId: targetDept,
     kpi: {
       totalActual,
       totalBudget,
-      variance,
+      variance: totalVariance,
       budgetUsagePercent,
-      activeLinesCount: lines.length
+      activeLinesCount: lineBreakdown.length
     },
-    lineBreakdown
+    totals,
+    lineBreakdown,
+    lineMetrics: lineBreakdown
   };
 }
 

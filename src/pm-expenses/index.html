@@ -79,6 +79,11 @@
               <span>นำเข้าจากตาราง</span>
             </button>
 
+            <button type="button" id="btn-open-delete-range-modal" class="btn btn-secondary" title="เลือกลบข้อมูลค่าใช้จ่ายตามช่วงวันที่" style="color: #dc2626; border-color: #fecaca; background: #fff5f5;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>ลบตามช่วงวันที่</span>
+            </button>
+
             <button type="button" id="btn-export-excel" class="btn btn-secondary btn-icon" title="นำออกข้อมูล CSV / Excel">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             </button>
@@ -313,7 +318,12 @@
             <!-- Legend -->
             <div class="chart-legend">
               <span class="legend-item"><span class="legend-dot dot-budget"></span> งบประมาณ (Budget)</span>
-              <span class="legend-item"><span class="legend-dot dot-actual"></span> ค่าใช้จ่ายจริง (Actual)</span>
+              <span class="legend-item" style="gap: 8px;">
+                <span>ค่าใช้จ่ายจริง (Actual):</span>
+                <span class="legend-subitem"><span class="legend-dot dot-safe"></span> &lt;80%</span>
+                <span class="legend-subitem"><span class="legend-dot dot-warning"></span> 80-100%</span>
+                <span class="legend-subitem"><span class="legend-dot dot-danger"></span> &gt;100%</span>
+              </span>
             </div>
 
             <!-- Sort option -->
@@ -584,6 +594,57 @@
           <button type="submit" class="btn btn-primary" id="btn-save-expense">บันทึก</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL: เลือกลบรายการตามช่วงวันที่ (Delete Expenses By Range Modal)
+       ========================================================================= -->
+  <div id="modal-delete-range" class="modal-backdrop" style="display:none;">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2 class="modal-title" style="color: #dc2626; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          <span>เลือกลบข้อมูลตามช่วงวันที่</span>
+        </h2>
+        <button type="button" class="btn-close-modal" id="btn-close-delete-range-modal">×</button>
+      </div>
+
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <p class="text-muted" style="font-size: 0.88rem; margin: 0; line-height: 1.5;">
+          กรุณาเลือกช่วงวันที่ (และเลือกแผนก หากต้องการกรองเฉพาะแผนก) ระบบจะคำนวณจำนวนรายการที่จะถูกลบให้ตรวจสอบก่อนยืนยัน
+        </p>
+
+        <div class="form-field">
+          <label for="delete-range-start">ตั้งแต่วันที่ <span class="req">*</span></label>
+          <input type="date" id="delete-range-start" class="form-input" required>
+        </div>
+
+        <div class="form-field">
+          <label for="delete-range-end">ถึงวันที่ <span class="req">*</span></label>
+          <input type="date" id="delete-range-end" class="form-input" required>
+        </div>
+
+        <div class="form-field">
+          <label for="delete-range-dept">แผนก (ไม่บังคับ)</label>
+          <select id="delete-range-dept" class="form-select">
+            <option value="">ทุกแผนก (All Departments)</option>
+          </select>
+        </div>
+
+        <!-- Preview Box -->
+        <div id="delete-range-preview" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; font-size: 0.875rem; color: #991b1b;">
+          <div style="font-weight: 600; margin-bottom: 4px;">สรุปรายการที่ตรงเงื่อนไข:</div>
+          <div id="delete-range-preview-text">กรุณาระบุช่วงวันที่เพื่อตรวจสอบจำนวน</div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-delete-range">ยกเลิก</button>
+        <button type="button" class="btn btn-danger" id="btn-confirm-delete-range" disabled style="background:#dc2626; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:not-allowed; opacity:0.6;">
+          ยืนยันการลบข้อมูล
+        </button>
+      </div>
     </div>
   </div>
 

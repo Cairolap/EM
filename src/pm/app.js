@@ -58,9 +58,21 @@
     return result.data;
   }
 
+  function checkUrlTab() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    if (tab === 'form' || tab === 'orders') return 'form';
+    if (tab === 'matrix' || tab === 'overview') return 'matrix';
+    return null;
+  }
+
   // Initialize Page
   async function init() {
     setupEventHandlers();
+    const targetTab = checkUrlTab();
+    if (targetTab) {
+      state.currentTab = targetTab;
+    }
     try {
       await loadReferences();
       switchTab(state.currentTab);
@@ -74,11 +86,41 @@
     // Tab toggles
     document.getElementById('tab-btn-form')?.addEventListener('click', () => switchTab('form'));
     document.getElementById('tab-btn-matrix')?.addEventListener('click', () => switchTab('matrix'));
+    document.getElementById('btn-back-overview')?.addEventListener('click', () => {
+      switchTab('matrix');
+      const url = new URL(window.location);
+      url.searchParams.set('tab', 'overview');
+      window.history.pushState({}, '', url);
+    });
+
+    window.addEventListener('popstate', () => {
+      const t = checkUrlTab();
+      if (t) switchTab(t);
+    });
+
+    document.querySelectorAll('a[href*="/pm/?tab="], a[href*="/pm?tab="]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const u = new URL(a.href, window.location.origin);
+        const t = u.searchParams.get('tab');
+        if (t === 'form' || t === 'orders') {
+          e.preventDefault();
+          history.pushState(null, '', a.href);
+          switchTab('form');
+        } else if (t === 'matrix' || t === 'overview') {
+          e.preventDefault();
+          history.pushState(null, '', a.href);
+          switchTab('matrix');
+        }
+      });
+    });
 
     // Filter selectors
     document.getElementById('select-dept')?.addEventListener('change', (e) => {
       state.selectedDept = e.target.value;
       updateLineDropdown();
+      if (state.currentTab === 'matrix') {
+        loadMatrixData();
+      }
     });
 
     document.getElementById('select-line')?.addEventListener('change', (e) => {
@@ -183,6 +225,7 @@
     // Default select first line or L00 if available
     const urlParams = new URLSearchParams(window.location.search);
     const lineParam = urlParams.get('line');
+    const deptParam = urlParams.get('dept');
     const yearParam = urlParams.get('year');
     const roundParam = urlParams.get('round');
 
@@ -195,23 +238,17 @@
       state.selectedRound = Math.min(5, Math.max(1, Number(roundParam) || 1));
     }
 
+    if (deptParam && state.departments.some(d => d.deptId === deptParam)) {
+      state.selectedDept = deptParam;
+    } else {
+      state.selectedDept = ''; // ทุกแผนก (Default)
+    }
+    if (deptSelect) deptSelect.value = state.selectedDept;
+
     if (lineParam && state.lines.some(l => l.lineId === lineParam)) {
-      const targetLine = state.lines.find(l => l.lineId === lineParam);
-      state.selectedDept = targetLine.deptId;
-      if (deptSelect) deptSelect.value = state.selectedDept;
       updateLineDropdown(lineParam);
     } else {
-      // Prefer L00 if exists
-      const l00 = state.lines.find(l => l.lineId === 'L00');
-      if (l00) {
-        state.selectedDept = l00.deptId;
-        if (deptSelect) deptSelect.value = state.selectedDept;
-        updateLineDropdown('L00');
-      } else if (state.lines.length > 0) {
-        state.selectedDept = state.lines[0].deptId;
-        if (deptSelect) deptSelect.value = state.selectedDept;
-        updateLineDropdown(state.lines[0].lineId);
-      }
+      updateLineDropdown(state.lines.find(l => l.lineId === 'L00')?.lineId || state.lines[0]?.lineId || '');
     }
   }
 
@@ -229,12 +266,29 @@
       return;
     }
 
-    lineSelect.innerHTML = filteredLines.map(l => 
-      `<option value="${l.lineId}">${l.lineName} (${l.lineId})</option>`
-    ).join('');
+    if (!state.selectedDept) {
+      let html = '';
+      state.departments.forEach(d => {
+        const dLines = state.lines.filter(l => l.deptId === d.deptId);
+        if (dLines.length > 0) {
+          html += `<optgroup label="${d.deptName} (${d.deptId})">`;
+          dLines.forEach(l => {
+            html += `<option value="${l.lineId}">${l.lineName} (${l.lineId})</option>`;
+          });
+          html += `</optgroup>`;
+        }
+      });
+      lineSelect.innerHTML = html;
+    } else {
+      lineSelect.innerHTML = filteredLines.map(l => 
+        `<option value="${l.lineId}">${l.lineName} (${l.lineId})</option>`
+      ).join('');
+    }
 
     if (preferredLineId && filteredLines.some(l => l.lineId === preferredLineId)) {
       state.selectedLine = preferredLineId;
+    } else if (state.selectedLine && filteredLines.some(l => l.lineId === state.selectedLine)) {
+      // Keep current line
     } else {
       state.selectedLine = filteredLines[0].lineId;
     }
@@ -389,10 +443,21 @@
       }
 
       // Link to expenses search if there is expense or order
-      const expenseSearchTerm = m.orderNo || m.machineCode;
-      const expenseDisplay = used > 0
-        ? `<a href="/pm-expenses/?search=${encodeURIComponent(expenseSearchTerm)}" target="_blank" class="expense-val-link ${isOver ? 'text-danger' : 'text-success'}" title="คลิกเพื่อเปิดดูรายละเอียดในหน้า ค่าใช้จ่าย PM">฿${formatMoney(used)}</a>`
-        : `<span class="expense-val-zero text-muted">฿0.00</span>`;
+      const orderNoTrimmed = (m.orderNo || '').trim();
+      const expenseSearchTerm = orderNoTrimmed || (m.machineCode || '').trim();
+      const isClickable = used > 0 || Boolean(orderNoTrimmed);
+
+      let expenseDisplay = `<span class="expense-val-zero text-muted">฿0.00</span>`;
+      if (isClickable && expenseSearchTerm) {
+        const linkClass = used > 0
+          ? (isOver ? 'text-danger' : 'text-success')
+          : 'text-muted';
+        const linkTitle = orderNoTrimmed
+          ? `คลิกเพื่อดูรายการค่าใช้จ่ายของ Order No. ${orderNoTrimmed}`
+          : `คลิกเพื่อค้นหารายการค่าใช้จ่ายของเครื่อง ${m.machineCode}`;
+
+        expenseDisplay = `<a href="/pm-expenses/?tab=table&search=${encodeURIComponent(expenseSearchTerm)}" target="_blank" class="expense-val-link ${linkClass}" title="${escapeHtml(linkTitle)}">฿${formatMoney(used)}</a>`;
+      }
 
       return `
         <tr data-machine-id="${m.machineId}">
@@ -692,9 +757,11 @@
             const deptId = e.currentTarget.getAttribute('data-dept');
             const roundNo = Number(e.currentTarget.getAttribute('data-round'));
 
-            state.selectedDept = deptId;
-            const deptSelect = document.getElementById('select-dept');
-            if (deptSelect) deptSelect.value = deptId;
+            if (state.selectedDept && state.selectedDept !== deptId) {
+              state.selectedDept = deptId;
+              const deptSelect = document.getElementById('select-dept');
+              if (deptSelect) deptSelect.value = deptId;
+            }
 
             updateLineDropdown(lineId);
             state.selectedRound = roundNo;

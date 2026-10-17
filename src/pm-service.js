@@ -8,6 +8,9 @@ export async function getPMReferences(env) {
   const linesResult = await env.DB.prepare(
     'SELECT l.id, l.name, l.department_id, d.name as department_name, l.remark FROM lines l JOIN departments d ON d.id = l.department_id WHERE l.is_active = 1 ORDER BY d.name ASC, l.name ASC'
   ).all();
+  const machinesResult = await env.DB.prepare(
+    'SELECT id, code, normalized_code, name, department_id, line_id FROM machines WHERE is_active = 1 ORDER BY code ASC'
+  ).all();
 
   return {
     departments: (departmentsResult.results || []).map(d => ({
@@ -20,6 +23,14 @@ export async function getPMReferences(env) {
       deptId: l.department_id,
       deptName: l.department_name,
       remark: l.remark
+    })),
+    machines: (machinesResult.results || []).map(m => ({
+      id: m.id,
+      code: m.code,
+      normalizedCode: m.normalized_code,
+      name: m.name,
+      deptId: m.department_id,
+      lineId: m.line_id
     }))
   };
 }

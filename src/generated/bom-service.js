@@ -110,7 +110,7 @@ var BomService = (() => {
           changes.push({before:row,after:{...row,...values,Version:row.Version+1,UpdatedAt:now,OperationID:payload.operationId}});
         });
       } else if(kind==='split') {
-        if(!C.text(payload.reason).trim()) C.fail('กรอกเหตุผลการแยกจำนวน','VALIDATION',{reason:'ระบุเหตุผลที่แยกรายการ'});
+        if(!payload.isAdmin && !C.text(payload.reason).trim()) C.fail('กรอกเหตุผลการแยกจำนวน','VALIDATION',{reason:'ระบุเหตุผลที่แยกรายการ'});
         const row=target(payload);
         if(!Number.isSafeInteger(row.Quantity)||row.Quantity<2||row.Quantity>50) C.fail('แยกได้เฉพาะรายการที่มีจำนวน 2–50 ชิ้น','VALIDATION');
         if(!Array.isArray(payload.labels)||payload.labels.length!==row.Quantity) C.fail('กรอก Label ให้ครบ '+row.Quantity+' รายการ','VALIDATION',{SplitLabel:'กรอก Label ให้ครบตามจำนวนเดิม'});
@@ -136,7 +136,7 @@ var BomService = (() => {
         });
       } else if(kind==='remove') {
         if(!C.date(payload.endedAt)||payload.endedAt>on) C.fail('วันที่ถอดต้องอยู่ระหว่างวันติดตั้งและวันนี้','VALIDATION',{endedAt:'ตรวจวันที่ถอดอุปกรณ์'});
-        if(!C.text(payload.reason).trim()) C.fail('กรอกเหตุผลการถอด','VALIDATION',{reason:'ระบุเหตุผลการถอด'});
+        if(!payload.isAdmin && !C.text(payload.reason).trim()) C.fail('กรอกเหตุผลการถอด','VALIDATION',{reason:'ระบุเหตุผลการถอด'});
         const targets = Array.isArray(payload.targets) ? payload.targets : [{recordId:payload.recordId, expectedVersion:payload.expectedVersion, quantity:payload.quantity}];
         if(!targets.length || targets.length>50) C.fail('เลือก 1–50 รายการต่อครั้ง');
         if(new Set(targets.map(t=>t.recordId)).size!==targets.length) C.fail('รายการที่เลือกซ้ำ');

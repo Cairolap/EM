@@ -4,7 +4,8 @@ import {Repository} from './repository.js';
 import {listUsers, createUser, updateUser, resetPassword, deleteUser} from './user-service.js';
 import {listAnnouncements, createAnnouncement, deleteAnnouncement, updateAnnouncementSettings, getAnnouncementMedia, forceAnnouncementSlide, reportCurrentAnnouncement, getAnnouncementState} from './announcement-service.js';
 import {getPMReferences, getPMCycleData, savePMCycleOrders, listPMOverview} from './pm-service.js';
-import {listExpenses, importExpenseRecords, deleteExpenseItem, saveExpenseItem, getDashboardData, saveLineBudgets} from './pm-expense-service.js';
+import {listExpenses, importExpenseRecords, deleteExpenseItem, clearAllExpenses, deleteExpensesByRange, saveExpenseItem, getDashboardData, saveLineBudgets} from './pm-expense-service.js';
+import {getPRReferences, listPRItems, getPRItem, savePRItem, bulkSavePRItems, archivePRItems, bulkUpdateArea, deletePRItems, pruneOldPRItems} from './pr-service.js';
 import {AppError,fail,json} from './errors.js';
 
 export default {
@@ -174,10 +175,33 @@ export default {
     else if(method==='listExpenses') result=await listExpenses(env, args[0]);
     else if(method==='importRecords') result=await importExpenseRecords(env, actor, args[0]);
     else if(method==='deleteExpense') result=await deleteExpenseItem(env, actor, args[0]);
+    else if(method==='clearAllExpenses') result=await clearAllExpenses(env, actor);
+    else if(method==='deleteExpensesByRange') result=await deleteExpensesByRange(env, actor, args[0]);
     else if(method==='saveExpense') result=await saveExpenseItem(env, actor, args[0]);
     else if(method==='getDashboard') result=await getDashboardData(env, args[0]);
     else if(method==='saveBudgets') result=await saveLineBudgets(env, actor, args[0]);
     else fail('NOT_FOUND','ไม่พบคำสั่งค่าใช้จ่าย PM นี้',404);
+    return json({ok:true,data:result});
+   }
+
+   // PR & Store Tracker RPC
+   if(url.pathname==='/api/v1/pr-tracker/rpc'){
+    if(request.method!=='POST')fail('METHOD','ใช้ POST สำหรับคำสั่งทะเบียนจัดซื้อ/สโตร์',405);
+    let body;
+    try{ body=await request.json(); }catch{ fail('VALIDATION','รูปแบบคำขอไม่ถูกต้อง'); }
+    const method = body?.method || '';
+    const args = body?.args || [];
+    let result;
+    if(method==='getReferences') result=await getPRReferences(env);
+    else if(method==='listItems') result=await listPRItems(env, args[0]);
+    else if(method==='getItem') result=await getPRItem(env, args[0]);
+    else if(method==='saveItem') result=await savePRItem(env, actor, args[0]);
+    else if(method==='bulkSaveItems') result=await bulkSavePRItems(env, actor, args[0]);
+    else if(method==='archiveItems') result=await archivePRItems(env, actor, args[0]);
+    else if(method==='bulkUpdateArea') result=await bulkUpdateArea(env, actor, args[0]);
+    else if(method==='deleteItems') result=await deletePRItems(env, actor, args[0]);
+    else if(method==='pruneOldItems') result=await pruneOldPRItems(env);
+    else fail('NOT_FOUND','ไม่พบคำสั่งทะเบียนจัดซื้อ/สโตร์นี้',404);
     return json({ok:true,data:result});
    }
 
