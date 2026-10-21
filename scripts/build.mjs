@@ -45,7 +45,9 @@ for (const [sourceFile, scope] of [
   ['', 'announcements'],
   ['', 'pm'],
   ['', 'pm-expenses'],
-  ['', 'pr-tracker']
+  ['', 'pr-tracker'],
+  ['', 'pm-aircooling'],
+  ['', 'electrical-diagram']
 ]) {
   let output = '';
   if (scope === 'users') {
@@ -84,6 +86,22 @@ for (const [sourceFile, scope] of [
     const html = await read(new URL('src/pr-tracker/index.html', root));
     const css = await read(new URL('src/pr-tracker/styles.css', root));
     const appJs = await read(new URL('src/pr-tracker/app.js', root));
+    const js = transportJs + '\n' + appJs;
+    output = html
+      .replace('<!-- APP_STYLE -->', () => '<style>\n' + css + '\n</style>')
+      .replace('<!-- APP_SCRIPT -->', () => '<script>\n' + js + '\n</script>');
+  } else if (scope === 'pm-aircooling') {
+    const html = await read(new URL('src/pm-aircooling/index.html', root));
+    const css = await read(new URL('src/pm-aircooling/styles.css', root));
+    const appJs = await read(new URL('src/pm-aircooling/app.js', root));
+    const js = transportJs + '\n' + appJs;
+    output = html
+      .replace('<!-- APP_STYLE -->', () => '<style>\n' + css + '\n</style>')
+      .replace('<!-- APP_SCRIPT -->', () => '<script>\n' + js + '\n</script>');
+  } else if (scope === 'electrical-diagram') {
+    const html = await read(new URL('src/electrical-diagram/index.html', root));
+    const css = await read(new URL('src/electrical-diagram/styles.css', root));
+    const appJs = await read(new URL('src/electrical-diagram/app.js', root));
     const js = transportJs + '\n' + appJs;
     output = html
       .replace('<!-- APP_STYLE -->', () => '<style>\n' + css + '\n</style>')
@@ -142,7 +160,7 @@ for (const [sourceFile, scope] of [
       <div class="em-dropdown em-dropdown-bom">
         <a href="/bom/" class="em-nav-link em-dropdown-trigger${scope === 'bom' ? ' active' : ''}"${scope === 'bom' ? ' aria-current="page"' : ''}>
           <span>BoM Parts</span>
-          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
           <div class="em-dropdown-header">เลือกแผนก</div>
@@ -156,31 +174,29 @@ for (const [sourceFile, scope] of [
         </div>
       </div>
 
-      <!-- 3. Master อะไหล่ with Dropdown -->
-      <div class="em-dropdown em-dropdown-parts">
-        <a href="/parts/" class="em-nav-link em-dropdown-trigger${scope === 'parts' ? ' active' : ''}"${scope === 'parts' ? ' aria-current="page"' : ''}>
-          <span>Master List</span>
-          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      <!-- 3. โครงสร้าง with Dropdown (Master List, Machines, แผนผังระบบไฟฟ้า) -->
+      <div class="em-dropdown em-dropdown-structure">
+        <a href="/parts/" class="em-nav-link em-dropdown-trigger${scope === 'parts' || scope === 'machines' || scope === 'electrical-diagram' ? ' active' : ''}"${scope === 'parts' || scope === 'machines' || scope === 'electrical-diagram' ? ' aria-current="page"' : ''}>
+          <span>โครงสร้าง</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
-          <a class="em-dropdown-item" href="/parts/"><span class="em-item-icon">▤</span> รายการอะไหล่</a>
-          <a class="em-dropdown-item" href="/parts/?action=add"><span class="em-item-icon">＋</span> เพิ่มแบบตาราง</a>
-          <a class="em-dropdown-item" href="/parts/?view=batch"><span class="em-item-icon">🖼</span> อัปโหลดรูปชุด</a>
+          <a class="em-dropdown-item${scope === 'parts' ? ' active' : ''}" href="/parts/"><span class="em-item-icon">▤</span> Master List</a>
+          <a class="em-dropdown-item${scope === 'machines' ? ' active' : ''}" href="/machines/"><span class="em-item-icon">⚙️</span> Machines</a>
+          <a class="em-dropdown-item${scope === 'electrical-diagram' ? ' active' : ''}" href="/electrical-diagram/"><span class="em-item-icon">⚡</span> แผนผังระบบไฟฟ้า</a>
         </div>
       </div>
 
-      <!-- 4. เครื่องจักร -->
-      <a class="em-nav-link${scope === 'machines' ? ' active' : ''}" href="/machines/"${scope === 'machines' ? ' aria-current="page"' : ''}>Machines</a>
-
       <!-- 5. จัดการ Order PM with Dropdown -->
       <div class="em-dropdown em-dropdown-pm">
-        <a href="/pm/" class="em-nav-link em-dropdown-trigger${scope === 'pm' ? ' active' : ''}"${scope === 'pm' ? ' aria-current="page"' : ''}>
-          <span>Order PM</span>
-          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        <a href="/pm/" class="em-nav-link em-dropdown-trigger${scope === 'pm' || scope === 'pm-aircooling' ? ' active' : ''}"${scope === 'pm' ? ' aria-current="page"' : ''}>
+          <span>PM</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
           <a class="em-dropdown-item" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
           <a class="em-dropdown-item" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+          <a class="em-dropdown-item${scope === 'pm-aircooling' ? ' active' : ''}" href="/pm-aircooling/"><span class="em-item-icon">❄️</span> Air Cooling</a>
         </div>
       </div>
 
@@ -188,7 +204,7 @@ for (const [sourceFile, scope] of [
       <div class="em-dropdown em-dropdown-pm-expenses">
         <a href="/pm-expenses/" class="em-nav-link em-dropdown-trigger${scope === 'pm-expenses' ? ' active' : ''}"${scope === 'pm-expenses' ? ' aria-current="page"' : ''}>
           <span>ค่าใช้จ่าย PM</span>
-          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
           <a class="em-dropdown-item" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
@@ -205,7 +221,7 @@ for (const [sourceFile, scope] of [
       <div class="em-dropdown em-dropdown-announcements">
         <a href="/announcements/" class="em-nav-link em-dropdown-trigger${scope === 'announcements' ? ' active' : ''}"${scope === 'announcements' ? ' aria-current="page"' : ''}>
           <span>สื่อประชาสัมพันธ์</span>
-          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
           <a class="em-dropdown-item" href="/announcements/"><span class="em-item-icon">⚙️</span> สื่อประชาสัมพันธ์</a>
@@ -263,40 +279,35 @@ for (const [sourceFile, scope] of [
           </div>
         </div>
 
-        <!-- 3. Master อะไหล่ Accordion -->
+        <!-- 3. โครงสร้าง Accordion (Master List, Machines, แผนผังระบบไฟฟ้า) -->
         <div class="em-drawer-group">
-          <button type="button" class="em-drawer-group-btn" aria-expanded="${scope === 'parts' ? 'true' : 'false'}">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="${scope === 'parts' || scope === 'machines' || scope === 'electrical-diagram' ? 'true' : 'false'}">
             <span class="em-drawer-group-title">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-              Master List
+              โครงสร้าง
             </span>
             <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
-          <div class="em-drawer-sublist"${scope === 'parts' ? '' : ' style="display:none;"'}>
-            <a class="em-drawer-subitem" href="/parts/"><span class="em-item-icon">▤</span> รายการอะไหล่</a>
-            <a class="em-drawer-subitem" href="/parts/?action=add"><span class="em-item-icon">＋</span> เพิ่มแบบตาราง</a>
-            <a class="em-drawer-subitem" href="/parts/?view=batch"><span class="em-item-icon">🖼</span> อัปโหลดรูปชุด</a>
+          <div class="em-drawer-sublist"${scope === 'parts' || scope === 'machines' || scope === 'electrical-diagram' ? '' : ' style="display:none;"'}>
+            <a class="em-drawer-subitem${scope === 'parts' ? ' active' : ''}" href="/parts/"><span class="em-item-icon">▤</span> Master List</a>
+            <a class="em-drawer-subitem${scope === 'machines' ? ' active' : ''}" href="/machines/"><span class="em-item-icon">⚙️</span> Machines</a>
+            <a class="em-drawer-subitem${scope === 'electrical-diagram' ? ' active' : ''}" href="/electrical-diagram/"><span class="em-item-icon">⚡</span> แผนผังระบบไฟฟ้า</a>
           </div>
         </div>
 
-        <!-- 4. เครื่องจักร -->
-        <a class="em-drawer-link${scope === 'machines' ? ' active' : ''}" href="/machines/"${scope === 'machines' ? ' aria-current="page"' : ''}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
-          Machines
-        </a>
-
         <!-- 5. จัดการ Order PM Accordion -->
         <div class="em-drawer-group">
-          <button type="button" class="em-drawer-group-btn" aria-expanded="${scope === 'pm' ? 'true' : 'false'}">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="${scope === 'pm' || scope === 'pm-aircooling' ? 'true' : 'false'}">
             <span class="em-drawer-group-title">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              Order PM
+              PM
             </span>
             <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
-          <div class="em-drawer-sublist"${scope === 'pm' ? '' : ' style="display:none;"'}>
+          <div class="em-drawer-sublist"${scope === 'pm' || scope === 'pm-aircooling' ? '' : ' style="display:none;"'}>
             <a class="em-drawer-subitem" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
             <a class="em-drawer-subitem" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+            <a class="em-drawer-subitem${scope === 'pm-aircooling' ? ' active' : ''}" href="/pm-aircooling/"><span class="em-item-icon">❄️</span> Air Cooling</a>
           </div>
         </div>
 
@@ -422,8 +433,8 @@ html, body {
 }
 .em-brand-link:hover { opacity: 0.92; }
 .em-brand-logo {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
   border-radius: 50%;
   background: #ffffff;
@@ -431,7 +442,7 @@ html, body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 .em-brand-text {
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: #ffffff;
@@ -442,19 +453,19 @@ html, body {
 .em-nav-center {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 8px;
+  gap: 4px;
+  margin-left: 6px;
 }
 .em-nav-link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   color: #cbd5e1;
   text-decoration: none;
-  font-size: 13.5px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 7px 12px;
-  border-radius: 6px;
+  padding: 5px 8px;
+  border-radius: 5px;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -470,6 +481,8 @@ html, body {
   border-bottom-color: #80182a;
 }
 .em-caret {
+  width: 12px;
+  height: 12px;
   transition: transform 0.2s ease;
   opacity: 0.7;
 }
@@ -480,17 +493,17 @@ html, body {
 }
 .em-dropdown-menu {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 4px);
   left: 0;
-  min-width: 200px;
+  min-width: 180px;
   background: #18313d;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-  padding: 6px;
+  border-radius: 7px;
+  padding: 5px;
   box-shadow: 0 12px 28px rgba(0,0,0,0.45);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(6px);
+  transform: translateY(4px);
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
   z-index: 10001;
 }
@@ -505,44 +518,49 @@ html, body {
   transform: rotate(180deg);
 }
 .em-dropdown-header {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #94a3b8;
-  padding: 6px 10px 4px;
+  padding: 4px 8px 3px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 .em-dropdown-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
+  gap: 8px;
+  padding: 6px 10px;
   color: #e2e8f0;
   text-decoration: none;
-  font-size: 13px;
-  border-radius: 6px;
+  font-size: 12px;
+  border-radius: 5px;
   transition: all 0.15s ease;
 }
 .em-dropdown-item:hover {
   background: rgba(128, 24, 42, 0.3);
   color: #ffffff;
 }
+.em-dropdown-item.active {
+  background: rgba(128, 24, 42, 0.28);
+  color: #f3c4ce;
+  font-weight: 600;
+}
 .em-dept-badge {
   display: inline-block;
   font-family: monospace;
   font-weight: 700;
-  font-size: 11px;
-  padding: 2px 6px;
+  font-size: 10px;
+  padding: 1px 5px;
   background: rgba(128, 24, 42, 0.38);
   color: #f3c4ce;
   border: 1px solid rgba(243, 196, 206, 0.45);
   border-radius: 4px;
 }
 .em-item-icon {
-  font-size: 14px;
-  width: 18px;
+  font-size: 13px;
+  width: 16px;
   text-align: center;
   color: #d68a9a;
 }
@@ -557,8 +575,8 @@ html, body {
 .em-user-badge {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 13px;
+  gap: 8px;
+  font-size: 11.5px;
   color: #cbd5e1;
 }
 
@@ -730,6 +748,11 @@ html, body {
 .em-drawer-subitem:hover {
   color: #ffffff;
   background: rgba(128, 24, 42, 0.22);
+}
+.em-drawer-subitem.active {
+  color: #f3c4ce;
+  background: rgba(128, 24, 42, 0.28);
+  font-weight: 600;
 }
 .em-drawer-footer {
   padding: 14px 18px;

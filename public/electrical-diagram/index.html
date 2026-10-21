@@ -1,0 +1,3949 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แผนผังระบบไฟฟ้า (Single Line Diagram) - แผนกซ่อมไฟฟ้า</title>
+  <link rel="icon" type="image/png" href="/Logo%20small.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+/* ==========================================================================
+   ELECTRICAL SINGLE LINE & POWER DISTRIBUTION DIAGRAM STYLES
+   Design System tokens, Industrial High-Contrast theme, Diagram Canvas & Modals
+   ========================================================================== */
+
+:root {
+  --el-primary: #176487;
+  --el-primary-hover: #114c67;
+  --el-primary-surface: #eaf3f7;
+  --el-accent: #80182a;
+
+  /* Node Type Colors */
+  --type-mdb: #b91c1c;
+  --type-mdb-bg: #fef2f2;
+  --type-mdb-border: #fca5a5;
+
+  --type-db: #d97706;
+  --type-db-bg: #fffbeb;
+  --type-db-border: #fde68a;
+
+  --type-lp: #0284c7;
+  --type-lp-bg: #f0f9ff;
+  --type-lp-border: #bae6fd;
+
+  --type-mc: #16a34a;
+  --type-mc-bg: #f0fdf4;
+  --type-mc-border: #bbf7d0;
+
+  --type-dv: #6366f1;
+  --type-dv-bg: #f5f3ff;
+  --type-dv-border: #ddd6fe;
+
+  /* Surfaces & Neutrals */
+  --el-ink: #0f172a;
+  --el-ink-secondary: #475569;
+  --el-ink-muted: #94a3b8;
+  --el-bg-page: #f1f5f9;
+  --el-bg-surface: #ffffff;
+  --el-bg-surface-muted: #f8fafc;
+  --el-border: #cbd5e1;
+  --el-border-subtle: #e2e8f0;
+
+  /* Shadows */
+  --el-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+  --el-shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+  --el-shadow-lg: 0 12px 30px rgba(15, 23, 42, 0.12);
+  --el-shadow-drawer: -6px 0 32px rgba(15, 23, 42, 0.22);
+
+  /* Fonts */
+  --font-body: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', Consolas, monospace;
+
+  /* Transitions */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 160ms;
+  --dur-normal: 240ms;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--el-bg-page);
+  color: var(--el-ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-mono {
+  font-family: var(--font-mono) !important;
+}
+
+/* App Layout */
+.el-app-container {
+  max-width: 1720px;
+  margin: 0 auto;
+  padding: 20px 24px 60px;
+}
+
+/* Header */
+.el-page-header {
+  background: var(--el-bg-surface);
+  border: 1px solid var(--el-border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--el-shadow-sm);
+}
+
+.el-header-main-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.el-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.el-title-with-pill {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.el-page-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0d1e38;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.el-title-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  font-size: 18px;
+}
+
+.el-page-subtitle {
+  margin: 0;
+  color: var(--el-ink-secondary);
+  font-size: 13.5px;
+}
+
+.el-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background: var(--el-bg-surface-muted);
+  border: 1px solid var(--el-border-subtle);
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--el-ink-secondary);
+}
+
+.el-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #16a34a;
+}
+.el-status-dot.pulse {
+  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+  animation: el-pulse 2s infinite;
+}
+@keyframes el-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6); }
+  70% { box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+
+.el-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* KPI Grid */
+.el-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.el-kpi-card {
+  background: var(--el-bg-surface-muted);
+  border: 1px solid var(--el-border-subtle);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+}
+.el-kpi-card:hover {
+  border-color: var(--el-border);
+  transform: translateY(-1px);
+  box-shadow: var(--el-shadow-sm);
+}
+
+.el-kpi-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--el-ink-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.el-kpi-value {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--el-ink);
+  line-height: 1.1;
+}
+
+.el-kpi-sub {
+  font-size: 11px;
+  color: var(--el-ink-muted);
+}
+
+/* Type Badges */
+.kpi-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+.badge-mdb { background: var(--type-mdb-bg); color: var(--type-mdb); border: 1px solid var(--type-mdb-border); }
+.badge-db  { background: var(--type-db-bg);  color: var(--type-db);  border: 1px solid var(--type-db-border); }
+.badge-lp  { background: var(--type-lp-bg);  color: var(--type-lp);  border: 1px solid var(--type-lp-border); }
+.badge-mc  { background: var(--type-mc-bg);  color: var(--type-mc);  border: 1px solid var(--type-mc-border); }
+.badge-dv  { background: var(--type-dv-bg);  color: var(--type-dv);  border: 1px solid var(--type-dv-border); }
+
+/* View Tabs */
+.el-view-tabs {
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid var(--el-border-subtle);
+  padding-top: 16px;
+  overflow-x: auto;
+}
+
+.el-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--el-ink-secondary);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+  white-space: nowrap;
+}
+.el-tab-btn:hover {
+  background: var(--el-bg-surface-muted);
+  color: var(--el-ink);
+}
+.el-tab-btn.active {
+  background: #0d1e38;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.el-tab-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+.el-tab-btn:not(.active) .el-tab-count {
+  background: var(--el-border);
+  color: var(--el-ink-secondary);
+}
+
+/* Tab Contents */
+.el-tab-content {
+  display: none;
+}
+.el-tab-content.active {
+  display: block;
+}
+
+/* ==========================================================================
+   TAB 1: DIAGRAM CANVAS
+   ========================================================================== */
+.el-diagram-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--el-bg-surface);
+  border: 1px solid var(--el-border);
+  border-radius: 10px 10px 0 0;
+  padding: 10px 18px;
+  flex-wrap: wrap;
+}
+
+.el-toolbar-left, .el-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.el-filter-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--el-ink-secondary);
+}
+
+.el-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--el-ink);
+  cursor: pointer;
+  user-select: none;
+}
+
+.el-zoom-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--el-bg-surface-muted);
+  border: 1px solid var(--el-border);
+  border-radius: 8px;
+  padding: 3px 6px;
+}
+
+.el-zoom-level {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 44px;
+  text-align: center;
+  color: var(--el-ink-secondary);
+}
+
+/* Diagram Viewport & Pan Layer */
+.el-diagram-viewport {
+  position: relative;
+  width: 100%;
+  height: 720px;
+  background: #0f172a;
+  background-image: 
+    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px, 14px 14px;
+  background-position: 0 0, 7px 7px;
+  border: 1px solid var(--el-border);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+}
+.el-diagram-viewport:active {
+  cursor: grabbing;
+}
+.el-diagram-viewport.is-fullscreen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10005;
+  border-radius: 0;
+}
+
+.el-diagram-pan-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.el-svg-connections {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6000px;
+  height: 6000px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.el-diagram-nodes-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6000px;
+  height: 6000px;
+  z-index: 2;
+}
+
+.el-diagram-hint {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  font-size: 12px;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Diagram Node Card */
+.el-node-card {
+  position: absolute;
+  width: 240px;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  color: #f8fafc;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease), border-color var(--dur-fast), box-shadow var(--dur-fast);
+  overflow: hidden;
+  user-select: none;
+}
+.el-node-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.2);
+}
+.el-node-card.is-selected {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px #38bdf8, 0 14px 34px rgba(0, 0, 0, 0.6);
+}
+
+.el-node-card-accent {
+  height: 4px;
+  width: 100%;
+}
+.el-node-card.type-mdb .el-node-card-accent { background: var(--type-mdb); }
+.el-node-card.type-db  .el-node-card-accent { background: var(--type-db); }
+.el-node-card.type-lp  .el-node-card-accent { background: var(--type-lp); }
+.el-node-card.type-mc  .el-node-card-accent { background: var(--type-mc); }
+.el-node-card.type-dv  .el-node-card-accent { background: var(--type-dv); }
+
+.el-node-card-content {
+  padding: 10px 12px;
+}
+
+.el-node-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.el-node-code {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.el-node-name {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 8px;
+}
+
+.el-node-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #94a3b8;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 6px;
+  margin-top: 6px;
+}
+
+.el-node-current {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: #fde047;
+}
+
+.el-node-children-tag {
+  font-size: 10.5px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: #cbd5e1;
+}
+
+/* SVG Connection Lines */
+.el-conn-line {
+  fill: none;
+  stroke: #475569;
+  stroke-width: 2;
+  transition: stroke 0.2s;
+}
+.el-conn-line:hover, .el-conn-line.is-active {
+  stroke: #38bdf8;
+  stroke-width: 3;
+}
+.el-conn-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  fill: #94a3b8;
+  text-anchor: middle;
+}
+
+/* Empty State */
+.el-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #e2e8f0;
+  text-align: center;
+  padding: 40px;
+}
+.el-empty-icon {
+  font-size: 48px;
+  margin-bottom: 14px;
+}
+.el-empty-state h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+.el-empty-state p {
+  color: #94a3b8;
+  max-width: 440px;
+  margin: 0 0 20px;
+}
+
+/* ==========================================================================
+   TAB 2: DIRECTORY TABLE & SEARCH
+   ========================================================================== */
+.el-directory-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.el-search-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--el-bg-surface);
+  border: 1px solid var(--el-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-width: 320px;
+  flex: 1;
+  max-width: 480px;
+}
+.el-search-box input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+}
+
+.el-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.el-pill {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid var(--el-border);
+  background: var(--el-bg-surface);
+  color: var(--el-ink-secondary);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--dur-fast);
+}
+.el-pill:hover {
+  border-color: var(--el-primary);
+  color: var(--el-primary);
+}
+.el-pill.active {
+  background: #0d1e38;
+  border-color: #0d1e38;
+  color: #ffffff;
+}
+
+/* Table */
+.el-table-wrapper {
+  background: var(--el-bg-surface);
+  border: 1px solid var(--el-border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--el-shadow-sm);
+}
+
+.el-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+.el-table th {
+  background: var(--el-bg-surface-muted);
+  color: var(--el-ink-secondary);
+  font-weight: 600;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--el-border);
+  white-space: nowrap;
+}
+.el-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--el-border-subtle);
+  vertical-align: middle;
+}
+.el-table tr:hover td {
+  background: #f8fafc;
+}
+
+.el-table-thumbnail {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--el-border);
+  cursor: pointer;
+}
+.el-table-thumb-empty {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: var(--el-bg-surface-muted);
+  border: 1px dashed var(--el-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--el-ink-muted);
+  font-size: 16px;
+}
+
+.el-table-loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--el-ink-muted);
+}
+
+/* ==========================================================================
+   TAB 3: WIRING MATRIX
+   ========================================================================== */
+.el-wiring-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--el-bg-surface);
+  border: 1px solid var(--el-border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.el-wiring-intro h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+.el-wiring-intro p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--el-ink-secondary);
+}
+
+/* ==========================================================================
+   SLIDE-OVER INSPECTOR DRAWER
+   ========================================================================== */
+.el-inspector {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(440px, 90vw);
+  background: #ffffff;
+  box-shadow: var(--el-shadow-drawer);
+  z-index: 10003;
+  transform: translateX(100%);
+  transition: transform var(--dur-normal) var(--ease);
+  display: flex;
+  flex-direction: column;
+}
+.el-inspector.is-open {
+  transform: translateX(0);
+}
+
+.el-inspector-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 10002;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--dur-normal), visibility var(--dur-normal);
+}
+.el-inspector-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.el-inspector-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--el-border);
+  background: #0d1e38;
+  color: #ffffff;
+}
+
+.el-inspector-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.el-inspector-code {
+  margin: 0;
+  font-size: 20px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #ffffff;
+  flex: 1;
+}
+
+.el-inspector-name {
+  font-size: 13.5px;
+  color: #cbd5e1;
+}
+
+.el-inspector-close {
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 4px;
+}
+.el-inspector-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.el-inspector-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.el-inspector-photo-wrapper {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--el-border);
+  background: var(--el-bg-surface-muted);
+}
+.el-inspector-photo {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  display: block;
+  cursor: zoom-in;
+}
+.el-inspector-photo-placeholder {
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--el-ink-muted);
+}
+
+.el-drive-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--el-primary);
+  text-decoration: none;
+  background: var(--el-bg-surface);
+  border-top: 1px solid var(--el-border-subtle);
+  width: 100%;
+}
+.el-drive-link:hover {
+  text-decoration: underline;
+}
+
+.el-section-title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--el-ink-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.el-spec-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.el-spec-item {
+  background: var(--el-bg-surface-muted);
+  border: 1px solid var(--el-border-subtle);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.el-spec-label {
+  font-size: 11px;
+  color: var(--el-ink-muted);
+}
+.el-spec-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--el-ink);
+}
+
+.el-inspector-remark {
+  margin: 0;
+  background: var(--el-bg-surface-muted);
+  border: 1px solid var(--el-border-subtle);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 13px;
+  color: var(--el-ink-secondary);
+  white-space: pre-wrap;
+}
+
+.el-children-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.el-child-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--el-border-subtle);
+  background: var(--el-bg-surface-muted);
+  cursor: pointer;
+  transition: all var(--dur-fast);
+}
+.el-child-item:hover {
+  background: var(--el-bg-surface);
+  border-color: var(--el-primary);
+  transform: translateX(2px);
+}
+
+.el-sub-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  background: var(--el-border);
+  color: var(--el-ink-secondary);
+}
+
+.el-empty-sub {
+  font-size: 12.5px;
+  color: var(--el-ink-muted);
+  padding: 8px;
+}
+
+.el-inspector-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--el-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--el-bg-surface-muted);
+}
+
+/* ==========================================================================
+   BUTTONS & FORM CONTROLS
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--dur-fast) var(--ease);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #0d1e38;
+  color: #ffffff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: #18313d;
+}
+
+.btn-secondary {
+  background: var(--el-bg-surface);
+  border-color: var(--el-border);
+  color: var(--el-ink);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: var(--el-bg-surface-muted);
+  border-color: var(--el-ink-secondary);
+}
+
+.btn-danger-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: #dc2626;
+  padding: 6px;
+}
+.btn-danger-ghost:hover:not(:disabled) {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  color: var(--el-ink-secondary);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-icon:hover {
+  background: var(--el-border-subtle);
+  color: var(--el-ink);
+}
+
+.btn-clear {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--el-ink-muted);
+  cursor: pointer;
+  padding: 0 4px;
+}
+.btn-clear:hover {
+  color: var(--el-ink);
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.el-select, .el-input, .el-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--el-border);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  background: var(--el-bg-surface);
+  color: var(--el-ink);
+  outline: none;
+  transition: border-color var(--dur-fast);
+}
+.el-select:focus, .el-input:focus, .el-textarea:focus {
+  border-color: var(--el-primary);
+  box-shadow: 0 0 0 3px rgba(23, 100, 135, 0.15);
+}
+
+.el-select-sm {
+  padding: 5px 8px;
+  font-size: 12.5px;
+  width: auto;
+}
+
+/* Modal */
+.el-modal {
+  border: none;
+  background: transparent;
+  padding: 0;
+  max-width: 90vw;
+  width: 640px;
+}
+.el-modal::backdrop {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.el-modal-card {
+  background: var(--el-bg-surface);
+  border-radius: 12px;
+  box-shadow: var(--el-shadow-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.el-modal-header {
+  padding: 16px 20px;
+  background: #0d1e38;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.el-modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.el-modal-header .btn-clear {
+  color: #cbd5e1;
+}
+
+.el-modal-form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.el-form-row {
+  display: grid;
+  gap: 14px;
+}
+.el-form-row.col-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.el-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.el-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--el-ink);
+}
+.el-label.required::after {
+  content: ' *';
+  color: #dc2626;
+}
+.el-help {
+  font-size: 11px;
+  color: var(--el-ink-muted);
+}
+
+.el-input-unit {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.el-input-unit input {
+  padding-right: 32px;
+}
+.el-unit {
+  position: absolute;
+  right: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--el-ink-muted);
+}
+
+/* Photo Uploader */
+.el-photo-uploader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--el-bg-surface-muted);
+  border: 1px dashed var(--el-border);
+  border-radius: 8px;
+  padding: 12px;
+}
+.el-photo-preview-box {
+  width: 90px;
+  height: 90px;
+  border-radius: 6px;
+  background: var(--el-bg-surface);
+  border: 1px solid var(--el-border);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.el-photo-preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.el-preview-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--el-ink-muted);
+  text-align: center;
+  font-size: 10px;
+  padding: 4px;
+}
+.el-photo-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.el-photo-tip {
+  font-size: 11px;
+  color: var(--el-ink-muted);
+  line-height: 1.4;
+}
+
+.el-form-error {
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+.el-modal-footer {
+  padding: 16px 20px;
+  background: var(--el-bg-surface-muted);
+  border-top: 1px solid var(--el-border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Lightbox Modal */
+.el-lightbox {
+  border: none;
+  background: transparent;
+  padding: 0;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+.el-lightbox::backdrop {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(6px);
+}
+.el-lightbox-inner {
+  position: relative;
+  display: inline-block;
+}
+.el-lightbox-inner img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+}
+.el-lightbox-close {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  background: #ffffff;
+  color: #0f172a;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .el-form-row.col-2 {
+    grid-template-columns: 1fr;
+  }
+  .el-diagram-viewport {
+    height: 560px;
+  }
+}
+
+</style>
+</head>
+<body>
+<nav aria-label="ระบบซ่อมบำรุงไฟฟ้า" class="em-main-nav">
+  <div class="em-nav-container">
+    <div class="em-nav-left">
+      <!-- Hamburger Toggle Button -->
+      <button type="button" id="em-hamburger-btn" class="em-hamburger-btn" aria-label="เปิดเมนูนำทาง" aria-expanded="false" aria-controls="em-drawer">
+        <svg class="em-icon-menu" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Logo แผนกซ่อมไฟฟ้า -->
+      <a href="/bom/" class="em-brand-link" title="แผนกซ่อมไฟฟ้า">
+        <img class="em-brand-logo" src="/Logo%20small.png" alt="แผนกซ่อมไฟฟ้า">
+        <span class="em-brand-text">แผนกซ่อมไฟฟ้า</span>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <div class="em-nav-center">
+      <!-- 2. อุปกรณ์ประจำเครื่องจักร with Dropdown -->
+      <div class="em-dropdown em-dropdown-bom">
+        <a href="/bom/" class="em-nav-link em-dropdown-trigger">
+          <span>BoM Parts</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <div class="em-dropdown-header">เลือกแผนก</div>
+          <a class="em-dropdown-item" href="/bom/"><span class="em-dept-badge">ALL</span> ทุกแผนก</a>
+          <a class="em-dropdown-item" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
+          <a class="em-dropdown-item" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PC"><span class="em-dept-badge">PC</span> ฝาพลาสติก</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PR"><span class="em-dept-badge">PR</span> งานพิมพ์</a>
+          <a class="em-dropdown-item" href="/bom/?dept=OT"><span class="em-dept-badge">OT</span> อื่นๆ</a>
+        </div>
+      </div>
+
+      <!-- 3. โครงสร้าง with Dropdown (Master List, Machines, แผนผังระบบไฟฟ้า) -->
+      <div class="em-dropdown em-dropdown-structure">
+        <a href="/parts/" class="em-nav-link em-dropdown-trigger active" aria-current="page">
+          <span>โครงสร้าง</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/parts/"><span class="em-item-icon">▤</span> Master List</a>
+          <a class="em-dropdown-item" href="/machines/"><span class="em-item-icon">⚙️</span> Machines</a>
+          <a class="em-dropdown-item active" href="/electrical-diagram/"><span class="em-item-icon">⚡</span> แผนผังระบบไฟฟ้า</a>
+        </div>
+      </div>
+
+      <!-- 5. จัดการ Order PM with Dropdown -->
+      <div class="em-dropdown em-dropdown-pm">
+        <a href="/pm/" class="em-nav-link em-dropdown-trigger">
+          <span>PM</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
+          <a class="em-dropdown-item" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+          <a class="em-dropdown-item" href="/pm-aircooling/"><span class="em-item-icon">❄️</span> Air Cooling</a>
+        </div>
+      </div>
+
+      <!-- 6. ค่าใช้จ่าย PM with Dropdown -->
+      <div class="em-dropdown em-dropdown-pm-expenses">
+        <a href="/pm-expenses/" class="em-nav-link em-dropdown-trigger">
+          <span>ค่าใช้จ่าย PM</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
+          <a class="em-dropdown-item" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+        </div>
+      </div>
+
+      <!-- 7. จัดซื้อ & สโตร์ (PR & Store Tracker) -->
+      <a class="em-nav-link" href="/pr-tracker/">
+        <span>จัดซื้อ &amp; สโตร์</span>
+      </a>
+
+      <!-- 8. สื่อประชาสัมพันธ์ with Dropdown -->
+      <div class="em-dropdown em-dropdown-announcements">
+        <a href="/announcements/" class="em-nav-link em-dropdown-trigger">
+          <span>สื่อประชาสัมพันธ์</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/announcements/"><span class="em-item-icon">⚙️</span> สื่อประชาสัมพันธ์</a>
+          <a class="em-dropdown-item" href="/announcements/tv.html" target="_blank"><span class="em-item-icon">📺</span> เปิดหน้า TV</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: User management and account -->
+    <div class="em-nav-right">
+      <a id="em-nav-users" class="em-nav-link" style="display:none" href="/users/">จัดการผู้ใช้งาน</a>
+      <span id="em-user-badge" class="em-user-badge"></span>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Overlay & Sidebar -->
+  <div id="em-drawer-overlay" class="em-drawer-overlay" aria-hidden="true"></div>
+  <aside id="em-drawer" class="em-drawer" aria-label="เมนูนำทางหลัก">
+    <div class="em-drawer-header">
+      <div class="em-drawer-brand">
+        <img class="em-brand-logo" src="/Logo%20small.png" alt="แผนกซ่อมไฟฟ้า">
+        <div class="em-drawer-brand-text">
+          <strong>แผนกซ่อมไฟฟ้า</strong>
+          <small>ระบบซ่อมบำรุงไฟฟ้า</small>
+        </div>
+      </div>
+      <button type="button" id="em-drawer-close" class="em-drawer-close" aria-label="ปิดเมนู">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="em-drawer-content">
+      <!-- User Info Card in Drawer -->
+      <div id="em-drawer-user-card" class="em-drawer-user-card"></div>
+
+      <nav class="em-drawer-nav">
+        <!-- 2. อุปกรณ์ประจำเครื่องจักร Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              BoM Parts
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/bom/"><span class="em-dept-badge">ALL</span> ทุกแผนก</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PC"><span class="em-dept-badge">PC</span> ฝาพลาสติก</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PR"><span class="em-dept-badge">PR</span> งานพิมพ์</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=OT"><span class="em-dept-badge">OT</span> อื่นๆ</a>
+          </div>
+        </div>
+
+        <!-- 3. โครงสร้าง Accordion (Master List, Machines, แผนผังระบบไฟฟ้า) -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="true">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              โครงสร้าง
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist">
+            <a class="em-drawer-subitem" href="/parts/"><span class="em-item-icon">▤</span> Master List</a>
+            <a class="em-drawer-subitem" href="/machines/"><span class="em-item-icon">⚙️</span> Machines</a>
+            <a class="em-drawer-subitem active" href="/electrical-diagram/"><span class="em-item-icon">⚡</span> แผนผังระบบไฟฟ้า</a>
+          </div>
+        </div>
+
+        <!-- 5. จัดการ Order PM Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              PM
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
+            <a class="em-drawer-subitem" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+            <a class="em-drawer-subitem" href="/pm-aircooling/"><span class="em-item-icon">❄️</span> Air Cooling</a>
+          </div>
+        </div>
+
+        <!-- 6. ค่าใช้จ่าย PM Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              ค่าใช้จ่าย PM
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
+            <a class="em-drawer-subitem" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+          </div>
+        </div>
+
+        <!-- 7. จัดซื้อ & สโตร์ (PR & Store Tracker) -->
+        <a class="em-drawer-link" href="/pr-tracker/">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          จัดซื้อ &amp; สโตร์
+        </a>
+
+        <!-- 8. สื่อประชาสัมพันธ์ Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              สื่อประชาสัมพันธ์
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/announcements/"><span class="em-item-icon">⚙️</span> สื่อประชาสัมพันธ์</a>
+            <a class="em-drawer-subitem" href="/announcements/tv.html" target="_blank"><span class="em-item-icon">📺</span> เปิดหน้า TV</a>
+          </div>
+        </div>
+
+        <!-- 6. จัดการผู้ใช้งาน -->
+        <a id="em-drawer-nav-users" class="em-drawer-link" style="display:none" href="/users/">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          จัดการผู้ใช้งาน
+        </a>
+      </nav>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div id="em-drawer-footer" class="em-drawer-footer"></div>
+  </aside>
+</nav>
+
+<style>
+/* --- UNIFIED ELECTRICAL MAINTENANCE NAVIGATION BAR --- */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+.em-main-nav,
+.em-main-nav *,
+.em-main-nav *::before,
+.em-main-nav *::after {
+  box-sizing: border-box;
+}
+.em-main-nav {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 10000;
+  background: #0d1e38;
+  color: #ffffff;
+  font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.18);
+  box-shadow: 0 4px 20px rgba(10, 25, 47, 0.35);
+}
+.em-nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 20px;
+  height: 54px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.em-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.em-hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #f1f5f9;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+.em-hamburger-btn:hover {
+  background: rgba(128, 24, 42, 0.28);
+  border-color: #80182a;
+  color: #ffffff;
+  transform: scale(1.04);
+}
+.em-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #ffffff;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: opacity 0.2s;
+}
+.em-brand-link:hover { opacity: 0.92; }
+.em-brand-logo {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 2px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.em-brand-text {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* Nav Links & Dropdowns */
+.em-nav-center {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+}
+.em-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 8px;
+  border-radius: 5px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.em-nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+.em-nav-link.active {
+  color: #ffffff;
+  font-weight: 600;
+  background: rgba(128, 24, 42, 0.22);
+  border-bottom-color: #80182a;
+}
+.em-caret {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.2s ease;
+  opacity: 0.7;
+}
+
+/* Dropdown Menu */
+.em-dropdown {
+  position: relative;
+}
+.em-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 180px;
+  background: #18313d;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 7px;
+  padding: 5px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  z-index: 10001;
+}
+.em-dropdown:hover .em-dropdown-menu,
+.em-dropdown.is-open .em-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.em-dropdown:hover .em-caret,
+.em-dropdown.is-open .em-caret {
+  transform: rotate(180deg);
+}
+.em-dropdown-header {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  padding: 4px 8px 3px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 3px;
+}
+.em-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  color: #e2e8f0;
+  text-decoration: none;
+  font-size: 12px;
+  border-radius: 5px;
+  transition: all 0.15s ease;
+}
+.em-dropdown-item:hover {
+  background: rgba(128, 24, 42, 0.3);
+  color: #ffffff;
+}
+.em-dropdown-item.active {
+  background: rgba(128, 24, 42, 0.28);
+  color: #f3c4ce;
+  font-weight: 600;
+}
+.em-dept-badge {
+  display: inline-block;
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 10px;
+  padding: 1px 5px;
+  background: rgba(128, 24, 42, 0.38);
+  color: #f3c4ce;
+  border: 1px solid rgba(243, 196, 206, 0.45);
+  border-radius: 4px;
+}
+.em-item-icon {
+  font-size: 13px;
+  width: 16px;
+  text-align: center;
+  color: #d68a9a;
+}
+
+/* Right User Info Badge */
+.em-nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.em-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: #cbd5e1;
+}
+
+/* Mobile Drawer Elements */
+.em-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 10002;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+.em-drawer-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+.em-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(320px, 86vw);
+  background: #13242e;
+  color: #ffffff;
+  z-index: 10003;
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+}
+.em-drawer.is-active {
+  transform: translateX(0);
+}
+.em-drawer-header {
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.em-drawer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.em-drawer-brand-text strong {
+  display: block;
+  font-size: 14.5px;
+  color: #ffffff;
+}
+.em-drawer-brand-text small {
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+.em-drawer-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.em-drawer-close:hover {
+  color: #ffffff;
+  background: rgba(255,255,255,0.08);
+}
+.em-drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.em-drawer-user-card {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+.em-drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.em-drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+.em-drawer-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+.em-drawer-link.active {
+  background: rgba(128, 24, 42, 0.3);
+  color: #f3c4ce;
+  font-weight: 600;
+  border-left: 3px solid #80182a;
+}
+.em-drawer-group {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  margin-bottom: 2px;
+  overflow: hidden;
+}
+.em-drawer-group-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.em-drawer-group-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+.em-drawer-group-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.em-drawer-arrow {
+  transition: transform 0.2s ease;
+  color: #94a3b8;
+}
+.em-drawer-group-btn[aria-expanded="true"] .em-drawer-arrow {
+  transform: rotate(180deg);
+  color: #f3c4ce;
+}
+.em-drawer-sublist {
+  padding: 4px 8px 10px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.em-drawer-subitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: #94a3b8;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.em-drawer-subitem:hover {
+  color: #ffffff;
+  background: rgba(128, 24, 42, 0.22);
+}
+.em-drawer-subitem.active {
+  color: #f3c4ce;
+  background: rgba(128, 24, 42, 0.28);
+  font-weight: 600;
+}
+.em-drawer-footer {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .em-hamburger-btn {
+    display: inline-flex;
+  }
+  .em-nav-center {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .em-nav-right {
+    display: none;
+  }
+  .em-nav-container {
+    padding: 0 14px;
+  }
+  .em-nav-left {
+    min-width: 0;
+  }
+  .em-brand-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+</style>
+
+  <div class="el-app-container">
+    
+    <!-- Top Header -->
+    <header class="el-page-header">
+      <div class="el-header-main-row">
+        <div class="el-title-group">
+          <div class="el-title-with-pill">
+            <h1 class="el-page-title">
+              <span class="el-title-badge">⚡</span>
+              <span>แผนผังระบบไฟฟ้า</span>
+            </h1>
+            <span class="el-meta-pill">
+              <span class="el-status-dot pulse"></span>
+              ผังการจ่ายกระแสไฟฟ้า &middot; Single Line Distribution Diagram
+            </span>
+          </div>
+          <p class="el-page-subtitle">บันทึกพิกัดตู้ MDB, DB, Load Panel, เครื่องจักร และผังการเชื่อมโยงระบบจ่ายไฟโรงงาน</p>
+        </div>
+
+        <div class="el-header-actions">
+          <button type="button" id="btn-refresh" class="btn btn-secondary" title="รีเฟรชข้อมูล">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <span>รีเฟรช</span>
+          </button>
+          <button type="button" id="btn-add-node" class="btn btn-primary" title="เพิ่มตู้ควบคุมหรืออุปกรณ์ใหม่">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>เพิ่มตู้/อุปกรณ์</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="el-kpi-grid">
+        <div class="el-kpi-card" data-filter-type="ALL">
+          <div class="el-kpi-label">ทั้งหมด</div>
+          <div class="el-kpi-value" id="kpi-total">0</div>
+          <div class="el-kpi-sub">ตู้และอุปกรณ์</div>
+        </div>
+        <div class="el-kpi-card type-mdb" data-filter-type="MDB">
+          <div class="el-kpi-label"><span class="kpi-badge badge-mdb">MDB</span> Main Board</div>
+          <div class="el-kpi-value" id="kpi-mdb">0</div>
+          <div class="el-kpi-sub">ตู้จ่ายไฟหลัก</div>
+        </div>
+        <div class="el-kpi-card type-db" data-filter-type="DB">
+          <div class="el-kpi-label"><span class="kpi-badge badge-db">DB</span> Dist. Board</div>
+          <div class="el-kpi-value" id="kpi-db">0</div>
+          <div class="el-kpi-sub">ตู้จ่ายไฟย่อย</div>
+        </div>
+        <div class="el-kpi-card type-lp" data-filter-type="LP">
+          <div class="el-kpi-label"><span class="kpi-badge badge-lp">LP</span> Load Panel</div>
+          <div class="el-kpi-value" id="kpi-lp">0</div>
+          <div class="el-kpi-sub">แผงย่อยโหลด</div>
+        </div>
+        <div class="el-kpi-card type-mc" data-filter-type="MC">
+          <div class="el-kpi-label"><span class="kpi-badge badge-mc">MC</span> Machine</div>
+          <div class="el-kpi-value" id="kpi-mc">0</div>
+          <div class="el-kpi-sub">เครื่องจักร</div>
+        </div>
+        <div class="el-kpi-card type-dv" data-filter-type="DV">
+          <div class="el-kpi-label"><span class="kpi-badge badge-dv">DV</span> Device</div>
+          <div class="el-kpi-value" id="kpi-dv">0</div>
+          <div class="el-kpi-sub">อุปกรณ์ไฟฟ้า</div>
+        </div>
+      </div>
+
+      <!-- View Navigation Tabs -->
+      <nav class="el-view-tabs" role="tablist">
+        <button type="button" class="el-tab-btn active" data-tab="diagram" role="tab" aria-selected="true">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span>แผนผังโครงข่าย (Single Line Tree)</span>
+        </button>
+        <button type="button" class="el-tab-btn" data-tab="directory" role="tab" aria-selected="false">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>ทะเบียนตู้/อุปกรณ์ (Panel Directory)</span>
+          <span class="el-tab-count" id="tab-count-all">0</span>
+        </button>
+        <button type="button" class="el-tab-btn" data-tab="wiring" role="tab" aria-selected="false">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
+          <span>จัดการสายจ่ายไฟ (Quick Wiring)</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- TAB 1: INTERACTIVE SINGLE LINE DIAGRAM -->
+    <section id="tab-diagram" class="el-tab-content active" role="tabpanel">
+      <!-- Diagram Toolbar -->
+      <div class="el-diagram-toolbar">
+        <div class="el-toolbar-left">
+          <label class="el-filter-label" for="filter-tree-root">เลือกดูสายเมน:</label>
+          <select id="filter-tree-root" class="el-select el-select-sm">
+            <option value="ALL">ดูทุกสายเมน (All MDBs)</option>
+          </select>
+
+          <label class="el-checkbox-label">
+            <input type="checkbox" id="toggle-show-machines" checked>
+            <span>แสดงเครื่องจักร (MC/DV)</span>
+          </label>
+        </div>
+
+        <div class="el-toolbar-right">
+          <div class="el-zoom-controls">
+            <button type="button" id="btn-zoom-in" class="btn-icon" title="ซูมเข้า (Zoom In)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            </button>
+            <span id="zoom-level-text" class="el-zoom-level">100%</span>
+            <button type="button" id="btn-zoom-out" class="btn-icon" title="ซูมออก (Zoom Out)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            </button>
+            <button type="button" id="btn-zoom-reset" class="btn-icon" title="รีเซ็ตขนาดปกติ (Fit View)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+            </button>
+          </div>
+          <button type="button" id="btn-fullscreen" class="btn btn-secondary btn-sm" title="ขยายเต็มจอ">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+            <span>เต็มจอ</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Diagram Interactive Canvas -->
+      <div id="diagram-viewport" class="el-diagram-viewport">
+        <div id="diagram-pan-layer" class="el-diagram-pan-layer">
+          <svg id="diagram-svg-connections" class="el-svg-connections"></svg>
+          <div id="diagram-nodes-layer" class="el-diagram-nodes-layer"></div>
+        </div>
+
+        <!-- Empty State in Diagram -->
+        <div id="diagram-empty-state" class="el-empty-state" style="display:none;">
+          <div class="el-empty-icon">⚡</div>
+          <h3>ยังไม่มีรายการตู้ควบคุมไฟฟ้า</h3>
+          <p>เริ่มต้นสร้างตู้จ่ายไฟหลัก (MDB) หรือตู้ย่อยในแท็บ "ทะเบียนตู้/อุปกรณ์" เพื่อเริ่มสร้างผัง</p>
+          <button type="button" class="btn btn-primary" onclick="document.getElementById('btn-add-node').click()">
+            + เพิ่มตู้ใบแรก
+          </button>
+        </div>
+
+        <!-- Floating Hint -->
+        <div class="el-diagram-hint">
+          <span>💡 เลื่อนล้อเมาส์เพื่อซูม &middot; คลิกค้างลากเพื่อเลื่อนผัง &middot; คลิกตู้เพื่อดูข้อมูล</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: PANEL DIRECTORY (TABLE & CARD VIEW) -->
+    <section id="tab-directory" class="el-tab-content" role="tabpanel">
+      <!-- Search & Filter Controls -->
+      <div class="el-directory-toolbar">
+        <div class="el-search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="dir-search-input" placeholder="ค้นหารหัสตู้, ชื่อตู้, สถานที่ติดตั้ง, หมายเหตุ...">
+          <button type="button" id="dir-search-clear" class="btn-clear" title="ล้างคำค้นหา" style="display:none;">&times;</button>
+        </div>
+
+        <!-- Type Filter Pills -->
+        <div class="el-filter-pills" id="dir-type-pills">
+          <button type="button" class="el-pill active" data-type="ALL">ทั้งหมด (<span id="pill-cnt-all">0</span>)</button>
+          <button type="button" class="el-pill" data-type="MDB">MDB (<span id="pill-cnt-mdb">0</span>)</button>
+          <button type="button" class="el-pill" data-type="DB">DB (<span id="pill-cnt-db">0</span>)</button>
+          <button type="button" class="el-pill" data-type="LP">LP (<span id="pill-cnt-lp">0</span>)</button>
+          <button type="button" class="el-pill" data-type="MC">MC (<span id="pill-cnt-mc">0</span>)</button>
+          <button type="button" class="el-pill" data-type="DV">DV (<span id="pill-cnt-dv">0</span>)</button>
+        </div>
+
+        <div class="el-dir-actions">
+          <select id="dir-location-filter" class="el-select el-select-sm">
+            <option value="">ทุกสถานที่ / อาคาร</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Directory Table -->
+      <div class="el-table-wrapper">
+        <table class="el-table" id="nodes-table">
+          <thead>
+            <tr>
+              <th style="width: 60px;">รูปภาพ</th>
+              <th style="width: 130px;">รหัสตู้ (Tag)</th>
+              <th>ชื่อตู้ / อุปกรณ์</th>
+              <th style="width: 100px;">ประเภท</th>
+              <th style="width: 110px;">พิกัดกระแส</th>
+              <th style="width: 110px;">แรงดัน</th>
+              <th>สถานที่ติดตั้ง</th>
+              <th>จ่ายมาจาก (ต้นทาง)</th>
+              <th style="width: 90px; text-align: center;">สายย่อย</th>
+              <th style="width: 140px; text-align: center;">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="nodes-table-body">
+            <tr>
+              <td colspan="10" class="el-table-loading">กำลังโหลดข้อมูล...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 3: QUICK WIRING MATRIX -->
+    <section id="tab-wiring" class="el-tab-content" role="tabpanel">
+      <div class="el-wiring-header">
+        <div class="el-wiring-intro">
+          <h3>กำหนดสายการจ่ายไฟฟ้า (Upstream Feeder Matrix)</h3>
+          <p>จับคู่ตู้ปลายทางกับตู้ต้นทาง (Parent) ได้สะดวกรวดเร็วในหน้าเดียว พร้อมระบบป้องกันวงลูปอัตโนมัติ</p>
+        </div>
+        <button type="button" id="btn-save-all-wiring" class="btn btn-primary" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>บันทึกการเชื่อมโยง</span>
+        </button>
+      </div>
+
+      <div class="el-table-wrapper">
+        <table class="el-table" id="wiring-table">
+          <thead>
+            <tr>
+              <th style="width: 130px;">รหัสตู้</th>
+              <th>ชื่อตู้ / อุปกรณ์</th>
+              <th style="width: 90px;">ประเภท</th>
+              <th style="width: 100px;">พิกัดกระแส</th>
+              <th>สถานที่</th>
+              <th style="min-width: 280px;">จ่ายไฟมาจาก (เลือกตู้ต้นทาง Parent)</th>
+              <th style="width: 120px;">สถานะสายเมน</th>
+            </tr>
+          </thead>
+          <tbody id="wiring-table-body">
+            <!-- Dynamic wiring rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- SLIDE-OVER INSPECTOR DRAWER -->
+  <aside id="node-inspector" class="el-inspector" aria-hidden="true">
+    <div class="el-inspector-header">
+      <div class="el-inspector-title-row">
+        <span id="inspect-badge" class="kpi-badge badge-mdb">MDB</span>
+        <h2 id="inspect-code" class="el-inspector-code">MDB-01</h2>
+        <button type="button" id="btn-close-inspector" class="btn-icon el-inspector-close" aria-label="ปิดแผงข้อมูล">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div id="inspect-name" class="el-inspector-name">ชื่อตู้สวิตช์บอร์ดหลัก</div>
+    </div>
+
+    <div class="el-inspector-body">
+      <!-- Photo Card -->
+      <div class="el-inspector-section">
+        <div class="el-inspector-photo-wrapper">
+          <img id="inspect-photo" class="el-inspector-photo" src="" alt="รูปถ่ายตู้" style="display:none;">
+          <div id="inspect-photo-placeholder" class="el-inspector-photo-placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            <span>ไม่มีรูปภาพในระบบ</span>
+          </div>
+          <a id="inspect-drive-link" href="#" target="_blank" rel="noopener noreferrer" class="el-drive-link" style="display:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            <span>เปิดดูใน Google Drive</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Electrical Technical Specs -->
+      <div class="el-inspector-section">
+        <h4 class="el-section-title">ข้อมูลทางเทคนิค (Technical Specs)</h4>
+        <div class="el-spec-grid">
+          <div class="el-spec-item">
+            <span class="el-spec-label">พิกัดกระแส (Rating)</span>
+            <span id="inspect-current" class="el-spec-value font-mono">0 A</span>
+          </div>
+          <div class="el-spec-item">
+            <span class="el-spec-label">ระดับแรงดัน (Voltage)</span>
+            <span id="inspect-voltage" class="el-spec-value">400V 3P4W</span>
+          </div>
+          <div class="el-spec-item">
+            <span class="el-spec-label">สถานที่ติดตั้ง (Location)</span>
+            <span id="inspect-location" class="el-spec-value">-</span>
+          </div>
+          <div class="el-spec-item">
+            <span class="el-spec-label">ตู้ต้นทาง (Feeder Source)</span>
+            <span id="inspect-parent" class="el-spec-value font-mono">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remark / Notes -->
+      <div class="el-inspector-section" id="inspect-remark-section">
+        <h4 class="el-section-title">หมายเหตุ / ข้อมูลเพิ่มเติม</h4>
+        <p id="inspect-remark" class="el-inspector-remark">-</p>
+      </div>
+
+      <!-- Connected Downstream Loads -->
+      <div class="el-inspector-section">
+        <h4 class="el-section-title">
+          <span>ตู้และอุปกรณ์ที่รับไฟต่อไป</span>
+          <span id="inspect-children-count" class="el-sub-badge">0</span>
+        </h4>
+        <div id="inspect-children-list" class="el-children-list">
+          <div class="el-empty-sub">ไม่มีสายย่อยแยกจากตู้นี้</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drawer Actions -->
+    <div class="el-inspector-footer">
+      <button type="button" id="btn-inspect-edit" class="btn btn-secondary" style="flex:1;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        <span>แก้ไขข้อมูล</span>
+      </button>
+      <button type="button" id="btn-inspect-delete" class="btn btn-danger-ghost" title="ลบตู้/อุปกรณ์นี้">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+      </button>
+    </div>
+  </aside>
+  <div id="inspector-overlay" class="el-inspector-overlay" aria-hidden="true"></div>
+
+  <!-- NODE CREATE / EDIT MODAL -->
+  <dialog id="modal-node-form" class="el-modal">
+    <div class="el-modal-card">
+      <div class="el-modal-header">
+        <h3 id="modal-form-title" class="el-modal-title">เพิ่มตู้ / อุปกรณ์ไฟฟ้า</h3>
+        <button type="button" id="btn-modal-close" class="btn-clear" aria-label="ปิดหน้าต่าง">&times;</button>
+      </div>
+
+      <form id="form-node" class="el-modal-form" novalidate>
+        <input type="hidden" id="form-id" name="id">
+
+        <div class="el-form-row col-2">
+          <div class="el-form-field">
+            <label for="form-node-code" class="el-label required">รหัสตู้ / Tag Code</label>
+            <input type="text" id="form-node-code" name="nodeCode" class="el-input font-mono" placeholder="เช่น MDB-01, DB-CC1, LP-01" required>
+            <small class="el-help">รหัสเฉพาะตัว เช่น MDB-MAIN, DB-CC1, MC-PRS01</small>
+          </div>
+
+          <div class="el-form-field">
+            <label for="form-node-type" class="el-label required">ประเภทตู้ / อุปกรณ์</label>
+            <select id="form-node-type" name="nodeType" class="el-select" required>
+              <option value="MDB">MDB - Main Distribution Board (ตู้ประธาน)</option>
+              <option value="DB" selected>DB - Distribution Board (ตู้จ่ายไฟย่อย)</option>
+              <option value="LP">LP - Load Panel (ตู้โหลดพาเนล)</option>
+              <option value="MC">MC - Machine (เครื่องจักร)</option>
+              <option value="DV">DV - Device (อุปกรณ์ไฟฟ้าเฉพาะจุด)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Machine Picker row (shown if type === 'MC') -->
+        <div id="row-machine-picker" class="el-form-field" style="display:none; background:rgba(22, 163, 74, 0.08); padding:10px; border-radius:6px; border:1px dashed rgba(22, 163, 74, 0.4);">
+          <label for="form-machine-picker" class="el-label">เลือกลิงก์กับเครื่องจักรในระบบ (Machines)</label>
+          <select id="form-machine-picker" class="el-select">
+            <option value="">-- ไม่เลือกลิงก์ (กรอกรหัสและชื่อเอง) --</option>
+          </select>
+          <small class="el-help">เลือกเพื่อดึงรหัสเครื่องจักรและชื่อมาใส่อัตโนมัติ</small>
+        </div>
+
+        <div class="el-form-field">
+          <label for="form-name" class="el-label required">ชื่อตู้ / อุปกรณ์</label>
+          <input type="text" id="form-name" name="name" class="el-input" placeholder="เช่น ตู้ควบคุมระบบผลิตฝาจีบ 1, แผงไฟส่องสว่างอาคาร A" required>
+        </div>
+
+        <div class="el-form-row col-2">
+          <div class="el-form-field">
+            <label for="form-current-rating" class="el-label">พิกัดกระแส (Amperes)</label>
+            <div class="el-input-unit">
+              <input type="number" id="form-current-rating" name="currentRating" class="el-input font-mono" placeholder="เช่น 1600, 630, 250, 100" min="0" step="any">
+              <span class="el-unit">A</span>
+            </div>
+          </div>
+
+          <div class="el-form-field">
+            <label for="form-voltage" class="el-label">ระดับแรงดัน (Voltage)</label>
+            <input type="text" id="form-voltage" name="voltage" class="el-input" placeholder="เช่น 400V 3P4W, 230V 1P, 22kV" value="400V 3P4W">
+          </div>
+        </div>
+
+        <div class="el-form-row col-2">
+          <div class="el-form-field">
+            <label for="form-location" class="el-label">สถานที่ติดตั้ง (Location)</label>
+            <input type="text" id="form-location" name="location" class="el-input" placeholder="เช่น ห้อง MDB ชั้น 1, เสา 14 แผนกฝาเกลียว">
+          </div>
+
+          <div class="el-form-field">
+            <label for="form-parent-id" class="el-label">รับไฟมาจาก (ตู้ต้นทาง Parent)</label>
+            <select id="form-parent-id" name="parentId" class="el-select font-mono">
+              <option value="">-- ไม่มี (เป็นตู้ประธาน MDB หรือยังไม่เชื่อมโยง) --</option>
+            </select>
+            <small class="el-help">สามารถเว้นว่างไว้ก่อน แล้วค่อยมาเชื่อมโยงทีหลังได้</small>
+          </div>
+        </div>
+
+        <div class="el-form-field">
+          <label for="form-remark" class="el-label">หมายเหตุ / ข้อมูลเพิ่มเติม</label>
+          <textarea id="form-remark" name="remark" class="el-textarea" rows="2" placeholder="เช่น ยี่ห้อเบรกเกอร์, ขนาดสายเมน, ข้อมูลตู้"></textarea>
+        </div>
+
+        <!-- Google Drive Photo Section -->
+        <div class="el-form-field">
+          <label class="el-label">รูปภาพตู้ (เชื่อมต่อ Google Drive)</label>
+          <div class="el-photo-uploader">
+            <div class="el-photo-preview-box" id="form-photo-preview">
+              <img id="form-preview-img" src="" alt="พรีวิวรูปภาพ" style="display:none;">
+              <div id="form-preview-empty" class="el-preview-empty">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                <span>เลือกไฟล์รูปภาพเพื่ออัปโหลด</span>
+              </div>
+            </div>
+
+            <div class="el-photo-controls">
+              <input type="file" id="form-file-input" accept="image/*" style="display:none;">
+              <button type="button" id="btn-select-file" class="btn btn-secondary btn-sm">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <span>เลือกรูปจากเครื่อง</span>
+              </button>
+              <button type="button" id="btn-remove-photo" class="btn btn-danger-ghost btn-sm" style="display:none;">
+                <span>ลบรูป</span>
+              </button>
+              <div class="el-photo-tip">รองรับไฟล์ JPG, PNG, WEBP ขนาดไม่เกิน 15MB &middot; อัปโหลดตรงเข้า Google Drive อัตโนมัติ</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="form-error-msg" class="el-form-error" style="display:none;"></div>
+
+        <div class="el-modal-footer">
+          <button type="button" id="btn-modal-cancel" class="btn btn-secondary">ยกเลิก</button>
+          <button type="submit" id="btn-modal-submit" class="btn btn-primary">
+            <span>บันทึกข้อมูล</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- IMAGE LIGHTBOX MODAL -->
+  <dialog id="modal-lightbox" class="el-lightbox">
+    <div class="el-lightbox-inner">
+      <img id="lightbox-img" src="" alt="ภาพขยาย">
+      <button type="button" id="btn-lightbox-close" class="el-lightbox-close" aria-label="ปิด">&times;</button>
+    </div>
+  </dialog>
+
+  <script>
+(() => {
+ 'use strict';
+ const scope = location.pathname.startsWith('/parts') ? 'parts'
+  : location.pathname.startsWith('/bom') ? 'bom'
+  : location.pathname.startsWith('/announcements') ? 'announcements'
+  : location.pathname.startsWith('/users') ? 'users'
+  : location.pathname.startsWith('/pm-expenses') ? 'pm-expenses'
+  : location.pathname.startsWith('/pm-aircooling') ? 'pm-aircooling'
+  : location.pathname.startsWith('/pm') ? 'pm'
+  : location.pathname.startsWith('/pr-tracker') ? 'pr-tracker'
+  : 'machines';
+ const inFlight = new Map();
+
+ let loginPromise = null;
+ let currentUser = null;
+
+ function ensureLoginModal() {
+  let modal = document.getElementById('em-auth-overlay');
+  if (modal) return modal;
+
+  const style = document.createElement('style');
+  style.textContent = `
+   #em-auth-overlay {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; z-index: 99999;
+   }
+   .em-auth-card {
+    background: #ffffff; color: #1e293b; border-radius: 12px; width: 100%; max-width: 380px;
+    padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    font-family: inherit;
+   }
+   .em-auth-title { font-size: 18px; font-weight: 700; color: #18313d; margin-bottom: 6px; }
+   .em-auth-sub { font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.4; }
+   .em-auth-field { margin-bottom: 14px; text-align: left; }
+   .em-auth-label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; }
+   .em-auth-input {
+    width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;
+    box-sizing: border-box; transition: border-color 0.2s;
+   }
+   .em-auth-input:focus { outline: none; border-color: #cc681c; box-shadow: 0 0 0 3px rgba(204, 104, 28, 0.15); }
+   .em-auth-btn {
+    width: 100%; padding: 10px; background: #cc681c; color: #ffffff; border: none; border-radius: 6px;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 8px;
+   }
+   .em-auth-btn:hover { background: #b25814; }
+   .em-auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+   .em-auth-err { font-size: 13px; color: #dc2626; margin-top: 10px; min-height: 18px; text-align: center; }
+  `;
+  document.head.appendChild(style);
+
+  modal = document.createElement('div');
+  modal.id = 'em-auth-overlay';
+  modal.style.display = 'none';
+  modal.innerHTML = `
+   <div class="em-auth-card">
+    <div class="em-auth-title">เข้าสู่ระบบ Electrical Maintenance</div>
+    <div class="em-auth-sub">กรุณาเข้าสู่ระบบเพื่อใช้งานระบบทะเบียนและอุปกรณ์<br><small style="color:#94a3b8">(บัญชีเริ่มต้น: admin / admin1234)</small></div>
+    <form id="em-auth-form">
+     <div class="em-auth-field">
+      <label class="em-auth-label" for="em-auth-user">ชื่อผู้ใช้ (Username)</label>
+      <input class="em-auth-input" id="em-auth-user" type="text" autocomplete="username" required placeholder="admin">
+     </div>
+     <div class="em-auth-field">
+      <label class="em-auth-label" for="em-auth-pass">รหัสผ่าน (Password)</label>
+      <input class="em-auth-input" id="em-auth-pass" type="password" autocomplete="current-password" required placeholder="••••••••">
+     </div>
+     <button class="em-auth-btn" id="em-auth-submit" type="submit">เข้าสู่ระบบ</button>
+     <div class="em-auth-err" id="em-auth-error"></div>
+    </form>
+   </div>
+  `;
+  document.body.appendChild(modal);
+
+  const form = modal.querySelector('#em-auth-form');
+  const errEl = modal.querySelector('#em-auth-error');
+  const btn = modal.querySelector('#em-auth-submit');
+
+  form.onsubmit = async (e) => {
+   e.preventDefault();
+   errEl.textContent = '';
+   btn.disabled = true;
+   btn.textContent = 'กำลังเข้าสู่ระบบ...';
+
+   const username = modal.querySelector('#em-auth-user').value.trim();
+   const password = modal.querySelector('#em-auth-pass').value;
+
+   try {
+    const res = await fetch('/api/v1/auth/login', {
+     method: 'POST',
+     credentials: 'same-origin',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({ username, password })
+    });
+    const result = await res.json();
+    if (!result.ok) throw new Error(result.error?.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+    currentUser = result.data;
+    window.currentUser = currentUser;
+    window.EM_CURRENT_USER = currentUser;
+    updateBadge();
+    modal.style.display = 'none';
+
+    if (result.data.mustChangePassword) {
+     await promptForceChangePassword();
+    }
+
+    if (loginPromise) {
+     const resolve = loginPromise.resolve;
+     loginPromise = null;
+     resolve(currentUser);
+    }
+   } catch (err) {
+    errEl.textContent = err.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่';
+   } finally {
+    btn.disabled = false;
+    btn.textContent = 'เข้าสู่ระบบ';
+   }
+  };
+
+  return modal;
+ }
+
+ function promptForceChangePassword() {
+  return new Promise((resolve) => {
+   let modal = document.getElementById('em-force-pass-overlay');
+   if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'em-force-pass-overlay';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.8);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:100000;';
+    modal.innerHTML = `
+     <div class="em-auth-card">
+      <div class="em-auth-title" style="color:#dc2626">⚠️ บังคับตั้งรหัสผ่านใหม่</div>
+      <div class="em-auth-sub">รหัสผ่านปัจจุบันต่ำกว่า 5 ตัวอักษร หรือได้รับการรีเซ็ต เพื่อความปลอดภัยกรุณาตั้งรหัสผ่านใหม่ (อย่างน้อย 5 ตัวอักษร)</div>
+      <form id="em-force-pass-form">
+       <div class="em-auth-field">
+        <label class="em-auth-label" for="em-new-pass">รหัสผ่านใหม่</label>
+        <input class="em-auth-input" id="em-new-pass" type="password" required minlength="5" placeholder="อย่างน้อย 5 ตัวอักษร">
+       </div>
+       <div class="em-auth-field">
+        <label class="em-auth-label" for="em-conf-pass">ยืนยันรหัสผ่านใหม่</label>
+        <input class="em-auth-input" id="em-conf-pass" type="password" required minlength="5" placeholder="พิมพ์ซ้ำอีกครั้ง">
+       </div>
+       <button class="em-auth-btn" id="em-force-submit" type="submit">บันทึกรหัสผ่านใหม่</button>
+       <div class="em-auth-err" id="em-force-err"></div>
+      </form>
+     </div>
+    `;
+    document.body.appendChild(modal);
+   }
+
+   modal.style.display = 'flex';
+   const form = modal.querySelector('#em-force-pass-form');
+   const errEl = modal.querySelector('#em-force-err');
+   const btn = modal.querySelector('#em-force-submit');
+   errEl.textContent = '';
+
+   form.onsubmit = async (e) => {
+    e.preventDefault();
+    errEl.textContent = '';
+    const p1 = modal.querySelector('#em-new-pass').value;
+    const p2 = modal.querySelector('#em-conf-pass').value;
+    if (p1 !== p2) {
+     errEl.textContent = 'รหัสผ่านทั้งสองช่องไม่ตรงกัน';
+     return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'กำลังบันทึก...';
+    try {
+     const res = await fetch('/api/v1/auth/change-password', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newPassword: p1 })
+     });
+     const r = await res.json();
+     if (!r.ok) throw new Error(r.error?.message || 'เปลี่ยนรหัสผ่านไม่สำเร็จ');
+     modal.style.display = 'none';
+     if (currentUser) currentUser.mustChangePassword = false;
+     resolve();
+    } catch (err) {
+     errEl.textContent = err.message || 'บันทึกรหัสผ่านไม่สำเร็จ';
+    } finally {
+     btn.disabled = false;
+     btn.textContent = 'บันทึกรหัสผ่านใหม่';
+    }
+   };
+  });
+ }
+
+ function promptLogin() {
+  if (loginPromise) return loginPromise.promise;
+  const modal = ensureLoginModal();
+  modal.style.display = 'flex';
+  const errEl = modal.querySelector('#em-auth-error');
+  if (errEl) errEl.textContent = '';
+  const userInput = modal.querySelector('#em-auth-user');
+  if (userInput) { userInput.value = ''; userInput.focus(); }
+  const passInput = modal.querySelector('#em-auth-pass');
+  if (passInput) passInput.value = '';
+
+  let resolve, reject;
+  const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
+  loginPromise = { promise, resolve, reject };
+  return promise;
+ }
+
+ function initNavUI() {
+    const hamburgerBtn = document.getElementById('em-hamburger-btn');
+    const drawer = document.getElementById('em-drawer');
+    const overlay = document.getElementById('em-drawer-overlay');
+    const closeBtn = document.getElementById('em-drawer-close');
+
+    function openDrawer() {
+      if (drawer) {
+        drawer.classList.add('is-active');
+        hamburgerBtn?.setAttribute('aria-expanded', 'true');
+      }
+      if (overlay) overlay.classList.add('is-active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      if (drawer) {
+        drawer.classList.remove('is-active');
+        hamburgerBtn?.setAttribute('aria-expanded', 'false');
+      }
+      if (overlay) overlay.classList.remove('is-active');
+      document.body.style.overflow = '';
+    }
+
+    if (hamburgerBtn) hamburgerBtn.onclick = openDrawer;
+    if (closeBtn) closeBtn.onclick = closeDrawer;
+    if (overlay) overlay.onclick = closeDrawer;
+
+    // Drawer accordions
+    document.querySelectorAll('.em-drawer-group-btn').forEach(btn => {
+      btn.onclick = () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!expanded));
+        const sublist = btn.nextElementSibling;
+        if (sublist) {
+          sublist.style.display = expanded ? 'none' : 'flex';
+        }
+      };
+    });
+
+    // Auto-handle ?dept= in Equipment BOM
+    if (location.pathname.startsWith('/bom')) {
+      const params = new URLSearchParams(location.search);
+      const targetDept = params.get('dept');
+      if (targetDept) {
+        try {
+          sessionStorage.setItem('BOM_LAST_DEPT', targetDept);
+          sessionStorage.removeItem('BOM_LAST_LINE');
+          sessionStorage.removeItem('BOM_LAST_MACHINE');
+        } catch (_) {}
+      } else if (!location.search && !sessionStorage.getItem('BOM_LAST_MACHINE')) {
+        try {
+          sessionStorage.removeItem('BOM_LAST_DEPT');
+          sessionStorage.removeItem('BOM_LAST_LINE');
+        } catch (_) {}
+      }
+    }
+
+    // Auto-handle ?view=bulk or ?action=add in Parts
+    if (location.pathname.startsWith('/parts')) {
+      const params = new URLSearchParams(location.search);
+      if (params.get('view') === 'bulk' || params.get('action') === 'bulk' || location.hash === '#bulk') {
+        const checkBulk = () => {
+          if (typeof window.switchView === 'function') {
+            window.switchView('bulk');
+          } else {
+            const btn = document.getElementById('nav-bulk') || document.getElementById('bulk-add-btn');
+            if (btn) btn.click();
+            else setTimeout(checkBulk, 80);
+          }
+        };
+        setTimeout(checkBulk, 80);
+      } else if (params.get('view') === 'batch' || location.hash === '#batch') {
+        const checkBatch = () => {
+          if (typeof window.switchView === 'function') {
+            window.switchView('batch');
+          } else {
+            const btn = document.getElementById('nav-batch');
+            if (btn) btn.click();
+            else setTimeout(checkBatch, 80);
+          }
+        };
+        setTimeout(checkBatch, 80);
+      } else if (params.get('action') === 'add') {
+        const checkAddBtn = () => {
+          const btn = document.getElementById('add-part');
+          if (btn && !btn.disabled) {
+            btn.click();
+          } else {
+            setTimeout(checkAddBtn, 100);
+          }
+        };
+        setTimeout(checkAddBtn, 300);
+      }
+
+      // Smooth in-page switching when clicking parts dropdown items
+      document.querySelectorAll('a[href*="/parts"]').forEach(a => {
+        a.addEventListener('click', (e) => {
+          if (!location.pathname.startsWith('/parts') || typeof window.switchView !== 'function') return;
+          const href = a.getAttribute('href') || '';
+          if (href.includes('view=bulk') || href.includes('action=bulk') || href.includes('#bulk')) {
+            e.preventDefault();
+            history.pushState(null, '', '/parts/?view=bulk');
+            window.switchView('bulk');
+          } else if (href.includes('view=batch') || href.includes('#batch')) {
+            e.preventDefault();
+            history.pushState(null, '', '/parts/?view=batch');
+            window.switchView('batch');
+          } else if (href === '/parts/' || href === '/parts') {
+            e.preventDefault();
+            history.pushState(null, '', '/parts/');
+            window.switchView('catalog');
+          }
+        });
+      });
+    }
+  }
+
+  function updateBadge() {
+    const badge = document.getElementById('em-user-badge');
+    const navUsers = document.getElementById('em-nav-users');
+    const drawerNavUsers = document.getElementById('em-drawer-nav-users');
+    const drawerUserCard = document.getElementById('em-drawer-user-card');
+    const drawerFooter = document.getElementById('em-drawer-footer');
+
+    const canManageUsers = currentUser && (currentUser.role === 'admin' || currentUser.permissions?.users === 'admin');
+    if (navUsers) navUsers.style.display = canManageUsers ? 'inline-flex' : 'none';
+    if (drawerNavUsers) drawerNavUsers.style.display = canManageUsers ? 'flex' : 'none';
+
+    if (!currentUser) {
+      if (badge) {
+        badge.innerHTML = '<button id="em-open-login" style="background:#cc681c;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s">เข้าสู่ระบบ</button>';
+        const btn = document.getElementById('em-open-login');
+        if (btn) btn.onclick = () => promptLogin();
+      }
+      if (drawerUserCard) {
+        drawerUserCard.innerHTML = '<div style="font-size:13px;color:#94a3b8;margin-bottom:8px">ยังไม่ได้เข้าสู่ระบบ</div><button id="em-drawer-open-login" style="width:100%;background:#cc681c;color:#fff;border:none;border-radius:6px;padding:8px;font-size:13px;font-weight:600;cursor:pointer">เข้าสู่ระบบ</button>';
+        const dBtn = document.getElementById('em-drawer-open-login');
+        if (dBtn) dBtn.onclick = () => {
+          const overlay = document.getElementById('em-drawer-overlay');
+          const drawer = document.getElementById('em-drawer');
+          if (drawer) drawer.classList.remove('is-active');
+          if (overlay) overlay.classList.remove('is-active');
+          document.body.style.overflow = '';
+          promptLogin();
+        };
+      }
+      if (drawerFooter) drawerFooter.innerHTML = '';
+      return;
+    }
+
+    const roleTh = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : currentUser.role === 'editor' ? 'แก้ไขได้' : 'ดูอย่างเดียว';
+
+    if (badge) {
+      badge.innerHTML = `
+        <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:5px;font-size:11.5px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <strong style="font-weight:600">${currentUser.displayName || currentUser.username}</strong>
+          <span style="font-size:10.5px;color:#94a3b8">(${roleTh})</span>
+        </span>
+        <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:5px;padding:2px 7px;font-size:11px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
+      `;
+      const logoutBtn = document.getElementById('em-btn-logout');
+      if (logoutBtn) {
+        logoutBtn.onclick = async () => {
+          try {
+            await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+          } catch (_) {}
+          location.reload();
+        };
+      }
+    }
+
+    if (drawerUserCard) {
+      drawerUserCard.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:50%;background:#cc681c;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">
+            ${(currentUser.displayName || currentUser.username).charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:14px;color:#fff">${currentUser.displayName || currentUser.username}</div>
+            <div style="font-size:12px;color:#94a3b8">${roleTh}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (drawerFooter) {
+      drawerFooter.innerHTML = `
+        <button id="em-drawer-btn-logout" style="width:100%;background:rgba(239, 68, 68, 0.15);color:#fca5a5;border:1px solid rgba(239, 68, 68, 0.3);border-radius:6px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          ออกจากระบบ
+        </button>
+      `;
+      const dLogoutBtn = document.getElementById('em-drawer-btn-logout');
+      if (dLogoutBtn) {
+        dLogoutBtn.onclick = async () => {
+          try {
+            await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+          } catch (_) {}
+          location.reload();
+        };
+      }
+    }
+  }
+
+
+  if (typeof window !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initNavUI();
+      fetch('/api/v1/auth/me', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(async res => {
+          if (res.ok && res.data) {
+            currentUser = res.data;
+            window.currentUser = currentUser;
+            window.EM_CURRENT_USER = currentUser;
+            updateBadge();
+            if (res.data.mustChangePassword) {
+              await promptForceChangePassword();
+            }
+          } else {
+            updateBadge();
+          }
+        })
+        .catch(() => updateBadge());
+    });
+  }
+
+  const safeUUID = () => {
+    if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+    return 'req-' + Date.now() + '-' + Math.random().toString(36).slice(2, 11) + '-' + Math.random().toString(36).slice(2, 9);
+  };
+
+  const executeRPC = async (targetScope, method, ...args) => {
+    const activeScope = targetScope || scope;
+    const signature = JSON.stringify([activeScope, method, args]);
+    const payload = [...args].reverse().find(a => a && typeof a === 'object' && !Array.isArray(a));
+    const requestId = payload?.requestId || payload?.operationId || inFlight.get(signature) || safeUUID();
+    inFlight.set(signature, requestId);
+
+    const doRequest = async () => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 60000);
+      try {
+        const response = await fetch(`/api/v1/${activeScope}/rpc`, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', 'Idempotency-Key': requestId },
+          body: JSON.stringify({ method, args }),
+          signal: controller.signal
+        });
+
+        if (response.status === 401) {
+          // Wait for user to log in via modal dialog
+          await promptLogin();
+          // Retry the request after successful login
+          return await doRequest();
+        }
+
+        if (response.redirected) {
+          if (typeof window !== 'undefined' && window.location.protocol === 'http:') {
+            throw Object.assign(new Error('คำขอถูก Redirect เนื่องจากเปิดด้วย HTTP กรุณาเข้าใช้งานผ่าน https://'), { code: 'REDIRECT_HTTP' });
+          }
+          throw Object.assign(new Error('การเชื่อมต่อถูก Redirect (เช่น เซสชัน Cloudflare Access หมดอายุ) กรุณารีเฟรชหน้าเว็บ'), { code: 'REDIRECT' });
+        }
+
+        const contentType = response.headers.get('Content-Type') || '';
+        if (!contentType.includes('application/json')) {
+          if (response.status === 404) {
+            throw Object.assign(new Error(`ไม่พบเซิร์ฟเวอร์หรือ API (/api/v1/${activeScope}/rpc) HTTP 404 - หากทดสอบ Local กรุณาตรวจสอบว่าเปิด npm run dev หรือยัง`), { code: 'NOT_FOUND' });
+          }
+          if (response.status >= 500) {
+            throw Object.assign(new Error(`เซิร์ฟเวอร์ขัดข้อง (HTTP ${response.status}) กรุณาตรวจสอบสถานะ Cloudflare Worker หรือฐานข้อมูล D1`), { code: 'SERVER_ERROR' });
+          }
+          throw Object.assign(new Error(`เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง (HTTP ${response.status}) กรุณารีเฟรชหน้าเว็บและลองใหม่อีกครั้ง`), { code: 'INVALID_RESPONSE' });
+        }
+
+        const result = await response.json();
+        if (!result.ok) {
+          if (result.error?.code === 'AUTH') {
+            await promptLogin();
+            return await doRequest();
+          }
+          throw Object.assign(new Error(result.error?.message || 'เชื่อมต่อไม่สำเร็จ'), result.error);
+        }
+
+        inFlight.delete(signature);
+        return result.data;
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          throw Object.assign(new Error('ยังยืนยันผลไม่ได้ กรุณาตรวจข้อมูลล่าสุดหรือลองคำขอเดิมอีกครั้ง'), { code: 'TIMEOUT' });
+        }
+        if (!error.code) {
+          const detail = error.message ? (' (' + error.message + ')') : '';
+          error.message = 'เชื่อมต่อไม่สำเร็จ ข้อมูลที่กรอกยังอยู่ กรุณาลองใหม่' + detail;
+          error.code = 'NETWORK';
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    };
+
+    return doRequest();
+  };
+
+  window.EM_RPC = async (method, ...args) => {
+    return executeRPC(scope, method, ...args);
+  };
+
+  window.EM_RPC_SCOPE = async (targetScope, method, ...args) => {
+    return executeRPC(targetScope, method, ...args);
+  };
+
+  window.isAdmin = () => Boolean(currentUser && (currentUser.role === 'admin' || currentUser.permissions?.bom === 'admin'));
+  window.callRPC = async (method, ...args) => {
+    return window.EM_RPC(method, ...args);
+  };
+})();
+
+/**
+ * Electrical Power Distribution Diagram (แผนผังระบบไฟฟ้า)
+ * Single Line Diagram, Panel Directory, Quick Wiring Matrix & Google Drive Integration
+ */
+
+(function () {
+  'use strict';
+
+  // State Management
+  const state = {
+    nodes: [],
+    references: { nodes: [], machines: [], types: [] },
+    currentTab: 'diagram',
+    filterType: 'ALL',
+    searchQuery: '',
+    locationFilter: '',
+    selectedNodeId: null,
+    showMachines: true,
+    treeRootFilter: 'ALL',
+    panZoom: { x: 40, y: 40, scale: 1.0, isPanning: false, startX: 0, startY: 0 },
+    pendingWiring: new Map(), // id -> parentId
+    formImage: null, // { mime, base64 } or null
+    removeImageFlag: false
+  };
+
+  // DOM Elements cache
+  const $ = id => document.getElementById(id);
+
+  // RPC Client Helper
+  async function rpc(method, ...args) {
+    const res = await fetch('/api/v1/electrical/rpc', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ method, args })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.ok) {
+      const err = new Error(json.error?.message || 'การเชื่อมต่อไม่สำเร็จ');
+      err.code = json.error?.code || 'SERVER';
+      throw err;
+    }
+    return json.data;
+  }
+
+  // Load initial data
+  async function loadData() {
+    try {
+      const [nodes, refs] = await Promise.all([
+        rpc('listNodes', {}),
+        rpc('getReferences')
+      ]);
+      state.nodes = nodes || [];
+      state.references = refs || { nodes: [], machines: [], types: [] };
+
+      updateKpis();
+      populateDropdowns();
+      renderCurrentTab();
+    } catch (err) {
+      console.error('Failed to load electrical data:', err);
+      alert('โหลดข้อมูลแผนผังระบบไฟฟ้าไม่สำเร็จ: ' + err.message);
+    }
+  }
+
+  // Populate dynamic dropdowns (Parent selector, Machine picker, Tree filter)
+  function populateDropdowns() {
+    // 1. Root MDB filter for diagram
+    const treeSelect = $('filter-tree-root');
+    if (treeSelect) {
+      const currentVal = treeSelect.value;
+      const mdbs = state.nodes.filter(n => n.nodeType === 'MDB');
+      let html = '<option value="ALL">ดูทุกสายเมน (All MDBs)</option>';
+      mdbs.forEach(m => {
+        html += `<option value="${m.id}">${escapeHtml(m.nodeCode)} - ${escapeHtml(m.name)}</option>`;
+      });
+      treeSelect.innerHTML = html;
+      treeSelect.value = currentVal || 'ALL';
+    }
+
+    // 2. Location filter in Directory
+    const locSelect = $('dir-location-filter');
+    if (locSelect) {
+      const currentLoc = locSelect.value;
+      const locs = Array.from(new Set(state.nodes.map(n => n.location).filter(Boolean))).sort();
+      let html = '<option value="">ทุกสถานที่ / อาคาร</option>';
+      locs.forEach(loc => {
+        html += `<option value="${escapeHtml(loc)}">${escapeHtml(loc)}</option>`;
+      });
+      locSelect.innerHTML = html;
+      locSelect.value = currentLoc || '';
+    }
+
+    // 3. Machine picker in Form Modal
+    const mcSelect = $('form-machine-picker');
+    if (mcSelect) {
+      let html = '<option value="">-- ไม่เลือกลิงก์ (กรอกรหัสและชื่อเอง) --</option>';
+      (state.references.machines || []).forEach(m => {
+        html += `<option value="${m.machineId}" data-code="${escapeHtml(m.machineCode)}" data-name="${escapeHtml(m.machineName)}">
+          ${escapeHtml(m.machineCode)} - ${escapeHtml(m.machineName)}
+        </option>`;
+      });
+      mcSelect.innerHTML = html;
+    }
+  }
+
+  // Update KPI counters
+  function updateKpis() {
+    const total = state.nodes.length;
+    let mdb = 0, db = 0, lp = 0, mc = 0, dv = 0;
+    state.nodes.forEach(n => {
+      if (n.nodeType === 'MDB') mdb++;
+      else if (n.nodeType === 'DB') db++;
+      else if (n.nodeType === 'LP') lp++;
+      else if (n.nodeType === 'MC') mc++;
+      else if (n.nodeType === 'DV') dv++;
+    });
+
+    $('kpi-total').textContent = total;
+    $('kpi-mdb').textContent = mdb;
+    $('kpi-db').textContent = db;
+    $('kpi-lp').textContent = lp;
+    $('kpi-mc').textContent = mc;
+    $('kpi-dv').textContent = dv;
+
+    $('tab-count-all').textContent = total;
+    $('pill-cnt-all').textContent = total;
+    $('pill-cnt-mdb').textContent = mdb;
+    $('pill-cnt-db').textContent = db;
+    $('pill-cnt-lp').textContent = lp;
+    $('pill-cnt-mc').textContent = mc;
+    $('pill-cnt-dv').textContent = dv;
+  }
+
+  // Switch Active Tab
+  function switchTab(tabName) {
+    state.currentTab = tabName;
+    document.querySelectorAll('.el-tab-btn').forEach(btn => {
+      const active = btn.dataset.tab === tabName;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', String(active));
+    });
+    document.querySelectorAll('.el-tab-content').forEach(pane => {
+      pane.classList.toggle('active', pane.id === 'tab-' + tabName);
+    });
+
+    renderCurrentTab();
+  }
+
+  function renderCurrentTab() {
+    if (state.currentTab === 'diagram') {
+      renderDiagram();
+    } else if (state.currentTab === 'directory') {
+      renderDirectory();
+    } else if (state.currentTab === 'wiring') {
+      renderWiringMatrix();
+    }
+  }
+
+  // ==========================================================================
+  // TAB 1: INTERACTIVE SINGLE LINE DIAGRAM
+  // ==========================================================================
+
+  function renderDiagram() {
+    const nodesLayer = $('diagram-nodes-layer');
+    const svgLayer = $('diagram-svg-connections');
+    const emptyState = $('diagram-empty-state');
+    if (!nodesLayer || !svgLayer) return;
+
+    nodesLayer.innerHTML = '';
+    svgLayer.innerHTML = '';
+
+    if (state.nodes.length === 0) {
+      emptyState.style.display = 'flex';
+      return;
+    }
+    emptyState.style.display = 'none';
+
+    // Filter nodes according to toolbar controls
+    let filteredNodes = state.nodes.slice();
+    if (!state.showMachines) {
+      filteredNodes = filteredNodes.filter(n => n.nodeType !== 'MC' && n.nodeType !== 'DV');
+    }
+
+    // Build children mapping
+    const nodeMap = new Map();
+    const childrenMap = new Map();
+    filteredNodes.forEach(n => {
+      nodeMap.set(n.id, n);
+      childrenMap.set(n.id, []);
+    });
+
+    const roots = [];
+    filteredNodes.forEach(n => {
+      if (n.parentId && nodeMap.has(n.parentId)) {
+        childrenMap.get(n.parentId).push(n);
+      } else {
+        roots.push(n);
+      }
+    });
+
+    // If root filter is active, only show the selected root tree
+    let effectiveRoots = roots;
+    if (state.treeRootFilter !== 'ALL') {
+      effectiveRoots = roots.filter(r => r.id === state.treeRootFilter);
+      if (effectiveRoots.length === 0) {
+        effectiveRoots = roots;
+      }
+    }
+
+    // Compute Left-to-Right Orthogonal Hierarchy Coordinates
+    const CARD_WIDTH = 240;
+    const CARD_HEIGHT = 100;
+    const GAP_X = 140; // horizontal distance between columns
+    const GAP_Y = 28;  // vertical distance between sibling cards
+
+    const positions = new Map(); // id -> { x, y }
+    let currentGlobalY = 40;
+
+    function layoutSubtree(nodeId, level) {
+      const children = childrenMap.get(nodeId) || [];
+      const x = 50 + level * (CARD_WIDTH + GAP_X);
+
+      if (children.length === 0) {
+        const y = currentGlobalY;
+        currentGlobalY += CARD_HEIGHT + GAP_Y;
+        positions.set(nodeId, { x, y });
+        return { topY: y, bottomY: y };
+      }
+
+      const childPositions = [];
+      children.forEach(child => {
+        childPositions.push(layoutSubtree(child.id, level + 1));
+      });
+
+      const firstChildY = childPositions[0].topY;
+      const lastChildY = childPositions[childPositions.length - 1].bottomY;
+      const y = Math.round((firstChildY + lastChildY) / 2);
+
+      positions.set(nodeId, { x, y });
+      return { topY: firstChildY, bottomY: lastChildY };
+    }
+
+    effectiveRoots.forEach(root => {
+      layoutSubtree(root.id, 0);
+      currentGlobalY += 30; // Extra gap between major trees
+    });
+
+    // Draw SVG connections first (busbars / power feed lines)
+    let svgLines = '';
+    filteredNodes.forEach(child => {
+      if (!child.parentId || !positions.has(child.id) || !positions.has(child.parentId)) return;
+
+      const pPos = positions.get(child.parentId);
+      const cPos = positions.get(child.id);
+
+      const x1 = pPos.x + CARD_WIDTH;
+      const y1 = pPos.y + (CARD_HEIGHT / 2);
+      const x2 = cPos.x;
+      const y2 = cPos.y + (CARD_HEIGHT / 2);
+      const xMid = Math.round((x1 + x2) / 2);
+
+      const d = `M ${x1} ${y1} H ${xMid} V ${y2} H ${x2}`;
+      const isSelected = state.selectedNodeId === child.id || state.selectedNodeId === child.parentId;
+
+      svgLines += `<path class="el-conn-line${isSelected ? ' is-active' : ''}" d="${d}" data-child-id="${child.id}" data-parent-id="${child.parentId}"></path>`;
+      
+      // Voltage / Current rating label on connecting busbar
+      if (child.currentRating > 0 && Math.abs(x2 - x1) > 60) {
+        svgLines += `<text class="el-conn-text" x="${xMid}" y="${y2 - 6}">${child.currentRating}A</text>`;
+      }
+    });
+    svgLayer.innerHTML = svgLines;
+
+    // Render node cards
+    filteredNodes.forEach(node => {
+      if (!positions.has(node.id)) return;
+      const pos = positions.get(node.id);
+
+      const card = document.createElement('div');
+      card.className = `el-node-card type-${node.nodeType.toLowerCase()}${state.selectedNodeId === node.id ? ' is-selected' : ''}`;
+      card.style.left = pos.x + 'px';
+      card.style.top = pos.y + 'px';
+      card.dataset.id = node.id;
+
+      const children = childrenMap.get(node.id) || [];
+      const hasPhoto = Boolean(node.imageUrl || node.driveFileId);
+
+      card.innerHTML = `
+        <div class="el-node-card-accent"></div>
+        <div class="el-node-card-content">
+          <div class="el-node-header">
+            <span class="kpi-badge badge-${node.nodeType.toLowerCase()}">${escapeHtml(node.nodeType)}</span>
+            <span class="el-node-code">${escapeHtml(node.nodeCode)}</span>
+            ${hasPhoto ? '<span title="มีรูปภาพ" style="font-size:12px;">📷</span>' : ''}
+          </div>
+          <div class="el-node-name" title="${escapeHtml(node.name)}">${escapeHtml(node.name)}</div>
+          <div class="el-node-meta-row">
+            <span class="el-node-current">${node.currentRating ? node.currentRating + ' A' : '-'}</span>
+            ${children.length > 0 ? `<span class="el-node-children-tag">${children.length} สายย่อย</span>` : '<span style="font-size:11px;color:#94a3b8;">ปลายทาง</span>'}
+          </div>
+        </div>
+      `;
+
+      card.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openInspector(node.id);
+      });
+
+      nodesLayer.appendChild(card);
+    });
+
+    applyPanZoomTransform();
+  }
+
+  function applyPanZoomTransform() {
+    const panLayer = $('diagram-pan-layer');
+    if (panLayer) {
+      const { x, y, scale } = state.panZoom;
+      panLayer.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+      const zoomText = $('zoom-level-text');
+      if (zoomText) zoomText.textContent = Math.round(scale * 100) + '%';
+    }
+  }
+
+  // Diagram Zoom & Pan Event Listeners
+  function initDiagramPanZoom() {
+    const viewport = $('diagram-viewport');
+    if (!viewport) return;
+
+    // Pan with mouse drag
+    viewport.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.el-node-card')) return;
+      state.panZoom.isPanning = true;
+      state.panZoom.startX = e.clientX - state.panZoom.x;
+      state.panZoom.startY = e.clientY - state.panZoom.y;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!state.panZoom.isPanning) return;
+      state.panZoom.x = e.clientX - state.panZoom.startX;
+      state.panZoom.y = e.clientY - state.panZoom.startY;
+      applyPanZoomTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+      state.panZoom.isPanning = false;
+    });
+
+    // Zoom with scroll wheel
+    viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      const newScale = Math.min(2.5, Math.max(0.3, state.panZoom.scale + delta));
+      
+      const rect = viewport.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      state.panZoom.x = mouseX - (mouseX - state.panZoom.x) * (newScale / state.panZoom.scale);
+      state.panZoom.y = mouseY - (mouseY - state.panZoom.y) * (newScale / state.panZoom.scale);
+      state.panZoom.scale = newScale;
+
+      applyPanZoomTransform();
+    }, { passive: false });
+
+    // Zoom buttons
+    $('btn-zoom-in')?.addEventListener('click', () => {
+      state.panZoom.scale = Math.min(2.5, state.panZoom.scale + 0.15);
+      applyPanZoomTransform();
+    });
+    $('btn-zoom-out')?.addEventListener('click', () => {
+      state.panZoom.scale = Math.max(0.3, state.panZoom.scale - 0.15);
+      applyPanZoomTransform();
+    });
+    $('btn-zoom-reset')?.addEventListener('click', () => {
+      state.panZoom.scale = 1.0;
+      state.panZoom.x = 40;
+      state.panZoom.y = 40;
+      applyPanZoomTransform();
+    });
+
+    // Fullscreen toggle
+    $('btn-fullscreen')?.addEventListener('click', () => {
+      viewport.classList.toggle('is-fullscreen');
+      const isFull = viewport.classList.contains('is-fullscreen');
+      $('btn-fullscreen').querySelector('span').textContent = isFull ? 'ออกเต็มจอ' : 'เต็มจอ';
+    });
+
+    // Tree root filter
+    $('filter-tree-root')?.addEventListener('change', (e) => {
+      state.treeRootFilter = e.target.value;
+      renderDiagram();
+    });
+
+    // Toggle show machines
+    $('toggle-show-machines')?.addEventListener('change', (e) => {
+      state.showMachines = e.target.checked;
+      renderDiagram();
+    });
+  }
+
+  // ==========================================================================
+  // TAB 2: PANEL DIRECTORY (TABLE & CARDS)
+  // ==========================================================================
+
+  function renderDirectory() {
+    const tbody = $('nodes-table-body');
+    if (!tbody) return;
+
+    let items = state.nodes.slice();
+
+    // 1. Type Filter
+    if (state.filterType !== 'ALL') {
+      items = items.filter(n => n.nodeType === state.filterType);
+    }
+
+    // 2. Location Filter
+    if (state.locationFilter) {
+      items = items.filter(n => n.location === state.locationFilter);
+    }
+
+    // 3. Search Query
+    if (state.searchQuery) {
+      const q = state.searchQuery.toLowerCase();
+      items = items.filter(n =>
+        (n.nodeCode || '').toLowerCase().includes(q) ||
+        (n.name || '').toLowerCase().includes(q) ||
+        (n.location || '').toLowerCase().includes(q) ||
+        (n.remark || '').toLowerCase().includes(q)
+      );
+    }
+
+    if (items.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="10" style="text-align:center; padding: 40px; color: var(--el-ink-muted);">
+            ไม่พบข้อมูลตู้หรืออุปกรณ์ไฟฟ้าที่ตรงกับเงื่อนไขการค้นหา
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    let html = '';
+    items.forEach(node => {
+      const thumbUrl = node.imageUrl || (node.driveFileId ? `https://drive.google.com/thumbnail?id=${node.driveFileId}&sz=w100` : '');
+      const parentLabel = node.parentCode ? `${escapeHtml(node.parentCode)} - ${escapeHtml(node.parentName)}` : '<span style="color:#94a3b8;">- เมนหลัก / ยังไม่ต่อ -</span>';
+
+      html += `
+        <tr data-id="${node.id}">
+          <td>
+            ${thumbUrl ? `
+              <img src="${escapeHtml(thumbUrl)}" class="el-table-thumbnail" alt="ตู้" data-large="${escapeHtml(node.imageUrl || thumbUrl)}">
+            ` : `
+              <div class="el-table-thumb-empty">⚡</div>
+            `}
+          </td>
+          <td>
+            <strong class="font-mono" style="color:var(--el-ink); font-size:13.5px;">${escapeHtml(node.nodeCode)}</strong>
+          </td>
+          <td>
+            <div style="font-weight:600; color:#0f172a;">${escapeHtml(node.name)}</div>
+            ${node.remark ? `<div style="font-size:11.5px; color:#64748b; margin-top:2px;">${escapeHtml(node.remark)}</div>` : ''}
+          </td>
+          <td>
+            <span class="kpi-badge badge-${node.nodeType.toLowerCase()}">${escapeHtml(node.nodeType)}</span>
+          </td>
+          <td>
+            <strong class="font-mono" style="color:#1e293b;">${node.currentRating ? node.currentRating + ' A' : '-'}</strong>
+          </td>
+          <td style="color:#64748b; font-size:12px;">
+            ${escapeHtml(node.voltage || '-')}
+          </td>
+          <td>
+            <span style="font-size:12.5px; color:#334155;">${escapeHtml(node.location || '-')}</span>
+          </td>
+          <td>
+            <span style="font-size:12px; color:#475569;">${parentLabel}</span>
+          </td>
+          <td style="text-align: center;">
+            <span class="el-sub-badge">${node.childCount || 0}</span>
+          </td>
+          <td style="text-align: center;">
+            <div style="display:inline-flex; align-items:center; gap:4px;">
+              <button type="button" class="btn btn-secondary btn-sm btn-action-view" data-id="${node.id}" title="เปิดดูข้อมูล">
+                ดูผัง
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm btn-action-edit" data-id="${node.id}" title="แก้ไข">
+                แก้ไข
+              </button>
+              <button type="button" class="btn btn-danger-ghost btn-sm btn-action-delete" data-id="${node.id}" title="ลบ">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+
+    // Attach row events
+    tbody.querySelectorAll('.btn-action-view').forEach(btn => {
+      btn.onclick = () => openInspector(btn.dataset.id);
+    });
+    tbody.querySelectorAll('.btn-action-edit').forEach(btn => {
+      btn.onclick = () => openEditModal(btn.dataset.id);
+    });
+    tbody.querySelectorAll('.btn-action-delete').forEach(btn => {
+      btn.onclick = () => confirmDeleteNode(btn.dataset.id);
+    });
+    tbody.querySelectorAll('.el-table-thumbnail').forEach(img => {
+      img.onclick = () => openLightbox(img.dataset.large);
+    });
+  }
+
+  // ==========================================================================
+  // TAB 3: QUICK WIRING MATRIX
+  // ==========================================================================
+
+  function renderWiringMatrix() {
+    const tbody = $('wiring-table-body');
+    const saveBtn = $('btn-save-all-wiring');
+    if (!tbody) return;
+
+    if (state.nodes.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px;">ไม่มีข้อมูลตู้</td></tr>';
+      return;
+    }
+
+    let html = '';
+    state.nodes.forEach(node => {
+      const currentParentId = state.pendingWiring.has(node.id)
+        ? state.pendingWiring.get(node.id)
+        : (node.parentId || '');
+
+      let options = '<option value="">-- เป็นตู้ประธานหลัก (MDB) หรือยังไม่เชื่อมโยง --</option>';
+      state.nodes.forEach(opt => {
+        if (opt.id === node.id) return; // Prevent picking self
+        const selected = opt.id === currentParentId ? ' selected' : '';
+        options += `<option value="${opt.id}"${selected}>${escapeHtml(opt.nodeCode)} - ${escapeHtml(opt.name)} (${opt.nodeType})</option>`;
+      });
+
+      const isChanged = state.pendingWiring.has(node.id) && state.pendingWiring.get(node.id) !== (node.parentId || '');
+      const statusPill = isChanged
+        ? '<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-weight:600; font-size:11px;">รอยืนยัน</span>'
+        : (node.parentId ? '<span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:4px; font-size:11px;">เชื่อมต่อแล้ว</span>' : '<span style="background:#f1f5f9; color:#64748b; padding:2px 8px; border-radius:4px; font-size:11px;">สายอิสระ</span>');
+
+      html += `
+        <tr data-id="${node.id}" style="${isChanged ? 'background: #fffbeb;' : ''}">
+          <td><strong class="font-mono">${escapeHtml(node.nodeCode)}</strong></td>
+          <td>${escapeHtml(node.name)}</td>
+          <td><span class="kpi-badge badge-${node.nodeType.toLowerCase()}">${escapeHtml(node.nodeType)}</span></td>
+          <td class="font-mono">${node.currentRating ? node.currentRating + ' A' : '-'}</td>
+          <td>${escapeHtml(node.location || '-')}</td>
+          <td>
+            <select class="el-select el-wiring-select" data-id="${node.id}" style="width:100%;">
+              ${options}
+            </select>
+          </td>
+          <td>${statusPill}</td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+
+    // Attach wiring change listener
+    tbody.querySelectorAll('.el-wiring-select').forEach(sel => {
+      sel.onchange = (e) => {
+        const nodeId = sel.dataset.id;
+        const newParentId = e.target.value;
+        const node = state.nodes.find(n => n.id === nodeId);
+        if (newParentId === (node?.parentId || '')) {
+          state.pendingWiring.delete(nodeId);
+        } else {
+          state.pendingWiring.set(nodeId, newParentId);
+        }
+        if (saveBtn) saveBtn.disabled = state.pendingWiring.size === 0;
+        renderWiringMatrix();
+      };
+    });
+
+    if (saveBtn) saveBtn.disabled = state.pendingWiring.size === 0;
+  }
+
+  // Save all pending wiring changes in batch
+  async function savePendingWiring() {
+    if (state.pendingWiring.size === 0) return;
+    const links = [];
+    state.pendingWiring.forEach((parentId, id) => {
+      links.push({ id, parentId: parentId || null });
+    });
+
+    const saveBtn = $('btn-save-all-wiring');
+    if (saveBtn) saveBtn.disabled = true;
+
+    try {
+      await rpc('bulkUpdateWiring', links);
+      state.pendingWiring.clear();
+      alert('บันทึกการเชื่อมโยงสายจ่ายไฟสำเร็จ');
+      await loadData();
+    } catch (err) {
+      alert('บันทึกการเชื่อมโยงไม่สำเร็จ: ' + err.message);
+      if (saveBtn) saveBtn.disabled = false;
+    }
+  }
+
+  // ==========================================================================
+  // SLIDE-OVER INSPECTOR DRAWER
+  // ==========================================================================
+
+  async function openInspector(nodeId) {
+    state.selectedNodeId = nodeId;
+    const drawer = $('node-inspector');
+    const overlay = $('inspector-overlay');
+    if (!drawer || !overlay) return;
+
+    try {
+      const node = await rpc('getNode', nodeId);
+      if (!node) return;
+
+      $('inspect-code').textContent = node.nodeCode;
+      $('inspect-name').textContent = node.name;
+
+      const badge = $('inspect-badge');
+      badge.className = `kpi-badge badge-${node.nodeType.toLowerCase()}`;
+      badge.textContent = node.nodeType;
+
+      $('inspect-current').textContent = node.currentRating ? node.currentRating + ' A' : '-';
+      $('inspect-voltage').textContent = node.voltage || '-';
+      $('inspect-location').textContent = node.location || '-';
+
+      // Upstream Feeder Breadcrumb
+      if (node.parentCode) {
+        $('inspect-parent').innerHTML = `
+          <a href="#" class="btn-inspect-jump font-mono" data-id="${node.parentId}" style="color:var(--el-primary); text-decoration:none;">
+            ${escapeHtml(node.parentCode)} (${escapeHtml(node.parentName)}) &rarr;
+          </a>
+        `;
+        $('inspect-parent').querySelector('a').onclick = (e) => {
+          e.preventDefault();
+          openInspector(node.parentId);
+        };
+      } else {
+        $('inspect-parent').textContent = 'ตู้ประธาน (MDB) หรือยังไม่ได้เชื่อมโยง';
+      }
+
+      $('inspect-remark').textContent = node.remark || '-';
+
+      // Photos & Drive Link
+      const photoEl = $('inspect-photo');
+      const placeholder = $('inspect-photo-placeholder');
+      const driveLink = $('inspect-drive-link');
+
+      const photoUrl = node.imageUrl || (node.driveFileId ? `https://drive.google.com/thumbnail?id=${node.driveFileId}&sz=w600` : '');
+      if (photoUrl) {
+        photoEl.src = photoUrl;
+        photoEl.style.display = 'block';
+        placeholder.style.display = 'none';
+        photoEl.onclick = () => openLightbox(node.imageUrl || photoUrl);
+      } else {
+        photoEl.style.display = 'none';
+        placeholder.style.display = 'flex';
+      }
+
+      if (node.driveFileId || node.imageUrl) {
+        const fileId = node.driveFileId || (node.imageUrl.match(/\/d\/([\w-]+)/)?.[1]);
+        if (fileId) {
+          driveLink.href = `https://drive.google.com/file/d/${fileId}/view`;
+          driveLink.style.display = 'inline-flex';
+        } else {
+          driveLink.style.display = 'none';
+        }
+      } else {
+        driveLink.style.display = 'none';
+      }
+
+      // Children list
+      const childrenList = $('inspect-children-list');
+      const childrenCount = $('inspect-children-count');
+      childrenCount.textContent = node.children.length;
+
+      if (node.children.length === 0) {
+        childrenList.innerHTML = '<div class="el-empty-sub">ไม่มีสายย่อยแยกจากตู้นี้ (End Node)</div>';
+      } else {
+        let cHtml = '';
+        node.children.forEach(c => {
+          cHtml += `
+            <div class="el-child-item" data-id="${c.id}">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="kpi-badge badge-${c.nodeType.toLowerCase()}">${c.nodeType}</span>
+                <strong class="font-mono">${escapeHtml(c.nodeCode)}</strong>
+                <span style="font-size:12px; color:#475569;">${escapeHtml(c.name)}</span>
+              </div>
+              <span class="font-mono" style="font-size:12px; font-weight:600; color:#b45309;">${c.currentRating ? c.currentRating + 'A' : ''}</span>
+            </div>
+          `;
+        });
+        childrenList.innerHTML = cHtml;
+
+        childrenList.querySelectorAll('.el-child-item').forEach(item => {
+          item.onclick = () => openInspector(item.dataset.id);
+        });
+      }
+
+      // Action buttons
+      $('btn-inspect-edit').onclick = () => {
+        closeInspector();
+        openEditModal(node.id);
+      };
+      $('btn-inspect-delete').onclick = () => {
+        confirmDeleteNode(node.id);
+      };
+
+      drawer.classList.add('is-open');
+      overlay.classList.add('is-open');
+      drawer.setAttribute('aria-hidden', 'false');
+
+      // Highlight in diagram if active
+      if (state.currentTab === 'diagram') {
+        renderDiagram();
+      }
+    } catch (err) {
+      console.error('Error fetching node details:', err);
+    }
+  }
+
+  function closeInspector() {
+    const drawer = $('node-inspector');
+    const overlay = $('inspector-overlay');
+    if (drawer) {
+      drawer.classList.remove('is-open');
+      drawer.setAttribute('aria-hidden', 'true');
+    }
+    if (overlay) overlay.classList.remove('is-open');
+    state.selectedNodeId = null;
+    if (state.currentTab === 'diagram') {
+      renderDiagram();
+    }
+  }
+
+  // ==========================================================================
+  // NODE FORM MODAL (CREATE / EDIT)
+  // ==========================================================================
+
+  function openCreateModal() {
+    $('modal-form-title').textContent = 'เพิ่มตู้ / อุปกรณ์ไฟฟ้าใหม่';
+    $('form-id').value = '';
+    $('form-node-code').value = '';
+    $('form-node-type').value = 'DB';
+    $('form-name').value = '';
+    $('form-current-rating').value = '';
+    $('form-voltage').value = '400V 3P4W';
+    $('form-location').value = '';
+    $('form-remark').value = '';
+    $('form-error-msg').style.display = 'none';
+
+    state.formImage = null;
+    state.removeImageFlag = false;
+    resetPhotoPreview();
+    updateParentSelector('');
+    toggleMachinePickerRow('DB');
+
+    $('modal-node-form').showModal();
+  }
+
+  function openEditModal(nodeId) {
+    const node = state.nodes.find(n => n.id === nodeId);
+    if (!node) return;
+
+    $('modal-form-title').textContent = `แก้ไขข้อมูล: ${node.nodeCode}`;
+    $('form-id').value = node.id;
+    $('form-node-code').value = node.nodeCode;
+    $('form-node-type').value = node.nodeType;
+    $('form-name').value = node.name;
+    $('form-current-rating').value = node.currentRating || '';
+    $('form-voltage').value = node.voltage || '400V 3P4W';
+    $('form-location').value = node.location || '';
+    $('form-remark').value = node.remark || '';
+    $('form-error-msg').style.display = 'none';
+
+    state.formImage = null;
+    state.removeImageFlag = false;
+
+    // Photo preview
+    const photoUrl = node.imageUrl || (node.driveFileId ? `https://drive.google.com/thumbnail?id=${node.driveFileId}&sz=w300` : '');
+    setPhotoPreview(photoUrl);
+
+    updateParentSelector(node.parentId, node.id);
+    toggleMachinePickerRow(node.nodeType);
+
+    $('modal-node-form').showModal();
+  }
+
+  function updateParentSelector(currentParentId, excludeId) {
+    const sel = $('form-parent-id');
+    if (!sel) return;
+
+    let html = '<option value="">-- ไม่มี (เป็นตู้ประธาน MDB หรือยังไม่เชื่อมโยง) --</option>';
+    state.nodes.forEach(n => {
+      if (n.id === excludeId) return; // Cannot be own parent
+      const selected = n.id === currentParentId ? ' selected' : '';
+      html += `<option value="${n.id}"${selected}>${escapeHtml(n.nodeCode)} - ${escapeHtml(n.name)} (${n.nodeType})</option>`;
+    });
+    sel.innerHTML = html;
+  }
+
+  function toggleMachinePickerRow(type) {
+    const row = $('row-machine-picker');
+    if (row) {
+      row.style.display = type === 'MC' ? 'block' : 'none';
+    }
+  }
+
+  function resetPhotoPreview() {
+    $('form-preview-img').style.display = 'none';
+    $('form-preview-empty').style.display = 'flex';
+    $('btn-remove-photo').style.display = 'none';
+  }
+
+  function setPhotoPreview(url) {
+    if (url) {
+      $('form-preview-img').src = url;
+      $('form-preview-img').style.display = 'block';
+      $('form-preview-empty').style.display = 'none';
+      $('btn-remove-photo').style.display = 'inline-flex';
+    } else {
+      resetPhotoPreview();
+    }
+  }
+
+  // Handle Photo File selection
+  function handlePhotoFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    if (file.size > 15 * 1024 * 1024) {
+      alert('ขนาดไฟล์เกินกำหนด (สูงสุด 15MB)');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64Data = e.target.result.split(',')[1];
+      state.formImage = {
+        mime: file.type,
+        base64: base64Data
+      };
+      state.removeImageFlag = false;
+      setPhotoPreview(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Submit Node Form
+  async function submitNodeForm(e) {
+    e.preventDefault();
+    const errorEl = $('form-error-msg');
+    const submitBtn = $('btn-modal-submit');
+    errorEl.style.display = 'none';
+
+    const id = $('form-id').value;
+    const nodeCode = $('form-node-code').value.trim();
+    const name = $('form-name').value.trim();
+    const nodeType = $('form-node-type').value;
+    const currentRating = parseFloat($('form-current-rating').value) || 0;
+    const voltage = $('form-voltage').value.trim();
+    const location = $('form-location').value.trim();
+    const parentId = $('form-parent-id').value;
+    const remark = $('form-remark').value.trim();
+
+    if (!nodeCode) {
+      errorEl.textContent = 'กรุณาระบุรหัสตู้ / Tag Code';
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (!name) {
+      errorEl.textContent = 'กรุณาระบุชื่อตู้หรืออุปกรณ์';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.querySelector('span').textContent = 'กำลังบันทึก...';
+
+    try {
+      const payload = {
+        id: id || undefined,
+        nodeCode,
+        name,
+        nodeType,
+        currentRating,
+        voltage,
+        location,
+        parentId: parentId || null,
+        remark,
+        image: state.formImage,
+        removeImage: state.removeImageFlag
+      };
+
+      await rpc('saveNode', payload);
+      $('modal-node-form').close();
+      await loadData();
+
+      if (id && state.selectedNodeId === id) {
+        openInspector(id);
+      }
+    } catch (err) {
+      errorEl.textContent = err.message || 'บันทึกข้อมูลไม่สำเร็จ';
+      errorEl.style.display = 'block';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.querySelector('span').textContent = 'บันทึกข้อมูล';
+    }
+  }
+
+  // Delete confirmation
+  async function confirmDeleteNode(id) {
+    const node = state.nodes.find(n => n.id === id);
+    if (!node) return;
+
+    const msg = `ต้องการลบตู้/อุปกรณ์ "${node.nodeCode} - ${node.name}" ใช่หรือไม่?\n\n*หมายเหตุ: สายย่อยที่รับไฟจากตู้นี้จะถูกปลดสายออก (ตั้งค่าต้นทางเป็นว่าง) โดยไม่ถูกลบ`;
+    if (!confirm(msg)) return;
+
+    try {
+      await rpc('deleteNode', id);
+      closeInspector();
+      await loadData();
+    } catch (err) {
+      alert('ลบข้อมูลไม่สำเร็จ: ' + err.message);
+    }
+  }
+
+  // Lightbox Modal
+  function openLightbox(url) {
+    if (!url) return;
+    $('lightbox-img').src = url;
+    $('modal-lightbox').showModal();
+  }
+
+  // Helpers
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // Initialize UI & Event Handlers
+  function init() {
+    // 1. Tab buttons
+    document.querySelectorAll('.el-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    // 2. Add node button
+    $('btn-add-node')?.addEventListener('click', openCreateModal);
+    $('btn-refresh')?.addEventListener('click', loadData);
+
+    // 3. KPI card filter clicks
+    document.querySelectorAll('.el-kpi-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const type = card.dataset.filterType;
+        if (type) {
+          state.filterType = type;
+          document.querySelectorAll('.el-pill').forEach(pill => {
+            pill.classList.toggle('active', pill.dataset.type === type);
+          });
+          switchTab('directory');
+        }
+      });
+    });
+
+    // 4. Directory filters & Search
+    const searchInput = $('dir-search-input');
+    const clearBtn = $('dir-search-clear');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value.trim();
+        if (clearBtn) clearBtn.style.display = state.searchQuery ? 'inline-block' : 'none';
+        renderDirectory();
+      });
+    }
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        state.searchQuery = '';
+        clearBtn.style.display = 'none';
+        renderDirectory();
+      });
+    }
+
+    // Type Pills
+    document.querySelectorAll('.el-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.el-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        state.filterType = pill.dataset.type;
+        renderDirectory();
+      });
+    });
+
+    // Location Filter
+    $('dir-location-filter')?.addEventListener('change', (e) => {
+      state.locationFilter = e.target.value;
+      renderDirectory();
+    });
+
+    // 5. Wiring Matrix Save
+    $('btn-save-all-wiring')?.addEventListener('click', savePendingWiring);
+
+    // 6. Inspector close
+    $('btn-close-inspector')?.addEventListener('click', closeInspector);
+    $('inspector-overlay')?.addEventListener('click', closeInspector);
+
+    // 7. Modal form events
+    $('btn-modal-close')?.addEventListener('click', () => $('modal-node-form').close());
+    $('btn-modal-cancel')?.addEventListener('click', () => $('modal-node-form').close());
+    $('form-node')?.addEventListener('submit', submitNodeForm);
+
+    // Machine Picker auto-populate
+    $('form-node-type')?.addEventListener('change', (e) => {
+      toggleMachinePickerRow(e.target.value);
+    });
+    $('form-machine-picker')?.addEventListener('change', (e) => {
+      const opt = e.target.selectedOptions?.[0];
+      if (opt && opt.dataset.code) {
+        $('form-node-code').value = opt.dataset.code;
+        $('form-name').value = opt.dataset.name;
+      }
+    });
+
+    // Photo File inputs
+    $('btn-select-file')?.addEventListener('click', () => $('form-file-input').click());
+    $('form-file-input')?.addEventListener('change', (e) => {
+      if (e.target.files?.[0]) handlePhotoFile(e.target.files[0]);
+    });
+    $('btn-remove-photo')?.addEventListener('click', () => {
+      state.formImage = null;
+      state.removeImageFlag = true;
+      resetPhotoPreview();
+    });
+
+    // Lightbox close
+    $('btn-lightbox-close')?.addEventListener('click', () => $('modal-lightbox').close());
+
+    // 8. Pan & Zoom
+    initDiagramPanZoom();
+
+    // 9. Load data
+    loadData();
+  }
+
+  // Boot on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+</script>
+</body>
+</html>

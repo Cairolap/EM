@@ -7,7 +7,15 @@
   <script id="em-transport-script">
 (() => {
  'use strict';
- const scope = location.pathname.startsWith('/parts') ? 'parts' : location.pathname.startsWith('/bom') ? 'bom' : location.pathname.startsWith('/announcements') ? 'announcements' : location.pathname.startsWith('/users') ? 'users' : 'machines';
+ const scope = location.pathname.startsWith('/parts') ? 'parts'
+  : location.pathname.startsWith('/bom') ? 'bom'
+  : location.pathname.startsWith('/announcements') ? 'announcements'
+  : location.pathname.startsWith('/users') ? 'users'
+  : location.pathname.startsWith('/pm-expenses') ? 'pm-expenses'
+  : location.pathname.startsWith('/pm-aircooling') ? 'pm-aircooling'
+  : location.pathname.startsWith('/pm') ? 'pm'
+  : location.pathname.startsWith('/pr-tracker') ? 'pr-tracker'
+  : 'machines';
  const inFlight = new Map();
 
  let loginPromise = null;
@@ -260,10 +268,32 @@
       }
     }
 
-    // Auto-handle ?action=add in Parts
+    // Auto-handle ?view=bulk or ?action=add in Parts
     if (location.pathname.startsWith('/parts')) {
       const params = new URLSearchParams(location.search);
-      if (params.get('action') === 'add') {
+      if (params.get('view') === 'bulk' || params.get('action') === 'bulk' || location.hash === '#bulk') {
+        const checkBulk = () => {
+          if (typeof window.switchView === 'function') {
+            window.switchView('bulk');
+          } else {
+            const btn = document.getElementById('nav-bulk') || document.getElementById('bulk-add-btn');
+            if (btn) btn.click();
+            else setTimeout(checkBulk, 80);
+          }
+        };
+        setTimeout(checkBulk, 80);
+      } else if (params.get('view') === 'batch' || location.hash === '#batch') {
+        const checkBatch = () => {
+          if (typeof window.switchView === 'function') {
+            window.switchView('batch');
+          } else {
+            const btn = document.getElementById('nav-batch');
+            if (btn) btn.click();
+            else setTimeout(checkBatch, 80);
+          }
+        };
+        setTimeout(checkBatch, 80);
+      } else if (params.get('action') === 'add') {
         const checkAddBtn = () => {
           const btn = document.getElementById('add-part');
           if (btn && !btn.disabled) {
@@ -274,6 +304,27 @@
         };
         setTimeout(checkAddBtn, 300);
       }
+
+      // Smooth in-page switching when clicking parts dropdown items
+      document.querySelectorAll('a[href*="/parts"]').forEach(a => {
+        a.addEventListener('click', (e) => {
+          if (!location.pathname.startsWith('/parts') || typeof window.switchView !== 'function') return;
+          const href = a.getAttribute('href') || '';
+          if (href.includes('view=bulk') || href.includes('action=bulk') || href.includes('#bulk')) {
+            e.preventDefault();
+            history.pushState(null, '', '/parts/?view=bulk');
+            window.switchView('bulk');
+          } else if (href.includes('view=batch') || href.includes('#batch')) {
+            e.preventDefault();
+            history.pushState(null, '', '/parts/?view=batch');
+            window.switchView('batch');
+          } else if (href === '/parts/' || href === '/parts') {
+            e.preventDefault();
+            history.pushState(null, '', '/parts/');
+            window.switchView('catalog');
+          }
+        });
+      });
     }
   }
 
@@ -314,12 +365,12 @@
 
     if (badge) {
       badge.innerHTML = `
-        <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:6px">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:5px;font-size:11.5px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           <strong style="font-weight:600">${currentUser.displayName || currentUser.username}</strong>
-          <span style="font-size:11.5px;color:#94a3b8">(${roleTh})</span>
+          <span style="font-size:10.5px;color:#94a3b8">(${roleTh})</span>
         </span>
-        <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
+        <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:5px;padding:2px 7px;font-size:11px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
       `;
       const logoutBtn = document.getElementById('em-btn-logout');
       if (logoutBtn) {
@@ -388,58 +439,92 @@
     });
   }
 
- window.EM_RPC = async (method, ...args) => {
-  const signature = JSON.stringify([method, args]);
-  const payload = args.findLast(a => a && typeof a === 'object' && !Array.isArray(a));
-  const requestId = payload?.requestId || payload?.operationId || inFlight.get(signature) || crypto.randomUUID();
-  inFlight.set(signature, requestId);
-
-  const doRequest = async () => {
-   const controller = new AbortController();
-   const timer = setTimeout(() => controller.abort(), 60000);
-   try {
-    const response = await fetch(`/api/v1/${scope}/rpc`, {
-     method: 'POST',
-     credentials: 'same-origin',
-     headers: { 'Content-Type': 'application/json', 'Idempotency-Key': requestId },
-     body: JSON.stringify({ method, args }),
-     signal: controller.signal
-    });
-
-    if (response.status === 401) {
-     // Wait for user to log in via modal dialog
-     await promptLogin();
-     // Retry the request after successful login
-     return await doRequest();
+  const safeUUID = () => {
+    if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
     }
-
-    if (response.redirected || !response.headers.get('Content-Type')?.includes('application/json')) {
-     throw Object.assign(new Error('กรุณาเข้าสู่ระบบใหม่ แล้วลองคำขอเดิมอีกครั้ง'), { code: 'AUTH' });
-    }
-
-    const result = await response.json();
-    if (!result.ok) {
-     if (result.error?.code === 'AUTH') {
-      await promptLogin();
-      return await doRequest();
-     }
-     throw Object.assign(new Error(result.error?.message || 'เชื่อมต่อไม่สำเร็จ'), result.error);
-    }
-
-    inFlight.delete(signature);
-    return result.data;
-   } catch (error) {
-    if (error.name === 'AbortError') {
-     throw Object.assign(new Error('ยังยืนยันผลไม่ได้ กรุณาตรวจข้อมูลล่าสุดหรือลองคำขอเดิมอีกครั้ง'), { code: 'TIMEOUT' });
-    }
-    if (!error.code) error.message = 'เชื่อมต่อไม่สำเร็จ ข้อมูลที่กรอกยังอยู่ กรุณาลองใหม่';
-    throw error;
-   } finally {
-    clearTimeout(timer);
-   }
+    return 'req-' + Date.now() + '-' + Math.random().toString(36).slice(2, 11) + '-' + Math.random().toString(36).slice(2, 9);
   };
 
+  const executeRPC = async (targetScope, method, ...args) => {
+    const activeScope = targetScope || scope;
+    const signature = JSON.stringify([activeScope, method, args]);
+    const payload = [...args].reverse().find(a => a && typeof a === 'object' && !Array.isArray(a));
+    const requestId = payload?.requestId || payload?.operationId || inFlight.get(signature) || safeUUID();
+    inFlight.set(signature, requestId);
+
+    const doRequest = async () => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 60000);
+      try {
+        const response = await fetch(`/api/v1/${activeScope}/rpc`, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', 'Idempotency-Key': requestId },
+          body: JSON.stringify({ method, args }),
+          signal: controller.signal
+        });
+
+        if (response.status === 401) {
+          // Wait for user to log in via modal dialog
+          await promptLogin();
+          // Retry the request after successful login
+          return await doRequest();
+        }
+
+        if (response.redirected) {
+          if (typeof window !== 'undefined' && window.location.protocol === 'http:') {
+            throw Object.assign(new Error('คำขอถูก Redirect เนื่องจากเปิดด้วย HTTP กรุณาเข้าใช้งานผ่าน https://'), { code: 'REDIRECT_HTTP' });
+          }
+          throw Object.assign(new Error('การเชื่อมต่อถูก Redirect (เช่น เซสชัน Cloudflare Access หมดอายุ) กรุณารีเฟรชหน้าเว็บ'), { code: 'REDIRECT' });
+        }
+
+        const contentType = response.headers.get('Content-Type') || '';
+        if (!contentType.includes('application/json')) {
+          if (response.status === 404) {
+            throw Object.assign(new Error(`ไม่พบเซิร์ฟเวอร์หรือ API (/api/v1/${activeScope}/rpc) HTTP 404 - หากทดสอบ Local กรุณาตรวจสอบว่าเปิด npm run dev หรือยัง`), { code: 'NOT_FOUND' });
+          }
+          if (response.status >= 500) {
+            throw Object.assign(new Error(`เซิร์ฟเวอร์ขัดข้อง (HTTP ${response.status}) กรุณาตรวจสอบสถานะ Cloudflare Worker หรือฐานข้อมูล D1`), { code: 'SERVER_ERROR' });
+          }
+          throw Object.assign(new Error(`เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง (HTTP ${response.status}) กรุณารีเฟรชหน้าเว็บและลองใหม่อีกครั้ง`), { code: 'INVALID_RESPONSE' });
+        }
+
+        const result = await response.json();
+        if (!result.ok) {
+          if (result.error?.code === 'AUTH') {
+            await promptLogin();
+            return await doRequest();
+          }
+          throw Object.assign(new Error(result.error?.message || 'เชื่อมต่อไม่สำเร็จ'), result.error);
+        }
+
+        inFlight.delete(signature);
+        return result.data;
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          throw Object.assign(new Error('ยังยืนยันผลไม่ได้ กรุณาตรวจข้อมูลล่าสุดหรือลองคำขอเดิมอีกครั้ง'), { code: 'TIMEOUT' });
+        }
+        if (!error.code) {
+          const detail = error.message ? (' (' + error.message + ')') : '';
+          error.message = 'เชื่อมต่อไม่สำเร็จ ข้อมูลที่กรอกยังอยู่ กรุณาลองใหม่' + detail;
+          error.code = 'NETWORK';
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    };
+
     return doRequest();
+  };
+
+  window.EM_RPC = async (method, ...args) => {
+    return executeRPC(scope, method, ...args);
+  };
+
+  window.EM_RPC_SCOPE = async (targetScope, method, ...args) => {
+    return executeRPC(targetScope, method, ...args);
   };
 
   window.isAdmin = () => Boolean(currentUser && (currentUser.role === 'admin' || currentUser.permissions?.bom === 'admin'));
@@ -468,13 +553,13 @@
 body{margin:0;font-family:var(--font-body)}body:has(dialog[open]){overflow:hidden}h1,h2,h3,p{margin:0}h1{font-size:clamp(1.5rem,2.6vw,2.15rem);line-height:1.5;letter-spacing:-.02em}h2{font-size:1.3rem}h3{font-size:1rem}button,input,select,textarea{font:inherit}button,summary,select,input[type=checkbox]{cursor:pointer}button{transition:background .16s,border-color .16s,transform .12s ease;color:inherit}button:disabled,input:disabled,select:disabled{cursor:not-allowed;opacity:.5}button:active:not(:disabled){transform:translateY(1px)}a{color:var(--primary)}:focus-visible{outline:3px solid var(--primary);outline-offset:3px}[hidden]{display:none !important}/* Native hidden must override layout declarations. */
 input,select,textarea{min-width:0;width:100%;border:1px solid var(--border);border-radius:var(--radius-control);background:var(--surface);color:var(--ink);padding:9px 12px;min-height:var(--control-height)}input:hover,select:hover,textarea:hover{border-color:var(--muted)}input[aria-invalid=true],textarea[aria-invalid=true],select[aria-invalid=true]{border-color:var(--danger)}input[type=checkbox]{width:18px;min-height:18px;height:18px;accent-color:var(--primary);flex-shrink:0}textarea{resize:none;min-height:100px}label{display:block;font-size:.86rem;font-weight:600;margin-bottom:6px}small,.muted{color:var(--muted)}small{display:block}.mono{font-family:var(--font-mono)}.eyebrow{font:600 .73rem/1.6 var(--font-body);letter-spacing:.07em;color:var(--primary);margin-bottom:6px}.footnote{font-size:.78rem;color:var(--muted);margin-top:16px}.button{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:var(--control-height);padding:8px 16px;border:1px solid transparent;border-radius:var(--radius-control);font-size:.88rem;font-weight:500;white-space:nowrap;background:transparent}.button.primary{background:linear-gradient(180deg,#215386,#18416c);color:var(--onPrimary);box-shadow:0 1px 2px rgba(18,50,84,0.18)}.button.primary:hover{background:linear-gradient(180deg,#18416c,#123254)}.button.outline{background:var(--surface);border-color:var(--border)}.button.outline:hover,.button.ghost:hover{background:var(--selection);border-color:#b4c8dc}.button.danger{background:linear-gradient(180deg,#9c2234,#80182a);color:var(--onPrimary);box-shadow:0 1px 2px rgba(128,24,42,0.2)}.button.danger:hover{background:#6b1322}.button.wide{width:100%}.button[aria-busy=true]{opacity:.65}.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 32px;border-bottom:1px solid var(--border);background:var(--surface)}.identity{display:flex;gap:16px;align-items:center}.identity strong{font-size:.98rem;font-weight:600}.identity small{font-size:.72rem}.brand-mark{font:700 28px var(--font-display);letter-spacing:-2px;color:var(--primary);border-right:1px solid var(--border);padding-right:20px}.brand-mark span{color:var(--accent)}.demo-banner{text-align:center;padding:5px 16px;font-size:.78rem;background:var(--warningSurface);color:var(--warning)}
 .header-logo-wrap{display:flex;align-items:center;width:164px;height:44px;padding-right:16px;border-right:1px solid var(--border);flex:0 0 auto;overflow:hidden}.header-logo{display:block;width:148px;height:44px;object-fit:contain;object-position:left center}.app-identity{min-width:0}
-.login-layout{display:grid;grid-template-columns:1.15fr 1fr;gap:80px;max-width:1100px;margin:80px auto;padding:24px;align-items:center}.login-intro h1{font-size:clamp(2rem,4vw,3rem);line-height:1.6;margin:20px 0}.login-intro>p:not(.eyebrow){color:var(--muted)}.journey{display:flex;flex-wrap:wrap;gap:18px;margin-top:32px;font-size:.9rem;color:var(--primary)}.login-card{padding:32px;background:var(--surface);border:1px solid var(--border);border-top:4px solid var(--primary);border-radius:var(--radius-panel);box-shadow:0 4px 20px rgba(20,34,51,0.04)}.login-card>.muted{margin:8px 0 24px}.secret{display:flex;position:relative}.secret input{padding-right:74px}.secret button{position:absolute;right:1px;top:1px;min-height:42px}.field-error{min-height:26px;color:var(--danger);font-size:.85rem;margin-top:6px;white-space:pre-wrap}.login-card .field-error{margin-bottom:16px}.workspace{display:grid;grid-template-columns:216px minmax(0,1fr);max-width:1600px;margin:auto}.sidebar{padding:30px 16px;border-right:1px solid var(--border);min-height:calc(100vh - 88px)}.sidebar h2{margin-bottom:20px;padding-left:12px}.sidebar .eyebrow{padding-left:12px}.sidebar nav{display:grid;gap:6px}.department-button{text-align:left;display:flex;align-items:center;gap:12px;padding:12px;border:1px solid transparent;border-radius:var(--radius-control);background:transparent;font-size:.88rem;width:100%}.department-button:hover{background:var(--surface)}.department-button[aria-current=true]{background:var(--surface);border-color:#b4c8dc;color:var(--primary);font-weight:600;box-shadow:0 1px 4px rgba(30,73,118,0.08)}.department-button .code{font:600 .82rem var(--font-mono);min-width:34px;padding:5px 0;border-right:2px solid var(--border)}.department-button[aria-current=true] .code{border-color:var(--accent);color:var(--accent)}.sidebar-note{font-size:.75rem;color:var(--muted);padding:24px 12px}.content{padding:26px 32px;min-width:0}.breadcrumb{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.78rem;color:var(--muted);min-height:30px;margin-bottom:16px}.breadcrumb button{background:none;border:0;color:var(--primary);padding:4px}.breadcrumb button:hover{text-decoration:underline}.section-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:16px 0 24px}.line-select{max-width:380px;margin:16px 0}.machine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));grid-auto-rows:max-content;align-content:start;align-items:start;gap:14px}.machine-card{text-align:left;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:8px;padding:14px 16px;min-height:auto;display:flex;flex-direction:column;gap:4px;box-shadow:0 1px 3px rgba(20,34,51,.04);transition:all .18s ease}.machine-card:hover{background:var(--surface);border-color:var(--primary);border-left-color:var(--primaryStrong);transform:translateY(-2px);box-shadow:0 4px 14px rgba(30,73,118,.12)}.machine-card strong{display:block;margin:3px 0 6px;font-size:.92rem;font-weight:600;color:var(--ink);line-height:1.35;word-break:break-word}.machine-card small{display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--muted);font-weight:500;margin-top:auto;padding-top:6px;border-top:1px dashed var(--border)}.machine-card:hover small{color:var(--primary)}.machine-card .mono{display:inline-block;font-size:.74rem;font-weight:600;color:var(--primary);background:var(--selection);padding:2px 7px;border-radius:4px;width:fit-content;letter-spacing:.02em}.totals{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius-panel);background:var(--surface);margin-bottom:24px}.total{padding:16px 24px;flex:1;border-right:1px solid var(--border)}.total:last-child{border:0}.total strong{font:500 1.7rem var(--font-display);margin-right:10px}.total span{font-size:.82rem;color:var(--muted)}.total.attention strong{color:var(--danger)}.register{border:1px solid var(--border);border-radius:var(--radius-panel);background:var(--surface);overflow:clip}.filterbar{display:grid;grid-template-columns:minmax(180px,1fr) 165px 165px;align-items:end;gap:12px;padding:20px}input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-decoration,input[type="search"]::-webkit-search-results-button,input[type="search"]::-webkit-search-results-decoration{-webkit-appearance:none;appearance:none;display:none !important}input[type="search"]::-ms-clear,input[type="search"]::-ms-reveal{display:none !important;width:0;height:0}.search-control{position:relative;display:flex;align-items:center}.search-control input{padding-right:36px !important}.clear-button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:26px;height:26px;min-width:26px;min-height:26px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:50%;font-size:18px;line-height:1;color:var(--muted);cursor:pointer;padding:0;z-index:3;user-select:none;-webkit-user-select:none;transition:background .15s ease,color .15s ease,transform .12s ease}.clear-button:hover:not(:disabled){background:var(--selection);color:var(--primary)}.clear-button:active:not(:disabled){transform:translateY(-50%) scale(.92)}.clear-button:focus-visible{outline:2px solid var(--primary);outline-offset:1px}.selection-bar{min-height:66px;padding:10px 20px;display:flex;align-items:center;gap:16px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surfaceMuted);flex-wrap:wrap}.checkbox-label{display:flex;align-items:center;gap:8px;margin:0;font-weight:400;font-size:.8rem}.selection-bar>span{font-size:.78rem;color:var(--muted);margin-left:auto}.selection-bar .button{min-height:38px;font-size:.8rem}.list-status{font-size:.8rem;color:var(--muted);min-height:32px;padding:6px 20px}.groups{min-height:280px}.group{border-top:1px solid var(--border)}.group summary{display:flex;align-items:center;gap:16px;padding:16px 20px;list-style:none;background:var(--surface)}.group summary::-webkit-details-marker{display:none}.group summary:after{content:'＋';color:var(--muted);font-size:18px}.group[open] summary:after{content:'−'}.group summary:hover{background:var(--surfaceMuted)}.part-image{width:52px;height:52px;flex-shrink:0;display:grid;place-items:center;border:1px solid var(--border);border-radius:8px;color:var(--muted);background:var(--surfaceMuted);font-family:var(--font-mono);font-size:.72rem;overflow:hidden}.part-image img{width:100%;height:100%;object-fit:contain}.part-info{flex:1;min-width:0;overflow-wrap:anywhere}.part-info strong{font-size:.95rem}.part-info p{font-size:.83rem;color:var(--muted)}.part-info small{font: .73rem var(--font-mono);margin-top:4px}.group-quantity{text-align:right;font-size:.8rem;min-width:70px}.group-quantity strong{font:500 1.25rem var(--font-display);display:block}.summary-label-preview{display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden;white-space:nowrap}.summary-label-preview .label-tag{flex-shrink:0;font-size:.72rem;padding:1px 5px;border-radius:4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--surfaceMuted);color:var(--ink);border:1px solid var(--border);line-height:1.4}.summary-label-preview .label-more{flex-shrink:0;font-size:.7rem;font-weight:600;padding:1px 5px;border-radius:4px;background:var(--selection);color:var(--primary);border:1px solid #b4c8dc;line-height:1.4}.group-tools{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:7px 20px 7px 88px;border-top:1px solid var(--border);background:var(--surfaceMuted)}.group-tools>span{margin-right:auto;font-size:.72rem;color:var(--muted)}.add-label-button{min-height:30px;padding:3px 10px;font-size:.75rem;background:var(--surface)}.label-list{padding:0 20px 12px 88px}.label-row{display:grid;grid-template-columns:24px minmax(110px,1fr) minmax(170px,1.4fr) minmax(160px,1.2fr) auto;gap:12px;align-items:center;border-top:1px solid var(--border);padding:15px 0}.label-tag{display:inline-block;font:.8rem var(--font-mono);border:1px solid var(--border);padding:2px 6px;background:var(--surfaceMuted);overflow-wrap:anywhere}.label-row small{font-size:.75rem;margin-top:4px}.label-row .button{padding:6px 8px;min-height:36px;font-size:.76rem}.badge{display:inline-block;padding:3px 8px;border-radius:5px;background:var(--surfaceMuted);color:var(--muted);font-size:.75rem}.badge.overdue,.badge.today{background:var(--dangerSurface);color:var(--danger)}.badge.soon{background:var(--warningSurface);color:var(--warning)}.badge.normal{background:var(--selection);color:var(--primary)}.pagination{border-top:1px solid var(--border);padding:16px 20px;display:flex;gap:16px;align-items:center;justify-content:space-between;font-size:.8rem;flex-wrap:wrap;min-height:80px}.page-size{display:flex;align-items:center;gap:8px;font-weight:400;margin:0}.page-size select{width:74px}.empty{padding:48px 24px;text-align:center;color:var(--muted)}.empty h3{font-size:1.1rem;color:var(--ink);margin-bottom:8px}.empty .button{margin-top:16px}.loading{padding:24px;min-height:80px;color:var(--primary)}.error-banner{padding:16px;background:var(--dangerSurface);color:var(--danger);border:1px solid var(--danger);border-radius:8px;margin-bottom:16px}.error-banner .button{margin-left:12px}
+.login-layout{display:grid;grid-template-columns:1.15fr 1fr;gap:80px;max-width:1100px;margin:80px auto;padding:24px;align-items:center}.login-intro h1{font-size:clamp(2rem,4vw,3rem);line-height:1.6;margin:20px 0}.login-intro>p:not(.eyebrow){color:var(--muted)}.journey{display:flex;flex-wrap:wrap;gap:18px;margin-top:32px;font-size:.9rem;color:var(--primary)}.login-card{padding:32px;background:var(--surface);border:1px solid var(--border);border-top:4px solid var(--primary);border-radius:var(--radius-panel);box-shadow:0 4px 20px rgba(20,34,51,0.04)}.login-card>.muted{margin:8px 0 24px}.secret{display:flex;position:relative}.secret input{padding-right:74px}.secret button{position:absolute;right:1px;top:1px;min-height:42px}.field-error{min-height:26px;color:var(--danger);font-size:.85rem;margin-top:6px;white-space:pre-wrap}.login-card .field-error{margin-bottom:16px}.workspace{display:grid;grid-template-columns:216px minmax(0,1fr);max-width:1600px;margin:auto}.sidebar{padding:30px 16px;border-right:1px solid var(--border);min-height:calc(100vh - 88px)}.sidebar h2{margin-bottom:20px;padding-left:12px}.sidebar .eyebrow{padding-left:12px}.sidebar nav{display:grid;gap:6px}.department-button{text-align:left;display:flex;align-items:center;gap:12px;padding:12px;border:1px solid transparent;border-radius:var(--radius-control);background:transparent;font-size:.88rem;width:100%}.department-button:hover{background:var(--surface)}.department-button[aria-current=true]{background:var(--surface);border-color:#b4c8dc;color:var(--primary);font-weight:600;box-shadow:0 1px 4px rgba(30,73,118,0.08)}.department-button .code{font:600 .82rem var(--font-mono);min-width:34px;padding:5px 0;border-right:2px solid var(--border)}.department-button[aria-current=true] .code{border-color:var(--accent);color:var(--accent)}.sidebar-note{font-size:.75rem;color:var(--muted);padding:24px 12px}.content{padding:26px 32px;min-width:0}.breadcrumb{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.78rem;color:var(--muted);min-height:30px;margin-bottom:16px}.breadcrumb button{background:none;border:0;color:var(--primary);padding:4px}.breadcrumb button:hover{text-decoration:underline}.section-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:16px 0 24px}.line-select{max-width:380px;margin:16px 0}.machine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));grid-auto-rows:max-content;align-content:start;align-items:start;gap:14px}.machine-card{text-align:left;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:8px;padding:14px 16px;min-height:auto;display:flex;flex-direction:column;gap:4px;box-shadow:0 1px 3px rgba(20,34,51,.04);transition:all .18s ease}.machine-card:hover{background:var(--surface);border-color:var(--primary);border-left-color:var(--primaryStrong);transform:translateY(-2px);box-shadow:0 4px 14px rgba(30,73,118,.12)}.machine-card strong{display:block;margin:3px 0 6px;font-size:.92rem;font-weight:600;color:var(--ink);line-height:1.35;word-break:break-word}.machine-card small{display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--muted);font-weight:500;margin-top:auto;padding-top:6px;border-top:1px dashed var(--border)}.machine-card:hover small{color:var(--primary)}.machine-card .mono{display:inline-block;font-size:.74rem;font-weight:600;color:var(--primary);background:var(--selection);padding:2px 7px;border-radius:4px;width:fit-content;letter-spacing:.02em}.totals{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius-panel);background:var(--surface);margin-bottom:24px}.total{padding:16px 24px;flex:1;border-right:1px solid var(--border)}.total:last-child{border:0}.total strong{font:500 1.7rem var(--font-display);margin-right:10px}.total span{font-size:.82rem;color:var(--muted)}.total.attention strong{color:var(--danger)}.register{border:1px solid var(--border);border-radius:var(--radius-panel);background:var(--surface);overflow:clip}.filterbar{display:grid;grid-template-columns:minmax(180px,1fr) 165px 165px;align-items:end;gap:12px;padding:20px}input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-decoration,input[type="search"]::-webkit-search-results-button,input[type="search"]::-webkit-search-results-decoration{-webkit-appearance:none;appearance:none;display:none !important}input[type="search"]::-ms-clear,input[type="search"]::-ms-reveal{display:none !important;width:0;height:0}.search-control{position:relative;display:flex;align-items:center}.search-control input{padding-right:36px !important}.clear-button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:26px;height:26px;min-width:26px;min-height:26px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:50%;font-size:18px;line-height:1;color:var(--muted);cursor:pointer;padding:0;z-index:3;user-select:none;-webkit-user-select:none;transition:background .15s ease,color .15s ease,transform .12s ease}.clear-button:hover:not(:disabled){background:var(--selection);color:var(--primary)}.clear-button:active:not(:disabled){transform:translateY(-50%) scale(.92)}.clear-button:focus-visible{outline:2px solid var(--primary);outline-offset:1px}.selection-bar{min-height:66px;padding:10px 20px;display:flex;align-items:center;gap:16px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surfaceMuted);flex-wrap:wrap}.checkbox-label{display:flex;align-items:center;gap:8px;margin:0;font-weight:400;font-size:.8rem}.selection-bar>span{font-size:.78rem;color:var(--muted);margin-left:auto}.selection-bar .button{min-height:38px;font-size:.8rem}.list-status{font-size:.8rem;color:var(--muted);min-height:32px;padding:6px 20px}.groups{min-height:280px}.group{border-top:1px solid var(--border)}.group summary{display:flex;align-items:center;gap:16px;padding:16px 20px;list-style:none;background:var(--surface)}.group summary::-webkit-details-marker{display:none}.group summary:after{content:'＋';color:var(--muted);font-size:18px}.group[open] summary:after{content:'−'}.group summary:hover{background:var(--surfaceMuted)}.part-image{width:52px;height:52px;flex-shrink:0;display:grid;place-items:center;border:1px solid var(--border);border-radius:8px;color:var(--muted);background:var(--surfaceMuted);font-family:var(--font-mono);font-size:.72rem;overflow:hidden}.part-image img{width:100%;height:100%;object-fit:contain}.part-info{flex:1;min-width:0;overflow-wrap:anywhere}.part-info strong{font-size:.95rem}.part-info p{font-size:.83rem;color:var(--muted)}.part-info small{font: .73rem var(--font-mono);margin-top:4px}.group-quantity{text-align:right;font-size:.8rem;min-width:70px}.group-quantity strong{font:500 1.25rem var(--font-display);display:block}.summary-label-preview{display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden;white-space:nowrap}.summary-label-preview .label-tag{flex-shrink:0;font-size:.72rem;padding:1px 5px;border-radius:4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--surfaceMuted);color:var(--ink);border:1px solid var(--border);line-height:1.4}.summary-label-preview .label-more{flex-shrink:0;font-size:.7rem;font-weight:600;padding:1px 5px;border-radius:4px;background:var(--selection);color:var(--primary);border:1px solid #b4c8dc;line-height:1.4}.group-tools{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:7px 20px 7px 88px;border-top:1px solid var(--border);background:var(--surfaceMuted)}.group-tools>span{margin-right:auto;font-size:.72rem;color:var(--muted)}.add-label-button{min-height:30px;padding:3px 10px;font-size:.75rem;background:var(--surface)}.label-list{padding:0 20px 12px 88px}.label-row{display:grid;grid-template-columns:24px minmax(110px,1fr) minmax(170px,1.4fr) minmax(160px,1.2fr) auto;gap:12px;align-items:center;border-top:1px solid var(--border);padding:15px 0}.label-tag{display:inline-block;font:.8rem var(--font-mono);border:1px solid var(--border);padding:2px 6px;background:var(--surfaceMuted);overflow-wrap:anywhere}.label-row small{font-size:.75rem;margin-top:4px}.label-row .button{padding:6px 8px;min-height:36px;font-size:.76rem}.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;background:var(--surfaceMuted);color:var(--muted);font-size:.75rem;font-weight:600;white-space:nowrap;line-height:1.3}.badge.overdue,.badge.today{background:var(--dangerSurface);color:var(--danger);border:1px solid rgba(135,24,40,0.22)}.badge.soon{background:var(--warningSurface);color:var(--warning);border:1px solid rgba(148,90,13,0.22)}.badge.normal{background:var(--selection);color:var(--primary);border:1px solid rgba(30,73,118,0.22)}.pagination{border-top:1px solid var(--border);padding:16px 20px;display:flex;gap:16px;align-items:center;justify-content:space-between;font-size:.8rem;flex-wrap:wrap;min-height:80px}.page-size{display:flex;align-items:center;gap:8px;font-weight:400;margin:0}.page-size select{width:74px}.empty{padding:48px 24px;text-align:center;color:var(--muted)}.empty h3{font-size:1.1rem;color:var(--ink);margin-bottom:8px}.empty .button{margin-top:16px}.loading{padding:24px;min-height:80px;color:var(--primary)}.error-banner{padding:16px;background:var(--dangerSurface);color:var(--danger);border:1px solid var(--danger);border-radius:8px;margin-bottom:16px}.error-banner .button{margin-left:12px}
 .machine-card-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:5px 0 7px;padding:7px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);min-height:48px}.machine-stat{min-width:0;text-align:center;border-right:1px solid var(--border)}.machine-stat:last-child{border-right:0}.machine-stat dt{font-size:.66rem;line-height:1.2;color:var(--muted);white-space:nowrap}.machine-stat dd{margin:0;font:600 .94rem/1.25 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--ink)}.machine-stat.attention.needs-attention{background:var(--warningSurface)}.machine-stat.attention.needs-attention dd{color:var(--danger)}.machine-card-stats[aria-busy="true"] .machine-stat-value{color:var(--muted)}.machine-stats-error{grid-column:1/-1;min-height:44px;display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 10px;border:1px solid var(--warning);border-radius:var(--radius-control);background:var(--warningSurface);color:var(--warning);font-size:.76rem}.machine-stats-error .button{min-height:30px;padding:3px 10px;font-size:.74rem}
 dialog{border:1px solid var(--border);border-radius:var(--radius-panel);padding:0;background:var(--surface);color:var(--ink);width:min(var(--dialog-width),calc(100% - 32px));max-height:calc(100dvh - 32px);box-shadow:0 24px 80px #18313d40;overflow:auto;scrollbar-gutter:stable}dialog::backdrop{background:#18313d70}dialog form{display:flex;flex-direction:column;max-height:calc(100dvh - 34px)}.dialog-header{padding:20px 24px;display:flex;gap:16px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}.dialog-header h2{font-size:1.15rem}.dialog-body{padding:24px;overflow:auto;min-height:0;scrollbar-gutter:stable}.dialog-footer{padding:16px 24px;display:flex;gap:12px;align-items:center;justify-content:flex-end;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin:18px 0}.field.full{grid-column:1/-1}.field small{font-size:.76rem}.part-choice{padding:16px;background:var(--surfaceMuted);border:1px solid var(--border);border-radius:8px;margin:16px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.part-choice p{flex:1;min-width:150px}.label-editor{padding:12px;border:1px solid var(--border);border-radius:8px;display:grid;grid-template-columns:1fr 90px 1fr 1fr auto;gap:10px;margin:12px 0;align-items:start}.label-editor label{font-size:.75rem}.label-editor input{font-size:.85rem;padding:9px}.label-editor .button{margin-top:27px;padding:8px;min-width:38px}.label-editor .field-error:empty{display:none}.review{padding:16px;background:var(--selection);border:1px solid var(--primary);border-radius:8px;margin-top:16px}.review ul{margin-bottom:0;padding-left:20px}.review li{margin-top:8px;overflow-wrap:anywhere}.review p{font-size:.85rem}.part-results{display:grid;gap:8px;min-height:200px}.part-result{text-align:left;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--surface)}.part-result:hover{background:var(--selection);border-color:var(--primary)}.part-result strong{display:block}.part-result small{font-size:.78rem}.data-fields{display:grid;grid-template-columns:160px 1fr;gap:8px 16px;margin:16px 0}.data-fields dt{color:var(--muted);font-size:.85rem}.data-fields dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.timeline{padding:0;margin:0;list-style:none}.timeline li{position:relative;padding:0 0 18px 20px;border-left:2px solid var(--border);display:grid;gap:2px}.timeline li:before{content:'';position:absolute;width:8px;height:8px;border-radius:50%;left:-5px;top:6px;background:var(--primary);box-shadow:0 0 0 3px var(--selection)}.timeline li:last-child{padding-bottom:0}.timeline small{font-size:.75rem;color:var(--muted)}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:8px;background:var(--ink);color:var(--onPrimary);max-width:calc(100% - 32px);z-index:10;font-size:.9rem}#discard{max-width:460px}
 .sidebar-main{min-height:0}.sidebar-footer{margin-top:auto;border-top:1px solid var(--border);padding-top:10px}.related-links{display:grid;gap:5px}.related-links>.eyebrow{padding-left:8px;margin-bottom:2px}.related-link{display:grid;gap:1px;padding:7px 9px;border:1px solid transparent;border-radius:6px;color:var(--ink);text-decoration:none}.related-link:hover{border-color:#b4c8dc;background:var(--selection)}.related-link strong{font-size:.76rem}.related-link small{font-size:.66rem;color:var(--muted)}
 #detail{width:min(960px,calc(100% - 32px));overflow:hidden}#detail[open]{display:flex;flex-direction:column}#detail .dialog-header{flex-shrink:0;background:var(--surface);z-index:1}#detail .dialog-body{display:grid;gap:18px;padding:20px 24px 28px}.dialog-close{min-width:72px}.close-mark{position:relative;width:12px;height:12px;display:inline-block}.close-mark:before,.close-mark:after{content:'';position:absolute;left:5px;top:0;width:2px;height:12px;border-radius:1px;background:currentColor}.close-mark:before{transform:rotate(45deg)}.close-mark:after{transform:rotate(-45deg)}
 .detail-summary{display:grid;grid-template-columns:148px minmax(0,1fr);gap:22px;align-items:center;padding:18px;border:1px solid #b4c8dc;border-left:5px solid var(--primary);border-radius:var(--radius-panel);background:linear-gradient(100deg,var(--selection),var(--surface) 68%)}.part-image.detail-image{width:148px;height:112px;border-radius:6px;background:var(--surface);font-family:var(--font-body)}.part-image.detail-image img{object-fit:contain}.detail-identity{min-width:0}.detail-identity h3{font-size:1.35rem;line-height:1.35;overflow-wrap:anywhere}.detail-description{margin-top:7px;color:var(--ink);overflow-wrap:anywhere}.detail-chips,.picture-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.detail-chip{padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);font-size:.75rem;color:var(--muted)}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.detail-panel{border:1px solid var(--border);border-radius:var(--radius-panel);padding:16px;background:var(--surface)}.detail-panel-heading,.detail-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.detail-panel-heading h3,.detail-section-heading h3{font-size:1rem}.detail-facts{display:grid;grid-template-columns:minmax(100px,140px) minmax(0,1fr);gap:7px 14px;margin:0}.detail-facts dt{font-size:.78rem;color:var(--muted)}.detail-facts dd{margin:0;font-size:.85rem;white-space:pre-wrap;overflow-wrap:anywhere}.detail-facts.compact{margin-top:12px;padding:0 16px 16px}.detail-link{display:inline-flex;min-height:32px;align-items:center;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surfaceMuted);font-size:.78rem;text-decoration:none}.detail-link:hover{border-color:var(--primary);background:var(--selection)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.detail-panel{border:1px solid var(--border);border-radius:var(--radius-panel);padding:16px;background:var(--surface)}.detail-panel-heading,.detail-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.detail-panel-heading h3,.detail-section-heading h3{font-size:1rem}.detail-facts{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px 16px;align-items:baseline;margin:0}.detail-facts dt{font-size:.82rem;font-weight:500;color:var(--muted);line-height:1.4;white-space:nowrap}.detail-facts dd{margin:0;font-size:.88rem;font-weight:500;color:var(--ink);line-height:1.45;white-space:pre-wrap;overflow-wrap:break-word;word-break:normal}.detail-facts dd.mono{font-family:var(--font-mono);font-size:.88rem;font-weight:600;color:var(--primary);font-variant-numeric:tabular-nums}.detail-facts.compact{margin-top:12px;padding:0 16px 16px}.detail-link{display:inline-flex;min-height:32px;align-items:center;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surfaceMuted);font-size:.78rem;text-decoration:none}.detail-link:hover{border-color:var(--primary);background:var(--selection)}
 .metadata-disclosure{border:1px solid var(--border);border-radius:var(--radius-panel);background:var(--surfaceMuted)}.metadata-disclosure>summary{padding:12px 16px;font-weight:600;font-size:.82rem}.metadata-disclosure[open]>summary{border-bottom:1px solid var(--border)}.detail-history{border-top:2px solid var(--primary);padding-top:18px}.history-columns{display:grid;grid-template-columns:1fr 1fr;gap:14px}.history-block{border:1px solid var(--border);border-radius:var(--radius-panel);padding:16px;min-height:132px}.history-block h4{margin:0 0 14px;font-size:.86rem}.detail-loading,.detail-error,.detail-empty{min-height:72px;display:flex;align-items:center;justify-content:center;padding:16px;color:var(--muted);background:var(--surfaceMuted);border-radius:8px;text-align:center}.detail-error{flex-direction:column;gap:12px;color:var(--danger);border:1px solid var(--danger)}.detail-pagination{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:14px;font-size:.8rem}
 @media(min-width:781px){
   :root{--control-height:36px}
@@ -545,14 +630,99 @@ dialog{border:1px solid var(--border);border-radius:var(--radius-panel);padding:
   #refresh:hover:not(:disabled) .refresh-icon{transform:rotate(60deg)}
   #refresh[aria-busy="true"] .refresh-icon{animation:spin .75s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .selection-bar{min-height:34px;padding:3px 12px;gap:12px;flex-shrink:0}
-  .checkbox-label{font-size:.76rem;gap:6px}
-  .selection-bar>span{font-size:.74rem}
-  .selection-bar .button{min-height:26px;padding:2px 8px;font-size:.74rem;border-radius:4px}
+  .selection-bar{min-height:44px;padding:5px 14px;gap:16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);transition:all .18s cubic-bezier(0.16,1,0.3,1)}
+  #bom-view.select-mode-active .selection-bar{background:#f4f9fc;border-bottom-color:#cde2ee}
+  .selection-bar-left{display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .selection-bar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .selection-divider{width:1px;height:18px;background:var(--border);margin:0 2px;flex-shrink:0}
+  
+  .select-toggle-btn{height:32px;padding:0 12px;font-size:.8rem;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:6px;cursor:pointer;white-space:nowrap;border:1px solid var(--border);background:var(--surface);color:var(--ink);transition:all .15s cubic-bezier(0.16,1,0.3,1);font-family:inherit}
+  .select-toggle-btn:hover{background:var(--selection);border-color:var(--primary);color:var(--primary)}
+  .select-toggle-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 1px 4px rgba(23,100,135,0.25)}
+  .select-mode-hint{font-size:.74rem;color:var(--muted);white-space:nowrap;user-select:none}
+  .selected-count-badge{display:inline-flex;align-items:center;height:24px;padding:0 10px;font-size:.74rem;font-variant-numeric:tabular-nums;border-radius:9999px;background:var(--surfaceMuted);border:1px solid var(--border);color:var(--muted);font-weight:500;transition:all .15s ease;white-space:nowrap}
+  .selected-count-badge.has-items{background:#e0f2fe;border-color:#7dd3fc;color:#0369a1;font-weight:700}
+  
+  /* Symmetrical Bar Action Buttons */
+  .bar-action-btn{height:32px;padding:0 12px;font-size:.78rem;font-weight:500;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer;transition:all .15s cubic-bezier(0.16,1,0.3,1);font-family:inherit}
+  .bar-action-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 2px 6px rgba(20,34,51,0.08)}
+  .bar-action-btn:active:not(:disabled){transform:translateY(0)}
+  .bar-action-btn:disabled{opacity:0.45;cursor:not-allowed;background:var(--surface);border-color:var(--border);color:var(--muted)}
+  .bar-action-btn.copy-btn:not(:disabled){background:#f0f9ff;border-color:#7dd3fc;color:#0369a1;font-weight:600}
+  .bar-action-btn.copy-btn:hover:not(:disabled){background:#e0f2fe;border-color:#0284c7;color:#0284c7}
+  .bar-action-btn.replace-btn:not(:disabled){background:var(--surface);border-color:#cbd5e1;color:var(--ink)}
+  .bar-action-btn.replace-btn:hover:not(:disabled){background:var(--selection);border-color:var(--primary);color:var(--primary)}
+  .bar-action-btn.remove-btn:not(:disabled){background:#fff5f5;border-color:#fca5a5;color:#b91c1c}
+  .bar-action-btn.remove-btn:hover:not(:disabled){background:#fee2e2;border-color:#ef4444;color:#991b1b}
+  
+  /* Copy Dialog Styles */
+  dialog#copy-modal{width:min(720px,calc(100vw - 24px));max-height:calc(100dvh - 32px);border-radius:12px;padding:0;margin:auto;border:1px solid var(--border);box-shadow:0 20px 50px rgba(20,34,51,0.2);overflow:hidden}
+  dialog#copy-modal::backdrop{background:rgba(20,34,51,0.45);backdrop-filter:blur(4px)}
+  .copy-source-banner{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surfaceMuted);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;gap:12px}
+  .copy-source-banner .source-info{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:0.8rem}
+  .copy-source-banner .source-label{color:var(--muted);font-weight:500}
+  .copy-form-section{margin-bottom:18px}
+  .copy-section-title{font-size:0.82rem;font-weight:600;color:var(--ink);margin:0 0 8px 0;display:flex;align-items:center;gap:6px}
+  .copy-target-grid{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:10px}
+  .copy-options-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:10px}
+  .copy-select,.copy-input{width:100%;min-height:36px;padding:4px 10px;font-size:0.82rem;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--ink);font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
+  .copy-select:focus,.copy-input:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(23,100,135,0.15)}
+  .copy-table-wrap{max-height:190px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--surface)}
+  .copy-preview-table{width:100%;border-collapse:collapse;font-size:0.78rem;text-align:left}
+  .copy-preview-table th{position:sticky;top:0;background:var(--surfaceMuted);padding:6px 10px;font-size:0.72rem;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border);z-index:1}
+  .copy-preview-table td{padding:6px 10px;border-bottom:1px solid rgba(205,217,229,0.4);color:var(--ink)}
+  .copy-preview-table tr:last-child td{border-bottom:none}
+  .copy-preview-table tr:hover{background:rgba(23,100,135,0.04)}
+
+  /* Symmetrical, Consistent Checkbox System matching header select-all */
+  .part-check-wrap,.label-check-wrap,.mobile-part-check-wrap{display:none !important;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin:0;width:22px;min-width:22px;height:22px;line-height:1}
+  #bom-view.select-mode-active .part-check-wrap,
+  #bom-view.select-mode-active .label-check-wrap,
+  #bom-view.select-mode-active .mobile-part-check-wrap{display:inline-flex !important}
+  
+  input[type=checkbox],
+  .part-checkbox,
+  .label-checkbox,
+  .mobile-part-checkbox,
+  .mobile-label-checkbox,
+  #select-page{
+    appearance:auto !important;
+    -webkit-appearance:auto !important;
+    width:18px !important;
+    height:18px !important;
+    min-width:18px !important;
+    min-height:18px !important;
+    max-width:18px !important;
+    max-height:18px !important;
+    padding:0 !important;
+    margin:0 !important;
+    border:none !important;
+    background:none !important;
+    accent-color:var(--primary) !important;
+    cursor:pointer !important;
+    flex-shrink:0 !important;
+    box-sizing:border-box !important;
+    vertical-align:middle;
+  }
+
+  .checkbox-label{font-size:.76rem;gap:6px;display:inline-flex;align-items:center;cursor:pointer}
   .list-status{font-size:.72rem;min-height:22px;padding:2px 12px;flex-shrink:0}
   .groups{flex:1;min-height:0;overflow-y:auto;background:var(--surface)}
-  .group summary{padding:6px 12px;gap:10px;min-height:40px;display:flex;align-items:center}
-  .group summary:after{font-size:13px;flex-shrink:0;margin-left:4px}
+  
+  /* Desktop Group Summary & Selection */
+  .group summary{padding:6px 12px;gap:10px;min-height:40px;display:flex;align-items:center;transition:background .15s ease,border-left-color .15s ease}
+  .group summary::-webkit-details-marker,.group summary::marker{display:none}
+  .group summary:after{display:none !important}
+  #bom-view.select-mode-active .group summary{cursor:pointer;user-select:none}
+  #bom-view.select-mode-active .group summary:hover{background:#f1f8fc}
+  #bom-view.select-mode-active .group summary.is-selected{background:#e8f4fa;border-left:3px solid var(--primary)}
+  #bom-view.select-mode-active .group summary.is-partially-selected{background:#f6fafd;border-left:3px solid #93c5fd}
+  
+  .group-expand-toggle{background:transparent;border:none;cursor:pointer;padding:4px 5px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);border-radius:4px;flex-shrink:0;margin-left:4px;transition:all .15s ease}
+  .group-expand-toggle:hover{background:var(--surfaceMuted);color:var(--primary)}
+  .expand-chevron{transition:transform .2s cubic-bezier(0.16,1,0.3,1)}
+  .group[open] .expand-chevron{transform:rotate(180deg)}
+  
   .part-image{width:32px;height:32px;border-radius:4px;font-size:.6rem;flex-shrink:0}
   .part-info{display:flex;align-items:baseline;gap:10px;flex-wrap:nowrap;overflow:hidden;flex:0 1 auto;max-width:min(55vw,680px);min-width:0}
   .part-info strong{font-size:.86rem;min-width:120px;white-space:nowrap;flex-shrink:0;color:var(--ink)}
@@ -565,8 +735,11 @@ dialog{border:1px solid var(--border);border-radius:var(--radius-panel);padding:
   .group-quantity{display:flex;align-items:baseline;gap:4px;font-size:.74rem;min-width:56px;justify-content:flex-end;margin-left:auto;flex-shrink:0}
   .group-quantity strong{font-size:.95rem;display:inline}
   .label-list{padding:0 12px 4px 40px;background:rgba(238,243,248,.35)}
-  .label-row{display:grid;grid-template-columns:20px minmax(130px,1.1fr) minmax(180px,1.4fr) minmax(180px,1.3fr) auto;gap:12px;align-items:center;padding:4px 8px;border-top:1px solid rgba(205,217,229,.5);border-radius:4px;transition:background .1s ease}
-  .label-row:hover{background:var(--selection)}
+  
+  .label-row{display:grid;grid-template-columns:minmax(130px,1.1fr) minmax(180px,1.4fr) minmax(180px,1.3fr) auto;gap:12px;align-items:center;padding:4px 8px;border-top:1px solid rgba(205,217,229,.5);border-radius:4px;transition:background .15s ease,border-left-color .15s ease}
+  #bom-view.select-mode-active .label-row{grid-template-columns:22px minmax(130px,1.1fr) minmax(180px,1.4fr) minmax(180px,1.3fr) auto;cursor:pointer;user-select:none}
+  #bom-view.select-mode-active .label-row:hover{background:#f1f8fc}
+  #bom-view.select-mode-active .label-row.is-selected{background:#e8f4fa;border-left:3px solid var(--primary)}
   .label-tag{font-size:.74rem;padding:1px 5px;border-radius:4px}
   .label-row small{font-size:.7rem;margin-top:1px}
   .label-age{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
@@ -575,17 +748,50 @@ dialog{border:1px solid var(--border);border-radius:var(--radius-panel);padding:
   .label-row .actions{gap:4px}
   .label-row .button{padding:2px 7px;min-height:24px;font-size:.7rem;border-radius:3px}
   .pagination{padding:4px 12px;min-height:36px;font-size:.74rem;flex-shrink:0;background:var(--surfaceMuted);border-top:1px solid var(--border)}
-  .page-size select{min-height:26px;padding:1px 5px;font-size:.74rem;width:60px;border-radius:3px}
+  .page-size select{min-height:26px;padding:1px 5px;font-size:.74rem;width:auto;min-width:68px;border-radius:3px}
   .pagination .button{min-height:26px;padding:2px 8px;font-size:.74rem;border-radius:3px}
   .footnote{font-size:.72rem;color:var(--muted);margin:4px 0 0;flex-shrink:0}
 }
 @media(min-width:781px) and (max-width:1150px){
   .filterbar{grid-template-columns:1fr 1fr}
   .filterbar .search-field{grid-column:1/-1}
-  .label-row{grid-template-columns:20px 1fr 1.3fr 1.2fr}
-  .label-row>.actions{grid-column:2/-1}
+  .label-row{grid-template-columns:1fr 1.3fr 1.2fr}
+  .label-row>.actions{grid-column:1/-1}
+  #bom-view.select-mode-active .label-row{grid-template-columns:22px 1fr 1.3fr 1.2fr}
+  #bom-view.select-mode-active .label-row>.actions{grid-column:2/-1}
 }
-@media(max-width:780px){.topbar{padding:14px 16px}.identity{gap:10px}.identity strong{font-size:.82rem}.identity small{font-size:.65rem}.brand-mark{font-size:23px;padding-right:12px}.topbar .button{padding:8px;font-size:.75rem}.workspace{display:block}.sidebar{width:auto;min-height:0;border:0;border-bottom:1px solid var(--border);padding:16px}.sidebar h2,.sidebar .eyebrow,.sidebar-note{display:none}.sidebar nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}.department-button{width:auto;white-space:nowrap;padding:8px;font-size:.8rem}.department-button .code{min-width:28px}.content{padding:16px}.section-heading{flex-direction:column;gap:16px}.section-heading>.actions{width:100%}.totals{flex-wrap:wrap}.total{flex:1 1 50%;border-bottom:1px solid var(--border)}.total:nth-child(2){border-right:0}.total:nth-child(3){border-bottom:0}.total strong{font-size:1.4rem}.filterbar{padding:16px;gap:10px;grid-template-columns:1fr 1fr}.filterbar .search-field{grid-column:1/-1}.filterbar select{font-size:.82rem}.selection-bar{padding:12px 16px;gap:12px}.selection-bar .checkbox-label{flex:1 1 100%}.selection-bar>span{margin-left:0;margin-right:auto}.group summary{display:grid;grid-template-columns:44px minmax(0,1fr) auto auto;align-items:center;gap:6px 10px;padding:12px 14px}.group summary .part-image{grid-column:1;grid-row:1 / span 2;align-self:start;width:44px;height:44px}.group summary .part-info{grid-column:2;grid-row:1;min-width:0;overflow:hidden}.group summary .group-quantity{grid-column:3;grid-row:1;min-width:46px;text-align:right}.group summary:after{grid-column:4;grid-row:1}.group summary .summary-label-preview{grid-column:2 / -1;grid-row:2;min-width:0;margin-top:2px}.label-list{padding:0 16px 12px}.label-row{grid-template-columns:20px 1fr;gap:8px 12px;align-items:start}.label-row>.label-age,.label-row>.label-due,.label-row>.actions{grid-column:2}.label-row>.actions{justify-content:flex-start}.label-row small{margin-top:0}.pagination{padding:12px 16px}.pagination .page-size{width:100%}.login-layout{grid-template-columns:1fr;gap:28px;margin:20px auto;padding:16px;max-width:480px}.login-intro h1{font-size:2rem;margin:8px 0}.login-intro .journey{margin-top:16px}.login-card{padding:24px}.form-grid{grid-template-columns:1fr}.label-editor{grid-template-columns:1fr 80px;position:relative;padding-right:48px}.label-editor .button{position:absolute;right:6px;top:18px}.dialog-header,.dialog-body,.dialog-footer{padding:16px}.dialog-header h2{font-size:1.05rem}.data-fields{grid-template-columns:1fr;gap:2px}.data-fields dd{margin-bottom:10px}.part-choice{align-items:flex-start}.machine-grid{grid-template-columns:1fr}.demo-banner{font-size:.68rem}}
+@media(max-width:780px){.topbar{padding:14px 16px}.identity{gap:10px}.identity strong{font-size:.82rem}.identity small{font-size:.65rem}.brand-mark{font-size:23px;padding-right:12px}.topbar .button{padding:8px;font-size:.75rem}.workspace{display:block}.sidebar{width:auto;min-height:0;border:0;border-bottom:1px solid var(--border);padding:16px}.sidebar h2,.sidebar .eyebrow,.sidebar-note{display:none}.sidebar nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}.department-button{width:auto;white-space:nowrap;padding:8px;font-size:.8rem}.department-button .code{min-width:28px}.content{padding:16px}.section-heading{flex-direction:column;gap:16px}.section-heading>.actions{width:100%}.totals{flex-wrap:wrap}.total{flex:1 1 50%;border-bottom:1px solid var(--border)}.total:nth-child(2){border-right:0}.total:nth-child(3){border-bottom:0}.total strong{font-size:1.4rem}.filterbar{padding:16px;gap:10px;grid-template-columns:1fr 1fr}.filterbar .search-field{grid-column:1/-1}.filterbar select{font-size:.82rem}.selection-bar{padding:12px 16px;gap:12px}.selection-bar .checkbox-label{flex:1 1 100%}.selection-bar>span{margin-left:0;margin-right:auto}.group summary{display:grid;grid-template-columns:44px minmax(0,1fr) auto auto;align-items:center;gap:6px 10px;padding:12px 14px}.group summary .part-image{grid-column:1;grid-row:1 / span 2;align-self:start;width:44px;height:44px}.group summary .part-info{grid-column:2;grid-row:1;min-width:0;overflow:hidden}.group summary .group-quantity{grid-column:3;grid-row:1;min-width:46px;text-align:right}.group summary:after{grid-column:4;grid-row:1}.group summary .summary-label-preview{grid-column:2 / -1;grid-row:2;min-width:0;margin-top:2px}.label-list{padding:0 16px 12px}.label-row{grid-template-columns:20px 1fr;gap:8px 12px;align-items:start}.label-row>.label-age,.label-row>.label-due,.label-row>.actions{grid-column:2}.label-row>.actions{justify-content:flex-start}.label-row small{margin-top:0}.pagination{padding:12px 16px}.pagination .page-size{width:100%}.login-layout{grid-template-columns:1fr;gap:28px;margin:20px auto;padding:16px;max-width:480px}.login-intro h1{font-size:2rem;margin:8px 0}.login-intro .journey{margin-top:16px}.login-card{padding:24px}.form-grid{grid-template-columns:1fr}.label-editor{grid-template-columns:1fr 80px;position:relative;padding-right:48px}.label-editor .button{position:absolute;right:6px;top:18px}.dialog-header,.dialog-body,.dialog-footer{padding:16px}.dialog-header h2{font-size:1.05rem}.data-fields{grid-template-columns:1fr;gap:2px}.data-fields dd{margin-bottom:10px}.part-choice{align-items:flex-start}.machine-grid{grid-template-columns:1fr}.demo-banner{font-size:.68rem}
+#detail{width:min(960px,calc(100vw - 16px));max-height:calc(100dvh - 20px);border-radius:16px;margin:auto}
+#detail .dialog-header{padding:14px 16px}
+#detail .dialog-header h2{font-size:1.05rem;font-weight:700}
+#detail .dialog-body{padding:14px 14px 22px;gap:12px}
+.detail-summary{grid-template-columns:88px minmax(0,1fr);gap:12px;padding:12px 14px;border-radius:12px}
+.part-image.detail-image{width:88px;height:88px;border-radius:8px}
+.detail-identity h3{font-size:1.05rem;line-height:1.35}
+.detail-description{font-size:.8rem;line-height:1.4;margin-top:4px}
+.detail-chips{margin-top:8px;gap:5px}
+.detail-chip{padding:2px 7px;font-size:.72rem}
+.detail-grid{grid-template-columns:1fr;gap:12px}
+.detail-panel{padding:14px 16px;border-radius:12px}
+.detail-panel-heading{margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.detail-panel-heading h3{font-size:.92rem;font-weight:600}
+.detail-facts{grid-template-columns:105px minmax(0,1fr);gap:8px 12px}
+.detail-facts dt{font-size:.8rem;color:var(--muted);white-space:nowrap}
+.detail-facts dd{font-size:.86rem;overflow-wrap:break-word;word-break:normal}
+.history-columns{grid-template-columns:1fr;gap:12px}
+.history-block{padding:14px;border-radius:12px;min-height:auto}
+}
+@media(max-width:440px){
+#detail{width:calc(100vw - 12px);max-height:calc(100dvh - 16px);border-radius:14px}
+#detail .dialog-header{padding:12px 14px}
+#detail .dialog-body{padding:12px 10px 18px;gap:10px}
+.detail-summary{grid-template-columns:74px minmax(0,1fr);gap:10px;padding:10px 12px}
+.part-image.detail-image{width:74px;height:74px}
+.detail-identity h3{font-size:.96rem}
+.detail-facts{grid-template-columns:92px minmax(0,1fr);gap:7px 10px}
+.detail-facts dt{font-size:.76rem}
+.detail-facts dd{font-size:.83rem}
+}
 /* Redesigned Close Buttons for Modals & Dialogs */
 .modal-close-btn{position:relative;width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--surfaceMuted);color:var(--muted);display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease;flex-shrink:0}
 .modal-close-btn:hover{background:#fee2e2;border-color:#fca5a5;color:#b91c1c}
@@ -846,6 +1052,8 @@ dialog#editor.mode-bulk-edit .dialog-footer{padding:10px 20px}
   .desktop-filter { display: none !important; }
   .mobile-filter-btn { display: inline-flex !important; min-height: 38px; align-items: center; gap: 6px; padding: 6px 12px; font-size: .8rem; }
   .mobile-filter-btn.has-filters { border-color: var(--primary); background: var(--selection); color: var(--primary); font-weight: 600; }
+  .mobile-select-btn { display: inline-flex !important; min-height: 38px; align-items: center; gap: 6px; padding: 6px 12px; font-size: .8rem; font-weight: 600; cursor: pointer; border-radius: 6px; }
+  .mobile-select-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
   .filterbar { grid-template-columns: 1fr auto !important; padding: 10px 14px !important; gap: 8px !important; align-items: center !important; }
   .filterbar .search-field label { display: none; }
   .selection-bar { display: none !important; }
@@ -857,11 +1065,19 @@ dialog#editor.mode-bulk-edit .dialog-footer{padding:10px 20px}
 
   /* Mobile Part Cards */
   .mobile-part-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-panel); margin-bottom: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(20,34,51,0.04); }
-  .mobile-part-header { display: grid; grid-template-columns: 56px minmax(0,1fr) auto 18px; gap: 12px; padding: 12px 14px; align-items: start; background: var(--surface); cursor: pointer; list-style: none; }
+  .mobile-part-header { display: grid; grid-template-columns: 56px minmax(0,1fr) auto 18px; gap: 12px; padding: 12px 14px; align-items: start; background: var(--surface); cursor: pointer; list-style: none; transition: background .15s ease; }
+  #bom-view.select-mode-active .mobile-part-header { grid-template-columns: 24px 56px minmax(0,1fr) auto 18px; user-select: none; }
+  #bom-view.select-mode-active .mobile-part-header.is-selected { background: #e8f4fa; border-left: 3px solid var(--primary); }
+  #bom-view.select-mode-active .mobile-part-header.is-partially-selected { background: #f6fafd; border-left: 3px solid #93c5fd; }
   .mobile-part-header::-webkit-details-marker { display: none; }
-  .mobile-part-header::after { content: '＋'; grid-column: 4; align-self: center; color: var(--muted); font-size: 18px; line-height: 1; }
+  .mobile-part-header::after { content: '＋'; grid-column: -1; align-self: center; color: var(--muted); font-size: 18px; line-height: 1; }
   .mobile-part-card[open] > .mobile-part-header { border-bottom: 1px solid var(--surfaceMuted); }
   .mobile-part-card[open] > .mobile-part-header::after { content: '−'; }
+  
+  #bom-view.select-mode-active .mobile-label-card { cursor: pointer; user-select: none; }
+  #bom-view.select-mode-active .mobile-label-card.is-selected { background: #e8f4fa; border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+  .mobile-label-check-wrap input[type=checkbox] { display: none; }
+  #bom-view.select-mode-active .mobile-label-check-wrap input[type=checkbox] { display: inline-block; }
   .mobile-part-thumb .part-image { width: 56px; height: 56px; border-radius: 8px; font-size: .65rem; }
   .mobile-part-identity { min-width: 0; }
   .mobile-part-number { font-size: .95rem; font-weight: 600; display: block; color: var(--ink); overflow-wrap: anywhere; line-height: 1.35; }
@@ -882,7 +1098,7 @@ dialog#editor.mode-bulk-edit .dialog-footer{padding:10px 20px}
   .mobile-label-card.inactive { opacity: .75; background: #fafbfc; }
   .mobile-label-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .mobile-label-check-wrap { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; min-height: 34px; font-weight: 500; }
-  .mobile-label-check-wrap input[type=checkbox] { width: 22px; height: 22px; min-height: 22px; }
+  .mobile-label-check-wrap input[type=checkbox] { width: 18px !important; height: 18px !important; min-width: 18px !important; min-height: 18px !important; padding: 0 !important; margin: 0 !important; accent-color: var(--primary) !important; }
   .mobile-label-qty { font-size: .78rem; font-weight: 600; color: var(--muted); }
   .mobile-label-body { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: .74rem; border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border); padding: 6px 0; }
   .mobile-label-timing, .mobile-label-status { display: flex; flex-direction: column; gap: 3px; }
@@ -930,6 +1146,116 @@ dialog#editor.mode-bulk-edit .dialog-footer{padding:10px 20px}
     min-height: 0;
   }
 }
+
+/* --- PART QUICK EDIT POPUP (MODERN DIALOG) --- */
+#part-quick-editor {
+  width: min(680px, calc(100vw - 32px));
+  max-height: min(90vh, 860px);
+  padding: 0;
+  border: 1px solid var(--border, #cdd9e5);
+  border-radius: 16px;
+  background: var(--surface, #ffffff);
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.28), 0 4px 16px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+#part-quick-editor::backdrop {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+}
+#part-quick-editor .dialog-body {
+  padding: 18px 24px;
+  max-height: calc(90vh - 140px);
+  overflow-y: auto;
+}
+.part-qe-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--surfaceMuted, #f4f7fb);
+  border: 1px solid var(--border, #cdd9e5);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+.part-qe-thumb-wrap {
+  flex-shrink: 0;
+}
+.part-qe-thumb {
+  width: 76px;
+  height: 76px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #cdd9e5);
+  background: var(--surface, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+.part-qe-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.part-qe-thumb-placeholder {
+  font-size: 32px;
+  opacity: 0.45;
+}
+.part-qe-thumb-actions {
+  flex: 1;
+  min-width: 0;
+}
+.part-qe-thumb-btn-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.part-qe-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 16px;
+}
+.part-qe-field.full-width {
+  grid-column: 1 / -1;
+}
+.part-qe-field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink, #142233);
+  margin-bottom: 5px;
+}
+.part-qe-field input,
+.part-qe-field select,
+.part-qe-field textarea {
+  width: 100%;
+  border: 1px solid var(--border, #cdd9e5);
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: var(--surface, #ffffff);
+  color: var(--ink, #142233);
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.part-qe-field input:focus,
+.part-qe-field select:focus,
+.part-qe-field textarea:focus {
+  outline: none;
+  border-color: var(--primary, #1e4976);
+  box-shadow: 0 0 0 3px rgba(30, 73, 118, 0.18);
+}
+@media (max-width: 640px) {
+  .part-qe-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .part-qe-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -958,7 +1284,7 @@ dialog#editor.mode-bulk-edit .dialog-footer{padding:10px 20px}
       <div class="em-dropdown em-dropdown-bom">
         <a href="/bom/" class="em-nav-link em-dropdown-trigger active" aria-current="page">
           <span>BoM Parts</span>
-          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
           <div class="em-dropdown-header">เลือกแผนก</div>
@@ -972,31 +1298,29 @@ dialog#editor.mode-bulk-edit .dialog-footer{padding:10px 20px}
         </div>
       </div>
 
-      <!-- 3. Master อะไหล่ with Dropdown -->
-      <div class="em-dropdown em-dropdown-parts">
+      <!-- 3. โครงสร้าง with Dropdown (Master List, Machines, แผนผังระบบไฟฟ้า) -->
+      <div class="em-dropdown em-dropdown-structure">
         <a href="/parts/" class="em-nav-link em-dropdown-trigger">
-          <span>Master List</span>
-          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          <span>โครงสร้าง</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
-          <a class="em-dropdown-item" href="/parts/"><span class="em-item-icon">▤</span> รายการอะไหล่</a>
-          <a class="em-dropdown-item" href="/parts/?action=add"><span class="em-item-icon">＋</span> เพิ่มแบบตาราง</a>
-          <a class="em-dropdown-item" href="/parts/?view=batch"><span class="em-item-icon">🖼</span> อัปโหลดรูปชุด</a>
+          <a class="em-dropdown-item" href="/parts/"><span class="em-item-icon">▤</span> Master List</a>
+          <a class="em-dropdown-item" href="/machines/"><span class="em-item-icon">⚙️</span> Machines</a>
+          <a class="em-dropdown-item" href="/electrical-diagram/"><span class="em-item-icon">⚡</span> แผนผังระบบไฟฟ้า</a>
         </div>
       </div>
-
-      <!-- 4. เครื่องจักร -->
-      <a class="em-nav-link" href="/machines/">Machines</a>
 
       <!-- 5. จัดการ Order PM with Dropdown -->
       <div class="em-dropdown em-dropdown-pm">
         <a href="/pm/" class="em-nav-link em-dropdown-trigger">
-          <span>Order PM</span>
-          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          <span>PM</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
           <a class="em-dropdown-item" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
           <a class="em-dropdown-item" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+          <a class="em-dropdown-item" href="/pm-aircooling/"><span class="em-item-icon">❄️</span> Air Cooling</a>
         </div>
       </div>
 
@@ -1004,7 +1328,7 @@ dialog#editor.mode-bulk-edit .dialog-footer{padding:10px 20px}
       <div class="em-dropdown em-dropdown-pm-expenses">
         <a href="/pm-expenses/" class="em-nav-link em-dropdown-trigger">
           <span>ค่าใช้จ่าย PM</span>
-          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
           <a class="em-dropdown-item" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
@@ -1021,7 +1345,7 @@ dialog#editor.mode-bulk-edit .dialog-footer{padding:10px 20px}
       <div class="em-dropdown em-dropdown-announcements">
         <a href="/announcements/" class="em-nav-link em-dropdown-trigger">
           <span>สื่อประชาสัมพันธ์</span>
-          <svg class="em-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
           <a class="em-dropdown-item" href="/announcements/"><span class="em-item-icon">⚙️</span> สื่อประชาสัมพันธ์</a>
@@ -1079,40 +1403,35 @@ dialog#editor.mode-bulk-edit .dialog-footer{padding:10px 20px}
           </div>
         </div>
 
-        <!-- 3. Master อะไหล่ Accordion -->
+        <!-- 3. โครงสร้าง Accordion (Master List, Machines, แผนผังระบบไฟฟ้า) -->
         <div class="em-drawer-group">
           <button type="button" class="em-drawer-group-btn" aria-expanded="false">
             <span class="em-drawer-group-title">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-              Master List
+              โครงสร้าง
             </span>
             <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
           <div class="em-drawer-sublist" style="display:none;">
-            <a class="em-drawer-subitem" href="/parts/"><span class="em-item-icon">▤</span> รายการอะไหล่</a>
-            <a class="em-drawer-subitem" href="/parts/?action=add"><span class="em-item-icon">＋</span> เพิ่มแบบตาราง</a>
-            <a class="em-drawer-subitem" href="/parts/?view=batch"><span class="em-item-icon">🖼</span> อัปโหลดรูปชุด</a>
+            <a class="em-drawer-subitem" href="/parts/"><span class="em-item-icon">▤</span> Master List</a>
+            <a class="em-drawer-subitem" href="/machines/"><span class="em-item-icon">⚙️</span> Machines</a>
+            <a class="em-drawer-subitem" href="/electrical-diagram/"><span class="em-item-icon">⚡</span> แผนผังระบบไฟฟ้า</a>
           </div>
         </div>
-
-        <!-- 4. เครื่องจักร -->
-        <a class="em-drawer-link" href="/machines/">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
-          Machines
-        </a>
 
         <!-- 5. จัดการ Order PM Accordion -->
         <div class="em-drawer-group">
           <button type="button" class="em-drawer-group-btn" aria-expanded="false">
             <span class="em-drawer-group-title">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              Order PM
+              PM
             </span>
             <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
           <div class="em-drawer-sublist" style="display:none;">
             <a class="em-drawer-subitem" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
             <a class="em-drawer-subitem" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+            <a class="em-drawer-subitem" href="/pm-aircooling/"><span class="em-item-icon">❄️</span> Air Cooling</a>
           </div>
         </div>
 
@@ -1238,8 +1557,8 @@ html, body {
 }
 .em-brand-link:hover { opacity: 0.92; }
 .em-brand-logo {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
   border-radius: 50%;
   background: #ffffff;
@@ -1247,7 +1566,7 @@ html, body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 .em-brand-text {
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: #ffffff;
@@ -1258,19 +1577,19 @@ html, body {
 .em-nav-center {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 8px;
+  gap: 4px;
+  margin-left: 6px;
 }
 .em-nav-link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   color: #cbd5e1;
   text-decoration: none;
-  font-size: 13.5px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 7px 12px;
-  border-radius: 6px;
+  padding: 5px 8px;
+  border-radius: 5px;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -1286,6 +1605,8 @@ html, body {
   border-bottom-color: #80182a;
 }
 .em-caret {
+  width: 12px;
+  height: 12px;
   transition: transform 0.2s ease;
   opacity: 0.7;
 }
@@ -1296,17 +1617,17 @@ html, body {
 }
 .em-dropdown-menu {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 4px);
   left: 0;
-  min-width: 200px;
+  min-width: 180px;
   background: #18313d;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-  padding: 6px;
+  border-radius: 7px;
+  padding: 5px;
   box-shadow: 0 12px 28px rgba(0,0,0,0.45);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(6px);
+  transform: translateY(4px);
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
   z-index: 10001;
 }
@@ -1321,44 +1642,49 @@ html, body {
   transform: rotate(180deg);
 }
 .em-dropdown-header {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #94a3b8;
-  padding: 6px 10px 4px;
+  padding: 4px 8px 3px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 .em-dropdown-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
+  gap: 8px;
+  padding: 6px 10px;
   color: #e2e8f0;
   text-decoration: none;
-  font-size: 13px;
-  border-radius: 6px;
+  font-size: 12px;
+  border-radius: 5px;
   transition: all 0.15s ease;
 }
 .em-dropdown-item:hover {
   background: rgba(128, 24, 42, 0.3);
   color: #ffffff;
 }
+.em-dropdown-item.active {
+  background: rgba(128, 24, 42, 0.28);
+  color: #f3c4ce;
+  font-weight: 600;
+}
 .em-dept-badge {
   display: inline-block;
   font-family: monospace;
   font-weight: 700;
-  font-size: 11px;
-  padding: 2px 6px;
+  font-size: 10px;
+  padding: 1px 5px;
   background: rgba(128, 24, 42, 0.38);
   color: #f3c4ce;
   border: 1px solid rgba(243, 196, 206, 0.45);
   border-radius: 4px;
 }
 .em-item-icon {
-  font-size: 14px;
-  width: 18px;
+  font-size: 13px;
+  width: 16px;
   text-align: center;
   color: #d68a9a;
 }
@@ -1373,8 +1699,8 @@ html, body {
 .em-user-badge {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 13px;
+  gap: 8px;
+  font-size: 11.5px;
   color: #cbd5e1;
 }
 
@@ -1547,6 +1873,11 @@ html, body {
   color: #ffffff;
   background: rgba(128, 24, 42, 0.22);
 }
+.em-drawer-subitem.active {
+  color: #f3c4ce;
+  background: rgba(128, 24, 42, 0.28);
+  font-weight: 600;
+}
 .em-drawer-footer {
   padding: 14px 18px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -1578,6 +1909,100 @@ html, body {
   }
 }
 </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1762,12 +2187,48 @@ html, body {
           <div class="section-heading"><div><p id="machine-code" class="eyebrow mono"></p><h1 id="machine-name" tabindex="-1"></h1><p id="machine-context" class="muted"></p></div><div class="actions"><button id="refresh" class="button outline" title="รีเฟรชข้อมูลอุปกรณ์ของเครื่องจักรนี้" data-ready="true" disabled><svg class="refresh-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><polyline points="3 21 3 16 8 16"/></svg><span>รีเฟรช</span></button><button id="back-machines" class="button outline" data-ready="true" disabled>เลือกเครื่องจักร</button><button id="add" class="button primary" data-ready="true" disabled>+ เพิ่มอุปกรณ์</button></div></div>
           <div id="totals" class="totals"></div>
           <div class="register">
-            <div class="filterbar"><div class="search-field"><label for="query">ค้นหาในเครื่องจักร</label><div class="search-control"><input id="query" type="search" placeholder="Part number, Description หรือ Label"><button type="button" id="clear-query" class="clear-button" aria-label="ล้างคำค้นหา" title="ล้างคำค้นหา" hidden>×</button></div></div><div class="desktop-filter"><label for="status">สถานะอายุ</label><select id="status"><option value="">ทุกสถานะ</option><option value="overdue">เกินกำหนด</option><option value="today">ครบกำหนดวันนี้</option><option value="soon">ใกล้ครบกำหนด</option><option value="normal">ปกติ</option><option value="unknown">ยังไม่ทราบกำหนด</option></select></div><div class="desktop-filter"><label for="history-view">ข้อมูลที่แสดง</label><select id="history-view"><option value="">ติดตั้งปัจจุบัน</option><option value="all">รวมรอบที่ผ่านมา</option></select></div><button type="button" id="mobile-filter-btn" class="button outline mobile-filter-btn" aria-haspopup="dialog" hidden>ตัวกรอง</button></div>
-            <div class="selection-bar"><label class="checkbox-label"><input id="select-page" type="checkbox">เลือกรายการปัจจุบันในหน้านี้</label><span id="selected-count">เลือก 0 รายการ</span><button id="replace" class="button outline" disabled>บันทึกการเปลี่ยนพร้อมกัน</button><button id="remove-selected" class="button outline" disabled>ถอดออกพร้อมกัน</button></div>
+            <div class="filterbar"><div class="search-field"><label for="query">ค้นหาในเครื่องจักร</label><div class="search-control"><input id="query" type="search" placeholder="Part number, Description หรือ Label"><button type="button" id="clear-query" class="clear-button" aria-label="ล้างคำค้นหา" title="ล้างคำค้นหา" hidden>×</button></div></div><div class="desktop-filter"><label for="status">สถานะอายุ</label><select id="status"><option value="">ทุกสถานะ</option><option value="overdue">เกินกำหนด</option><option value="today">ครบกำหนดวันนี้</option><option value="soon">ใกล้ครบกำหนด</option><option value="normal">ปกติ</option><option value="unknown">ยังไม่ทราบกำหนด</option></select></div><div class="desktop-filter"><label for="history-view">ข้อมูลที่แสดง</label><select id="history-view"><option value="">ติดตั้งปัจจุบัน</option><option value="all">รวมรอบที่ผ่านมา</option></select></div><button type="button" id="mobile-filter-btn" class="button outline mobile-filter-btn" aria-haspopup="dialog" hidden>ตัวกรอง</button><button type="button" id="mobile-toggle-select" class="button outline mobile-select-btn" hidden>เลือก</button></div>
+            <div class="selection-bar" id="selection-bar">
+              <div class="selection-bar-left">
+                <button type="button" id="btn-toggle-select" class="select-toggle-btn" title="เปิด/ปิดโหมดเลือกรายการ">
+                  <svg class="select-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M9 12l2 2 4-4"></path></svg>
+                  <span class="select-btn-text">เลือก</span>
+                </button>
+                <div class="selection-divider" id="selection-divider" hidden></div>
+                <label class="checkbox-label select-page-label" id="select-page-wrap" hidden>
+                  <input id="select-page" type="checkbox">
+                  <span>เลือกทั้งหมดในหน้านี้</span>
+                </label>
+                <span id="selected-count" class="selected-count-badge" hidden>เลือก 0 รายการ</span>
+                <span id="select-mode-hint" class="select-mode-hint muted">คลิก "เลือก" เพื่อเลือกหลายรายการสำหรับคัดลอก เปลี่ยน หรือถอดออก</span>
+              </div>
+              <div class="selection-bar-right">
+                <button type="button" id="copy-selected" class="bar-action-btn copy-btn" disabled title="คัดลอกรายการที่เลือกไปยังเครื่องจักร แผนก หรือไลน์อื่น">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <span>คัดลอกไปเครื่องอื่น</span>
+                </button>
+                <button type="button" id="replace" class="bar-action-btn replace-btn" disabled title="บันทึกการเปลี่ยนอะไหล่พร้อมกัน">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                  <span>บันทึกการเปลี่ยน</span>
+                </button>
+                <button type="button" id="remove-selected" class="bar-action-btn remove-btn" disabled title="ถอดอะไหล่ออกพร้อมกัน">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>ถอดออก</span>
+                </button>
+              </div>
+            </div>
             <p id="list-status" class="list-status" role="status"></p>
             <div id="groups" class="groups" aria-busy="false"></div>
-            <footer class="pagination"><span id="range"></span><div class="actions"><button id="previous" class="button ghost" data-ready="true" disabled>ก่อนหน้า</button><span id="page-number"></span><button id="next" class="button ghost" data-ready="true" disabled>ถัดไป</button></div><label class="page-size">Part ต่อหน้า<select id="page-size"><option>10</option><option selected>25</option><option>50</option></select></label></footer>
-            <div id="mobile-selection-bar" class="mobile-selection-bar" hidden><div class="mobile-selection-info"><strong id="mobile-selected-count">เลือก 0 รายการ</strong></div><div class="mobile-selection-actions"><button type="button" id="mobile-replace" class="button primary mini-btn" disabled>เปลี่ยนพร้อมกัน</button><button type="button" id="mobile-remove" class="button danger mini-btn" disabled>ถอดออก</button></div></div>
+            <footer class="pagination"><span id="range"></span><div class="actions"><button id="previous" class="button ghost" data-ready="true" disabled>ก่อนหน้า</button><span id="page-number"></span><button id="next" class="button ghost" data-ready="true" disabled>ถัดไป</button></div><label class="page-size">Part ต่อหน้า<select id="page-size"><option value="10">10</option><option value="25" selected>25</option><option value="50">50</option><option value="all">ทั้งหมด</option></select></label></footer>
+            <div id="mobile-selection-bar" class="mobile-selection-bar" hidden>
+              <div class="mobile-selection-info"><strong id="mobile-selected-count">เลือก 0 รายการ</strong></div>
+              <div class="mobile-selection-actions">
+                <button type="button" id="mobile-copy" class="button outline mini-btn" disabled>📋 คัดลอก</button>
+                <button type="button" id="mobile-replace" class="button primary mini-btn" disabled>🔄 เปลี่ยน</button>
+                <button type="button" id="mobile-remove" class="button danger mini-btn" disabled>🗑 ถอดออก</button>
+                <button type="button" id="mobile-done" class="button outline mini-btn">เสร็จสิ้น</button>
+              </div>
+            </div>
           </div>
           <p class="footnote">อายุใช้งานตามวันปฏิทิน • เขตเวลาไทย • กำหนดจาก Part list จะเปลี่ยนตามเกณฑ์ล่าสุด</p>
         </section>
@@ -1777,9 +2238,187 @@ html, body {
   <dialog id="editor" aria-labelledby="editor-title"><form id="editor-form" novalidate><header class="dialog-header"><div><p class="eyebrow">อุปกรณ์ประจำเครื่องจักร</p><h2 id="editor-title"></h2><div id="mobile-editor-step-bar" class="mobile-editor-step-bar" hidden><span id="mobile-editor-step-text">ขั้น 1 จาก 3</span></div></div><button type="button" id="editor-close" class="modal-close-btn" aria-label="ปิดหน้าต่าง" data-ready="true" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></header><div class="dialog-body"><p id="editor-context" class="muted"></p><div id="editor-fields"></div><div id="editor-error" class="field-error" role="alert" tabindex="-1"></div><div id="review" class="review" hidden></div></div><footer class="dialog-footer"><button type="button" id="editor-step-prev" class="button outline" hidden>ย้อนกลับ</button><button type="button" id="editor-step-next" class="button primary" hidden>ถัดไป</button><button type="button" id="editor-retry-new" class="button ghost" hidden data-ready="true" disabled>ลองเป็นคำสั่งใหม่</button><button type="button" id="editor-cancel" class="button outline" data-ready="true" disabled>ยกเลิก</button><button id="save" class="button primary" type="submit">บันทึก</button></footer></form></dialog>
   <dialog id="mobile-filters" aria-labelledby="mobile-filters-title"><header class="dialog-header"><div><p class="eyebrow">ตัวกรองรายการ</p><h2 id="mobile-filters-title">กรองอุปกรณ์</h2></div><button type="button" id="mobile-filters-close" class="modal-close-btn" aria-label="ปิดหน้าต่างตัวกรอง"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></header><div class="dialog-body"><div class="mobile-filter-field"><label for="mobile-filter-status">สถานะอายุ</label><select id="mobile-filter-status"><option value="">ทุกสถานะ</option><option value="overdue">เกินกำหนด</option><option value="today">ครบกำหนดวันนี้</option><option value="soon">ใกล้ครบกำหนด</option><option value="normal">ปกติ</option><option value="unknown">ยังไม่ทราบกำหนด</option></select></div><div class="mobile-filter-field" style="margin-top:16px;"><label for="mobile-filter-history">ข้อมูลที่แสดง</label><select id="mobile-filter-history"><option value="">ติดตั้งปัจจุบัน</option><option value="all">รวมรอบที่ผ่านมา</option></select></div></div><footer class="dialog-footer"><button type="button" id="mobile-filters-clear" class="button outline">ล้างตัวกรอง</button><button type="button" id="mobile-filters-apply" class="button primary">แสดงผล</button></footer></dialog>
   <dialog id="legacy-import" aria-labelledby="legacy-import-title"><header class="dialog-header"><div><p class="eyebrow">นำเข้าข้อมูล</p><h2 id="legacy-import-title">นำเข้าจากฐานข้อมูลเดิม (.xls / .xlsx / .csv)</h2></div><button type="button" id="legacy-import-close" class="modal-close-btn" aria-label="ปิดหน้าต่างนำเข้า" data-ready="true" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></header><div class="dialog-body"><input type="file" id="legacy-file-input" accept=".xls,.xlsx,.csv,.tsv,.json" hidden><div id="legacy-dropzone" class="legacy-dropzone" role="button" tabindex="0" aria-label="เลือกไฟล์เพื่อนำเข้า"><div class="dropzone-content"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="dropzone-icon" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg><p class="dropzone-title">คลิกเพื่อเลือกไฟล์ หรือ ลากไฟล์มาวางที่นี่</p><p class="dropzone-hint">รองรับไฟล์ <strong>.xls</strong> (เช่น PRS224.xls), <strong>.xlsx</strong> หรือ <strong>.csv</strong></p></div></div><div id="legacy-preview-section" hidden><div class="legacy-file-bar"><div class="legacy-file-info"><span class="file-icon" aria-hidden="true">📄</span><div><strong id="legacy-filename"></strong><small id="legacy-filesize" class="muted"></small></div></div><button type="button" id="legacy-change-file" class="button outline mini-btn" data-ready="true" disabled>เลือกไฟล์ใหม่</button></div><div class="legacy-preview-summary"><span id="legacy-item-count" class="badge normal"></span><span id="legacy-match-summary" class="muted"></span><span id="legacy-unmatched-badge" class="badge soon" hidden></span></div><div id="legacy-matched-only-wrap" class="legacy-filter-wrap" hidden><label class="checkbox-label"><input type="checkbox" id="legacy-matched-only" checked><span>นำเข้าเฉพาะรายการที่ตรงทะเบียน (ข้ามรายการที่ไม่พบในทะเบียน)</span></label></div><div class="legacy-table-wrap"><table class="legacy-preview-table"><thead><tr><th>#</th><th>Part Number</th><th>ชื่อ Part ในระบบ</th><th>Label</th><th>วันติดตั้ง</th><th>จำนวน</th><th>สถานะ</th></tr></thead><tbody id="legacy-preview-body"></tbody></table></div><p id="legacy-table-hint" class="muted footnote" style="margin-top:6px;margin-bottom:8px;" hidden></p><div id="legacy-progress-container" class="legacy-progress-container" hidden><div class="legacy-progress-header"><span id="legacy-progress-title" class="legacy-progress-title">กำลังนำเข้าข้อมูลสู่ระบบ…</span><span id="legacy-progress-percent" class="legacy-progress-percent">0%</span></div><div class="legacy-progress-bar"><div id="legacy-progress-fill" class="legacy-progress-fill" style="width: 0%;"></div></div><p id="legacy-progress-status" class="legacy-progress-status muted"></p></div><div id="legacy-import-mode-wrap" class="legacy-mode-wrap" hidden><span class="legacy-mode-label">รูปแบบการนำเข้าสู่ตาราง:</span><div class="legacy-mode-options"><label><input type="radio" name="legacy-mode" value="replace" checked> ล้างตารางเดิมและแทนที่ทั้งหมด</label><label><input type="radio" name="legacy-mode" value="append"> เพิ่มต่อท้ายรายการเดิมในตาราง</label></div></div></div><div id="legacy-import-error" class="field-error" role="alert"></div></div><footer class="dialog-footer"><button type="button" id="legacy-import-cancel" class="button outline" data-ready="true" disabled>ยกเลิก</button><button type="button" id="legacy-import-to-editor" class="button outline" hidden data-ready="true" disabled>📝 ใส่ลงตารางแก้ไข</button><button type="button" id="legacy-import-apply" class="button primary" disabled data-ready="true">🚀 นำเข้าสู่ระบบอัตโนมัติ</button></footer></dialog>
-  <dialog id="picker" aria-labelledby="picker-title"><header class="dialog-header"><div><p class="eyebrow">ทะเบียนอุปกรณ์</p><h2 id="picker-title">เลือกอุปกรณ์จาก Part list</h2></div><div class="actions"><button type="button" id="part-refresh" class="button ghost" title="รีเฟรชข้อมูล Part จากชีต" data-ready="true" disabled style="padding:4px 10px;font-size:.78rem">รีเฟรช Part</button><button id="picker-close" class="modal-close-btn" aria-label="ปิดรายการ Part" data-ready="true" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div></header><div class="dialog-body"><label for="part-query">ค้นหา Part</label><div class="search-control"><input id="part-query" type="search" placeholder="ID, Part number, Description หรือ Brand"><button type="button" id="clear-part-query" class="clear-button" aria-label="ล้างคำค้นหา Part" title="ล้างคำค้นหา Part" hidden>×</button></div><p id="picker-status" class="list-status" role="status"></p><div id="part-results" class="part-results"></div><button id="part-retry" class="button outline" hidden data-ready="true" disabled>ลองใหม่</button></div><footer class="dialog-footer"><button id="part-previous" class="button outline" data-ready="true" disabled>ก่อนหน้า</button><span id="part-page"></span><button id="part-next" class="button outline" data-ready="true" disabled>ถัดไป</button></footer></dialog>
+  <dialog id="picker" aria-labelledby="picker-title"><header class="dialog-header"><div><p class="eyebrow">ทะเบียนอุปกรณ์</p><h2 id="picker-title">เลือกอุปกรณ์จาก Part list</h2></div><div class="actions" style="display:flex;align-items:center;gap:8px;"><button type="button" id="picker-add-part" class="button outline mini-btn" title="เพิ่ม Part ใหม่เข้าสู่ Master List จากหน้านี้" data-ready="true" disabled style="padding:4px 10px;font-size:.78rem;font-weight:600;color:var(--accent,#0284c7);border-color:var(--accent,#0284c7);white-space:nowrap;">+ เพิ่ม Part Master List จากหน้านี้</button><button type="button" id="part-refresh" class="button ghost" title="รีเฟรชข้อมูล Part จากชีต" data-ready="true" disabled style="padding:4px 10px;font-size:.78rem">รีเฟรช Part</button><button id="picker-close" class="modal-close-btn" aria-label="ปิดรายการ Part" data-ready="true" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div></header><div class="dialog-body"><label for="part-query">ค้นหา Part</label><div class="search-control"><input id="part-query" type="search" placeholder="ID, Part number, Description หรือ Brand"><button type="button" id="clear-part-query" class="clear-button" aria-label="ล้างคำค้นหา Part" title="ล้างคำค้นหา Part" hidden>×</button></div><p id="picker-status" class="list-status" role="status"></p><div id="part-results" class="part-results"></div><button id="part-retry" class="button outline" hidden data-ready="true" disabled>ลองใหม่</button></div><footer class="dialog-footer"><button id="part-previous" class="button outline" data-ready="true" disabled>ก่อนหน้า</button><span id="part-page"></span><button id="part-next" class="button outline" data-ready="true" disabled>ถัดไป</button></footer></dialog>
   <dialog id="detail" aria-labelledby="detail-title"><header class="dialog-header"><div><p class="eyebrow">ทะเบียนการติดตั้ง</p><h2 id="detail-title">รายละเอียดและประวัติ</h2></div><button id="detail-close" class="modal-close-btn" aria-label="ปิดรายละเอียด" data-ready="true" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></header><div id="detail-body" class="dialog-body"></div></dialog>
   <dialog id="discard" aria-labelledby="discard-title"><div class="dialog-body"><h2 id="discard-title">ปิดโดยไม่บันทึก?</h2><p>ข้อมูลที่แก้ไขในฟอร์มนี้ยังไม่ได้บันทึก</p></div><footer class="dialog-footer"><button id="keep-editing" class="button outline" autofocus data-ready="true" disabled>กลับไปแก้ไข</button><button id="discard-changes" class="button danger" data-ready="true" disabled>ปิดโดยไม่บันทึก</button></footer></dialog>
+
+  <!-- Copy Selected Items Dialog -->
+  <dialog id="copy-modal" aria-labelledby="copy-modal-title" class="copy-dialog">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow">คัดลอกอุปกรณ์ประจำเครื่องจักร</p>
+        <h2 id="copy-modal-title">คัดลอกรายการที่เลือกไปยังเครื่องอื่น</h2>
+      </div>
+      <button type="button" id="copy-modal-close" class="modal-close-btn" aria-label="ปิดหน้าต่าง">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </header>
+    <div class="dialog-body">
+      <!-- Source banner -->
+      <div class="copy-source-banner">
+        <div class="source-info">
+          <span class="source-label">เครื่องจักรต้นทาง:</span>
+          <strong id="copy-source-machine">PRS202</strong>
+          <span id="copy-source-context" class="muted"></span>
+        </div>
+        <div class="source-count">
+          <span class="badge primary" id="copy-items-count">0 รายการที่เลือก</span>
+        </div>
+      </div>
+
+      <!-- Target Selection Grid -->
+      <div class="copy-form-section">
+        <h3 class="copy-section-title">เลือกเครื่องจักรปลายทาง</h3>
+        <div class="copy-target-grid">
+          <div class="field">
+            <label for="copy-target-dept">แผนกปลายทาง <span class="req" style="color:var(--danger)">*</span></label>
+            <select id="copy-target-dept" class="copy-select"></select>
+          </div>
+          <div class="field">
+            <label for="copy-target-line">ไลน์ผลิตปลายทาง <span class="req" style="color:var(--danger)">*</span></label>
+            <select id="copy-target-line" class="copy-select"></select>
+          </div>
+          <div class="field">
+            <label for="copy-target-machine">เครื่องจักรปลายทาง <span class="req" style="color:var(--danger)">*</span></label>
+            <select id="copy-target-machine" class="copy-select"></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Installation Options -->
+      <div class="copy-form-section">
+        <h3 class="copy-section-title">กำหนดวันที่และตัวเลือกการติดตั้ง</h3>
+        <div class="copy-options-grid">
+          <div class="field">
+            <label for="copy-installed-date">วันที่ติดตั้งในเครื่องใหม่</label>
+            <input type="date" id="copy-installed-date" class="copy-input">
+          </div>
+          <div class="field">
+            <label for="copy-due-mode">กำหนดวันหมดอายุ</label>
+            <select id="copy-due-mode" class="copy-select">
+              <option value="PART_LIFE">ตามอายุจาก Part list (คำนวณใหม่ตามเกณฑ์)</option>
+              <option value="KEEP_ORIGINAL">คงวันหมดอายุตามข้อมูลเดิม</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top: 10px;">
+          <label class="checkbox-label">
+            <input type="checkbox" id="copy-auto-suffix" checked>
+            <span>หาก Label ซ้ำในเครื่องปลายทาง ให้เพิ่มหมายเลขต่อท้ายอัตโนมัติ (เช่น Label-COPY)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Selected Items Preview -->
+      <div class="copy-form-section">
+        <h3 class="copy-section-title">รายการอุปกรณ์ที่จะคัดลอก</h3>
+        <div class="copy-table-wrap">
+          <table class="copy-preview-table">
+            <thead>
+              <tr>
+                <th style="width: 36px;">#</th>
+                <th>Part Number</th>
+                <th>รายละเอียด / Brand</th>
+                <th>Label</th>
+                <th class="numeric" style="width: 80px;">จำนวน</th>
+              </tr>
+            </thead>
+            <tbody id="copy-preview-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="copy-error" class="field-error" role="alert" hidden></div>
+    </div>
+    <footer class="dialog-footer">
+      <button type="button" id="copy-cancel" class="button outline">ยกเลิก</button>
+      <button type="button" id="copy-submit" class="button primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        <span id="copy-submit-text">คัดลอกไปยังเครื่องปลายทาง</span>
+      </button>
+    </footer>
+  </dialog>
+
+  <dialog id="part-quick-editor" aria-labelledby="part-qe-title" class="editor-dialog">
+    <form id="part-qe-form" novalidate>
+      <header class="dialog-header">
+        <div>
+          <p class="eyebrow mono" id="part-qe-code">PART-000000 · MASTER อะไหล่</p>
+          <h2 id="part-qe-title">แก้ไขข้อมูล Part</h2>
+        </div>
+        <button type="button" id="part-qe-close" class="modal-close-btn" aria-label="ปิดหน้าต่าง">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </header>
+      <div class="dialog-body">
+        <div id="part-qe-error" class="field-error" role="alert" hidden style="margin-bottom:12px;background:#fef2f2;border:1px solid #fecaca;padding:8px 12px;border-radius:6px;"></div>
+
+        <!-- Image & Quick Info Bar -->
+        <div class="part-qe-hero">
+          <div class="part-qe-thumb-wrap">
+            <div id="part-qe-preview" class="part-qe-thumb">
+              <span class="part-qe-thumb-placeholder">📷</span>
+            </div>
+          </div>
+          <div class="part-qe-thumb-actions">
+            <div class="part-qe-thumb-btn-group">
+              <button type="button" class="button outline mini-btn" id="part-qe-choose-file">📁 เลือกรูปภาพ</button>
+              <button type="button" class="button outline mini-btn" id="part-qe-camera">📷 ถ่ายรูป</button>
+              <button type="button" class="button danger mini-btn" id="part-qe-remove-img" hidden>🗑️ ลบรูป</button>
+            </div>
+            <small id="part-qe-img-status" class="muted" style="margin-top:6px;font-size:12px;">รองรับไฟล์ JPG, PNG, WebP (สามารถกด Ctrl+V เพื่อวางรูปภาพ หรือลากไฟล์มาวางได้)</small>
+            <input type="file" id="part-qe-file" accept="image/jpeg,image/png,image/webp" hidden>
+            <input type="file" id="part-qe-camera-input" accept="image/jpeg,image/png,image/webp" capture="environment" hidden>
+          </div>
+        </div>
+
+        <div class="part-qe-grid">
+          <div class="part-qe-field">
+            <label for="part-qe-number">Part Number <span style="color:var(--danger, #dc2626)">*</span></label>
+            <input type="text" id="part-qe-number" required maxlength="160" autocomplete="off" placeholder="เช่น 04072012">
+            <small id="part-qe-number-error" class="field-error" style="min-height:0;margin-top:2px;" hidden></small>
+          </div>
+
+          <div class="part-qe-field">
+            <label for="part-qe-brand">Brand / ยี่ห้อ</label>
+            <select id="part-qe-brand">
+              <option value="">-- ไม่ระบุยี่ห้อ --</option>
+            </select>
+          </div>
+
+          <div class="part-qe-field full-width">
+            <label for="part-qe-desc">Description / รายละเอียดอะไหล่ <span style="color:var(--danger, #dc2626)">*</span></label>
+            <textarea id="part-qe-desc" rows="2" required maxlength="2000" placeholder="เช่น MICRO-SWITCH 24VDC"></textarea>
+            <small id="part-qe-desc-error" class="field-error" style="min-height:0;margin-top:2px;" hidden></small>
+          </div>
+
+          <div class="part-qe-field">
+            <label for="part-qe-store">Store Code / รหัสสโตร์</label>
+            <input type="text" id="part-qe-store" maxlength="160" placeholder="เช่น E-102">
+          </div>
+
+          <div class="part-qe-field">
+            <label for="part-qe-lifespan">อายุอุปกรณ์ (ปี)</label>
+            <input type="number" id="part-qe-lifespan" min="0" max="999" step="any" placeholder="เช่น 2 หรือ 0.5">
+          </div>
+
+          <div class="part-qe-field">
+            <label for="part-qe-price">ราคาต่อหน่วย (บาท)</label>
+            <input type="number" id="part-qe-price" min="0" step="0.01" placeholder="เช่น 450.00">
+          </div>
+
+          <div class="part-qe-field full-width">
+            <label for="part-qe-notes">หมายเหตุ (Notes)</label>
+            <textarea id="part-qe-notes" rows="2" maxlength="4000" placeholder="บันทึกเพิ่มเติม..."></textarea>
+          </div>
+        </div>
+      </div>
+      <footer class="dialog-footer">
+        <button type="button" id="part-qe-cancel" class="button outline">ยกเลิก</button>
+        <button type="submit" id="part-qe-save" class="button primary">💾 บันทึกข้อมูล Part</button>
+      </footer>
+    </form>
+  </dialog>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   <script>/* Shared deterministic domain rules; no browser or Apps Script dependencies. */
 var BomCore = (() => {
@@ -1887,7 +2526,7 @@ if (typeof module!=='undefined') module.exports=BomCore;
   const svgIcon=(nodes,size=15)=>{const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');Object.entries({width:size,height:size,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor','stroke-width':'2','stroke-linecap':'round','stroke-linejoin':'round','aria-hidden':'true'}).forEach(([k,v])=>svg.setAttribute(k,v));nodes.forEach(([tag,attrs])=>{const node=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>node.setAttribute(k,v));svg.append(node);});return svg;};
   const button=(label,fn,cls='button outline')=>{const n=el('button',cls,label);n.type='button';n.addEventListener('click',()=>Promise.resolve().then(fn).catch(pageError));return n;};
   const mql = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(max-width: 780px)') : null;
-  const state={token:'',expiresAt:0,reference:null,deptId:'',lineId:'',machineId:'',result:null,machineData:null,machineCache:{},allParts:null,loadingParts:false,page:1,selected:new Set(),listSequence:0,statsSequence:0,pickerSequence:0,detailSequence:0,busy:false,editor:null,dirty:false,reviewed:false,partPage:1,pendingPayload:null,pickerTarget:null,viewport:mql&&mql.matches?'mobile':'desktop',editorStep:1};
+  const state={token:'',expiresAt:0,reference:null,deptId:'',lineId:'',machineId:'',result:null,machineData:null,machineCache:{},allParts:null,loadingParts:false,page:1,selected:new Set(),selectMode:false,listSequence:0,statsSequence:0,pickerSequence:0,detailSequence:0,busy:false,editor:null,dirty:false,reviewed:false,partPage:1,pendingPayload:null,pickerTarget:null,viewport:mql&&mql.matches?'mobile':'desktop',editorStep:1};
   if(mql){
     mql.addEventListener('change',e=>{
       const next=e.matches?'mobile':'desktop';
@@ -2113,7 +2752,8 @@ if (typeof module!=='undefined') module.exports=BomCore;
     const showHistory=$('history-view').value==='all';
     const queryText=$('query').value;
     const statusFilter=$('status').value;
-    const pageSize=+($('page-size')?.value||25);
+    const rawSize = $('page-size')?.value || '25';
+    const pageSize = rawSize === 'all' || rawSize === 'ทั้งหมด' ? 'all' : (+rawSize || 25);
     const rows=m.rawRows.filter(r=>showHistory||r.RecordStatus==='ACTIVE');
     const words=C.normalized(queryText).split(/\s+/).filter(Boolean);
     const filtered=rows.filter(r=>{
@@ -2147,6 +2787,8 @@ if (typeof module!=='undefined') module.exports=BomCore;
   }
   function openMachine(id){
     state.machineId=id;state.page=1;$('query').value='';$('clear-query').hidden=true;$('status').value='';$('history-view').value='';
+    state.selectMode=false;
+    if($('bom-view')) $('bom-view').classList.remove('select-mode-active');
     const m=state.reference?.machines?.find(item=>item.MachineID===id);
     if(m){
       state.deptId=m.DeptID;
@@ -2200,24 +2842,264 @@ if (typeof module!=='undefined') module.exports=BomCore;
   function externalLink(url,label){const a=el('a','detail-link',label);a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a;}
   function fact(list,label,value,cls=''){list.append(el('dt','',label),el('dd',cls,value===''||value==null?'—':String(value)));}
   function visibleRows(){return state.result?state.result.items.flatMap(g=>g.labels):[];}
+  function openCopyModal() {
+    const selectedRows = visibleRows().filter(r => state.selected.has(r.RecordID));
+    if (!selectedRows.length) return;
+    const modal = $('copy-modal');
+    if (!modal) return;
+
+    $('copy-source-machine').textContent = `${state.result?.machine?.MachineCode || ''} · ${state.result?.machine?.MachineName || ''}`;
+    $('copy-source-context').textContent = `${state.result?.department?.DeptName || ''} / ${state.result?.line?.LineName || ''}`;
+    $('copy-items-count').textContent = `${selectedRows.length} รายการที่เลือก`;
+    $('copy-submit-text').textContent = `คัดลอก ${selectedRows.length} รายการไปยังเครื่องปลายทาง`;
+
+    const deptSelect = $('copy-target-dept');
+    deptSelect.innerHTML = '';
+    (state.reference?.departments || []).forEach(d => {
+      const opt = new Option(d.DeptName, d.DeptID);
+      if (d.DeptID === state.deptId) opt.selected = true;
+      deptSelect.add(opt);
+    });
+
+    const updateCopyMachines = () => {
+      const deptId = $('copy-target-dept').value;
+      const lineId = $('copy-target-line').value;
+      const machineSelect = $('copy-target-machine');
+      machineSelect.innerHTML = '<option value="">-- เลือกเครื่องจักรปลายทาง --</option>';
+      const available = (state.reference?.machines || []).filter(m => {
+        if (m.MachineID === state.machineId) return false;
+        if (!m.IsActive) return false;
+        if (lineId && m.LineID !== lineId) return false;
+        if (deptId && m.DeptID !== deptId) return false;
+        return true;
+      });
+      available.forEach(m => {
+        machineSelect.add(new Option(`${m.MachineCode} · ${m.MachineName}`, m.MachineID));
+      });
+    };
+
+    const updateCopyLines = () => {
+      const deptId = $('copy-target-dept').value;
+      const lineSelect = $('copy-target-line');
+      lineSelect.innerHTML = '<option value="">ทุกไลน์ผลิตในแผนกนี้</option>';
+      (state.reference?.lines || []).filter(l => !deptId || l.DeptID === deptId).forEach(l => {
+        const opt = new Option(l.LineName + (l.IsActive ? '' : ' (ปิดใช้งาน)'), l.LineID);
+        lineSelect.add(opt);
+      });
+      updateCopyMachines();
+    };
+
+    deptSelect.onchange = updateCopyLines;
+    $('copy-target-line').onchange = updateCopyMachines;
+    updateCopyLines();
+
+    $('copy-installed-date').value = today();
+    $('copy-due-mode').value = 'PART_LIFE';
+    $('copy-auto-suffix').checked = true;
+    $('copy-error').hidden = true;
+    $('copy-error').textContent = '';
+
+    const tbody = $('copy-preview-body');
+    tbody.replaceChildren();
+    selectedRows.forEach((r, idx) => {
+      const tr = document.createElement('tr');
+      const tdIdx = el('td', 'muted', String(idx + 1));
+      const tdPart = el('td');
+      tdPart.append(el('strong', '', r.part?.['Part number'] || r.PartID));
+      const tdDesc = el('td');
+      tdDesc.append(el('span', '', r.part?.Description || '—'), document.createElement('br'), el('small', 'muted', r.part?.Brand || 'ไม่ระบุยี่ห้อ'));
+      const tdLabel = el('td');
+      tdLabel.append(el('span', 'label-tag' + (r.Label ? '' : ' muted-tag'), r.Label || '—'));
+      const tdQty = el('td', 'numeric', `${r.Quantity} ชิ้น`);
+      tr.append(tdIdx, tdPart, tdDesc, tdLabel, tdQty);
+      tbody.append(tr);
+    });
+
+    modal.showModal();
+  }
+
+  async function submitCopy() {
+    const targetMachineId = $('copy-target-machine').value;
+    if (!targetMachineId) {
+      const err = $('copy-error');
+      err.textContent = 'กรุณาเลือกเครื่องจักรปลายทาง';
+      err.hidden = false;
+      $('copy-target-machine').focus();
+      return;
+    }
+    const selectedRows = visibleRows().filter(r => state.selected.has(r.RecordID));
+    if (!selectedRows.length) {
+      const err = $('copy-error');
+      err.textContent = 'ไม่มีรายการที่เลือก';
+      err.hidden = false;
+      return;
+    }
+    const targetMachine = state.reference?.machines?.find(m => m.MachineID === targetMachineId);
+    const installedAt = $('copy-installed-date').value || today();
+    const dueMode = $('copy-due-mode').value || 'PART_LIFE';
+    const autoSuffix = $('copy-auto-suffix').checked;
+    const submitBtn = $('copy-submit');
+
+    busyButton(submitBtn, true);
+    $('copy-error').hidden = true;
+    try {
+      const labels = selectedRows.map(r => ({
+        PartID: r.PartID,
+        Label: r.Label || '',
+        Quantity: Number(r.Quantity) || 1,
+        InstalledAt: installedAt,
+        DueMode: dueMode === 'KEEP_ORIGINAL' ? (r.DueMode || 'PART_LIFE') : 'PART_LIFE',
+        ManualExpiryDate: dueMode === 'KEEP_ORIGINAL' ? (r.ManualExpiryDate || '') : '',
+        Notes: r.Notes ? `คัดลอกจาก ${state.result?.machine?.MachineCode || ''} · ${r.Notes}` : `คัดลอกจาก ${state.result?.machine?.MachineCode || ''}`
+      }));
+
+      try {
+        const payload = {
+          machineId: targetMachineId,
+          operationId: crypto.randomUUID(),
+          labels,
+          reason: `คัดลอก ${labels.length} รายการจากเครื่อง ${state.result?.machine?.MachineCode || ''}`
+        };
+        await transport('add', payload);
+      } catch (addErr) {
+        if (autoSuffix && addErr.message && addErr.message.includes('Label ซ้ำ')) {
+          const suffixed = labels.map(l => ({
+            ...l,
+            Label: l.Label ? `${l.Label}-COPY` : ''
+          }));
+          const retryPayload = {
+            machineId: targetMachineId,
+            operationId: crypto.randomUUID(),
+            labels: suffixed,
+            reason: `คัดลอก ${labels.length} รายการจากเครื่อง ${state.result?.machine?.MachineCode || ''}`
+          };
+          await transport('add', retryPayload);
+        } else {
+          throw addErr;
+        }
+      }
+
+      delete state.machineCache[targetMachineId];
+      $('copy-modal').close();
+      toast(`คัดลอก ${labels.length} รายการไปยัง ${targetMachine ? targetMachine.MachineCode : 'เครื่องปลายทาง'} สำเร็จ`);
+      toggleSelectMode(false);
+    } catch (err) {
+      const errBox = $('copy-error');
+      errBox.textContent = err.message || 'เกิดข้อผิดพลาดในการคัดลอก';
+      errBox.hidden = false;
+    } finally {
+      busyButton(submitBtn, false);
+    }
+  }
+
+  function toggleSelectMode(force){
+    const next=typeof force==='boolean'?force:!state.selectMode;
+    state.selectMode=next;
+    const bomView=$('bom-view');
+    if(bomView) bomView.classList.toggle('select-mode-active',next);
+    const btn=$('btn-toggle-select');
+    if(btn){
+      btn.classList.toggle('active',next);
+      btn.classList.toggle('primary',next);
+      btn.classList.toggle('outline',!next);
+      const icon=next
+        ? '<svg class="select-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+        : '<svg class="select-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M9 12l2 2 4-4"></path></svg>';
+      btn.innerHTML=`${icon}<span class="select-btn-text">${next?'เสร็จสิ้น':'เลือก'}</span>`;
+      btn.title=next?'เสร็จสิ้นการเลือก (ปิดโหมดเลือก)':'เปิดโหมดเลือกรายการ (Part / Label)';
+    }
+    const mobileBtn=$('mobile-toggle-select');
+    if(mobileBtn){
+      mobileBtn.classList.toggle('active',next);
+      mobileBtn.classList.toggle('primary',next);
+      mobileBtn.classList.toggle('outline',!next);
+      mobileBtn.textContent=next?'เสร็จสิ้น':'เลือก';
+    }
+    const pageWrap=$('select-page-wrap');
+    if(pageWrap) pageWrap.hidden=!next;
+    const divider=$('selection-divider');
+    if(divider) divider.hidden=!next;
+    const countBadge=$('selected-count');
+    if(countBadge) countBadge.hidden=!next;
+    const hint=$('select-mode-hint');
+    if(hint) hint.hidden=next;
+    if(!next){
+      state.selected.clear();
+    }
+    updateSelection();
+  }
+  function togglePartSelection(group){
+    const activeLabels=(group.labels||[]).filter(r=>r.RecordStatus==='ACTIVE'&&state.result?.editable);
+    if(!activeLabels.length) return;
+    const allSelected=activeLabels.every(r=>state.selected.has(r.RecordID));
+    if(allSelected){
+      activeLabels.forEach(r=>state.selected.delete(r.RecordID));
+    } else {
+      activeLabels.forEach(r=>state.selected.add(r.RecordID));
+    }
+    updateSelection();
+  }
   function updateSelection(){
     const available=visibleRows().filter(r=>r.RecordStatus==='ACTIVE'&&state.result?.editable);
     const count=state.selected.size;
     const txt=`เลือก ${count} รายการ${count>50?' · ไม่เกิน 50':''}`;
-    if($('selected-count')) $('selected-count').textContent=txt;
+    const badge=$('selected-count');
+    if(badge){
+      badge.textContent=txt;
+      badge.classList.toggle('has-items',count>0);
+    }
     if($('mobile-selected-count')) $('mobile-selected-count').textContent=txt;
     const canMutate=count>0&&count<=50&&!state.busy;
     if($('replace')) $('replace').disabled=!canMutate;
     if($('remove-selected')) $('remove-selected').disabled=!canMutate;
+    if($('copy-selected')) $('copy-selected').disabled=!canMutate;
     if($('mobile-replace')) $('mobile-replace').disabled=!canMutate;
     if($('mobile-remove')) $('mobile-remove').disabled=!canMutate;
+    if($('mobile-copy')) $('mobile-copy').disabled=!canMutate;
     if($('select-page')){
       $('select-page').checked=!!available.length&&available.every(r=>state.selected.has(r.RecordID));
       $('select-page').indeterminate=count>0&&!$('select-page').checked;
     }
+    if(state.result?.items){
+      state.result.items.forEach(group=>{
+        const activeLabels=(group.labels||[]).filter(r=>r.RecordStatus==='ACTIVE'&&state.result?.editable);
+        const selCount=activeLabels.filter(r=>state.selected.has(r.RecordID)).length;
+        const isAll=activeLabels.length>0&&selCount===activeLabels.length;
+        const isIndet=selCount>0&&selCount<activeLabels.length;
+        document.querySelectorAll(`.part-checkbox[data-part-id="${group.PartID}"]`).forEach(cb=>{
+          cb.checked=isAll;
+          cb.indeterminate=isIndet;
+          cb.disabled=activeLabels.length===0;
+          const summary=cb.closest('summary');
+          if(summary){
+            summary.classList.toggle('is-selected',isAll);
+            summary.classList.toggle('is-partially-selected',isIndet);
+          }
+          const details=cb.closest('details');
+          if(details) details.classList.toggle('has-selected-items',selCount>0);
+        });
+        document.querySelectorAll(`.mobile-part-checkbox[data-part-id="${group.PartID}"]`).forEach(cb=>{
+          cb.checked=isAll;
+          cb.indeterminate=isIndet;
+          cb.disabled=activeLabels.length===0;
+          const header=cb.closest('.mobile-part-header');
+          if(header){
+            header.classList.toggle('is-selected',isAll);
+            header.classList.toggle('is-partially-selected',isIndet);
+          }
+          const card=cb.closest('.mobile-part-card');
+          if(card) card.classList.toggle('has-selected-items',selCount>0);
+        });
+      });
+    }
+    document.querySelectorAll('[data-record]').forEach(n=>{
+      if(n.type==='checkbox') n.checked=state.selected.has(n.dataset.record);
+      const row=n.closest('.label-row, .mobile-label-card');
+      if(row) row.classList.toggle('is-selected',state.selected.has(n.dataset.record));
+    });
     const mobileBar=$('mobile-selection-bar');
     if(mobileBar){
-      const showMobile=count>0&&state.viewport==='mobile';
+      const showMobile=(count>0||state.selectMode)&&state.viewport==='mobile';
       mobileBar.hidden=!showMobile;
       document.body.classList.toggle('has-mobile-selection',showMobile);
     }
@@ -2301,15 +3183,62 @@ if (typeof module!=='undefined') module.exports=BomCore;
     btn.classList.toggle('has-filters',filterCount>0);
   }
   function renderDesktopGroup(group,r){
-    const details=el('details','group');const summary=el('summary');const info=el('div','part-info');
+    const details=el('details','group');
+    details.dataset.partId=group.PartID;
+    const summary=el('summary');
+    
+    const partCheckWrap=el('label','part-check-wrap');
+    const partCheck=el('input','part-checkbox');
+    partCheck.type='checkbox';
+    partCheck.dataset.partId=group.PartID;
+    partCheck.setAttribute('aria-label','เลือก Part '+(group.part?.['Part number']||group.PartID));
+    partCheckWrap.append(partCheck);
+
+    const info=el('div','part-info');
     const descText=group.part?.Description||'ไม่พบ Part ในข้อมูลหลัก';
     const descEl=el('p','',descText);descEl.title=descText;
     info.append(el('strong','',group.part?.['Part number']||group.PartID),descEl,el('small','',group.PartID+' · '+(group.part?.Brand||'ไม่ระบุ Brand')));
     const quantity=el('div','group-quantity');quantity.append(el('strong','',group.quantity),el('span','',r.filtered?'ชิ้นที่กรอง':'ชิ้น'));
     const preview=group.labels?.length?renderSummaryPreview(group.labels):null;
-    if(preview)summary.append(partImageButton(group.part,group),info,preview,quantity);
-    else summary.append(partImageButton(group.part,group),info,quantity);
+
+    const expandToggle=el('button','group-expand-toggle');
+    expandToggle.type='button';
+    expandToggle.setAttribute('aria-label','เปิด/ปิดรายการ');
+    expandToggle.title='เปิด/ปิดรายการ Label';
+    expandToggle.innerHTML='<svg class="expand-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
+    summary.append(partCheckWrap,partImageButton(group.part,group),info);
+    if(preview)summary.append(preview);
+    summary.append(quantity,expandToggle);
     details.append(summary);
+
+    summary.addEventListener('click',e=>{
+      if(e.target.closest('.part-image-button, .button, a')) return;
+      if(e.target.closest('.group-expand-toggle')){
+        e.preventDefault();
+        details.open=!details.open;
+        schedulePreviewUpdate();
+        return;
+      }
+      if(e.target.closest('.part-check-wrap')) return;
+      if(state.selectMode){
+        e.preventDefault();
+        togglePartSelection(group);
+      }
+    });
+
+    partCheck.addEventListener('change',e=>{
+      e.stopPropagation();
+      const activeLabels=(group.labels||[]).filter(row=>row.RecordStatus==='ACTIVE'&&state.result?.editable);
+      if(!activeLabels.length) return;
+      if(partCheck.checked){
+        activeLabels.forEach(row=>state.selected.add(row.RecordID));
+      } else {
+        activeLabels.forEach(row=>state.selected.delete(row.RecordID));
+      }
+      updateSelection();
+    });
+
     details.addEventListener('toggle',schedulePreviewUpdate);
     if(r.editable&&group.part){
       const tools=el('div','group-tools');
@@ -2317,9 +3246,8 @@ if (typeof module!=='undefined') module.exports=BomCore;
       tools.append(el('span','',`ติดตั้งปัจจุบัน ${activeLabels.length} รายการ`));
       const partUrl=partEditUrl(group.PartID||group.part?.ID);
       if(partUrl){
-        const editPart=el('a','button outline edit-part-button mini-btn','✎ Part Edit');
-        editPart.href=partUrl;editPart.target='_blank';editPart.rel='noopener noreferrer';
-        editPart.title=`เปิดแก้ไข Part ในระบบ Part list (${group.PartID})`;
+        const editPart=button('✎ Part Edit',()=>openPartEditor(group.part||{ID:group.PartID},group),'button outline edit-part-button mini-btn');
+        editPart.title=`แก้ไขข้อมูล Part (${group.PartID}) ในหน้านี้`;
         tools.append(editPart);
       }else tools.append(el('span','group-part-missing','ไม่พบ Part ใน Master อะไหล่'));
       if(activeLabels.length>0){
@@ -2365,11 +3293,30 @@ if (typeof module!=='undefined') module.exports=BomCore;
       actions.append(button('ถอดออก',()=>openEditor('remove',[row]),'button ghost mini-btn'));
     }
     card.append(head,body,actions);
+    card.dataset.record=row.RecordID;
+    card.addEventListener('click',e=>{
+      if(e.target.closest('button, a, input, label')) return;
+      if(state.selectMode){
+        if(!state.result?.editable||row.RecordStatus!=='ACTIVE') return;
+        if(state.selected.has(row.RecordID)) state.selected.delete(row.RecordID);
+        else state.selected.add(row.RecordID);
+        updateSelection();
+      }
+    });
     return card;
   }
   function renderMobileGroup(group,r){
     const card=el('details','mobile-part-card');
+    card.dataset.partId=group.PartID;
     const header=el('summary','mobile-part-header');
+
+    const partCheckWrap=el('label','mobile-part-check-wrap');
+    const partCheck=el('input','mobile-part-checkbox');
+    partCheck.type='checkbox';
+    partCheck.dataset.partId=group.PartID;
+    partCheck.setAttribute('aria-label','เลือก Part '+(group.part?.['Part number']||group.PartID));
+    partCheckWrap.append(partCheck);
+
     const thumb=el('div','mobile-part-thumb');
     thumb.append(partImageButton(group.part,group));
     
@@ -2385,16 +3332,36 @@ if (typeof module!=='undefined') module.exports=BomCore;
       el('span','',r.filtered?'ชิ้นที่กรอง':'ชิ้น'),
       el('small','mobile-part-label-count',`${group.labels.length} Label`)
     );
-    header.append(thumb,identity,qty);
+    header.append(partCheckWrap,thumb,identity,qty);
+
+    header.addEventListener('click',e=>{
+      if(e.target.closest('.part-image-button, .button, a')) return;
+      if(e.target.closest('.mobile-part-check-wrap')) return;
+      if(state.selectMode){
+        e.preventDefault();
+        togglePartSelection(group);
+      }
+    });
+
+    partCheck.addEventListener('change',e=>{
+      e.stopPropagation();
+      const activeLabels=(group.labels||[]).filter(row=>row.RecordStatus==='ACTIVE'&&state.result?.editable);
+      if(!activeLabels.length) return;
+      if(partCheck.checked){
+        activeLabels.forEach(row=>state.selected.add(row.RecordID));
+      } else {
+        activeLabels.forEach(row=>state.selected.delete(row.RecordID));
+      }
+      updateSelection();
+    });
 
     const actions=el('div','mobile-part-actions');
     const detailBtn=button('ดูรายละเอียด Part',()=>openPartDetail(group.part,group),'button outline mini-btn');
     actions.append(detailBtn);
     const partUrl=partEditUrl(group.PartID||group.part?.ID);
     if(partUrl){
-      const editPart=el('a','button outline mini-btn','✎ Part Edit ↗');
-      editPart.href=partUrl;editPart.target='_blank';editPart.rel='noopener noreferrer';
-      editPart.title=`เปิดแก้ไข Part ในระบบ Master (${group.PartID})`;
+      const editPart=button('✎ Part Edit',()=>openPartEditor(group.part||{ID:group.PartID},group),'button outline mini-btn');
+      editPart.title=`แก้ไขข้อมูล Part (${group.PartID}) ในหน้านี้`;
       actions.append(editPart);
     } else {
       const missing=el('span','button outline mini-btn disabled muted','ไม่พบใน Master');
@@ -2418,7 +3385,7 @@ if (typeof module!=='undefined') module.exports=BomCore;
     const r=state.result;$('machine-code').textContent=r.machine.MachineCode;$('machine-name').textContent=r.machine.MachineName;
     $('machine-context').textContent=r.department.DeptName+' / '+r.line.LineName+(r.editable?'':' • อ่านประวัติเท่านั้น');renderBreadcrumb();document.title=r.machine.MachineCode+' | อุปกรณ์ประจำเครื่องจักร';
     $('totals').replaceChildren();[[r.totals.parts,'ชนิดอุปกรณ์'],[r.totals.labels,'รายการติดตั้ง'],[r.totals.quantity,'ชิ้นทั้งหมด'],[r.totals.attention,'รายการที่ควรตรวจ']].forEach(([value,label],i)=>{const item=el('div','total'+(i===3?' attention':''));item.append(el('strong','',value),el('span','',label));$('totals').append(item);});
-    $('add').disabled=!r.editable;$('select-page').disabled=!r.editable||!r.items.length;
+    $('add').disabled=!r.editable;$('select-page').disabled=!r.editable||!r.items.length;if($('btn-toggle-select'))$('btn-toggle-select').disabled=!r.editable||!r.items.length;if($('mobile-toggle-select'))$('mobile-toggle-select').disabled=!r.editable||!r.items.length;if($('bom-view'))$('bom-view').classList.toggle('select-mode-active',state.selectMode);
     const root=$('groups');root.replaceChildren();
     if(!r.items.length){
       const empty=el('div','empty');
@@ -2436,12 +3403,31 @@ if (typeof module!=='undefined') module.exports=BomCore;
     }
     updateMobileFilterButton();
     $('list-status').textContent=`ข้อมูล ณ ${dateText(r.asOf)}${r.filtered?' • แสดงเฉพาะรายการที่กรอง':''}${$('history-view').value?' • จำนวนในกลุ่มรวมรอบที่ผ่านมา':''}`;
-    $('range').textContent=r.total?`Part ${(r.page-1)*r.pageSize+1}–${Math.min(r.page*r.pageSize,r.total)} จาก ${r.total}`:'0 Part';
-    $('page-number').textContent=`${r.page} / ${Math.ceil(r.total/r.pageSize)||1}`;$('previous').disabled=r.page===1;$('next').disabled=r.page*r.pageSize>=r.total;
+    const isAll = r.pageSize === 'all' || +r.pageSize >= 999999;
+    const totalPages = isAll ? 1 : (Math.ceil(r.total / r.pageSize) || 1);
+    const rangeText = r.total
+      ? (isAll ? `Part 1–${r.total} จาก ${r.total}` : `Part ${(r.page - 1) * r.pageSize + 1}–${Math.min(r.page * r.pageSize, r.total)} จาก ${r.total}`)
+      : '0 Part';
+    $('range').textContent = rangeText;
+    $('page-number').textContent = `${r.page} / ${totalPages}`;
+    $('previous').disabled = r.page <= 1;
+    $('next').disabled = isAll || (r.page * r.pageSize >= r.total);
     updateSelection();
   }
   function renderLabel(row){
-    const root=el('div','label-row'),check=el('input');check.type='checkbox';check.dataset.record=row.RecordID;check.setAttribute('aria-label','เลือก '+(row.Label||'รายการ'));check.disabled=!state.result.editable||row.RecordStatus!=='ACTIVE';check.addEventListener('change',()=>{check.checked?state.selected.add(row.RecordID):state.selected.delete(row.RecordID);updateSelection();});
+    const root=el('div','label-row');root.dataset.record=row.RecordID;
+    const checkWrap=el('label','label-check-wrap');
+    const check=el('input','label-checkbox');check.type='checkbox';check.dataset.record=row.RecordID;check.setAttribute('aria-label','เลือก '+(row.Label||'รายการ'));check.disabled=!state.result.editable||row.RecordStatus!=='ACTIVE';check.checked=state.selected.has(row.RecordID);check.addEventListener('change',()=>{check.checked?state.selected.add(row.RecordID):state.selected.delete(row.RecordID);updateSelection();});
+    checkWrap.append(check);
+    root.addEventListener('click',e=>{
+      if(e.target.closest('button, a, input, label')) return;
+      if(state.selectMode){
+        if(!state.result?.editable||row.RecordStatus!=='ACTIVE') return;
+        if(state.selected.has(row.RecordID)) state.selected.delete(row.RecordID);
+        else state.selected.add(row.RecordID);
+        updateSelection();
+      }
+    });
     const name=el('div');
     const labelTag=el('span','label-tag'+(row.Label?'':' muted-tag'),row.Label||'—');
     if(!row.Label) labelTag.title='ไม่ระบุ Label (นับตามจำนวนชิ้น)';
@@ -2449,7 +3435,7 @@ if (typeof module!=='undefined') module.exports=BomCore;
     const age=el('div','label-age');age.append(el('small','',`ติดตั้ง ${dateText(row.InstalledAt)}`),el('small','',`อายุ ${row.age.ageText}`),el('small','',row.age.lifeText));
     const due=el('div','label-due');due.append(el('span','badge '+(row.RecordStatus==='ACTIVE'?row.age.status:''),row.RecordStatus==='ACTIVE'?row.age.label:'สิ้นสุด '+dateText(row.EndedAt)),el('small','',row.age.dueDate?'กำหนด '+dateText(row.age.dueDate):'ยังไม่มีวันครบกำหนด'));
     const actions=el('div','actions');actions.append(button('รายละเอียด',()=>openDetail(row),'button ghost'));if(state.result.editable&&row.RecordStatus==='ACTIVE'){actions.append(button('แก้ไข',()=>openEditor('edit',[row]),'button ghost'),button('ถอดออก',()=>openEditor('remove',[row]),'button ghost'));}
-    root.append(check,name,age,due,actions);return root;
+    root.append(checkWrap,name,age,due,actions);return root;
   }
   function field(key,label,value='',type='text',options){
     const wrap=el('div','field'),id='f-'+key;const lab=el('label','',label);lab.htmlFor=id;
@@ -2637,6 +3623,7 @@ if (typeof module!=='undefined') module.exports=BomCore;
     inputLabel.name = 'Label-' + index;
     inputLabel.type = 'text';
     inputLabel.placeholder = 'Label (เว้นว่างได้)';
+    inputLabel.title = 'กด ↑ หรือ ↓ เพื่อเลื่อนระหว่างแถว Label';
     inputLabel.value = preset.Label || '';
     inputLabel.setAttribute('aria-label', 'Label แถว ' + (index + 1));
     inputLabel.setAttribute('aria-describedby', 'f-Label-' + index + '-error');
@@ -3464,6 +4451,17 @@ if (typeof module!=='undefined') module.exports=BomCore;
       $('part-results').append(item);
     });
     $('picker-status').textContent=paged.total?`พบ ${paged.total} Part${queryText?' (จากทั้งหมด '+state.allParts.length+' รายการ)':''}`:'ไม่พบ Part ที่ตรงกับคำค้นหา';
+    if(!paged.total && queryText){
+      const emptyWrap = el('div', 'picker-empty-add');
+      emptyWrap.style.cssText = 'text-align:center;padding:20px 12px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;margin-top:12px;';
+      const emptyHint = el('p', '', 'ไม่พบ Part ที่ค้นหา "' + queryText + '" ในระบบ');
+      emptyHint.style.cssText = 'margin:0 0 10px 0;color:#64748b;font-size:13.5px;';
+      const createBtn = button('➕ เพิ่ม "' + queryText + '" เข้าสู่ Part Master List จากหน้านี้', () => openPartCreator(queryText), 'button primary mini-btn');
+      createBtn.type = 'button';
+      createBtn.style.cssText = 'font-size:13px;padding:6px 14px;';
+      emptyWrap.append(emptyHint, createBtn);
+      $('part-results').append(emptyWrap);
+    }
     $('part-page').textContent=`${paged.page} / ${Math.ceil(paged.total/pageSize)||1}`;
     $('part-previous').disabled=paged.page===1;
     $('part-next').disabled=paged.page*pageSize>=paged.total;
@@ -3554,8 +4552,7 @@ if (typeof module!=='undefined') module.exports=BomCore;
       const links=el('div','actions');
       if(original)links.append(externalLink(original,'เปิดรูปต้นฉบับ'));
       if(partUrl){
-        const editLink=el('a','button outline mini-btn detail-link','✎ แก้ไข Part ใน Master อะไหล่');
-        editLink.href=partUrl;editLink.target='_blank';editLink.rel='noopener noreferrer';
+        const editLink=button('✎ แก้ไขข้อมูล Part ในหน้านี้',()=>openPartEditor(part,group),'button outline mini-btn detail-link');
         links.append(editLink);
       }
       partPanel.append(links);
@@ -3565,6 +4562,574 @@ if (typeof module!=='undefined') module.exports=BomCore;
     const installed=el('section','detail-panel');installed.append(el('h3','','การติดตั้งในเครื่องนี้'));
     const installedFacts=el('dl','detail-facts');fact(installedFacts,'Label ที่แสดง',labels.length);fact(installedFacts,'จำนวนรวม',group?.quantity||0);installed.append(installedFacts);root.append(installed);
   }
+
+  /* --- PART QUICK EDIT POPUP CONTROLLER --- */
+  const PartImageCompressor = (() => {
+    const TYPES = ['image/jpeg','image/png','image/webp'];
+    const blobData = blob => new Promise((resolve,reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve({mime:blob.type, base64:String(reader.result).split(',')[1]});
+      reader.onerror = () => reject(new Error('ไม่สามารถอ่านไฟล์รูปภาพได้'));
+      reader.readAsDataURL(blob);
+    });
+    async function compress(file) {
+      if(!TYPES.includes(file.type)) throw new Error('กรุณาเลือกรูปภาพ JPG, PNG หรือ WebP');
+      if(!file.size || file.size > 10000000) throw new Error('ขนาดรูปภาพต้องไม่เกิน 10 MB');
+      const url = URL.createObjectURL(file), img = new Image();
+      try {
+        await new Promise((resolve,reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error('ไม่สามารถอ่านรูปภาพได้'));
+          img.src = url;
+        });
+        if(img.naturalWidth * img.naturalHeight > 50000000) throw new Error('ความละเอียดรูปภาพสูงเกินไป');
+        async function encode(longSide, maxBytes) {
+          const canvas = document.createElement('canvas');
+          const scale = Math.min(1, longSide / Math.max(img.naturalWidth, img.naturalHeight));
+          canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+          const ctx = canvas.getContext('2d');
+          if(!ctx) throw new Error('เบราว์เซอร์ไม่รองรับ Canvas');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          let blob;
+          for(const quality of [.82, .76, .68, .60]) {
+            blob = await new Promise(r => canvas.toBlob(r, 'image/webp', quality));
+            if(!blob || blob.type !== 'image/webp') {
+              ctx.globalCompositeOperation = 'destination-over';
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+              blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', quality));
+            }
+            if(blob && blob.size <= maxBytes) return blob;
+          }
+          return blob;
+        }
+        let full = await encode(1600, 1500000);
+        if(file.size < full.size && file.size <= 1500000 && Math.max(img.naturalWidth, img.naturalHeight) <= 1600) full = file;
+        const thumb = await encode(320, 100000);
+        return {
+          image: await blobData(full),
+          thumbnail: await blobData(thumb),
+          url: URL.createObjectURL(full),
+          size: full.size,
+          originalSize: file.size,
+          name: file.name || 'รูปภาพ'
+        };
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    }
+    return { compress };
+  })();
+
+    const rpcScope = (targetScope, method, ...args) => {
+    if (typeof window.EM_RPC_SCOPE === 'function') {
+      return window.EM_RPC_SCOPE(targetScope, method, ...args);
+    }
+    return fetch('/api/v1/' + targetScope + '/rpc', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'Idempotency-Key': crypto.randomUUID() },
+      body: JSON.stringify({ method, args })
+    }).then(async r => {
+      const res = await r.json();
+      if (!res.ok) throw new Error(res.error?.message || 'เชื่อมต่อไม่สำเร็จ');
+      return res.data;
+    });
+  };
+  if (typeof window.EM_RPC_SCOPE !== 'function') {
+    window.EM_RPC_SCOPE = rpcScope;
+  }
+
+  const partQeState = {
+    part: null,
+    group: null,
+    partId: null,
+    image: null,
+    removeImage: false,
+    busy: false,
+    brands: null
+  };
+
+  function renderQeImagePreview(url) {
+    const container = $('part-qe-preview');
+    if (!container) return;
+    container.innerHTML = '';
+    if (url) {
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = 'Part Thumbnail';
+      container.appendChild(img);
+      $('part-qe-remove-img').hidden = false;
+    } else {
+      container.innerHTML = '<span class="part-qe-thumb-placeholder">📷</span>';
+      $('part-qe-remove-img').hidden = true;
+    }
+  }
+
+  async function populateQeBrands(selectedBrandId = '') {
+    if (!partQeState.brands) {
+      try {
+        const fetched = await rpcScope('parts', 'getBrands');
+        partQeState.brands = (fetched || []).slice().sort((a, b) => a.name.localeCompare(b.name, 'th', { numeric: true, sensitivity: 'base' }));
+      } catch (e) {
+        console.warn('Could not load brands:', e);
+        partQeState.brands = [];
+      }
+    } else {
+      partQeState.brands.sort((a, b) => a.name.localeCompare(b.name, 'th', { numeric: true, sensitivity: 'base' }));
+    }
+    const select = $('part-qe-brand');
+    if (!select) return;
+    select.innerHTML = '<option value="">-- ไม่ระบุยี่ห้อ --</option>';
+    partQeState.brands.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b.id;
+      opt.textContent = b.name;
+      select.appendChild(opt);
+    });
+    if (selectedBrandId && !partQeState.brands.some(b => b.id === selectedBrandId)) {
+      const opt = document.createElement('option');
+      opt.value = selectedBrandId;
+      opt.textContent = selectedBrandId;
+      select.appendChild(opt);
+    }
+  }
+
+  async function openPartCreator(initialPartNumber = '') {
+    partQeState.isCreate = true;
+    partQeState.partId = null;
+    partQeState.part = null;
+    partQeState.group = null;
+    partQeState.image = null;
+    partQeState.removeImage = false;
+    partQeState.busy = false;
+
+    const dialog = $('part-quick-editor');
+    if (!dialog) return;
+
+    $('part-qe-error').hidden = true;
+    $('part-qe-error').textContent = '';
+    $('part-qe-code').textContent = '+ เพิ่มรายการใหม่ · MASTER อะไหล่';
+    $('part-qe-title').textContent = 'เพิ่ม Part ใหม่เข้าสู่ Master List';
+    $('part-qe-img-status').textContent = 'รองรับไฟล์ JPG, PNG, WebP (สามารถกด Ctrl+V เพื่อวางรูปภาพได้ทันที)';
+    $('part-qe-save').disabled = false;
+    $('part-qe-save').textContent = '➕ บันทึก Part ใหม่';
+
+    await populateQeBrands();
+
+    $('part-qe-number').value = initialPartNumber || '';
+    $('part-qe-desc').value = '';
+    $('part-qe-store').value = '';
+    $('part-qe-lifespan').value = '';
+    $('part-qe-price').value = '';
+    $('part-qe-notes').value = '';
+    $('part-qe-brand').value = '';
+
+    renderQeImagePreview(null);
+
+    dialog.showModal();
+    if (initialPartNumber) {
+      $('part-qe-desc').focus();
+    } else {
+      $('part-qe-number').focus();
+    }
+  }
+
+  async function openPartEditor(part, group) {
+    const partId = group?.PartID || part?.ID || part?.id;
+    partQeState.isCreate = false;
+    if (!partId) return;
+
+    partQeState.group = group;
+    partQeState.partId = partId;
+    partQeState.image = null;
+    partQeState.removeImage = false;
+    partQeState.busy = false;
+
+    const dialog = $('part-quick-editor');
+    if (!dialog) return;
+
+    $('part-qe-error').hidden = true;
+    $('part-qe-error').textContent = '';
+    $('part-qe-code').textContent = `${partId} · MASTER อะไหล่`;
+    $('part-qe-title').textContent = `แก้ไขข้อมูล Part (${partId})`;
+    $('part-qe-img-status').textContent = 'รองรับไฟล์ JPG, PNG, WebP (สามารถกด Ctrl+V เพื่อวางรูปภาพได้ทันที)';
+    $('part-qe-save').disabled = false;
+    $('part-qe-save').textContent = '💾 บันทึกข้อมูล Part';
+
+    // Load brands if not loaded yet
+    await populateQeBrands();
+
+    // Fetch full part object to ensure we have latest version and brandId
+    let fullPart = part || {};
+    try {
+      const fetched = await rpcScope('parts', 'getPart', partId);
+      if (fetched) fullPart = fetched;
+    } catch (e) {
+      console.warn('Could not fetch single part, using fallback:', e);
+    }
+    partQeState.part = fullPart;
+
+    // Populate form fields
+    $('part-qe-number').value = fullPart.partNumber || fullPart['Part number'] || '';
+    $('part-qe-desc').value = fullPart.description || fullPart.Description || '';
+    $('part-qe-store').value = fullPart.storeCode || fullPart['Store code'] || '';
+    $('part-qe-lifespan').value = fullPart.lifespan != null ? fullPart.lifespan : (fullPart['อายุอุปกรณ์ (ปี)'] != null ? fullPart['อายุอุปกรณ์ (ปี)'] : '');
+    $('part-qe-price').value = fullPart.price != null ? fullPart.price : (fullPart.Price != null ? fullPart.Price : '');
+    $('part-qe-notes').value = fullPart.notes || fullPart.Notes || '';
+
+    // Select brand
+    const brandVal = fullPart.brandId || '';
+    const brandName = fullPart.brand || fullPart.Brand || '';
+    const brandSelect = $('part-qe-brand');
+    if (brandVal && brandSelect.querySelector(`option[value="${brandVal}"]`)) {
+      brandSelect.value = brandVal;
+    } else if (brandName && partQeState.brands) {
+      const matched = partQeState.brands.find(b => b.name.toLowerCase() === brandName.toLowerCase());
+      if (matched) brandSelect.value = matched.id;
+      else brandSelect.value = '';
+    } else {
+      brandSelect.value = '';
+    }
+
+    // Setup Image preview
+    const currentImgUrl = fullPart.thumbnail || fullPart.Thumbnail || fullPart.picture || fullPart.Picture;
+    renderQeImagePreview(currentImgUrl);
+
+    dialog.showModal();
+    $('part-qe-number').focus();
+  }
+
+  function initPartQuickEditorEvents() {
+    const dialog = $('part-quick-editor');
+    if (!dialog) return;
+
+    $('part-qe-choose-file').onclick = () => $('part-qe-file').click();
+    $('part-qe-camera').onclick = () => $('part-qe-camera-input').click();
+
+    // Clipboard paste (Ctrl+V) support for images
+    window.addEventListener('paste', (e) => {
+      if (!dialog.open) return;
+
+      let imageFile = null;
+      if (e.clipboardData?.files && e.clipboardData.files.length > 0) {
+        for (let i = 0; i < e.clipboardData.files.length; i++) {
+          const file = e.clipboardData.files[i];
+          if (file.type && file.type.startsWith('image/')) {
+            imageFile = file;
+            break;
+          }
+        }
+      }
+
+      if (!imageFile && e.clipboardData?.items && e.clipboardData.items.length > 0) {
+        for (let i = 0; i < e.clipboardData.items.length; i++) {
+          const item = e.clipboardData.items[i];
+          if (item.type && item.type.startsWith('image/')) {
+            imageFile = item.getAsFile();
+            break;
+          }
+        }
+      }
+
+      if (imageFile) {
+        e.preventDefault();
+        if (!imageFile.name) {
+          const ext = imageFile.type === 'image/jpeg' ? '.jpg' : imageFile.type === 'image/webp' ? '.webp' : '.png';
+          imageFile = new File([imageFile], `clipboard_${Date.now()}${ext}`, { type: imageFile.type });
+        }
+        $('part-qe-img-status').textContent = '📋 วางรูปภาพจาก Clipboard แล้ว กำลังบีบอัด...';
+        handleFile(imageFile);
+      }
+    });
+
+    // Drag-and-drop image support onto the hero area
+    const heroEl = dialog.querySelector('.part-qe-hero');
+    if (heroEl) {
+      ['dragenter', 'dragover'].forEach(name => {
+        heroEl.addEventListener(name, (e) => {
+          e.preventDefault();
+          heroEl.style.outline = '2px dashed var(--accent, #0284c7)';
+          heroEl.style.outlineOffset = '2px';
+          heroEl.style.borderRadius = '8px';
+        });
+      });
+      ['dragleave', 'drop'].forEach(name => {
+        heroEl.addEventListener(name, (e) => {
+          e.preventDefault();
+          heroEl.style.outline = '';
+          heroEl.style.outlineOffset = '';
+        });
+      });
+      heroEl.addEventListener('drop', (e) => {
+        const file = e.dataTransfer?.files?.[0];
+        if (file && file.type && file.type.startsWith('image/')) {
+          handleFile(file);
+        }
+      });
+    }
+
+    async function handleFile(file) {
+      if (!file) return;
+      $('part-qe-img-status').textContent = '⏳ กำลังประมวลผลและบีบอัดรูปภาพ...';
+      try {
+        const compressed = await PartImageCompressor.compress(file);
+        partQeState.image = compressed;
+        partQeState.removeImage = false;
+        renderQeImagePreview(compressed.url);
+        $('part-qe-img-status').textContent = `✅ ${compressed.name} (${Math.round(compressed.size / 1024)} KB)`;
+      } catch (e) {
+        $('part-qe-img-status').textContent = `❌ ${e.message}`;
+      }
+    }
+
+    $('part-qe-file').onchange = (e) => {
+      if (e.target.files?.[0]) handleFile(e.target.files[0]);
+    };
+    $('part-qe-camera-input').onchange = (e) => {
+      if (e.target.files?.[0]) handleFile(e.target.files[0]);
+    };
+    $('part-qe-remove-img').onclick = () => {
+      partQeState.removeImage = true;
+      if (partQeState.image?.url) URL.revokeObjectURL(partQeState.image.url);
+      partQeState.image = null;
+      renderQeImagePreview(null);
+      $('part-qe-img-status').textContent = 'เตรียมลบรูปภาพเมื่อกดบันทึก';
+    };
+
+    $('part-qe-close').onclick = () => dialog.close();
+    $('part-qe-cancel').onclick = () => dialog.close();
+
+    $('part-qe-form').onsubmit = async (e) => {
+      e.preventDefault();
+      if (partQeState.busy) return;
+
+      const partNumber = $('part-qe-number').value.trim();
+      const description = $('part-qe-desc').value.trim();
+      const brandId = $('part-qe-brand').value || null;
+      const storeCode = $('part-qe-store').value.trim();
+      const rawLifespan = $('part-qe-lifespan').value.trim();
+      const rawPrice = $('part-qe-price').value.trim();
+      const notes = $('part-qe-notes').value.trim();
+
+      if (!partNumber) {
+        $('part-qe-error').textContent = 'กรุณากรอก Part Number';
+        $('part-qe-error').hidden = false;
+        $('part-qe-number').focus();
+        return;
+      }
+      if (!description) {
+        $('part-qe-error').textContent = 'กรุณากรอก Description';
+        $('part-qe-error').hidden = false;
+        $('part-qe-desc').focus();
+        return;
+      }
+
+      const lifespan = rawLifespan === '' ? null : Number(rawLifespan);
+      const price = rawPrice === '' ? null : Number(rawPrice);
+
+      partQeState.busy = true;
+      const saveBtn = $('part-qe-save');
+      saveBtn.disabled = true;
+      saveBtn.textContent = '⏳ กำลังบันทึก...';
+      $('part-qe-error').hidden = true;
+
+      try {
+        if (partQeState.isCreate) {
+          const payload = {
+            partNumber,
+            description,
+            brandId,
+            storeCode,
+            lifespan,
+            price,
+            notes,
+            requestId: crypto.randomUUID(),
+            image: partQeState.image ? partQeState.image.image : null,
+            thumbnail: partQeState.image ? partQeState.image.thumbnail : null
+          };
+
+          const res = await rpcScope('parts', 'createPart', payload);
+
+          const matchedBrand = partQeState.brands?.find(b => b.id === brandId);
+          const brandName = matchedBrand ? matchedBrand.name : '';
+
+          const newPart = {
+            ID: res.id,
+            id: res.id,
+            'Part number': partNumber,
+            partNumber: partNumber,
+            Description: description,
+            description: description,
+            Brand: brandName,
+            brand: brandName,
+            brandId: brandId,
+            'Store code': storeCode,
+            storeCode: storeCode,
+            'อายุอุปกรณ์ (ปี)': lifespan,
+            lifespan: lifespan,
+            Price: price,
+            price: price,
+            Notes: notes,
+            notes: notes,
+            Picture: res.picture || '',
+            picture: res.picture || '',
+            Thumbnail: res.thumbnail || '',
+            thumbnail: res.thumbnail || '',
+            version: res.version || 1
+          };
+
+          if (!Array.isArray(state.allParts)) state.allParts = [];
+          state.allParts.unshift(newPart);
+
+          try {
+            sessionStorage.setItem('BOM_PARTS_CACHE', JSON.stringify(state.allParts));
+          } catch (_) {}
+
+          dialog.close();
+          toast('✅ เพิ่ม Part "' + partNumber + '" (' + res.id + ') เข้าสู่ Master List แล้ว');
+
+          // If picker was open with a target in editor, auto-select this new part!
+          if ($('picker').open && state.pickerTarget && state.editor) {
+            const target = state.pickerTarget;
+            if (target && target.type === 'row') {
+              const idx = target.index;
+              if (state.editor.rows && state.editor.rows[idx]) {
+                state.editor.rows[idx].part = newPart;
+                updateRowPartUI(idx, newPart);
+              }
+            } else if (target && target.type === 'default') {
+              state.editor.defaultPart = newPart;
+              renderDefaultPartPanel(newPart);
+            } else if (target && target.type === 'edit') {
+              state.editor.replacementPart = newPart;
+              if ($('chosen-part')) $('chosen-part').textContent = newPart['Part number'] + ' · ' + newPart.Description;
+            } else {
+              state.editor.part = newPart;
+              if ($('chosen-part')) $('chosen-part').textContent = newPart['Part number'] + ' · ' + newPart.Description;
+            }
+            editorChanged();
+            closeDialog('picker');
+          } else if ($('picker').open) {
+            applyPartFilter();
+          }
+          return;
+        }
+
+        const payload = {
+          partNumber,
+          description,
+          brandId,
+          storeCode,
+          lifespan,
+          price,
+          notes,
+          version: partQeState.part ? Number(partQeState.part.version) : 1,
+          requestId: crypto.randomUUID(),
+          removeImage: partQeState.removeImage,
+          image: partQeState.image ? partQeState.image.image : null,
+          thumbnail: partQeState.image ? partQeState.image.thumbnail : null
+        };
+
+        const res = await rpcScope('parts', 'updatePart', partQeState.partId, payload);
+
+        // Update in-memory part
+        const matchedBrand = partQeState.brands?.find(b => b.id === brandId);
+        const brandName = matchedBrand ? matchedBrand.name : '';
+
+        if (partQeState.part) {
+          partQeState.part.version = res.version;
+          partQeState.part.partNumber = partNumber;
+          partQeState.part['Part number'] = partNumber;
+          partQeState.part.description = description;
+          partQeState.part.Description = description;
+          partQeState.part.brandId = brandId;
+          partQeState.part.brand = brandName;
+          partQeState.part.Brand = brandName;
+          partQeState.part.storeCode = storeCode;
+          partQeState.part['Store code'] = storeCode;
+          partQeState.part.lifespan = lifespan;
+          partQeState.part['อายุอุปกรณ์ (ปี)'] = lifespan;
+          partQeState.part.price = price;
+          partQeState.part.Price = price;
+          partQeState.part.notes = notes;
+          partQeState.part.Notes = notes;
+          if (res.picture !== undefined) {
+            partQeState.part.picture = res.picture;
+            partQeState.part.Picture = res.picture;
+          }
+          if (res.thumbnail !== undefined) {
+            partQeState.part.thumbnail = res.thumbnail;
+            partQeState.part.Thumbnail = res.thumbnail;
+          }
+        }
+
+        // Update group.part in current view
+        if (partQeState.group && partQeState.group.part) {
+          Object.assign(partQeState.group.part, {
+            'Part number': partNumber,
+            Description: description,
+            Brand: brandName,
+            brandId: brandId,
+            'Store code': storeCode,
+            'อายุอุปกรณ์ (ปี)': lifespan,
+            Price: price,
+            Notes: notes,
+            version: res.version,
+            Picture: res.picture !== undefined ? res.picture : partQeState.group.part.Picture,
+            Thumbnail: res.thumbnail !== undefined ? res.thumbnail : partQeState.group.part.Thumbnail
+          });
+        }
+
+        // Update in state.allParts if present
+        if (Array.isArray(state.allParts)) {
+          const idx = state.allParts.findIndex(p => p.ID === partQeState.partId || p.id === partQeState.partId);
+          if (idx !== -1) {
+            Object.assign(state.allParts[idx], {
+              'Part number': partNumber,
+              Description: description,
+              Brand: brandName,
+              brandId: brandId,
+              'Store code': storeCode,
+              'อายุอุปกรณ์ (ปี)': lifespan,
+              Price: price,
+              Notes: notes,
+              version: res.version,
+              Picture: res.picture !== undefined ? res.picture : state.allParts[idx].Picture,
+              Thumbnail: res.thumbnail !== undefined ? res.thumbnail : state.allParts[idx].Thumbnail
+            });
+            savePartsToStorage(state.allParts);
+          }
+        }
+
+        if (partQeState.image?.url) {
+          URL.revokeObjectURL(partQeState.image.url);
+          partQeState.image = null;
+        }
+
+        dialog.close();
+        toast(`✅ บันทึกข้อมูล Part ${partNumber} เรียบร้อยแล้ว`);
+
+        // Re-render BOM to reflect updated part number / desc / brand / image immediately
+        if (state.result && typeof renderBOM === 'function') {
+          renderBOM();
+        }
+      } catch (err) {
+        $('part-qe-error').textContent = err.message || 'บันทึกข้อมูลไม่สำเร็จ กรุณาลองใหม่';
+        $('part-qe-error').hidden = false;
+      } finally {
+        partQeState.busy = false;
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 บันทึกข้อมูล Part';
+      }
+    };
+  }
+
+    initPartQuickEditorEvents();
+  window.openPartEditor = openPartEditor;
+  window.openPartCreator = openPartCreator;
+  on('picker-add-part', 'click', () => openPartCreator($('part-query')?.value.trim() || ''));
   on('login-form','submit',async e=>{
     e.preventDefault();if(e.isComposing||$('login-submit').disabled)return;busyButton($('login-submit'),true);$('login-error').textContent='';
     try{
@@ -3602,6 +5167,14 @@ if (typeof module!=='undefined') module.exports=BomCore;
   on('back-machines','click',backMachines);on('add','click',()=>openEditor('add'));on('replace','click',()=>openEditor('replace',visibleRows().filter(r=>state.selected.has(r.RecordID))));on('remove-selected','click',()=>openEditor('remove',visibleRows().filter(r=>state.selected.has(r.RecordID))));
   on('mobile-replace','click',()=>openEditor('replace',visibleRows().filter(r=>state.selected.has(r.RecordID))));
   on('mobile-remove','click',()=>openEditor('remove',visibleRows().filter(r=>state.selected.has(r.RecordID))));
+  on('copy-selected','click',openCopyModal);
+  on('mobile-copy','click',openCopyModal);
+  on('copy-modal-close','click',()=>$('copy-modal').close());
+  on('copy-cancel','click',()=>$('copy-modal').close());
+  on('copy-submit','click',submitCopy);
+  on('btn-toggle-select','click',()=>toggleSelectMode());
+  on('mobile-toggle-select','click',()=>toggleSelectMode());
+  on('mobile-done','click',()=>toggleSelectMode(false));
   on('mobile-filter-btn','click',()=>{
     if($('mobile-filter-status')) $('mobile-filter-status').value = $('status')?.value||'';
     if($('mobile-filter-history')) $('mobile-filter-history').value = $('history-view')?.value||'';
@@ -3646,7 +5219,14 @@ if (typeof module!=='undefined') module.exports=BomCore;
     }
   });
   on('status','change',()=>{state.page=1;applyClientFilter();});on('history-view','change',()=>{state.page=1;applyClientFilter();});on('page-size','change',()=>{state.page=1;applyClientFilter();});on('refresh','click',async()=>{state.machineCache={};state.allParts=null;try{sessionStorage.removeItem('BOM_PARTS_CACHE');}catch(_){}await loadBOM(true,true);toast('รีเฟรชข้อมูลและเกณฑ์ Part สำเร็จ');});on('retry','click',()=>retryTask());on('previous','click',()=>{if(state.page>1){state.page--;applyClientFilter();}});on('next','click',()=>{state.page++;applyClientFilter();});
-  on('select-page','change',()=>{const checked=$('select-page').checked;visibleRows().filter(r=>r.RecordStatus==='ACTIVE').forEach(r=>{checked?state.selected.add(r.RecordID):state.selected.delete(r.RecordID);});document.querySelectorAll('[data-record]').forEach(n=>{if(!n.disabled)n.checked=checked;});updateSelection();});
+  on('select-page','change',()=>{
+    if(!state.selectMode) toggleSelectMode(true);
+    const checked=$('select-page').checked;
+    visibleRows().filter(r=>r.RecordStatus==='ACTIVE').forEach(r=>{
+      checked?state.selected.add(r.RecordID):state.selected.delete(r.RecordID);
+    });
+    updateSelection();
+  });
   const debouncedClientFilter=debounce(()=>{state.page=1;applyClientFilter();},150);
   let queryComposing=false;
   const queryInput=$('query'),clearQueryBtn=$('clear-query');
@@ -4281,6 +5861,41 @@ if (typeof module!=='undefined') module.exports=BomCore;
   on('legacy-import-to-editor','click',applyLegacyImportToEditor);
 
   on('part-previous','click',()=>{if(state.partPage>1){state.partPage--;applyPartFilter();}});on('part-next','click',()=>{state.partPage++;applyPartFilter();});on('part-retry','click',()=>{ensurePartsLoaded(true).then(applyPartFilter).catch(()=>{});});on('part-refresh','click',refreshParts);on('picker-close','click',()=>closeDialog('picker'));on('detail-close','click',()=>closeDialog('detail'));
+  // Keyboard navigation for Label inputs (ArrowUp / ArrowDown / Enter)
+  $('editor').addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter') return;
+    const target = e.target;
+    if (!target || target.tagName !== 'INPUT') return;
+    if (!target.name || !target.name.startsWith('Label-')) return;
+
+    const container = target.closest('#equipment-rows-container') || target.closest('#multi-edit-rows');
+    if (!container) return;
+
+    const allLabels = Array.from(container.querySelectorAll('input[name^="Label-"]'));
+    const curIdx = allLabels.indexOf(target);
+    if (curIdx === -1) return;
+
+    if (e.key === 'ArrowDown' || (e.key === 'Enter' && !e.shiftKey)) {
+      if (curIdx < allLabels.length - 1) {
+        e.preventDefault();
+        const next = allLabels[curIdx + 1];
+        next.focus();
+        next.select();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+      }
+    } else if (e.key === 'ArrowUp' || (e.key === 'Enter' && e.shiftKey)) {
+      if (curIdx > 0) {
+        e.preventDefault();
+        const prev = allLabels[curIdx - 1];
+        prev.focus();
+        prev.select();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+      }
+    }
+  });
+
   on('editor-form','submit',save);on('editor-form','input',editorChanged);on('editor-form','change',editorChanged);on('editor-close','click',cancelEditor);on('editor-cancel','click',cancelEditor);on('editor','cancel',e=>{e.preventDefault();cancelEditor();});
   on('editor-retry-new','click',()=>{state.pendingPayload=null;if(state.editor)state.editor.operationId=crypto.randomUUID();state.reviewed=false;$('review').hidden=true;$('save').textContent='ตรวจข้อมูลก่อนบันทึก';$('editor-error').textContent='';$('editor-retry-new').hidden=true;document.querySelectorAll('#editor input,#editor select,#editor textarea,#editor-fields button').forEach(n=>n.disabled=false);toggleManual();});
   on('keep-editing','click',()=>$('discard').close());on('discard-changes','click',()=>{$('discard').close();state.dirty=false;state.editor=null;state.pendingPayload=null;state.pickerTarget=null;closeDialog('editor');});

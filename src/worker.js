@@ -6,6 +6,8 @@ import {listAnnouncements, createAnnouncement, deleteAnnouncement, updateAnnounc
 import {getPMReferences, getPMCycleData, savePMCycleOrders, listPMOverview} from './pm-service.js';
 import {listExpenses, importExpenseRecords, deleteExpenseItem, clearAllExpenses, deleteExpensesByRange, saveExpenseItem, getDashboardData, saveLineBudgets} from './pm-expense-service.js';
 import {getPRReferences, listPRItems, getPRItem, savePRItem, bulkSavePRItems, archivePRItems, bulkUpdateArea, deletePRItems, pruneOldPRItems} from './pr-service.js';
+import {listAirCoolingUnits, getAirCoolingUnit, saveAirCoolingUnit, deleteAirCoolingUnit, reportAirCoolingIssue, resolveAirCoolingIssue, syncFromGoogleSheets, getAirCoolingReferences} from './pm-aircooling-service.js';
+import {listElectricalNodes, getElectricalNode, saveElectricalNode, bulkUpdateWiring, deleteElectricalNode, getElectricalReferences} from './electrical-service.js';
 import {AppError,fail,json} from './errors.js';
 
 export default {
@@ -132,6 +134,7 @@ export default {
    // Announcements Management RPC
    if(url.pathname==='/api/v1/announcements/rpc'){
     if(request.method!=='POST')fail('METHOD','ใช้ POST สำหรับคำสั่งประชาสัมพันธ์',405);
+    if(actor.permissions && actor.permissions.announcements==='none')fail('FORBIDDEN','ไม่มีสิทธิ์เข้าถึงโมดูลประชาสัมพันธ์',403);
     let body;
     try{ body=await request.json(); }catch{ fail('VALIDATION','รูปแบบคำขอไม่ถูกต้อง'); }
     const rawMethod = body?.method || '';
@@ -150,6 +153,7 @@ export default {
    // PM (Preventive Maintenance) Orders RPC
    if(url.pathname==='/api/v1/pm/rpc'){
     if(request.method!=='POST')fail('METHOD','ใช้ POST สำหรับคำสั่ง PM',405);
+    if(actor.permissions && actor.permissions.pm==='none')fail('FORBIDDEN','ไม่มีสิทธิ์เข้าถึงโมดูล PM',403);
     let body;
     try{ body=await request.json(); }catch{ fail('VALIDATION','รูปแบบคำขอไม่ถูกต้อง'); }
     const method = body?.method || '';
@@ -163,9 +167,10 @@ export default {
     return json({ok:true,data:result});
    }
 
-   // PM Expenses & Dashboard RPC
+    // PM Expenses & Dashboard RPC
    if(url.pathname==='/api/v1/pm-expenses/rpc'){
     if(request.method!=='POST')fail('METHOD','ใช้ POST สำหรับคำสั่งค่าใช้จ่าย PM',405);
+    if(actor.permissions && (actor.permissions.pm_expenses==='none' || (!actor.permissions.pm_expenses && actor.permissions.pm==='none')))fail('FORBIDDEN','ไม่มีสิทธิ์เข้าถึงโมดูลค่าใช้จ่าย PM',403);
     let body;
     try{ body=await request.json(); }catch{ fail('VALIDATION','รูปแบบคำขอไม่ถูกต้อง'); }
     const method = body?.method || '';
@@ -184,9 +189,34 @@ export default {
     return json({ok:true,data:result});
    }
 
+   // PM Air Cooling RPC
+   if(url.pathname==='/api/v1/pm-aircooling/rpc'){
+    if(request.method!=='POST')fail('METHOD','ใช้ POST สำหรับคำสั่ง Air Cooling',405);
+    if(actor.permissions && (actor.permissions.pm_aircooling==='none' || (actor.permissions.pm==='none' && !actor.permissions.pm_aircooling)))fail('FORBIDDEN','ไม่มีสิทธิ์เข้าถึงโมดูล Air Cooling',403);
+    let body;
+    try{ body=await request.json(); }catch{ fail('VALIDATION','รูปแบบคำขอไม่ถูกต้อง'); }
+    const method = body?.method || '';
+    const args = body?.args || [];
+    let result;
+    if(method==='listUnits') result=await listAirCoolingUnits(env, args[0]);
+    else if(method==='getUnit') result=await getAirCoolingUnit(env, args[0]);
+    else if(method==='saveUnit') result=await saveAirCoolingUnit(env, actor, args[0]);
+    else if(method==='deleteUnit') {
+      if(actor.permissions && !actor.permissions.can_delete && actor.role !== 'admin') fail('FORBIDDEN','บัญชีนี้ไม่ได้รับสิทธิ์ในการลบข้อมูล',403);
+      result=await deleteAirCoolingUnit(env, actor, args[0]);
+    }
+    else if(method==='reportIssue') result=await reportAirCoolingIssue(env, actor, args[0]);
+    else if(method==='resolveIssue') result=await resolveAirCoolingIssue(env, actor, args[0]);
+    else if(method==='syncGoogleSheets') result=await syncFromGoogleSheets(env, actor);
+    else if(method==='getReferences') result=await getAirCoolingReferences(env);
+    else fail('NOT_FOUND','ไม่พบคำสั่ง Air Cooling นี้',404);
+    return json({ok:true,data:result});
+   }
+
    // PR & Store Tracker RPC
    if(url.pathname==='/api/v1/pr-tracker/rpc'){
     if(request.method!=='POST')fail('METHOD','ใช้ POST สำหรับคำสั่งทะเบียนจัดซื้อ/สโตร์',405);
+    if(actor.permissions && actor.permissions.pr_tracker==='none')fail('FORBIDDEN','ไม่มีสิทธิ์เข้าถึงโมดูลจัดซื้อและสโตร์',403);
     let body;
     try{ body=await request.json(); }catch{ fail('VALIDATION','รูปแบบคำขอไม่ถูกต้อง'); }
     const method = body?.method || '';
@@ -205,15 +235,36 @@ export default {
     return json({ok:true,data:result});
    }
 
+   // Electrical Power Distribution Diagram RPC
+   if(url.pathname==='/api/v1/electrical/rpc'){
+    if(request.method!=='POST')fail('METHOD','ใช้ POST สำหรับคำสั่งแผนผังระบบไฟฟ้า',405);
+    let body;
+    try{ body=await request.json(); }catch{ fail('VALIDATION','รูปแบบคำขอไม่ถูกต้อง'); }
+    const method = body?.method || '';
+    const args = body?.args || [];
+    let result;
+    if(method==='listNodes') result=await listElectricalNodes(env, args[0]);
+    else if(method==='getNode') result=await getElectricalNode(env, args[0]);
+    else if(method==='saveNode') result=await saveElectricalNode(env, actor, args[0]);
+    else if(method==='bulkUpdateWiring') result=await bulkUpdateWiring(env, actor, args[0]);
+    else if(method==='deleteNode') {
+      if(actor.permissions && !actor.permissions.can_delete && actor.role !== 'admin') fail('FORBIDDEN','บัญชีนี้ไม่ได้รับสิทธิ์ในการลบข้อมูล',403);
+      result=await deleteElectricalNode(env, actor, args[0]);
+    }
+    else if(method==='getReferences') result=await getElectricalReferences(env);
+    else fail('NOT_FOUND','ไม่พบคำสั่งแผนผังไฟฟ้านี้',404);
+    return json({ok:true,data:result});
+   }
+
    const match=url.pathname.match(/^\/api\/v1\/(machines|parts|bom)\/rpc$/);
    if(match){
     if(request.method!=='POST')fail('METHOD','ใช้ POST สำหรับคำสั่งทะเบียน',405);
     if(actor.role==='integration')fail('FORBIDDEN','บริการนี้อ่านได้เฉพาะข้อมูล BOM',403);
     const scope=match[1];
     if(actor.permissions && actor.permissions[scope]==='none')fail('FORBIDDEN','ไม่มีสิทธิ์เข้าถึงโมดูลนี้',403);
-    if(Number(request.headers.get('Content-Length'))>2400000)fail('TOO_LARGE','ขนาดคำขอเกินกำหนด',413);
+    if(Number(request.headers.get('Content-Length'))>35000000)fail('TOO_LARGE','ขนาดคำขอเกินกำหนด',413);
     const reader=request.body?.getReader();if(!reader)fail('VALIDATION','ไม่พบข้อมูล');
-    const chunks=[];let size=0;while(true){const {value,done}=await reader.read();if(done)break;size+=value.length;if(size>2400000){await reader.cancel();fail('TOO_LARGE','ขนาดคำขอเกินกำหนด',413);}chunks.push(value);}
+    const chunks=[];let size=0;while(true){const {value,done}=await reader.read();if(done)break;size+=value.length;if(size>35000000){await reader.cancel();fail('TOO_LARGE','ขนาดคำขอเกินกำหนด',413);}chunks.push(value);}
     const bytes=new Uint8Array(size);let offset=0;for(const c of chunks){bytes.set(c,offset);offset+=c.length;}
     let body;try{body=JSON.parse(new TextDecoder().decode(bytes));}catch{fail('VALIDATION','รูปแบบคำขอไม่ถูกต้อง');}
 
