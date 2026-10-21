@@ -11,11 +11,23 @@
     nodes: [],
     references: { nodes: [], machines: [], types: [] },
     currentTab: 'diagram',
+    
+    // Directory pagination & filters
     filterType: 'ALL',
     searchQuery: '',
     locationFilter: '',
+    dirPage: 1,
+    dirPageSize: 50,
+
+    // Quick Wiring pagination & filters
+    wiringFilterType: 'ALL',
+    wiringSearchQuery: '',
+    wiringStatusFilter: 'ALL',
+    wiringPage: 1,
+    wiringPageSize: 50,
+
     selectedNodeId: null,
-    showMachines: true,
+    showMachines: false, // Default to FALSE so diagram renders instantly with 169 panels!
     treeRootFilter: 'ALL',
     panZoom: { x: 40, y: 40, scale: 1.0, isPanning: false, startX: 0, startY: 0 },
     pendingWiring: new Map(), // id -> parentId
@@ -270,7 +282,8 @@
     });
     svgLayer.innerHTML = svgLines;
 
-    // Render node cards
+    // Render node cards using DocumentFragment
+    const fragment = document.createDocumentFragment();
     filteredNodes.forEach(node => {
       if (!positions.has(node.id)) return;
       const pos = positions.get(node.id);
@@ -305,8 +318,10 @@
         openInspector(node.id);
       });
 
-      nodesLayer.appendChild(card);
+      fragment.appendChild(card);
     });
+
+    nodesLayer.appendChild(fragment);
 
     applyPanZoomTransform();
   }
@@ -429,7 +444,26 @@
       );
     }
 
-    if (items.length === 0) {
+    const total = items.length;
+    const pageSize = state.dirPageSize || 50;
+    const totalPages = Math.ceil(total / pageSize) || 1;
+    if (state.dirPage > totalPages) state.dirPage = totalPages;
+    if (state.dirPage < 1) state.dirPage = 1;
+
+    const startIdx = total === 0 ? 0 : (state.dirPage - 1) * pageSize;
+    const endIdx = Math.min(startIdx + pageSize, total);
+    const pagedItems = items.slice(startIdx, endIdx);
+
+    // Update pagination controls
+    if ($('dir-page-start')) $('dir-page-start').textContent = total === 0 ? 0 : startIdx + 1;
+    if ($('dir-page-end')) $('dir-page-end').textContent = endIdx;
+    if ($('dir-page-total')) $('dir-page-total').textContent = total;
+    if ($('dir-page-current')) $('dir-page-current').textContent = state.dirPage;
+    if ($('dir-page-pages')) $('dir-page-pages').textContent = totalPages;
+    if ($('dir-btn-prev')) $('dir-btn-prev').disabled = state.dirPage <= 1;
+    if ($('dir-btn-next')) $('dir-btn-next').disabled = state.dirPage >= totalPages;
+
+    if (pagedItems.length === 0) {
       tbody.innerHTML = `
         <tr>
           <td colspan="10" style="text-align:center; padding: 40px; color: var(--el-ink-muted);">
@@ -441,7 +475,7 @@
     }
 
     let html = '';
-    items.forEach(node => {
+    pagedItems.forEach(node => {
       const thumbUrl = node.imageUrl || (node.driveFileId ? `https://drive.google.com/thumbnail?id=${node.driveFileId}&sz=w100` : '');
       const parentLabel = node.parentCode ? `${escapeHtml(node.parentCode)} - ${escapeHtml(node.parentName)}` : '<span style="color:#94a3b8;">- เมนหลัก / ยังไม่ต่อ -</span>';
 
@@ -517,6 +551,16 @@
   // TAB 3: QUICK WIRING MATRIX
   // ==========================================================================
 
+  function getWiringStatusBadge(isChanged, parentId) {
+    if (isChanged) {
+      return '<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-weight:600; font-size:11px;">รอยืนยัน</span>';
+    }
+    if (parentId) {
+      return '<span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:4px; font-size:11px;">เชื่อมต่อแล้ว</span>';
+    }
+    return '<span style="background:#f1f5f9; color:#64748b; padding:2px 8px; border-radius:4px; font-size:11px;">สายอิสระ</span>';
+  }
+
   function renderWiringMatrix() {
     const tbody = $('wiring-table-body');
     const saveBtn = $('btn-save-all-wiring');
@@ -527,26 +571,85 @@
       return;
     }
 
+    // 1. Filter nodes
+    let items = state.nodes.slice();
+
+    if (state.wiringFilterType !== 'ALL') {
+      items = items.filter(n => n.nodeType === state.wiringFilterType);
+    }
+
+    if (state.wiringSearchQuery) {
+      const q = state.wiringSearchQuery.toLowerCase();
+      items = items.filter(n =>
+        (n.nodeCode || '').toLowerCase().includes(q) ||
+        (n.name || '').toLowerCase().includes(q) ||
+        (n.location || '').toLowerCase().includes(q)
+      );
+    }
+
+    if (state.wiringStatusFilter === 'UNLINKED') {
+      items = items.filter(n => {
+        const effectiveParent = state.pendingWiring.has(n.id)
+          ? state.pendingWiring.get(n.id)
+          : n.parentId;
+        return !effectiveParent;
+      });
+    } else if (state.wiringStatusFilter === 'LINKED') {
+      items = items.filter(n => {
+        const effectiveParent = state.pendingWiring.has(n.id)
+          ? state.pendingWiring.get(n.id)
+          : n.parentId;
+        return Boolean(effectiveParent);
+      });
+    } else if (state.wiringStatusFilter === 'PENDING') {
+      items = items.filter(n => state.pendingWiring.has(n.id));
+    }
+
+    const total = items.length;
+    const pageSize = state.wiringPageSize || 50;
+    const totalPages = Math.ceil(total / pageSize) || 1;
+    if (state.wiringPage > totalPages) state.wiringPage = totalPages;
+    if (state.wiringPage < 1) state.wiringPage = 1;
+
+    const startIdx = total === 0 ? 0 : (state.wiringPage - 1) * pageSize;
+    const endIdx = Math.min(startIdx + pageSize, total);
+    const pagedItems = items.slice(startIdx, endIdx);
+
+    // Update pagination controls
+    if ($('wiring-page-start')) $('wiring-page-start').textContent = total === 0 ? 0 : startIdx + 1;
+    if ($('wiring-page-end')) $('wiring-page-end').textContent = endIdx;
+    if ($('wiring-page-total')) $('wiring-page-total').textContent = total;
+    if ($('wiring-page-current')) $('wiring-page-current').textContent = state.wiringPage;
+    if ($('wiring-page-pages')) $('wiring-page-pages').textContent = totalPages;
+    if ($('wiring-btn-prev')) $('wiring-btn-prev').disabled = state.wiringPage <= 1;
+    if ($('wiring-btn-next')) $('wiring-btn-next').disabled = state.wiringPage >= totalPages;
+
+    if (pagedItems.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--el-ink-muted);">ไม่พบรายการที่ตรงกับเงื่อนไข</td></tr>';
+      return;
+    }
+
+    // Feeder candidates: Power feeds come exclusively from distribution panels (MDB, DB, LP)
+    const feederCandidates = state.nodes.filter(n => n.nodeType === 'MDB' || n.nodeType === 'DB' || n.nodeType === 'LP');
+
     let html = '';
-    state.nodes.forEach(node => {
+    pagedItems.forEach(node => {
       const currentParentId = state.pendingWiring.has(node.id)
         ? state.pendingWiring.get(node.id)
         : (node.parentId || '');
 
       let options = '<option value="">-- เป็นตู้ประธานหลัก (MDB) หรือยังไม่เชื่อมโยง --</option>';
-      state.nodes.forEach(opt => {
+      feederCandidates.forEach(opt => {
         if (opt.id === node.id) return; // Prevent picking self
         const selected = opt.id === currentParentId ? ' selected' : '';
         options += `<option value="${opt.id}"${selected}>${escapeHtml(opt.nodeCode)} - ${escapeHtml(opt.name)} (${opt.nodeType})</option>`;
       });
 
       const isChanged = state.pendingWiring.has(node.id) && state.pendingWiring.get(node.id) !== (node.parentId || '');
-      const statusPill = isChanged
-        ? '<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-weight:600; font-size:11px;">รอยืนยัน</span>'
-        : (node.parentId ? '<span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:4px; font-size:11px;">เชื่อมต่อแล้ว</span>' : '<span style="background:#f1f5f9; color:#64748b; padding:2px 8px; border-radius:4px; font-size:11px;">สายอิสระ</span>');
+      const statusPill = getWiringStatusBadge(isChanged, currentParentId);
 
       html += `
-        <tr data-id="${node.id}" style="${isChanged ? 'background: #fffbeb;' : ''}">
+        <tr data-id="${node.id}" class="${isChanged ? 'is-modified' : ''}">
           <td><strong class="font-mono">${escapeHtml(node.nodeCode)}</strong></td>
           <td>${escapeHtml(node.name)}</td>
           <td><span class="kpi-badge badge-${node.nodeType.toLowerCase()}">${escapeHtml(node.nodeType)}</span></td>
@@ -557,30 +660,52 @@
               ${options}
             </select>
           </td>
-          <td>${statusPill}</td>
+          <td class="wiring-status-cell">${statusPill}</td>
         </tr>
       `;
     });
 
     tbody.innerHTML = html;
 
-    // Attach wiring change listener
+    // Attach wiring change listener: TARGETED ROW UPDATE (Instant 60fps)
     tbody.querySelectorAll('.el-wiring-select').forEach(sel => {
       sel.onchange = (e) => {
         const nodeId = sel.dataset.id;
         const newParentId = e.target.value;
         const node = state.nodes.find(n => n.id === nodeId);
-        if (newParentId === (node?.parentId || '')) {
+        const origParentId = node?.parentId || '';
+
+        if (newParentId === origParentId) {
           state.pendingWiring.delete(nodeId);
         } else {
           state.pendingWiring.set(nodeId, newParentId);
         }
-        if (saveBtn) saveBtn.disabled = state.pendingWiring.size === 0;
-        renderWiringMatrix();
+
+        const isChanged = state.pendingWiring.has(nodeId);
+        const row = sel.closest('tr');
+        if (row) {
+          row.classList.toggle('is-modified', isChanged);
+          const statusCell = row.querySelector('.wiring-status-cell');
+          if (statusCell) {
+            statusCell.innerHTML = getWiringStatusBadge(isChanged, newParentId);
+          }
+        }
+
+        if (saveBtn) {
+          saveBtn.disabled = state.pendingWiring.size === 0;
+          saveBtn.querySelector('span').textContent = state.pendingWiring.size > 0
+            ? `บันทึกการเชื่อมโยง (${state.pendingWiring.size})`
+            : 'บันทึกการเชื่อมโยง';
+        }
       };
     });
 
-    if (saveBtn) saveBtn.disabled = state.pendingWiring.size === 0;
+    if (saveBtn) {
+      saveBtn.disabled = state.pendingWiring.size === 0;
+      saveBtn.querySelector('span').textContent = state.pendingWiring.size > 0
+        ? `บันทึกการเชื่อมโยง (${state.pendingWiring.size})`
+        : 'บันทึกการเชื่อมโยง';
+    }
   }
 
   // Save all pending wiring changes in batch
@@ -797,7 +922,9 @@
     if (!sel) return;
 
     let html = '<option value="">-- ไม่มี (เป็นตู้ประธาน MDB หรือยังไม่เชื่อมโยง) --</option>';
-    state.nodes.forEach(n => {
+    // Prioritize distribution panels (MDB, DB, LP)
+    const feederCandidates = state.nodes.filter(n => n.nodeType === 'MDB' || n.nodeType === 'DB' || n.nodeType === 'LP');
+    feederCandidates.forEach(n => {
       if (n.id === excludeId) return; // Cannot be own parent
       const selected = n.id === currentParentId ? ' selected' : '';
       html += `<option value="${n.id}"${selected}>${escapeHtml(n.nodeCode)} - ${escapeHtml(n.name)} (${n.nodeType})</option>`;
@@ -978,6 +1105,7 @@
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         state.searchQuery = e.target.value.trim();
+        state.dirPage = 1;
         if (clearBtn) clearBtn.style.display = state.searchQuery ? 'inline-block' : 'none';
         renderDirectory();
       });
@@ -986,17 +1114,19 @@
       clearBtn.addEventListener('click', () => {
         searchInput.value = '';
         state.searchQuery = '';
+        state.dirPage = 1;
         clearBtn.style.display = 'none';
         renderDirectory();
       });
     }
 
-    // Type Pills
-    document.querySelectorAll('.el-pill').forEach(pill => {
+    // Type Pills in Directory
+    document.querySelectorAll('#dir-type-pills .el-pill').forEach(pill => {
       pill.addEventListener('click', () => {
-        document.querySelectorAll('.el-pill').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('#dir-type-pills .el-pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
         state.filterType = pill.dataset.type;
+        state.dirPage = 1;
         renderDirectory();
       });
     });
@@ -1004,10 +1134,84 @@
     // Location Filter
     $('dir-location-filter')?.addEventListener('change', (e) => {
       state.locationFilter = e.target.value;
+      state.dirPage = 1;
       renderDirectory();
     });
 
-    // 5. Wiring Matrix Save
+    // Directory Pagination
+    $('dir-page-size')?.addEventListener('change', (e) => {
+      state.dirPageSize = parseInt(e.target.value, 10) || 50;
+      state.dirPage = 1;
+      renderDirectory();
+    });
+    $('dir-btn-prev')?.addEventListener('click', () => {
+      if (state.dirPage > 1) {
+        state.dirPage--;
+        renderDirectory();
+      }
+    });
+    $('dir-btn-next')?.addEventListener('click', () => {
+      state.dirPage++;
+      renderDirectory();
+    });
+
+    // 5. Wiring Matrix Filters & Search
+    const wiringSearchInput = $('wiring-search-input');
+    const wiringClearBtn = $('wiring-search-clear');
+    if (wiringSearchInput) {
+      wiringSearchInput.addEventListener('input', (e) => {
+        state.wiringSearchQuery = e.target.value.trim();
+        state.wiringPage = 1;
+        if (wiringClearBtn) wiringClearBtn.style.display = state.wiringSearchQuery ? 'inline-block' : 'none';
+        renderWiringMatrix();
+      });
+    }
+    if (wiringClearBtn) {
+      wiringClearBtn.addEventListener('click', () => {
+        wiringSearchInput.value = '';
+        state.wiringSearchQuery = '';
+        state.wiringPage = 1;
+        wiringClearBtn.style.display = 'none';
+        renderWiringMatrix();
+      });
+    }
+
+    // Type Pills in Wiring
+    document.querySelectorAll('#wiring-type-pills .el-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('#wiring-type-pills .el-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        state.wiringFilterType = pill.dataset.type;
+        state.wiringPage = 1;
+        renderWiringMatrix();
+      });
+    });
+
+    // Status Filter in Wiring
+    $('wiring-status-filter')?.addEventListener('change', (e) => {
+      state.wiringStatusFilter = e.target.value;
+      state.wiringPage = 1;
+      renderWiringMatrix();
+    });
+
+    // Wiring Pagination
+    $('wiring-page-size')?.addEventListener('change', (e) => {
+      state.wiringPageSize = parseInt(e.target.value, 10) || 50;
+      state.wiringPage = 1;
+      renderWiringMatrix();
+    });
+    $('wiring-btn-prev')?.addEventListener('click', () => {
+      if (state.wiringPage > 1) {
+        state.wiringPage--;
+        renderWiringMatrix();
+      }
+    });
+    $('wiring-btn-next')?.addEventListener('click', () => {
+      state.wiringPage++;
+      renderWiringMatrix();
+    });
+
+    // Save All Wiring
     $('btn-save-all-wiring')?.addEventListener('click', savePendingWiring);
 
     // 6. Inspector close

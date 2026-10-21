@@ -682,6 +682,41 @@ body {
   color: var(--el-ink-muted);
 }
 
+/* Pagination Bar */
+.el-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--el-bg-surface);
+  border-top: 1px solid var(--el-border);
+  font-size: 13px;
+  color: var(--el-ink-secondary);
+  flex-wrap: wrap;
+}
+.el-pagination-info {
+  font-size: 12.5px;
+  color: var(--el-ink-secondary);
+}
+.el-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.el-pagination-controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+}
+.el-page-indicator {
+  font-size: 12.5px;
+  font-weight: 500;
+  min-width: 80px;
+  text-align: center;
+}
+
 /* ==========================================================================
    TAB 3: WIRING MATRIX
    ========================================================================== */
@@ -704,6 +739,19 @@ body {
   margin: 0;
   font-size: 13px;
   color: var(--el-ink-secondary);
+}
+
+.el-wiring-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.el-table tr.is-modified td {
+  background: #fffbeb !important;
 }
 
 /* ==========================================================================

@@ -58,9 +58,15 @@ export async function listElectricalNodes(env, filters = {}) {
       n.is_active as isActive,
       n.created_at as createdAt,
       n.updated_at as updatedAt,
-      (SELECT COUNT(*) FROM electrical_nodes c WHERE c.parent_id = n.id AND c.is_active = 1) as childCount
+      COALESCE(cc.child_count, 0) as childCount
     FROM electrical_nodes n
     LEFT JOIN electrical_nodes p ON n.parent_id = p.id
+    LEFT JOIN (
+      SELECT parent_id, COUNT(*) as child_count 
+      FROM electrical_nodes 
+      WHERE is_active = 1 AND parent_id IS NOT NULL 
+      GROUP BY parent_id
+    ) cc ON cc.parent_id = n.id
     WHERE n.is_active = 1
   `;
   const binds = [];

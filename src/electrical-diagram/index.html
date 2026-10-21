@@ -105,8 +105,8 @@
           </select>
 
           <label class="el-checkbox-label">
-            <input type="checkbox" id="toggle-show-machines" checked>
-            <span>แสดงเครื่องจักร (MC/DV)</span>
+            <input type="checkbox" id="toggle-show-machines">
+            <span>แสดงเครื่องจักร/โหลด (MC/DV)</span>
           </label>
         </div>
 
@@ -204,6 +204,25 @@
             </tr>
           </tbody>
         </table>
+        <!-- Directory Pagination -->
+        <div class="el-pagination-bar" id="dir-pagination">
+          <div class="el-pagination-info">
+            แสดง <span id="dir-page-start">0</span> - <span id="dir-page-end">0</span> จากทั้งหมด <span id="dir-page-total">0</span> รายการ
+          </div>
+          <div class="el-pagination-controls">
+            <label>แถวต่อหน้า:
+              <select id="dir-page-size" class="el-select el-select-sm">
+                <option value="25">25</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="250">250</option>
+              </select>
+            </label>
+            <button type="button" class="btn btn-secondary btn-sm" id="dir-btn-prev">&larr; ก่อนหน้า</button>
+            <span class="el-page-indicator">หน้า <span id="dir-page-current">1</span> / <span id="dir-page-pages">1</span></span>
+            <button type="button" class="btn btn-secondary btn-sm" id="dir-btn-next">ถัดไป &rarr;</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -218,6 +237,33 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
           <span>บันทึกการเชื่อมโยง</span>
         </button>
+      </div>
+
+      <!-- Wiring Toolbar -->
+      <div class="el-wiring-toolbar">
+        <div class="el-search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="wiring-search-input" placeholder="ค้นหารหัสตู้, ชื่อ, สถานที่...">
+          <button type="button" id="wiring-search-clear" class="btn-clear" title="ล้างคำค้นหา" style="display:none;">&times;</button>
+        </div>
+
+        <div class="el-filter-pills" id="wiring-type-pills">
+          <button type="button" class="el-pill active" data-type="ALL">ทั้งหมด</button>
+          <button type="button" class="el-pill" data-type="MDB">MDB</button>
+          <button type="button" class="el-pill" data-type="DB">DB</button>
+          <button type="button" class="el-pill" data-type="LP">LP</button>
+          <button type="button" class="el-pill" data-type="MC">MC</button>
+          <button type="button" class="el-pill" data-type="DV">DV</button>
+        </div>
+
+        <div class="el-status-filter">
+          <select id="wiring-status-filter" class="el-select el-select-sm">
+            <option value="ALL">ทุกสถานะสายเมน</option>
+            <option value="UNLINKED">เฉพาะสายอิสระ (ยังไม่ต่อ)</option>
+            <option value="LINKED">เชื่อมต่อแล้ว</option>
+            <option value="PENDING">เฉพาะรอยืนยัน</option>
+          </select>
+        </div>
       </div>
 
       <div class="el-table-wrapper">
@@ -237,6 +283,25 @@
             <!-- Dynamic wiring rows -->
           </tbody>
         </table>
+        <!-- Wiring Pagination -->
+        <div class="el-pagination-bar" id="wiring-pagination">
+          <div class="el-pagination-info">
+            แสดง <span id="wiring-page-start">0</span> - <span id="wiring-page-end">0</span> จากทั้งหมด <span id="wiring-page-total">0</span> รายการ
+          </div>
+          <div class="el-pagination-controls">
+            <label>แถวต่อหน้า:
+              <select id="wiring-page-size" class="el-select el-select-sm">
+                <option value="25">25</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="250">250</option>
+              </select>
+            </label>
+            <button type="button" class="btn btn-secondary btn-sm" id="wiring-btn-prev">&larr; ก่อนหน้า</button>
+            <span class="el-page-indicator">หน้า <span id="wiring-page-current">1</span> / <span id="wiring-page-pages">1</span></span>
+            <button type="button" class="btn btn-secondary btn-sm" id="wiring-btn-next">ถัดไป &rarr;</button>
+          </div>
+        </div>
       </div>
     </section>
 
