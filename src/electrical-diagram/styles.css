@@ -674,14 +674,15 @@ html, body {
 }
 
 .el-detail-header {
-  background: #0d1e38;
+  background: linear-gradient(100deg, #07152b 0%, #0d274c 30%, #035282 58%, #0284c7 82%, #38bdf8 100%);
   color: #ffffff;
   padding: 12px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 2px 8px rgba(7, 21, 43, 0.25);
 }
 .el-detail-header-left {
   display: flex;
@@ -701,10 +702,13 @@ html, body {
   font-size: 19px;
   font-weight: 700;
   color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 .el-detail-subtitle {
   font-size: 13px;
-  color: #94a3b8;
+  color: #e0f2fe;
+  opacity: 0.92;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 .el-detail-header-actions {
   display: flex;
@@ -719,15 +723,18 @@ html, body {
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.08);
-  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
   cursor: pointer;
   transition: all var(--dur-fast);
 }
 .el-detail-close-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(255, 255, 255, 0.55);
   color: #ffffff;
+  transform: scale(1.05);
 }
 
 /* Responsive 2-column on Desktop, 1-column on Mobile */
