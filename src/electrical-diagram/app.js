@@ -45,6 +45,57 @@
   // DOM Elements cache
   const $ = id => document.getElementById(id);
 
+  // Auth State & Guards
+  function isLoggedIn() {
+    return Boolean(window.EM_CURRENT_USER || window.currentUser);
+  }
+
+  async function ensureAuthenticated() {
+    if (isLoggedIn()) return true;
+    try {
+      const meRes = await fetch('/api/v1/auth/me', { credentials: 'same-origin' });
+      if (meRes.ok) {
+        const meJson = await meRes.json();
+        if (meJson.ok && meJson.data) {
+          window.currentUser = meJson.data;
+          window.EM_CURRENT_USER = meJson.data;
+          updateAuthPill();
+          return true;
+        }
+      }
+    } catch (_) {}
+
+    if (typeof window.promptLogin === 'function') {
+      try {
+        await window.promptLogin();
+        updateAuthPill();
+        return isLoggedIn();
+      } catch (_) {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  function updateAuthPill() {
+    const pill = $('btn-auth-status');
+    const text = $('auth-status-text');
+    if (!pill || !text) return;
+
+    const user = window.EM_CURRENT_USER || window.currentUser;
+    if (user) {
+      pill.classList.remove('is-guest');
+      pill.classList.add('is-logged-in');
+      pill.title = `เข้าสู่ระบบแล้ว (${user.displayName || user.username}) สามารถเพิ่ม แก้ไข ลบ และส่งออกข้อมูลได้`;
+      text.textContent = `โหมดแก้ไขได้ (${user.displayName || user.username})`;
+    } else {
+      pill.classList.remove('is-logged-in');
+      pill.classList.add('is-guest');
+      pill.title = 'ดูข้อมูลได้ไม่ต้องล็อกอิน (คลิกเพื่อเข้าสู่ระบบหากต้องการเพิ่ม แก้ไข หรือส่งออก)';
+      text.textContent = 'ดูข้อมูลได้ (คลิกเพื่อล็อกอิน)';
+    }
+  }
+
   // RPC Client Helper
   async function rpc(method, ...args) {
     const res = await fetch('/api/v1/electrical/rpc', {
@@ -52,6 +103,12 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ method, args })
     });
+    if (res.status === 401) {
+      const authed = await ensureAuthenticated();
+      if (authed) {
+        return rpc(method, ...args);
+      }
+    }
     const json = await res.json();
     if (!res.ok || !json.ok) {
       const err = new Error(json.error?.message || 'การเชื่อมต่อไม่สำเร็จ');
@@ -64,6 +121,22 @@
   // Load initial data
   async function loadData() {
     try {
+      // 1. Try public read endpoint first (no login required to view diagram)
+      const pubRes = await fetch('/api/v1/electrical/public', { credentials: 'same-origin' });
+      if (pubRes.ok) {
+        const pubJson = await pubRes.json();
+        if (pubJson.ok && pubJson.data) {
+          state.nodes = pubJson.data.nodes || [];
+          state.references = pubJson.data.references || { nodes: [], machines: [], types: [] };
+          updateKpis();
+          populateDropdowns();
+          renderCurrentTab();
+          updateAuthPill();
+          return;
+        }
+      }
+
+      // Fallback to RPC if public API fails
       const [nodes, refs] = await Promise.all([
         rpc('listNodes', {}),
         rpc('getReferences')
@@ -74,6 +147,7 @@
       updateKpis();
       populateDropdowns();
       renderCurrentTab();
+      updateAuthPill();
     } catch (err) {
       console.error('Failed to load electrical data:', err);
       alert('โหลดข้อมูลแผนผังระบบไฟฟ้าไม่สำเร็จ: ' + err.message);
@@ -1238,7 +1312,11 @@
     }
   }
 
-  function openWiringDropdown(trigger) {
+  async function openWiringDropdown(trigger) {
+    if (!isLoggedIn()) {
+      const ok = await ensureAuthenticated();
+      if (!ok) return;
+    }
     const dropdown = $('wiring-select-dropdown');
     const searchInput = $('wiring-select-search');
     const clearBtn = $('wiring-select-search-clear');
@@ -1357,6 +1435,10 @@
 
   // Save all pending wiring changes in batch
   async function savePendingWiring() {
+    if (!isLoggedIn()) {
+      const ok = await ensureAuthenticated();
+      if (!ok) return;
+    }
     if (state.pendingWiring.size === 0) return;
     const links = [];
     state.pendingWiring.forEach((parentId, id) => {
@@ -1525,7 +1607,12 @@
   // NODE FORM MODAL (CREATE / EDIT)
   // ==========================================================================
 
-  function openCreateModal(initialData = {}) {
+  async function openCreateModal(initialData = {}) {
+    if (!isLoggedIn()) {
+      const ok = await ensureAuthenticated();
+      if (!ok) return;
+    }
+
     $('modal-form-title').textContent = 'เพิ่มตู้ / อุปกรณ์ไฟฟ้าใหม่ (พร้อมรายการวงจรย่อย)';
     $('form-id').value = '';
     $('form-node-code').value = initialData.nodeCode || '';
@@ -1554,6 +1641,11 @@
   }
 
   async function openEditModal(nodeId) {
+    if (!isLoggedIn()) {
+      const ok = await ensureAuthenticated();
+      if (!ok) return;
+    }
+
     const node = state.nodes.find(n => n.id === nodeId);
     if (!node) return;
 
@@ -1855,6 +1947,10 @@
   // Submit Node Form
   async function submitNodeForm(e) {
     e.preventDefault();
+    if (!isLoggedIn()) {
+      const ok = await ensureAuthenticated();
+      if (!ok) return;
+    }
     const errorEl = $('form-error-msg');
     const submitBtn = $('btn-modal-submit');
     errorEl.style.display = 'none';
@@ -1964,6 +2060,10 @@
 
   // Delete confirmation
   async function confirmDeleteNode(id) {
+    if (!isLoggedIn()) {
+      const ok = await ensureAuthenticated();
+      if (!ok) return;
+    }
     const node = state.nodes.find(n => n.id === id);
     if (!node) return;
 
@@ -1992,7 +2092,11 @@
   }
 
   // Export Electrical Distribution Data to Excel (.xlsx)
-  function exportElectricalExcel() {
+  async function exportElectricalExcel() {
+    if (!isLoggedIn()) {
+      const ok = await ensureAuthenticated();
+      if (!ok) return;
+    }
     if (!state.nodes || state.nodes.length === 0) {
       alert('ยังไม่มีข้อมูลตู้หรืออุปกรณ์ไฟฟ้าสำหรับส่งออก');
       return;
@@ -2168,10 +2272,20 @@
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
-    // 2. Add node, refresh & export Excel buttons
+    // 2. Add node, refresh, export Excel & auth buttons
     $('btn-add-node')?.addEventListener('click', openCreateModal);
     $('btn-refresh')?.addEventListener('click', loadData);
     $('btn-export-excel')?.addEventListener('click', exportElectricalExcel);
+    $('btn-auth-status')?.addEventListener('click', () => {
+      if (!isLoggedIn()) {
+        ensureAuthenticated();
+      }
+    });
+
+    window.addEventListener('em-auth-changed', () => {
+      updateAuthPill();
+    });
+    updateAuthPill();
 
     // 3. KPI card / chip filter clicks
     document.querySelectorAll('.el-kpi-card, .el-kpi-chip').forEach(card => {

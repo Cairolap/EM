@@ -48,6 +48,16 @@ export default {
     return json({ok:true,data});
    }
 
+   // Public read API for Electrical Diagram (No login required to view diagram & nodes)
+   if(url.pathname==='/api/v1/electrical/public'){
+    if(request.method!=='GET')fail('METHOD','ใช้ GET สำหรับดึงข้อมูลผังระบบไฟฟ้า',405);
+    const [nodes, references] = await Promise.all([
+      listElectricalNodes(env, {}),
+      getElectricalReferences(env)
+    ]);
+    return json({ok:true,data:{nodes, references}});
+   }
+
    // 1. Static Web Assets & Root Redirect (No Auth Required to load HTML/JS/CSS)
    if(!url.pathname.startsWith('/api/')){
     if(!['GET','HEAD'].includes(request.method))fail('METHOD','ไม่รองรับคำขอนี้',405);

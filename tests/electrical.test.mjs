@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { database } from './db.mjs';
+import worker from '../src/worker.js';
 import {
   listElectricalNodes,
   getElectricalNode,
@@ -237,4 +238,45 @@ test('Electrical Distribution Service: CRUD lifecycle, 2-step panel creation, wi
   });
   assert.equal(mdbDupTest.children.length, 3);
   assert.equal(mdbDupTest.children.filter(c => c.nodeCode === 'SPARE').length, 2);
+});
+
+test('Electrical Distribution HTTP Endpoints: Public read access without login, RPC write endpoints require authentication', async () => {
+  const db = database();
+  const env = { DB: db, ENVIRONMENT: 'test', MAINTENANCE_MODE: 'false' };
+  const adminActor = { id: 'admin-1', username: 'admin', role: 'admin' };
+
+  // Seed sample node
+  await saveElectricalNode(env, adminActor, {
+    nodeCode: 'MDB-PUB',
+    name: 'Public Test MDB',
+    nodeType: 'MDB',
+    currentRating: 1600
+  });
+
+  // 1. Public GET endpoint works without authentication (no cookie/token)
+  const pubReq = new Request('https://example.com/api/v1/electrical/public', {
+    method: 'GET'
+  });
+  const pubRes = await worker.fetch(pubReq, env);
+  assert.equal(pubRes.status, 200);
+  const pubBody = await pubRes.json();
+  assert.equal(pubBody.ok, true);
+  assert.ok(Array.isArray(pubBody.data.nodes));
+  assert.ok(Array.isArray(pubBody.data.references.nodes));
+  assert.ok(pubBody.data.nodes.some(n => n.nodeCode === 'MDB-PUB'));
+
+  // 2. Unauthenticated RPC mutation returns 401
+  const unauthReq = new Request('https://example.com/api/v1/electrical/rpc', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Origin': 'https://example.com' },
+    body: JSON.stringify({
+      method: 'saveNode',
+      args: [{ nodeCode: 'MDB-UNAUTH', name: 'Hacker Panel', nodeType: 'MDB' }]
+    })
+  });
+  const unauthRes = await worker.fetch(unauthReq, env);
+  assert.equal(unauthRes.status, 401);
+  const unauthBody = await unauthRes.json();
+  assert.equal(unauthBody.ok, false);
+  assert.equal(unauthBody.error.code, 'AUTH');
 });
