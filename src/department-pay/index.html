@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ค่าใช้จ่ายแผนก (Department Pay) - แผนกซ่อมไฟฟ้า</title>
+  <link rel="icon" type="image/png" href="/Logo%20small.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- APP_STYLE -->
+</head>
+<body>
+  <div class="dp-app-container">
+
+    <!-- Top Header & KPI Strip -->
+    <header class="dp-page-header">
+      <div class="dp-header-row">
+        <div class="dp-header-left">
+          <div class="dp-title-wrap">
+            <h1 class="dp-page-title">
+              <span class="dp-title-badge">💳</span>
+              <span>ค่าใช้จ่ายแผนก</span>
+              <span class="dp-title-en">Department Pay</span>
+            </h1>
+            <button type="button" id="btn-auth-status" class="dp-auth-pill is-guest" title="คลิกเพื่อเข้าสู่ระบบสำหรับแก้ไขข้อมูล">
+              <span id="auth-status-dot" class="dp-auth-dot"></span>
+              <span id="auth-status-text">ดูข้อมูลได้ทันที · คลิกเพื่อล็อกอินแก้ไข</span>
+            </button>
+          </div>
+
+          <!-- View Switcher Tabs -->
+          <nav class="dp-view-tabs" role="tablist">
+            <button type="button" class="dp-tab-btn active" data-tab="board" role="tab" aria-selected="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span>บอร์ดวางแผน 12 เดือน</span>
+            </button>
+            <button type="button" class="dp-tab-btn" data-tab="table" role="tab" aria-selected="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+              <span>ตารางรายการรวม</span>
+              <span class="dp-tab-count" id="tab-count-items">0</span>
+            </button>
+          </nav>
+        </div>
+
+        <div class="dp-header-right">
+          <!-- KPI Strip -->
+          <div class="dp-kpi-strip">
+            <button type="button" id="btn-open-budget-settings" class="dp-kpi-chip kpi-budget-btn" title="คลิกเพื่อปรับเปลี่ยนงบประมาณต่อเดือน">
+              <span>งบ/เดือน</span>
+              <strong id="kpi-default-budget" class="font-mono">8,000 ฿</strong>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            </button>
+            <div class="dp-kpi-chip">
+              <span>งบรวม 12 เดือน</span>
+              <strong id="kpi-total-budget" class="font-mono">96,000 ฿</strong>
+            </div>
+            <div class="dp-kpi-chip kpi-spent">
+              <span>วางแผนใช้ไป</span>
+              <strong id="kpi-total-spent" class="font-mono">0 ฿</strong>
+            </div>
+            <div class="dp-kpi-chip kpi-remaining">
+              <span>คงเหลือรวม</span>
+              <strong id="kpi-total-remaining" class="font-mono">96,000 ฿</strong>
+            </div>
+          </div>
+
+          <!-- Header Actions -->
+          <div class="dp-header-actions">
+            <button type="button" id="btn-export-excel" class="btn btn-secondary btn-sm dp-btn-excel-icon" title="ส่งออกข้อมูลเป็นไฟล์ Excel (.xlsx)" aria-label="ส่งออกข้อมูลเป็นไฟล์ Excel">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <path d="m9.5 12.5 5 5"></path>
+                <path d="m14.5 12.5-5 5"></path>
+              </svg>
+            </button>
+            <button type="button" id="btn-refresh" class="btn btn-secondary btn-sm" title="รีเฟรชข้อมูล">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <span>รีเฟรช</span>
+            </button>
+            <button type="button" id="btn-add-item" class="btn btn-primary btn-sm" title="เพิ่มรายการวางแผนค่าใช้จ่ายใหม่">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>เพิ่มรายการ</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Control Bar: 12-Month Window Navigator + Filter Pills + Search -->
+    <div class="dp-toolbar">
+      <div class="dp-window-nav">
+        <button type="button" id="btn-win-prev" class="btn btn-secondary btn-sm" title="เลื่อนช่วงเวลาถอยหลัง 1 เดือน">
+          &larr; ก่อนหน้า
+        </button>
+        <div class="dp-start-month-box">
+          <label for="input-start-month">เริ่มเดือน:</label>
+          <input type="month" id="input-start-month" class="dp-month-input font-mono">
+        </div>
+        <button type="button" id="btn-win-current" class="btn btn-secondary btn-sm" title="กลับมาเริ่มที่เดือนปัจจุบัน (วางแผนล่วงหน้า 12 เดือน)">
+          เดือนปัจจุบัน (12 เดือน)
+        </button>
+        <button type="button" id="btn-win-next" class="btn btn-secondary btn-sm" title="เลื่อนช่วงเวลาไปข้างหน้า 1 เดือน">
+          ถัดไป &rarr;
+        </button>
+      </div>
+
+      <div class="dp-filter-pills" id="dp-filter-pills">
+        <button type="button" class="dp-pill active" data-filter="ALL">ทั้งหมด 12 เดือน</button>
+        <button type="button" class="dp-pill" data-filter="HAS_ITEMS">เฉพาะเดือนที่มีรายการ</button>
+        <button type="button" class="dp-pill" data-filter="URGENT">🔥 มีรายการด่วน</button>
+        <button type="button" class="dp-pill" data-filter="OVER_BUDGET">⚠️ เกินงบประมาณ</button>
+      </div>
+
+      <div class="dp-search-wrap">
+        <div class="dp-search-box">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="dp-search-input" placeholder="ค้นหารายละเอียด, ยี่ห้อ, ระยะเวลาจัดส่ง..." autocomplete="off">
+          <button type="button" id="dp-search-clear" class="btn-clear" style="display:none;">&times;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 1: 12-MONTH PLANNING BOARD -->
+    <section id="tab-board" class="dp-tab-content active" role="tabpanel">
+      <div id="dp-months-grid" class="dp-months-grid">
+        <!-- Populated dynamically with 12 month cards -->
+      </div>
+    </section>
+
+    <!-- TAB 2: ALL ITEMS TABLE VIEW -->
+    <section id="tab-table" class="dp-tab-content" role="tabpanel" style="display:none;">
+      <div class="dp-table-card">
+        <div class="dp-table-wrapper">
+          <table class="dp-table">
+            <thead>
+              <tr>
+                <th style="width: 170px;">เดือนที่วางแผน</th>
+                <th>รายละเอียด (Description)</th>
+                <th style="width: 150px;">ยี่ห้อ (Brand)</th>
+                <th style="width: 130px; text-align: right;">ราคา (บาท)</th>
+                <th style="width: 150px;">ระยะเวลาจัดส่ง</th>
+                <th style="width: 120px; text-align: center;">ไฟล์ / ลิงก์</th>
+                <th style="width: 130px; text-align: center;">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="dp-table-body">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- MODAL 1: ADD / EDIT DEPARTMENT PAY ITEM -->
+  <dialog id="modal-dp-item" class="dp-modal">
+    <div class="dp-modal-card">
+      <div class="dp-modal-header">
+        <h3 id="modal-item-title" class="dp-modal-title">เพิ่มรายการค่าใช้จ่ายแผนก</h3>
+        <button type="button" id="btn-close-item-modal" class="btn-clear" aria-label="ปิดหน้าต่าง">&times;</button>
+      </div>
+
+      <form id="form-dp-item" class="dp-modal-form" novalidate>
+        <input type="hidden" id="item-id">
+
+        <div class="dp-form-row col-2">
+          <div class="dp-form-field">
+            <label for="item-year-month" class="dp-label required">เดือนที่วางแผนสั่งซื้อ</label>
+            <select id="item-year-month" class="dp-select font-mono" required></select>
+          </div>
+
+          <div class="dp-form-field">
+            <label class="dp-label">ความเร่งด่วน</label>
+            <label class="dp-urgent-toggle" for="item-is-urgent" title="ทำเครื่องหมายเป็นรายการด่วน">
+              <input type="checkbox" id="item-is-urgent">
+              <span>🔥 รายการด่วน (Urgent)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="dp-form-field">
+          <label for="item-description" class="dp-label required">รายละเอียด (Description)</label>
+          <input type="text" id="item-description" class="dp-input" placeholder="ระบุชื่ออุปกรณ์ รายละเอียดสเปก หรือรายการค่าใช้จ่าย (บังคับกรอก)" required>
+        </div>
+
+        <div class="dp-form-row col-3">
+          <div class="dp-form-field">
+            <label for="item-brand" class="dp-label">ยี่ห้อ (Brand)</label>
+            <input type="text" id="item-brand" class="dp-input" placeholder="เช่น Mitsubishi, Schneider, OMRON, Fluke">
+          </div>
+
+          <div class="dp-form-field">
+            <label for="item-price" class="dp-label">ราคา (บาท)</label>
+            <div class="dp-input-unit">
+              <input type="number" id="item-price" class="dp-input font-mono" placeholder="เช่น 2500" min="0" step="any">
+              <span class="dp-unit">฿</span>
+            </div>
+          </div>
+
+          <div class="dp-form-field">
+            <label for="item-lead-time" class="dp-label">ระยะเวลาจัดส่ง (Lead Time)</label>
+            <input type="text" id="item-lead-time" class="dp-input" placeholder="เช่น พร้อมส่ง, 3-5 วัน, 2 สัปดาห์, 30 วัน">
+          </div>
+        </div>
+
+        <div class="dp-form-field">
+          <label for="item-file-url" class="dp-label">ลิงก์ / URL ไฟล์แนบ (ใบเสนอราคา, รูปภาพ, Google Drive, ลิงก์สินค้า)</label>
+          <input type="url" id="item-file-url" class="dp-input font-mono" placeholder="https://drive.google.com/... หรือลิงก์เอกสาร/ร้านค้า">
+        </div>
+
+        <div class="dp-form-field">
+          <label for="item-remark" class="dp-label">หมายเหตุเพิ่มเติม</label>
+          <textarea id="item-remark" class="dp-textarea" rows="2" placeholder="ระบุเหตุผลความจำเป็น เครื่องจักรที่นำไปใช้ หรือข้อมูลเพิ่มเติม (ถ้ามี)"></textarea>
+        </div>
+
+        <div id="item-budget-preview" class="dp-budget-preview-bar"></div>
+        <div id="item-form-error" class="dp-form-error" style="display:none;"></div>
+
+        <div class="dp-modal-footer">
+          <label class="dp-checkbox-label">
+            <input type="checkbox" id="item-continuous-add">
+            <span>บันทึกแล้วเพิ่มรายการถัดไปต่อทันที</span>
+          </label>
+          <div class="dp-modal-footer-right">
+            <button type="button" id="btn-cancel-item-modal" class="btn btn-secondary">ยกเลิก</button>
+            <button type="submit" id="btn-submit-item-modal" class="btn btn-primary">
+              <span>บันทึกรายการ</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- MODAL 2: BUDGET SETTINGS (DEFAULT 8,000 THB & PER-MONTH OVERRIDE) -->
+  <dialog id="modal-dp-budget" class="dp-modal dp-modal-sm">
+    <div class="dp-modal-card">
+      <div class="dp-modal-header">
+        <h3 class="dp-modal-title">⚙️ ตั้งค่างบประมาณค่าใช้จ่ายแผนก</h3>
+        <button type="button" id="btn-close-budget-modal" class="btn-clear" aria-label="ปิดหน้าต่าง">&times;</button>
+      </div>
+
+      <form id="form-dp-budget" class="dp-modal-form" novalidate>
+        <div class="dp-budget-section">
+          <h4 class="dp-budget-sec-title">1. งบประมาณมาตรฐานรายเดือน (ทุกเดือน)</h4>
+          <p class="dp-help">ค่าเริ่มต้นของทุกเดือนที่ไม่ได้กำหนดงบแยกเฉพาะ (ค่าเริ่มต้น 8,000 บาท/เดือน)</p>
+          <div class="dp-input-unit" style="margin-top:6px;">
+            <input type="number" id="budget-default-input" class="dp-input font-mono" min="0" step="100" value="8000" required>
+            <span class="dp-unit">฿ / เดือน</span>
+          </div>
+        </div>
+
+        <div class="dp-budget-section" id="budget-month-specific-box">
+          <h4 class="dp-budget-sec-title">2. กำหนดงบเฉพาะเดือน (ถ้าต้องการปรับเฉพาะบางเดือน)</h4>
+          <div class="dp-form-row col-2" style="margin-top:6px;">
+            <div class="dp-form-field">
+              <label for="budget-target-month" class="dp-label">เลือกเดือน</label>
+              <select id="budget-target-month" class="dp-select font-mono"></select>
+            </div>
+            <div class="dp-form-field">
+              <label for="budget-month-amount" class="dp-label">งบเฉพาะเดือนนี้ (บาท)</label>
+              <div class="dp-input-unit">
+                <input type="number" id="budget-month-amount" class="dp-input font-mono" min="0" step="100" placeholder="เว้นว่างเพื่อใช้งบมาตรฐาน">
+                <span class="dp-unit">฿</span>
+              </div>
+            </div>
+          </div>
+          <div class="dp-form-field" style="margin-top:8px;">
+            <label for="budget-month-note" class="dp-label">หมายเหตุงบเดือนนี้</label>
+            <input type="text" id="budget-month-note" class="dp-input" placeholder="เช่น เพิ่มงบพิเศษซ่อมด่วน หรือปรับลดงบ">
+          </div>
+          <div style="margin-top:8px;">
+            <button type="button" id="btn-reset-month-budget" class="btn btn-secondary btn-sm">
+              รีเซ็ตเดือนนี้กลับไปใช้งบมาตรฐาน
+            </button>
+          </div>
+        </div>
+
+        <div id="budget-form-error" class="dp-form-error" style="display:none;"></div>
+
+        <div class="dp-modal-footer">
+          <div class="dp-modal-footer-right">
+            <button type="button" id="btn-cancel-budget-modal" class="btn btn-secondary">ยกเลิก</button>
+            <button type="submit" id="btn-submit-budget-modal" class="btn btn-primary">บันทึกงบประมาณ</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- MODAL 3: ITEM DETAIL VIEW (i BUTTON) -->
+  <dialog id="modal-dp-detail" class="dp-modal dp-modal-sm">
+    <div class="dp-modal-card">
+      <div class="dp-modal-header">
+        <h3 class="dp-modal-title">ℹ️ รายละเอียดรายการค่าใช้จ่าย</h3>
+        <button type="button" id="btn-close-detail-modal" class="btn-clear" aria-label="ปิดหน้าต่าง">&times;</button>
+      </div>
+      <div id="dp-detail-body" class="dp-detail-modal-body"></div>
+      <div class="dp-modal-footer">
+        <div class="dp-modal-footer-right">
+          <button type="button" id="btn-detail-close" class="btn btn-secondary">ปิด</button>
+          <button type="button" id="btn-detail-edit" class="btn btn-primary">แก้ไขรายการ</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- APP_SCRIPT -->
+</body>
+</html>

@@ -2,12 +2,14 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>แผนผังระบบไฟฟ้า (Single Line Diagram) - แผนกซ่อมไฟฟ้า</title>
   <link rel="icon" type="image/png" href="/Logo%20small.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
 /* ==========================================================================
    ELECTRICAL SINGLE LINE & POWER DISTRIBUTION DIAGRAM STYLES
@@ -161,6 +163,24 @@ html, body {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.el-btn-excel-icon {
+  padding: 5px 8px;
+  color: #15803d;
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  transition: all var(--dur-fast) var(--ease);
+}
+.el-btn-excel-icon:hover:not(:disabled) {
+  background: #dcfce7;
+  border-color: #4ade80;
+  color: #166534;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.14);
+}
+.el-btn-excel-icon:focus-visible {
+  outline: 3px solid rgba(22, 163, 74, 0.35);
+  outline-offset: 2px;
 }
 
 /* Compact KPI Strip */
@@ -1109,6 +1129,60 @@ html, body {
   .el-downstream-amp {
     font-size: 13.5px;
   }
+
+  /* Modal at 100% Large Screen Scale */
+  .el-modal {
+    width: min(1640px, 88vw);
+  }
+  .el-modal-header {
+    padding: 18px 28px;
+  }
+  .el-modal-title {
+    font-size: 18px;
+  }
+  .el-modal-form {
+    padding: 24px 28px;
+    gap: 16px;
+    max-height: 88vh;
+  }
+  .el-form-row {
+    gap: 18px;
+  }
+  .el-label {
+    font-size: 13.5px;
+  }
+  .el-select, .el-input, .el-textarea {
+    padding: 9px 14px;
+    font-size: 14px;
+  }
+  .el-circuit-builder-section {
+    padding: 18px 20px;
+    gap: 14px;
+  }
+  .el-circuit-builder-title {
+    font-size: 15.5px;
+  }
+  .el-circuit-builder-desc {
+    font-size: 13px;
+  }
+  .el-circuit-table-wrap {
+    max-height: 420px;
+  }
+  .el-circuit-table {
+    font-size: 13.5px;
+  }
+  .el-circuit-table thead th {
+    padding: 10px 12px;
+  }
+  .el-circuit-table tbody td {
+    padding: 7px 10px;
+  }
+  .el-circuit-table .el-input,
+  .el-circuit-table .el-select {
+    padding: 6px 10px;
+    font-size: 13.5px;
+    height: 36px;
+  }
 }
 
 @media (max-width: 1200px) {
@@ -2038,7 +2112,7 @@ html, body {
   background: transparent;
   padding: 0;
   max-width: 95vw;
-  width: 960px;
+  width: min(1360px, 90vw);
 }
 .el-modal::backdrop {
   background: rgba(15, 23, 42, 0.6);
@@ -2055,7 +2129,7 @@ html, body {
 }
 
 .el-modal-header {
-  padding: 16px 20px;
+  padding: 16px 24px;
   background: #0d1e38;
   color: #ffffff;
   display: flex;
@@ -2064,7 +2138,7 @@ html, body {
 }
 .el-modal-title {
   margin: 0;
-  font-size: 16px;
+  font-size: 16.5px;
   font-weight: 600;
 }
 .el-modal-header .btn-clear {
@@ -2072,11 +2146,11 @@ html, body {
 }
 
 .el-modal-form {
-  padding: 20px;
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-height: 80vh;
+  max-height: 86vh;
   overflow-y: auto;
 }
 
@@ -2251,7 +2325,7 @@ html, body {
   border-radius: 6px;
   background: #ffffff;
   overflow-x: auto;
-  max-height: 280px;
+  max-height: 340px;
   overflow-y: auto;
 }
 .el-circuit-table {
@@ -2375,6 +2449,21 @@ html, body {
   .el-diagram-viewport {
     height: 560px;
   }
+  /* Prevent mobile browsers (iOS Safari / Chrome Mobile) from auto-zooming on input focus */
+  input,
+  select,
+  textarea,
+  .el-input,
+  .el-select,
+  .el-textarea,
+  .el-select-sm,
+  .el-search-box input,
+  .el-explorer-search-box input,
+  .el-custom-select-search,
+  .el-circuit-table .el-input,
+  .el-circuit-table .el-select {
+    font-size: 16px !important;
+  }
 }
 
 </style>
@@ -2445,15 +2534,16 @@ html, body {
         </div>
       </div>
 
-      <!-- 6. ค่าใช้จ่าย PM with Dropdown -->
+      <!-- 6. ค่าใช้จ่าย PM & ค่าใช้จ่ายแผนก with Dropdown -->
       <div class="em-dropdown em-dropdown-pm-expenses">
         <a href="/pm-expenses/" class="em-nav-link em-dropdown-trigger">
-          <span>ค่าใช้จ่าย PM</span>
+          <span>ค่าใช้จ่าย</span>
           <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
           <a class="em-dropdown-item" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
           <a class="em-dropdown-item" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+          <a class="em-dropdown-item" href="/department-pay/"><span class="em-item-icon">💳</span> ค่าใช้จ่ายแผนก (Dept Pay)</a>
         </div>
       </div>
 
@@ -2556,18 +2646,19 @@ html, body {
           </div>
         </div>
 
-        <!-- 6. ค่าใช้จ่าย PM Accordion -->
+        <!-- 6. ค่าใช้จ่าย PM & แผนก Accordion -->
         <div class="em-drawer-group">
           <button type="button" class="em-drawer-group-btn" aria-expanded="false">
             <span class="em-drawer-group-title">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-              ค่าใช้จ่าย PM
+              ค่าใช้จ่าย PM &amp; แผนก
             </span>
             <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
           <div class="em-drawer-sublist" style="display:none;">
             <a class="em-drawer-subitem" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
             <a class="em-drawer-subitem" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+            <a class="em-drawer-subitem" href="/department-pay/"><span class="em-item-icon">💳</span> ค่าใช้จ่ายแผนก (Department Pay)</a>
           </div>
         </div>
 
@@ -3090,6 +3181,14 @@ html, body {
           </div>
 
           <div class="el-header-actions">
+            <button type="button" id="btn-export-excel" class="btn btn-secondary btn-sm el-btn-excel-icon" title="ส่งออกข้อมูลเป็นไฟล์ Excel (.xlsx)" aria-label="ส่งออกข้อมูลเป็นไฟล์ Excel">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <path d="m9.5 12.5 5 5"></path>
+                <path d="m14.5 12.5-5 5"></path>
+              </svg>
+            </button>
             <button type="button" id="btn-refresh" class="btn btn-secondary btn-sm" title="รีเฟรชข้อมูล">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
               <span>รีเฟรช</span>
@@ -3271,6 +3370,7 @@ html, body {
               <th>สถานที่</th>
               <th style="min-width: 280px;">จ่ายไฟมาจาก (เลือกตู้ต้นทาง Parent)</th>
               <th style="width: 120px;">สถานะสายเมน</th>
+              <th style="width: 80px; text-align: center;">จัดการ</th>
             </tr>
           </thead>
           <tbody id="wiring-table-body">
@@ -3486,33 +3586,35 @@ html, body {
           </div>
         </div>
 
-        <div class="el-form-field">
-          <label for="form-remark" class="el-label">หมายเหตุ / ข้อมูลเพิ่มเติม</label>
-          <textarea id="form-remark" name="remark" class="el-textarea" rows="2" placeholder="เช่น ยี่ห้อเบรกเกอร์, ขนาดสายเมน, ข้อมูลตู้"></textarea>
-        </div>
+        <div class="el-form-row col-2">
+          <div class="el-form-field">
+            <label for="form-remark" class="el-label">หมายเหตุ / ข้อมูลเพิ่มเติม</label>
+            <textarea id="form-remark" name="remark" class="el-textarea" rows="3" style="height: 100%; min-height: 96px;" placeholder="เช่น ยี่ห้อเบรกเกอร์, ขนาดสายเมน, ข้อมูลตู้"></textarea>
+          </div>
 
-        <!-- Google Drive Photo Section -->
-        <div class="el-form-field">
-          <label class="el-label">รูปภาพตู้ (เชื่อมต่อ Google Drive)</label>
-          <div class="el-photo-uploader">
-            <div class="el-photo-preview-box" id="form-photo-preview">
-              <img id="form-preview-img" src="" alt="พรีวิวรูปภาพ" style="display:none;">
-              <div id="form-preview-empty" class="el-preview-empty">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                <span>เลือกไฟล์รูปภาพเพื่ออัปโหลด</span>
+          <!-- Google Drive Photo Section -->
+          <div class="el-form-field">
+            <label class="el-label">รูปภาพตู้ (เชื่อมต่อ Google Drive)</label>
+            <div class="el-photo-uploader">
+              <div class="el-photo-preview-box" id="form-photo-preview">
+                <img id="form-preview-img" src="" alt="พรีวิวรูปภาพ" style="display:none;">
+                <div id="form-preview-empty" class="el-preview-empty">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  <span>เลือกไฟล์รูปภาพเพื่ออัปโหลด</span>
+                </div>
               </div>
-            </div>
 
-            <div class="el-photo-controls">
-              <input type="file" id="form-file-input" accept="image/*" style="display:none;">
-              <button type="button" id="btn-select-file" class="btn btn-secondary btn-sm">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                <span>เลือกรูปจากเครื่อง</span>
-              </button>
-              <button type="button" id="btn-remove-photo" class="btn btn-danger-ghost btn-sm" style="display:none;">
-                <span>ลบรูป</span>
-              </button>
-              <div class="el-photo-tip">รองรับไฟล์ JPG, PNG, WEBP ขนาดไม่เกิน 15MB &middot; อัปโหลดตรงเข้า Google Drive อัตโนมัติ</div>
+              <div class="el-photo-controls">
+                <input type="file" id="form-file-input" accept="image/*" style="display:none;">
+                <button type="button" id="btn-select-file" class="btn btn-secondary btn-sm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  <span>เลือกรูปจากเครื่อง</span>
+                </button>
+                <button type="button" id="btn-remove-photo" class="btn btn-danger-ghost btn-sm" style="display:none;">
+                  <span>ลบรูป</span>
+                </button>
+                <div class="el-photo-tip">รองรับไฟล์ JPG, PNG, WEBP ขนาดไม่เกิน 15MB &middot; อัปโหลดตรงเข้า Google Drive อัตโนมัติ</div>
+              </div>
             </div>
           </div>
         </div>
@@ -3599,13 +3701,13 @@ html, body {
             <table class="el-circuit-table">
               <thead>
                 <tr>
-                  <th style="width:36px; text-align:center;">#</th>
-                  <th style="width:130px;">รหัส / Tag Code *</th>
+                  <th style="width:42px; text-align:center;">#</th>
+                  <th style="width:18%; min-width:140px;">รหัส / Tag Code *</th>
                   <th>ชื่อตู้ / โหลดปลายทาง *</th>
-                  <th style="width:115px;">ประเภท</th>
-                  <th style="width:95px;">พิกัด (A)</th>
-                  <th style="width:150px;">สถานที่ติดตั้ง</th>
-                  <th style="width:40px; text-align:center;">ลบ</th>
+                  <th style="width:145px;">ประเภท</th>
+                  <th style="width:115px;">พิกัด (A)</th>
+                  <th style="width:20%; min-width:160px;">สถานที่ติดตั้ง</th>
+                  <th style="width:46px; text-align:center;">ลบ</th>
                 </tr>
               </thead>
               <tbody id="circuit-table-body">
@@ -3658,6 +3760,8 @@ html, body {
   : location.pathname.startsWith('/pm-aircooling') ? 'pm-aircooling'
   : location.pathname.startsWith('/pm') ? 'pm'
   : location.pathname.startsWith('/pr-tracker') ? 'pr-tracker'
+  : location.pathname.startsWith('/electrical-diagram') ? 'electrical'
+  : location.pathname.startsWith('/department-pay') ? 'department-pay'
   : 'machines';
  const inFlight = new Map();
 
@@ -3982,6 +4086,10 @@ html, body {
     if (navUsers) navUsers.style.display = canManageUsers ? 'inline-flex' : 'none';
     if (drawerNavUsers) drawerNavUsers.style.display = canManageUsers ? 'flex' : 'none';
 
+    try {
+      window.dispatchEvent(new CustomEvent('em-auth-changed', { detail: currentUser }));
+    } catch (_) {}
+
     if (!currentUser) {
       if (badge) {
         badge.innerHTML = '<button id="em-open-login" style="background:linear-gradient(135deg, #0284c7, #0369a1);color:#fff;border:1px solid rgba(56,189,248,0.4);border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(2,132,199,0.3)">เข้าสู่ระบบ</button>';
@@ -4171,6 +4279,7 @@ html, body {
   };
 
   window.isAdmin = () => Boolean(currentUser && (currentUser.role === 'admin' || currentUser.permissions?.bom === 'admin'));
+  window.promptLogin = promptLogin;
   window.callRPC = async (method, ...args) => {
     return window.EM_RPC(method, ...args);
   };
@@ -5155,7 +5264,7 @@ html, body {
     if (!tbody) return;
 
     if (state.nodes.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px;">ไม่มีข้อมูลตู้</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">ไม่มีข้อมูลตู้</td></tr>';
       return;
     }
 
@@ -5211,7 +5320,7 @@ html, body {
     if ($('wiring-btn-next')) $('wiring-btn-next').disabled = state.wiringPage >= totalPages;
 
     if (pagedItems.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--el-ink-muted);">ไม่พบรายการที่ตรงกับเงื่อนไข</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--el-ink-muted);">ไม่พบรายการที่ตรงกับเงื่อนไข</td></tr>';
       return;
     }
 
@@ -5241,6 +5350,11 @@ html, body {
             </button>
           </td>
           <td class="wiring-status-cell">${statusPill}</td>
+          <td style="text-align: center;">
+            <button type="button" class="btn btn-danger-ghost btn-sm btn-wiring-delete" data-id="${node.id}" title="ลบตู้/อุปกรณ์นี้">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </td>
         </tr>
       `;
     });
@@ -5258,6 +5372,10 @@ html, body {
           openWiringDropdown(btn);
         }
       });
+    });
+
+    tbody.querySelectorAll('.btn-wiring-delete').forEach(btn => {
+      btn.addEventListener('click', () => confirmDeleteNode(btn.dataset.id));
     });
 
     if (saveBtn) {
@@ -6142,6 +6260,10 @@ html, body {
     const fallbackParentId = node.parentId || null;
     try {
       await rpc('deleteNode', id);
+      state.pendingWiring.delete(id);
+      for (const [k, v] of state.pendingWiring.entries()) {
+        if (v === id) state.pendingWiring.delete(k);
+      }
       state.selectedNodeId = fallbackParentId;
       await loadData();
     } catch (err) {
@@ -6154,6 +6276,165 @@ html, body {
     if (!url) return;
     $('lightbox-img').src = url;
     $('modal-lightbox').showModal();
+  }
+
+  // Export Electrical Distribution Data to Excel (.xlsx)
+  function exportElectricalExcel() {
+    if (!state.nodes || state.nodes.length === 0) {
+      alert('ยังไม่มีข้อมูลตู้หรืออุปกรณ์ไฟฟ้าสำหรับส่งออก');
+      return;
+    }
+
+    const byId = new Map();
+    const childrenMap = new Map();
+    state.nodes.forEach(n => {
+      byId.set(n.id, n);
+      childrenMap.set(n.id, []);
+    });
+    state.nodes.forEach(n => {
+      if (n.parentId && childrenMap.has(n.parentId)) {
+        childrenMap.get(n.parentId).push(n);
+      }
+    });
+
+    function getHierarchyMeta(node) {
+      const chain = [];
+      const visited = new Set();
+      let curr = node;
+      while (curr && !visited.has(curr.id)) {
+        visited.add(curr.id);
+        chain.unshift(curr);
+        curr = curr.parentId ? byId.get(curr.parentId) : null;
+      }
+      const rootNode = chain[0] || node;
+      const rootMdb = rootNode.nodeType === 'MDB' ? rootNode.nodeCode : (node.parentId ? rootNode.nodeCode : 'สายอิสระ (ยังไม่ต่อ)');
+      const feederPath = chain.map(c => c.nodeCode).join(' > ');
+      return {
+        level: chain.length,
+        rootMdb,
+        feederPath
+      };
+    }
+
+    const allRows = state.nodes.map((n, idx) => {
+      const parent = n.parentId ? byId.get(n.parentId) : null;
+      const meta = getHierarchyMeta(n);
+      return {
+        'ลำดับ': idx + 1,
+        'สายประธานหลัก (MDB)': meta.rootMdb,
+        'ระดับชั้น': meta.level,
+        'รหัสตู้ / อุปกรณ์ (Tag Code)': n.nodeCode || '',
+        'ชื่อตู้ / อุปกรณ์': n.name || '',
+        'ประเภท (Type)': n.nodeType || '',
+        'พิกัดกระแส (A)': n.currentRating || 0,
+        'ระดับแรงดัน (Voltage)': n.voltage || '',
+        'สถานที่ติดตั้ง (Location)': n.location || '',
+        'จ่ายไฟมาจาก (Parent Code)': parent ? parent.nodeCode : (n.nodeType === 'MDB' ? 'ตู้ประธานหลัก (MDB)' : 'ยังไม่เชื่อมโยง'),
+        'ชื่อตู้ต้นทาง (Parent Name)': parent ? parent.name : '',
+        'เส้นทางสายไฟ (Feeder Path)': meta.feederPath,
+        'จำนวนวงจรย่อย': n.childCount || (childrenMap.get(n.id)?.length || 0),
+        'หมายเหตุ': n.remark || '',
+        'ลิงก์รูปถ่าย (Google Drive)': n.driveWebUrl || ''
+      };
+    });
+
+    const nowStr = new Date().toISOString().slice(0, 10);
+
+    if (typeof XLSX === 'undefined') {
+      // Fallback to UTF-8 BOM CSV if SheetJS is not loaded
+      const headers = Object.keys(allRows[0]);
+      const csvLines = [
+        headers.join(','),
+        ...allRows.map(row =>
+          headers.map(h => `"${String(row[h] ?? '').replace(/"/g, '""')}"`).join(',')
+        )
+      ];
+      const blob = new Blob(['\uFEFF' + csvLines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `Electrical_Distribution_${nowStr}.csv`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      return;
+    }
+
+    const colWidths = [
+      { wch: 7 },  // ลำดับ
+      { wch: 18 }, // สายประธานหลัก
+      { wch: 10 }, // ระดับชั้น
+      { wch: 22 }, // รหัสตู้
+      { wch: 34 }, // ชื่อตู้
+      { wch: 12 }, // ประเภท
+      { wch: 14 }, // พิกัดกระแส
+      { wch: 16 }, // ระดับแรงดัน
+      { wch: 24 }, // สถานที่ติดตั้ง
+      { wch: 22 }, // จ่ายไฟมาจาก
+      { wch: 28 }, // ชื่อตู้ต้นทาง
+      { wch: 42 }, // เส้นทางสายไฟ
+      { wch: 14 }, // จำนวนวงจรย่อย
+      { wch: 28 }, // หมายเหตุ
+      { wch: 36 }  // ลิงก์รูปถ่าย
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    const wsAll = XLSX.utils.json_to_sheet(allRows);
+    wsAll['!cols'] = colWidths;
+    XLSX.utils.book_append_sheet(workbook, wsAll, 'ทะเบียนตู้ทั้งหมด');
+
+    // Create dedicated hierarchical sheet per Root MDB
+    const rootMdbs = state.nodes
+      .filter(n => n.nodeType === 'MDB' && !n.parentId)
+      .sort((a, b) => (a.nodeCode || '').localeCompare(b.nodeCode || '', undefined, { numeric: true, sensitivity: 'base' }));
+
+    const usedSheetNames = new Set(['ทะเบียนตู้ทั้งหมด']);
+    rootMdbs.forEach(mdb => {
+      const treeNodes = [];
+      const visited = new Set();
+      function traverse(node) {
+        if (!node || visited.has(node.id)) return;
+        visited.add(node.id);
+        treeNodes.push(node);
+        const kids = (childrenMap.get(node.id) || []).slice().sort((a, b) =>
+          (a.nodeCode || '').localeCompare(b.nodeCode || '', undefined, { numeric: true, sensitivity: 'base' })
+        );
+        kids.forEach(traverse);
+      }
+      traverse(mdb);
+
+      const mdbRows = treeNodes.map((n, idx) => {
+        const parent = n.parentId ? byId.get(n.parentId) : null;
+        const meta = getHierarchyMeta(n);
+        return {
+          'ลำดับ': idx + 1,
+          'สายประธานหลัก (MDB)': mdb.nodeCode,
+          'ระดับชั้น': meta.level,
+          'รหัสตู้ / อุปกรณ์ (Tag Code)': n.nodeCode || '',
+          'ชื่อตู้ / อุปกรณ์': n.name || '',
+          'ประเภท (Type)': n.nodeType || '',
+          'พิกัดกระแส (A)': n.currentRating || 0,
+          'ระดับแรงดัน (Voltage)': n.voltage || '',
+          'สถานที่ติดตั้ง (Location)': n.location || '',
+          'จ่ายไฟมาจาก (Parent Code)': parent ? parent.nodeCode : 'ตู้ประธานหลัก (MDB)',
+          'ชื่อตู้ต้นทาง (Parent Name)': parent ? parent.name : '',
+          'เส้นทางสายไฟ (Feeder Path)': meta.feederPath,
+          'จำนวนวงจรย่อย': n.childCount || (childrenMap.get(n.id)?.length || 0),
+          'หมายเหตุ': n.remark || '',
+          'ลิงก์รูปถ่าย (Google Drive)': n.driveWebUrl || ''
+        };
+      });
+
+      let sheetName = (mdb.nodeCode || 'MDB').replace(/[\\/?*[\]:]/g, ' ').trim().slice(0, 31) || 'MDB';
+      if (usedSheetNames.has(sheetName)) {
+        sheetName = `${sheetName.slice(0, 27)}_${usedSheetNames.size}`;
+      }
+      usedSheetNames.add(sheetName);
+
+      const wsMdb = XLSX.utils.json_to_sheet(mdbRows);
+      wsMdb['!cols'] = colWidths;
+      XLSX.utils.book_append_sheet(workbook, wsMdb, sheetName);
+    });
+
+    XLSX.writeFile(workbook, `Electrical_Distribution_${nowStr}.xlsx`);
   }
 
   // Helpers
@@ -6174,9 +6455,10 @@ html, body {
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
-    // 2. Add node button
+    // 2. Add node, refresh & export Excel buttons
     $('btn-add-node')?.addEventListener('click', openCreateModal);
     $('btn-refresh')?.addEventListener('click', loadData);
+    $('btn-export-excel')?.addEventListener('click', exportElectricalExcel);
 
     // 3. KPI card / chip filter clicks
     document.querySelectorAll('.el-kpi-card, .el-kpi-chip').forEach(card => {

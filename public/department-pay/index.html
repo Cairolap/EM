@@ -1,0 +1,3686 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ค่าใช้จ่ายแผนก (Department Pay) - แผนกซ่อมไฟฟ้า</title>
+  <link rel="icon" type="image/png" href="/Logo%20small.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+:root {
+  --dp-primary: #0f294a;
+  --dp-primary-accent: #0284c7;
+  --dp-primary-surface: #e0f2fe;
+  --dp-ink: #0f172a;
+  --dp-ink-secondary: #475569;
+  --dp-ink-muted: #94a3b8;
+  --dp-bg-page: #f1f5f9;
+  --dp-bg-surface: #ffffff;
+  --dp-bg-muted: #f8fafc;
+  --dp-border: #cbd5e1;
+  --dp-border-subtle: #e2e8f0;
+  --dp-success: #15803d;
+  --dp-success-bg: #dcfce7;
+  --dp-warn: #b45309;
+  --dp-warn-bg: #fef3c7;
+  --dp-danger: #dc2626;
+  --dp-danger-bg: #fee2e2;
+  --font-body: "Prompt", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, monospace;
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 6px 16px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 16px 36px rgba(15, 23, 42, 0.16);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 150ms;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--dp-bg-page);
+  color: var(--dp-ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-mono {
+  font-family: var(--font-mono) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.dp-app-container {
+  max-width: 1880px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 12px 20px 40px;
+}
+
+/* ==========================================================================
+   HEADER & KPI STRIP
+   ========================================================================== */
+.dp-page-header {
+  background: var(--dp-bg-surface);
+  border: 1px solid var(--dp-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-sm);
+}
+
+.dp-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dp-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.dp-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dp-page-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0d1e38;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  letter-spacing: -0.02em;
+}
+
+.dp-title-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  border-radius: 7px;
+  font-size: 15px;
+}
+
+.dp-title-en {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+
+.dp-auth-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--dp-border);
+  background: var(--dp-bg-muted);
+  color: var(--dp-ink-secondary);
+  transition: all var(--dur-fast) var(--ease);
+}
+.dp-auth-pill:hover {
+  border-color: var(--dp-primary-accent);
+  color: var(--dp-ink);
+}
+.dp-auth-pill.is-logged-in {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+  cursor: default;
+}
+.dp-auth-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f59e0b;
+}
+.dp-auth-pill.is-logged-in .dp-auth-dot {
+  background: #10b981;
+}
+
+/* View Switcher Tabs */
+.dp-view-tabs {
+  display: inline-flex;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--dp-border-subtle);
+  gap: 3px;
+}
+
+.dp-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dp-ink-secondary);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+}
+.dp-tab-btn:hover {
+  color: var(--dp-ink);
+}
+.dp-tab-btn.active {
+  background: #0d1e38;
+  color: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+.dp-tab-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.1);
+}
+.dp-tab-btn.active .dp-tab-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* Right Group: KPIs & Actions */
+.dp-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.dp-kpi-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.dp-kpi-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--dp-bg-muted);
+  border: 1px solid var(--dp-border-subtle);
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: var(--dp-ink-secondary);
+}
+.dp-kpi-chip strong {
+  color: var(--dp-ink);
+  font-size: 13px;
+}
+.dp-kpi-chip.kpi-budget-btn {
+  cursor: pointer;
+  background: #f0f9ff;
+  border-color: #bae6fd;
+  color: #0369a1;
+  transition: all var(--dur-fast) var(--ease);
+}
+.dp-kpi-chip.kpi-budget-btn:hover {
+  background: #e0f2fe;
+  border-color: #38bdf8;
+}
+.dp-kpi-chip.kpi-budget-btn strong {
+  color: #0c4a6e;
+}
+.dp-kpi-chip.kpi-spent strong {
+  color: #0284c7;
+}
+.dp-kpi-chip.kpi-remaining strong {
+  color: var(--dp-success);
+}
+.dp-kpi-chip.kpi-remaining.is-over strong {
+  color: var(--dp-danger);
+}
+
+.dp-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dp-btn-excel-icon {
+  padding: 5px 8px;
+  color: #15803d;
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+.dp-btn-excel-icon:hover:not(:disabled) {
+  background: #dcfce7;
+  border-color: #4ade80;
+  color: #166534;
+}
+
+/* ==========================================================================
+   TOOLBAR (WINDOW NAV, FILTER PILLS, SEARCH)
+   ========================================================================== */
+.dp-toolbar {
+  background: var(--dp-bg-surface);
+  border: 1px solid var(--dp-border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.dp-window-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.dp-start-month-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--dp-bg-muted);
+  border: 1px solid var(--dp-border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dp-ink-secondary);
+}
+
+.dp-month-input {
+  border: none;
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--dp-ink);
+  outline: none;
+  cursor: pointer;
+}
+
+.dp-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.dp-pill {
+  border: 1px solid var(--dp-border);
+  background: var(--dp-bg-surface);
+  color: var(--dp-ink-secondary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 11px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+}
+.dp-pill:hover {
+  border-color: var(--dp-primary-accent);
+  color: var(--dp-ink);
+}
+.dp-pill.active {
+  background: #0d1e38;
+  border-color: #0d1e38;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.dp-search-wrap {
+  flex: 0 1 320px;
+  min-width: 220px;
+}
+
+.dp-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--dp-bg-muted);
+  border: 1px solid var(--dp-border);
+  border-radius: 7px;
+  padding: 5px 10px;
+}
+.dp-search-box:focus-within {
+  background: var(--dp-bg-surface);
+  border-color: var(--dp-primary-accent);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14);
+}
+.dp-search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--dp-ink);
+}
+
+/* ==========================================================================
+   12-MONTH PLANNING BOARD GRID & MONTH CARDS
+   ========================================================================== */
+.dp-months-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.dp-month-card {
+  background: var(--dp-bg-surface);
+  border: 1px solid var(--dp-border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  overflow: hidden;
+  min-height: 195px;
+}
+.dp-month-card.is-current-month {
+  border-color: #0284c7;
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.12);
+}
+.dp-month-card.is-over-budget {
+  border-color: #f87171;
+}
+.dp-month-card.is-drag-over {
+  border: 2px dashed #0284c7;
+  background: #f0f9ff;
+  transform: translateY(-2px);
+}
+
+.dp-month-top-bar {
+  height: 3.5px;
+  background: #64748b;
+}
+.dp-month-card.is-current-month .dp-month-top-bar {
+  background: linear-gradient(90deg, #0284c7, #38bdf8);
+}
+.dp-month-card.is-over-budget .dp-month-top-bar {
+  background: linear-gradient(90deg, #dc2626, #f87171);
+}
+
+.dp-month-header {
+  padding: 8px 12px 7px;
+  border-bottom: 1px solid var(--dp-border-subtle);
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dp-month-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.dp-month-name-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.dp-month-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.dp-month-code {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--dp-ink-muted);
+}
+
+.dp-badge-current {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.dp-btn-month-add {
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 5px;
+  border: 1px solid #bae6fd;
+  background: #f0f9ff;
+  color: #0369a1;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+.dp-btn-month-add:hover {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+}
+
+/* Budget Progress inside Month Header */
+.dp-budget-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dp-budget-numbers {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  gap: 6px;
+}
+
+.dp-budget-spent-lbl {
+  color: var(--dp-ink-secondary);
+}
+.dp-budget-spent-lbl strong {
+  color: var(--dp-ink);
+  font-family: var(--font-mono);
+}
+
+.dp-budget-edit-trigger {
+  background: transparent;
+  border: none;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--dp-ink-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.dp-budget-edit-trigger:hover {
+  background: #e2e8f0;
+  color: var(--dp-ink);
+}
+
+.dp-progress-track {
+  width: 100%;
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.dp-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #10b981;
+  transition: width 220ms var(--ease);
+}
+.dp-progress-fill.is-warn {
+  background: #f59e0b;
+}
+.dp-progress-fill.is-over {
+  background: #dc2626;
+}
+
+.dp-remain-pill {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--dp-success);
+}
+.dp-remain-pill.is-over {
+  color: var(--dp-danger);
+}
+
+/* Month Items List */
+.dp-month-body {
+  padding: 7px 9px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dp-month-empty {
+  flex: 1;
+  min-height: 76px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--dp-ink-muted);
+  font-size: 11.5px;
+  padding: 10px;
+  text-align: center;
+}
+
+/* Compact Single-Row Expense Item Card */
+.dp-item-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #0284c7;
+  border-radius: 7px;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  transition: all 120ms ease;
+  cursor: grab;
+  min-width: 0;
+}
+.dp-item-card:hover {
+  border-color: #94a3b8;
+  border-left-color: #0284c7;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+}
+.dp-item-card.is-urgent {
+  border-left-color: #dc2626;
+  background: #fff5f5;
+}
+
+.dp-item-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.dp-drag-grip {
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1;
+  user-select: none;
+  flex-shrink: 0;
+}
+.dp-item-card:hover .dp-drag-grip {
+  color: #64748b;
+}
+
+.dp-item-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.dp-item-title-line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.dp-item-desc {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.dp-item-sub-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.dp-item-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.dp-item-price {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+.dp-item-card.is-urgent .dp-item-price {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.dp-tag-urgent {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: #dc2626;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.dp-link-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.dp-link-chip:hover {
+  background: #dbeafe;
+  text-decoration: underline;
+}
+
+/* Organized Action Buttons (i, ด่วน, แก้ไข, ลบ) */
+.dp-edit-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 1px;
+}
+
+.dp-btn-act {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  border-radius: 4px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 120ms ease;
+  font-family: var(--font-body);
+}
+.dp-btn-act:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+.dp-btn-act.act-info {
+  color: #0284c7;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+}
+.dp-btn-act.act-info:hover {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+.dp-btn-act.act-urgent:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+.dp-btn-act.act-urgent.is-active {
+  background: #fee2e2;
+  color: #dc2626;
+}
+.dp-btn-act.act-delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Detail Modal Body (i button) */
+.dp-detail-modal-body {
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dp-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.dp-detail-box {
+  background: #f8fafc;
+  border: 1px solid var(--dp-border-subtle);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.dp-detail-box.full {
+  grid-column: 1 / -1;
+}
+.dp-detail-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dp-ink-muted);
+}
+.dp-detail-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dp-ink);
+  word-break: break-word;
+}
+
+/* ==========================================================================
+   FLOATING QUICK MOVE POPOVER
+   ========================================================================== */
+.dp-quick-move-popover {
+  position: fixed;
+  z-index: 9999;
+  width: 250px;
+  background: #ffffff;
+  border: 1px solid #94a3b8;
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.dp-popover-header {
+  padding: 8px 12px;
+  background: #0d1e38;
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dp-popover-header .btn-clear {
+  color: #cbd5e1;
+}
+
+.dp-popover-urgent-bar {
+  padding: 8px;
+  background: #fff5f5;
+  border-bottom: 1px solid #fecaca;
+}
+
+.dp-btn-urgent-now {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #ef4444;
+  border-radius: 6px;
+  background: #dc2626;
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.dp-btn-urgent-now:hover {
+  background: #b91c1c;
+}
+
+.dp-popover-month-list {
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dp-popover-month-item {
+  width: 100%;
+  text-align: left;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--dp-ink);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dp-popover-month-item:hover {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+.dp-popover-month-item.is-current {
+  font-weight: 700;
+  background: #f1f5f9;
+}
+
+/* ==========================================================================
+   TAB 2: TABLE VIEW
+   ========================================================================== */
+.dp-table-card {
+  background: var(--dp-bg-surface);
+  border: 1px solid var(--dp-border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.dp-table-wrapper {
+  overflow-x: auto;
+}
+
+.dp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.dp-table thead th {
+  background: #f8fafc;
+  color: var(--dp-ink-secondary);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--dp-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.dp-table tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--dp-border-subtle);
+  vertical-align: middle;
+}
+
+.dp-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* ==========================================================================
+   BUTTONS, INPUTS & MODALS
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--dur-fast) var(--ease);
+  white-space: nowrap;
+}
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.btn-primary {
+  background: #0d1e38;
+  color: #ffffff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: #18313d;
+}
+.btn-secondary {
+  background: var(--dp-bg-surface);
+  border-color: var(--dp-border);
+  color: var(--dp-ink);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: var(--dp-bg-muted);
+  border-color: var(--dp-ink-secondary);
+}
+
+.btn-clear {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--dp-ink-muted);
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.dp-input, .dp-select, .dp-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--dp-border);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--dp-ink);
+  background: var(--dp-bg-surface);
+  outline: none;
+}
+.dp-input:focus, .dp-select:focus, .dp-textarea:focus {
+  border-color: var(--dp-primary-accent);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14);
+}
+
+.dp-modal {
+  border: none;
+  background: transparent;
+  padding: 0;
+  max-width: 95vw;
+  width: min(860px, 92vw);
+}
+.dp-modal.dp-modal-sm {
+  width: min(560px, 92vw);
+}
+.dp-modal::backdrop {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.dp-modal-card {
+  background: var(--dp-bg-surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dp-modal-header {
+  padding: 16px 22px;
+  background: #0d1e38;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dp-modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.dp-modal-header .btn-clear {
+  color: #cbd5e1;
+}
+
+.dp-modal-form {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.dp-form-row {
+  display: grid;
+  gap: 14px;
+}
+.dp-form-row.col-2 {
+  grid-template-columns: 1fr 1fr;
+}
+.dp-form-row.col-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.dp-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dp-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--dp-ink);
+}
+.dp-label.required::after {
+  content: ' *';
+  color: var(--dp-danger);
+}
+
+.dp-help {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--dp-ink-muted);
+}
+
+.dp-input-unit {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.dp-input-unit input {
+  padding-right: 44px;
+}
+.dp-unit {
+  position: absolute;
+  right: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dp-ink-muted);
+}
+
+.dp-status-urgent-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dp-urgent-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  background: #fff5f5;
+  color: #b91c1c;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.dp-budget-preview-bar {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid var(--dp-border-subtle);
+  font-size: 12.5px;
+  color: var(--dp-ink-secondary);
+}
+
+.dp-budget-section {
+  padding: 14px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid var(--dp-border-subtle);
+}
+.dp-budget-sec-title {
+  margin: 0 0 4px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--dp-ink);
+}
+
+.dp-form-error {
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: var(--dp-danger);
+  font-size: 13px;
+}
+
+.dp-modal-footer {
+  padding: 14px 20px;
+  background: var(--dp-bg-muted);
+  border-top: 1px solid var(--dp-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.dp-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  cursor: pointer;
+  user-select: none;
+}
+.dp-modal-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* ==========================================================================
+   RESPONSIVE BREAKPOINTS & LARGE MONITOR SCALING
+   ========================================================================== */
+@media (min-width: 1680px) {
+  .dp-app-container {
+    max-width: 1920px;
+    padding: 16px 28px 44px;
+  }
+  .dp-months-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .dp-modal {
+    width: min(1040px, 88vw);
+  }
+}
+
+@media (max-width: 1200px) {
+  .dp-months-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .dp-form-row.col-2,
+  .dp-form-row.col-3 {
+    grid-template-columns: 1fr;
+  }
+  .dp-months-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Prevent mobile browsers from auto-zooming on input focus */
+  input,
+  select,
+  textarea,
+  .dp-input,
+  .dp-select,
+  .dp-textarea,
+  .dp-month-input,
+  .dp-search-box input {
+    font-size: 16px !important;
+  }
+}
+
+</style>
+</head>
+<body>
+<nav aria-label="ระบบซ่อมบำรุงไฟฟ้า" class="em-main-nav">
+  <div class="em-nav-container">
+    <div class="em-nav-left">
+      <!-- Hamburger Toggle Button -->
+      <button type="button" id="em-hamburger-btn" class="em-hamburger-btn" aria-label="เปิดเมนูนำทาง" aria-expanded="false" aria-controls="em-drawer">
+        <svg class="em-icon-menu" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Logo แผนกซ่อมไฟฟ้า -->
+      <a href="/bom/" class="em-brand-link" title="แผนกซ่อมไฟฟ้า">
+        <img class="em-brand-logo" src="/Logo%20small.png" alt="แผนกซ่อมไฟฟ้า">
+        <span class="em-brand-text">แผนกซ่อมไฟฟ้า</span>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <div class="em-nav-center">
+      <!-- 2. อุปกรณ์ประจำเครื่องจักร with Dropdown -->
+      <div class="em-dropdown em-dropdown-bom">
+        <a href="/bom/" class="em-nav-link em-dropdown-trigger">
+          <span>BoM Parts</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <div class="em-dropdown-header">เลือกแผนก</div>
+          <a class="em-dropdown-item" href="/bom/"><span class="em-dept-badge">ALL</span> ทุกแผนก</a>
+          <a class="em-dropdown-item" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
+          <a class="em-dropdown-item" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PC"><span class="em-dept-badge">PC</span> ฝาพลาสติก</a>
+          <a class="em-dropdown-item" href="/bom/?dept=PR"><span class="em-dept-badge">PR</span> งานพิมพ์</a>
+          <a class="em-dropdown-item" href="/bom/?dept=OT"><span class="em-dept-badge">OT</span> อื่นๆ</a>
+        </div>
+      </div>
+
+      <!-- 3. โครงสร้าง with Dropdown (Master List, Machines, แผนผังระบบไฟฟ้า) -->
+      <div class="em-dropdown em-dropdown-structure">
+        <a href="/parts/" class="em-nav-link em-dropdown-trigger">
+          <span>โครงสร้าง</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/parts/"><span class="em-item-icon">▤</span> Master List</a>
+          <a class="em-dropdown-item" href="/machines/"><span class="em-item-icon">⚙️</span> Machines</a>
+          <a class="em-dropdown-item" href="/electrical-diagram/"><span class="em-item-icon">⚡</span> แผนผังระบบไฟฟ้า</a>
+        </div>
+      </div>
+
+      <!-- 5. จัดการ Order PM with Dropdown -->
+      <div class="em-dropdown em-dropdown-pm">
+        <a href="/pm/" class="em-nav-link em-dropdown-trigger">
+          <span>PM</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
+          <a class="em-dropdown-item" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+          <a class="em-dropdown-item" href="/pm-aircooling/"><span class="em-item-icon">❄️</span> Air Cooling</a>
+        </div>
+      </div>
+
+      <!-- 6. ค่าใช้จ่าย PM & ค่าใช้จ่ายแผนก with Dropdown -->
+      <div class="em-dropdown em-dropdown-pm-expenses">
+        <a href="/pm-expenses/" class="em-nav-link em-dropdown-trigger active" aria-current="page">
+          <span>ค่าใช้จ่าย</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
+          <a class="em-dropdown-item" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+          <a class="em-dropdown-item active" href="/department-pay/"><span class="em-item-icon">💳</span> ค่าใช้จ่ายแผนก (Dept Pay)</a>
+        </div>
+      </div>
+
+      <!-- 7. จัดซื้อ & สโตร์ (PR & Store Tracker) -->
+      <a class="em-nav-link" href="/pr-tracker/">
+        <span>จัดซื้อ &amp; สโตร์</span>
+      </a>
+
+      <!-- 8. สื่อประชาสัมพันธ์ with Dropdown -->
+      <div class="em-dropdown em-dropdown-announcements">
+        <a href="/announcements/" class="em-nav-link em-dropdown-trigger">
+          <span>สื่อประชาสัมพันธ์</span>
+          <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </a>
+        <div class="em-dropdown-menu">
+          <a class="em-dropdown-item" href="/announcements/"><span class="em-item-icon">⚙️</span> สื่อประชาสัมพันธ์</a>
+          <a class="em-dropdown-item" href="/announcements/tv.html" target="_blank"><span class="em-item-icon">📺</span> เปิดหน้า TV</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: User management and account -->
+    <div class="em-nav-right">
+      <a id="em-nav-users" class="em-nav-link" style="display:none" href="/users/">จัดการผู้ใช้งาน</a>
+      <span id="em-user-badge" class="em-user-badge"></span>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Overlay & Sidebar -->
+  <div id="em-drawer-overlay" class="em-drawer-overlay" aria-hidden="true"></div>
+  <aside id="em-drawer" class="em-drawer" aria-label="เมนูนำทางหลัก">
+    <div class="em-drawer-header">
+      <div class="em-drawer-brand">
+        <img class="em-brand-logo" src="/Logo%20small.png" alt="แผนกซ่อมไฟฟ้า">
+        <div class="em-drawer-brand-text">
+          <strong>แผนกซ่อมไฟฟ้า</strong>
+          <small>ระบบซ่อมบำรุงไฟฟ้า</small>
+        </div>
+      </div>
+      <button type="button" id="em-drawer-close" class="em-drawer-close" aria-label="ปิดเมนู">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="em-drawer-content">
+      <!-- User Info Card in Drawer -->
+      <div id="em-drawer-user-card" class="em-drawer-user-card"></div>
+
+      <nav class="em-drawer-nav">
+        <!-- 2. อุปกรณ์ประจำเครื่องจักร Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              BoM Parts
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/bom/"><span class="em-dept-badge">ALL</span> ทุกแผนก</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=CC"><span class="em-dept-badge">CC</span> ฝาจีบ</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PP"><span class="em-dept-badge">PP</span> ฝาเกลียว</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=MX"><span class="em-dept-badge">MX</span> ฝาแม็กซี่</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PC"><span class="em-dept-badge">PC</span> ฝาพลาสติก</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=PR"><span class="em-dept-badge">PR</span> งานพิมพ์</a>
+            <a class="em-drawer-subitem" href="/bom/?dept=OT"><span class="em-dept-badge">OT</span> อื่นๆ</a>
+          </div>
+        </div>
+
+        <!-- 3. โครงสร้าง Accordion (Master List, Machines, แผนผังระบบไฟฟ้า) -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              โครงสร้าง
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/parts/"><span class="em-item-icon">▤</span> Master List</a>
+            <a class="em-drawer-subitem" href="/machines/"><span class="em-item-icon">⚙️</span> Machines</a>
+            <a class="em-drawer-subitem" href="/electrical-diagram/"><span class="em-item-icon">⚡</span> แผนผังระบบไฟฟ้า</a>
+          </div>
+        </div>
+
+        <!-- 5. จัดการ Order PM Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              PM
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/pm/?tab=overview"><span class="em-item-icon">📊</span> ภาพรวม</a>
+            <a class="em-drawer-subitem" href="/pm/?tab=orders"><span class="em-item-icon">📝</span> จัดการ Order No.</a>
+            <a class="em-drawer-subitem" href="/pm-aircooling/"><span class="em-item-icon">❄️</span> Air Cooling</a>
+          </div>
+        </div>
+
+        <!-- 6. ค่าใช้จ่าย PM & แผนก Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="true">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              ค่าใช้จ่าย PM &amp; แผนก
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist">
+            <a class="em-drawer-subitem" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
+            <a class="em-drawer-subitem" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+            <a class="em-drawer-subitem active" href="/department-pay/"><span class="em-item-icon">💳</span> ค่าใช้จ่ายแผนก (Department Pay)</a>
+          </div>
+        </div>
+
+        <!-- 7. จัดซื้อ & สโตร์ (PR & Store Tracker) -->
+        <a class="em-drawer-link" href="/pr-tracker/">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          จัดซื้อ &amp; สโตร์
+        </a>
+
+        <!-- 8. สื่อประชาสัมพันธ์ Accordion -->
+        <div class="em-drawer-group">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="false">
+            <span class="em-drawer-group-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              สื่อประชาสัมพันธ์
+            </span>
+            <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="em-drawer-sublist" style="display:none;">
+            <a class="em-drawer-subitem" href="/announcements/"><span class="em-item-icon">⚙️</span> สื่อประชาสัมพันธ์</a>
+            <a class="em-drawer-subitem" href="/announcements/tv.html" target="_blank"><span class="em-item-icon">📺</span> เปิดหน้า TV</a>
+          </div>
+        </div>
+
+        <!-- 6. จัดการผู้ใช้งาน -->
+        <a id="em-drawer-nav-users" class="em-drawer-link" style="display:none" href="/users/">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          จัดการผู้ใช้งาน
+        </a>
+      </nav>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div id="em-drawer-footer" class="em-drawer-footer"></div>
+  </aside>
+</nav>
+
+<style>
+/* --- UNIFIED ELECTRICAL MAINTENANCE NAVIGATION BAR --- */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+.em-main-nav,
+.em-main-nav *,
+.em-main-nav *::before,
+.em-main-nav *::after {
+  box-sizing: border-box;
+}
+.em-main-nav {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 10000;
+  background: #0d1e38;
+  color: #ffffff;
+  font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.18);
+  box-shadow: 0 4px 20px rgba(10, 25, 47, 0.35);
+}
+.em-nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 20px;
+  height: 54px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.em-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.em-hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #f1f5f9;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+.em-hamburger-btn:hover {
+  background: rgba(14, 165, 233, 0.2);
+  border-color: #38bdf8;
+  color: #ffffff;
+  transform: scale(1.04);
+}
+.em-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #ffffff;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: opacity 0.2s;
+}
+.em-brand-link:hover { opacity: 0.92; }
+.em-brand-logo {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 2px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.em-brand-text {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* Nav Links & Dropdowns */
+.em-nav-center {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+}
+.em-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 8px;
+  border-radius: 5px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.em-nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+.em-nav-link.active {
+  color: #ffffff;
+  font-weight: 600;
+  background: rgba(14, 165, 233, 0.18);
+  border-bottom-color: #38bdf8;
+}
+.em-caret {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.2s ease;
+  opacity: 0.7;
+}
+
+/* Dropdown Menu */
+.em-dropdown {
+  position: relative;
+}
+.em-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 180px;
+  background: #0f223d;
+  border: 1px solid rgba(56, 189, 248, 0.24);
+  border-radius: 7px;
+  padding: 5px;
+  box-shadow: 0 12px 28px rgba(7, 16, 33, 0.55);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  z-index: 10001;
+}
+.em-dropdown:hover .em-dropdown-menu,
+.em-dropdown.is-open .em-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.em-dropdown:hover .em-caret,
+.em-dropdown.is-open .em-caret {
+  transform: rotate(180deg);
+}
+.em-dropdown-header {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7dd3fc;
+  padding: 4px 8px 3px;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.14);
+  margin-bottom: 3px;
+}
+.em-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  color: #e2e8f0;
+  text-decoration: none;
+  font-size: 12px;
+  border-radius: 5px;
+  transition: all 0.15s ease;
+}
+.em-dropdown-item:hover {
+  background: rgba(14, 165, 233, 0.22);
+  color: #ffffff;
+}
+.em-dropdown-item.active {
+  background: rgba(14, 165, 233, 0.25);
+  color: #7dd3fc;
+  font-weight: 600;
+}
+.em-dept-badge {
+  display: inline-block;
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 10px;
+  padding: 1px 5px;
+  background: rgba(14, 165, 233, 0.18);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.38);
+  border-radius: 4px;
+}
+.em-item-icon {
+  font-size: 13px;
+  width: 16px;
+  text-align: center;
+  color: #38bdf8;
+}
+
+/* Right User Info Badge */
+.em-nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.em-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: #cbd5e1;
+}
+
+/* Mobile Drawer Elements */
+.em-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 10002;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+.em-drawer-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+.em-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(320px, 86vw);
+  background: #0a1728;
+  color: #ffffff;
+  z-index: 10003;
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+}
+.em-drawer.is-active {
+  transform: translateX(0);
+}
+.em-drawer-header {
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.em-drawer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.em-drawer-brand-text strong {
+  display: block;
+  font-size: 14.5px;
+  color: #ffffff;
+}
+.em-drawer-brand-text small {
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+.em-drawer-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.em-drawer-close:hover {
+  color: #ffffff;
+  background: rgba(255,255,255,0.08);
+}
+.em-drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.em-drawer-user-card {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+.em-drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.em-drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+.em-drawer-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+.em-drawer-link.active {
+  background: rgba(14, 165, 233, 0.18);
+  color: #38bdf8;
+  font-weight: 600;
+  border-left: 3px solid #38bdf8;
+}
+.em-drawer-group {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  margin-bottom: 2px;
+  overflow: hidden;
+}
+.em-drawer-group-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.em-drawer-group-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+.em-drawer-group-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.em-drawer-arrow {
+  transition: transform 0.2s ease;
+  color: #94a3b8;
+}
+.em-drawer-group-btn[aria-expanded="true"] .em-drawer-arrow {
+  transform: rotate(180deg);
+  color: #38bdf8;
+}
+.em-drawer-sublist {
+  padding: 4px 8px 10px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.em-drawer-subitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: #94a3b8;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.em-drawer-subitem:hover {
+  color: #ffffff;
+  background: rgba(14, 165, 233, 0.18);
+}
+.em-drawer-subitem.active {
+  color: #38bdf8;
+  background: rgba(14, 165, 233, 0.22);
+  font-weight: 600;
+}
+.em-drawer-footer {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .em-hamburger-btn {
+    display: inline-flex;
+  }
+  .em-nav-center {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .em-nav-right {
+    display: none;
+  }
+  .em-nav-container {
+    padding: 0 14px;
+  }
+  .em-nav-left {
+    min-width: 0;
+  }
+  .em-brand-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+</style>
+
+  <div class="dp-app-container">
+
+    <!-- Top Header & KPI Strip -->
+    <header class="dp-page-header">
+      <div class="dp-header-row">
+        <div class="dp-header-left">
+          <div class="dp-title-wrap">
+            <h1 class="dp-page-title">
+              <span class="dp-title-badge">💳</span>
+              <span>ค่าใช้จ่ายแผนก</span>
+              <span class="dp-title-en">Department Pay</span>
+            </h1>
+            <button type="button" id="btn-auth-status" class="dp-auth-pill is-guest" title="คลิกเพื่อเข้าสู่ระบบสำหรับแก้ไขข้อมูล">
+              <span id="auth-status-dot" class="dp-auth-dot"></span>
+              <span id="auth-status-text">ดูข้อมูลได้ทันที · คลิกเพื่อล็อกอินแก้ไข</span>
+            </button>
+          </div>
+
+          <!-- View Switcher Tabs -->
+          <nav class="dp-view-tabs" role="tablist">
+            <button type="button" class="dp-tab-btn active" data-tab="board" role="tab" aria-selected="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span>บอร์ดวางแผน 12 เดือน</span>
+            </button>
+            <button type="button" class="dp-tab-btn" data-tab="table" role="tab" aria-selected="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+              <span>ตารางรายการรวม</span>
+              <span class="dp-tab-count" id="tab-count-items">0</span>
+            </button>
+          </nav>
+        </div>
+
+        <div class="dp-header-right">
+          <!-- KPI Strip -->
+          <div class="dp-kpi-strip">
+            <button type="button" id="btn-open-budget-settings" class="dp-kpi-chip kpi-budget-btn" title="คลิกเพื่อปรับเปลี่ยนงบประมาณต่อเดือน">
+              <span>งบ/เดือน</span>
+              <strong id="kpi-default-budget" class="font-mono">8,000 ฿</strong>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            </button>
+            <div class="dp-kpi-chip">
+              <span>งบรวม 12 เดือน</span>
+              <strong id="kpi-total-budget" class="font-mono">96,000 ฿</strong>
+            </div>
+            <div class="dp-kpi-chip kpi-spent">
+              <span>วางแผนใช้ไป</span>
+              <strong id="kpi-total-spent" class="font-mono">0 ฿</strong>
+            </div>
+            <div class="dp-kpi-chip kpi-remaining">
+              <span>คงเหลือรวม</span>
+              <strong id="kpi-total-remaining" class="font-mono">96,000 ฿</strong>
+            </div>
+          </div>
+
+          <!-- Header Actions -->
+          <div class="dp-header-actions">
+            <button type="button" id="btn-export-excel" class="btn btn-secondary btn-sm dp-btn-excel-icon" title="ส่งออกข้อมูลเป็นไฟล์ Excel (.xlsx)" aria-label="ส่งออกข้อมูลเป็นไฟล์ Excel">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <path d="m9.5 12.5 5 5"></path>
+                <path d="m14.5 12.5-5 5"></path>
+              </svg>
+            </button>
+            <button type="button" id="btn-refresh" class="btn btn-secondary btn-sm" title="รีเฟรชข้อมูล">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <span>รีเฟรช</span>
+            </button>
+            <button type="button" id="btn-add-item" class="btn btn-primary btn-sm" title="เพิ่มรายการวางแผนค่าใช้จ่ายใหม่">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>เพิ่มรายการ</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Control Bar: 12-Month Window Navigator + Filter Pills + Search -->
+    <div class="dp-toolbar">
+      <div class="dp-window-nav">
+        <button type="button" id="btn-win-prev" class="btn btn-secondary btn-sm" title="เลื่อนช่วงเวลาถอยหลัง 1 เดือน">
+          &larr; ก่อนหน้า
+        </button>
+        <div class="dp-start-month-box">
+          <label for="input-start-month">เริ่มเดือน:</label>
+          <input type="month" id="input-start-month" class="dp-month-input font-mono">
+        </div>
+        <button type="button" id="btn-win-current" class="btn btn-secondary btn-sm" title="กลับมาเริ่มที่เดือนปัจจุบัน (วางแผนล่วงหน้า 12 เดือน)">
+          เดือนปัจจุบัน (12 เดือน)
+        </button>
+        <button type="button" id="btn-win-next" class="btn btn-secondary btn-sm" title="เลื่อนช่วงเวลาไปข้างหน้า 1 เดือน">
+          ถัดไป &rarr;
+        </button>
+      </div>
+
+      <div class="dp-filter-pills" id="dp-filter-pills">
+        <button type="button" class="dp-pill active" data-filter="ALL">ทั้งหมด 12 เดือน</button>
+        <button type="button" class="dp-pill" data-filter="HAS_ITEMS">เฉพาะเดือนที่มีรายการ</button>
+        <button type="button" class="dp-pill" data-filter="URGENT">🔥 มีรายการด่วน</button>
+        <button type="button" class="dp-pill" data-filter="OVER_BUDGET">⚠️ เกินงบประมาณ</button>
+      </div>
+
+      <div class="dp-search-wrap">
+        <div class="dp-search-box">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="dp-search-input" placeholder="ค้นหารายละเอียด, ยี่ห้อ, ระยะเวลาจัดส่ง..." autocomplete="off">
+          <button type="button" id="dp-search-clear" class="btn-clear" style="display:none;">&times;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 1: 12-MONTH PLANNING BOARD -->
+    <section id="tab-board" class="dp-tab-content active" role="tabpanel">
+      <div id="dp-months-grid" class="dp-months-grid">
+        <!-- Populated dynamically with 12 month cards -->
+      </div>
+    </section>
+
+    <!-- TAB 2: ALL ITEMS TABLE VIEW -->
+    <section id="tab-table" class="dp-tab-content" role="tabpanel" style="display:none;">
+      <div class="dp-table-card">
+        <div class="dp-table-wrapper">
+          <table class="dp-table">
+            <thead>
+              <tr>
+                <th style="width: 170px;">เดือนที่วางแผน</th>
+                <th>รายละเอียด (Description)</th>
+                <th style="width: 150px;">ยี่ห้อ (Brand)</th>
+                <th style="width: 130px; text-align: right;">ราคา (บาท)</th>
+                <th style="width: 150px;">ระยะเวลาจัดส่ง</th>
+                <th style="width: 120px; text-align: center;">ไฟล์ / ลิงก์</th>
+                <th style="width: 130px; text-align: center;">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="dp-table-body">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- MODAL 1: ADD / EDIT DEPARTMENT PAY ITEM -->
+  <dialog id="modal-dp-item" class="dp-modal">
+    <div class="dp-modal-card">
+      <div class="dp-modal-header">
+        <h3 id="modal-item-title" class="dp-modal-title">เพิ่มรายการค่าใช้จ่ายแผนก</h3>
+        <button type="button" id="btn-close-item-modal" class="btn-clear" aria-label="ปิดหน้าต่าง">&times;</button>
+      </div>
+
+      <form id="form-dp-item" class="dp-modal-form" novalidate>
+        <input type="hidden" id="item-id">
+
+        <div class="dp-form-row col-2">
+          <div class="dp-form-field">
+            <label for="item-year-month" class="dp-label required">เดือนที่วางแผนสั่งซื้อ</label>
+            <select id="item-year-month" class="dp-select font-mono" required></select>
+          </div>
+
+          <div class="dp-form-field">
+            <label class="dp-label">ความเร่งด่วน</label>
+            <label class="dp-urgent-toggle" for="item-is-urgent" title="ทำเครื่องหมายเป็นรายการด่วน">
+              <input type="checkbox" id="item-is-urgent">
+              <span>🔥 รายการด่วน (Urgent)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="dp-form-field">
+          <label for="item-description" class="dp-label required">รายละเอียด (Description)</label>
+          <input type="text" id="item-description" class="dp-input" placeholder="ระบุชื่ออุปกรณ์ รายละเอียดสเปก หรือรายการค่าใช้จ่าย (บังคับกรอก)" required>
+        </div>
+
+        <div class="dp-form-row col-3">
+          <div class="dp-form-field">
+            <label for="item-brand" class="dp-label">ยี่ห้อ (Brand)</label>
+            <input type="text" id="item-brand" class="dp-input" placeholder="เช่น Mitsubishi, Schneider, OMRON, Fluke">
+          </div>
+
+          <div class="dp-form-field">
+            <label for="item-price" class="dp-label">ราคา (บาท)</label>
+            <div class="dp-input-unit">
+              <input type="number" id="item-price" class="dp-input font-mono" placeholder="เช่น 2500" min="0" step="any">
+              <span class="dp-unit">฿</span>
+            </div>
+          </div>
+
+          <div class="dp-form-field">
+            <label for="item-lead-time" class="dp-label">ระยะเวลาจัดส่ง (Lead Time)</label>
+            <input type="text" id="item-lead-time" class="dp-input" placeholder="เช่น พร้อมส่ง, 3-5 วัน, 2 สัปดาห์, 30 วัน">
+          </div>
+        </div>
+
+        <div class="dp-form-field">
+          <label for="item-file-url" class="dp-label">ลิงก์ / URL ไฟล์แนบ (ใบเสนอราคา, รูปภาพ, Google Drive, ลิงก์สินค้า)</label>
+          <input type="url" id="item-file-url" class="dp-input font-mono" placeholder="https://drive.google.com/... หรือลิงก์เอกสาร/ร้านค้า">
+        </div>
+
+        <div class="dp-form-field">
+          <label for="item-remark" class="dp-label">หมายเหตุเพิ่มเติม</label>
+          <textarea id="item-remark" class="dp-textarea" rows="2" placeholder="ระบุเหตุผลความจำเป็น เครื่องจักรที่นำไปใช้ หรือข้อมูลเพิ่มเติม (ถ้ามี)"></textarea>
+        </div>
+
+        <div id="item-budget-preview" class="dp-budget-preview-bar"></div>
+        <div id="item-form-error" class="dp-form-error" style="display:none;"></div>
+
+        <div class="dp-modal-footer">
+          <label class="dp-checkbox-label">
+            <input type="checkbox" id="item-continuous-add">
+            <span>บันทึกแล้วเพิ่มรายการถัดไปต่อทันที</span>
+          </label>
+          <div class="dp-modal-footer-right">
+            <button type="button" id="btn-cancel-item-modal" class="btn btn-secondary">ยกเลิก</button>
+            <button type="submit" id="btn-submit-item-modal" class="btn btn-primary">
+              <span>บันทึกรายการ</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- MODAL 2: BUDGET SETTINGS (DEFAULT 8,000 THB & PER-MONTH OVERRIDE) -->
+  <dialog id="modal-dp-budget" class="dp-modal dp-modal-sm">
+    <div class="dp-modal-card">
+      <div class="dp-modal-header">
+        <h3 class="dp-modal-title">⚙️ ตั้งค่างบประมาณค่าใช้จ่ายแผนก</h3>
+        <button type="button" id="btn-close-budget-modal" class="btn-clear" aria-label="ปิดหน้าต่าง">&times;</button>
+      </div>
+
+      <form id="form-dp-budget" class="dp-modal-form" novalidate>
+        <div class="dp-budget-section">
+          <h4 class="dp-budget-sec-title">1. งบประมาณมาตรฐานรายเดือน (ทุกเดือน)</h4>
+          <p class="dp-help">ค่าเริ่มต้นของทุกเดือนที่ไม่ได้กำหนดงบแยกเฉพาะ (ค่าเริ่มต้น 8,000 บาท/เดือน)</p>
+          <div class="dp-input-unit" style="margin-top:6px;">
+            <input type="number" id="budget-default-input" class="dp-input font-mono" min="0" step="100" value="8000" required>
+            <span class="dp-unit">฿ / เดือน</span>
+          </div>
+        </div>
+
+        <div class="dp-budget-section" id="budget-month-specific-box">
+          <h4 class="dp-budget-sec-title">2. กำหนดงบเฉพาะเดือน (ถ้าต้องการปรับเฉพาะบางเดือน)</h4>
+          <div class="dp-form-row col-2" style="margin-top:6px;">
+            <div class="dp-form-field">
+              <label for="budget-target-month" class="dp-label">เลือกเดือน</label>
+              <select id="budget-target-month" class="dp-select font-mono"></select>
+            </div>
+            <div class="dp-form-field">
+              <label for="budget-month-amount" class="dp-label">งบเฉพาะเดือนนี้ (บาท)</label>
+              <div class="dp-input-unit">
+                <input type="number" id="budget-month-amount" class="dp-input font-mono" min="0" step="100" placeholder="เว้นว่างเพื่อใช้งบมาตรฐาน">
+                <span class="dp-unit">฿</span>
+              </div>
+            </div>
+          </div>
+          <div class="dp-form-field" style="margin-top:8px;">
+            <label for="budget-month-note" class="dp-label">หมายเหตุงบเดือนนี้</label>
+            <input type="text" id="budget-month-note" class="dp-input" placeholder="เช่น เพิ่มงบพิเศษซ่อมด่วน หรือปรับลดงบ">
+          </div>
+          <div style="margin-top:8px;">
+            <button type="button" id="btn-reset-month-budget" class="btn btn-secondary btn-sm">
+              รีเซ็ตเดือนนี้กลับไปใช้งบมาตรฐาน
+            </button>
+          </div>
+        </div>
+
+        <div id="budget-form-error" class="dp-form-error" style="display:none;"></div>
+
+        <div class="dp-modal-footer">
+          <div class="dp-modal-footer-right">
+            <button type="button" id="btn-cancel-budget-modal" class="btn btn-secondary">ยกเลิก</button>
+            <button type="submit" id="btn-submit-budget-modal" class="btn btn-primary">บันทึกงบประมาณ</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- MODAL 3: ITEM DETAIL VIEW (i BUTTON) -->
+  <dialog id="modal-dp-detail" class="dp-modal dp-modal-sm">
+    <div class="dp-modal-card">
+      <div class="dp-modal-header">
+        <h3 class="dp-modal-title">ℹ️ รายละเอียดรายการค่าใช้จ่าย</h3>
+        <button type="button" id="btn-close-detail-modal" class="btn-clear" aria-label="ปิดหน้าต่าง">&times;</button>
+      </div>
+      <div id="dp-detail-body" class="dp-detail-modal-body"></div>
+      <div class="dp-modal-footer">
+        <div class="dp-modal-footer-right">
+          <button type="button" id="btn-detail-close" class="btn btn-secondary">ปิด</button>
+          <button type="button" id="btn-detail-edit" class="btn btn-primary">แก้ไขรายการ</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+(() => {
+ 'use strict';
+ const scope = location.pathname.startsWith('/parts') ? 'parts'
+  : location.pathname.startsWith('/bom') ? 'bom'
+  : location.pathname.startsWith('/announcements') ? 'announcements'
+  : location.pathname.startsWith('/users') ? 'users'
+  : location.pathname.startsWith('/pm-expenses') ? 'pm-expenses'
+  : location.pathname.startsWith('/pm-aircooling') ? 'pm-aircooling'
+  : location.pathname.startsWith('/pm') ? 'pm'
+  : location.pathname.startsWith('/pr-tracker') ? 'pr-tracker'
+  : location.pathname.startsWith('/electrical-diagram') ? 'electrical'
+  : location.pathname.startsWith('/department-pay') ? 'department-pay'
+  : 'machines';
+ const inFlight = new Map();
+
+ let loginPromise = null;
+ let currentUser = null;
+
+ function ensureLoginModal() {
+  let modal = document.getElementById('em-auth-overlay');
+  if (modal) return modal;
+
+  const style = document.createElement('style');
+  style.textContent = `
+   #em-auth-overlay {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; z-index: 99999;
+   }
+   .em-auth-card {
+    background: #ffffff; color: #1e293b; border-radius: 12px; width: 100%; max-width: 380px;
+    padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    font-family: inherit;
+   }
+   .em-auth-title { font-size: 18px; font-weight: 700; color: #0d1e38; margin-bottom: 6px; }
+   .em-auth-sub { font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.4; }
+   .em-auth-field { margin-bottom: 14px; text-align: left; }
+   .em-auth-label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; }
+   .em-auth-input {
+    width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;
+    box-sizing: border-box; transition: border-color 0.2s;
+   }
+   .em-auth-input:focus { outline: none; border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+   .em-auth-btn {
+    width: 100%; padding: 10px; background: #0284c7; color: #ffffff; border: none; border-radius: 6px;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 8px;
+   }
+   .em-auth-btn:hover { background: #0369a1; }
+   .em-auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+   .em-auth-err { font-size: 13px; color: #dc2626; margin-top: 10px; min-height: 18px; text-align: center; }
+  `;
+  document.head.appendChild(style);
+
+  modal = document.createElement('div');
+  modal.id = 'em-auth-overlay';
+  modal.style.display = 'none';
+  modal.innerHTML = `
+   <div class="em-auth-card">
+    <div class="em-auth-title">เข้าสู่ระบบ Electrical Maintenance</div>
+    <div class="em-auth-sub">กรุณาเข้าสู่ระบบเพื่อใช้งานระบบทะเบียนและอุปกรณ์<br><small style="color:#94a3b8">(บัญชีเริ่มต้น: admin / admin1234)</small></div>
+    <form id="em-auth-form">
+     <div class="em-auth-field">
+      <label class="em-auth-label" for="em-auth-user">ชื่อผู้ใช้ (Username)</label>
+      <input class="em-auth-input" id="em-auth-user" type="text" autocomplete="username" required placeholder="admin">
+     </div>
+     <div class="em-auth-field">
+      <label class="em-auth-label" for="em-auth-pass">รหัสผ่าน (Password)</label>
+      <input class="em-auth-input" id="em-auth-pass" type="password" autocomplete="current-password" required placeholder="••••••••">
+     </div>
+     <button class="em-auth-btn" id="em-auth-submit" type="submit">เข้าสู่ระบบ</button>
+     <div class="em-auth-err" id="em-auth-error"></div>
+    </form>
+   </div>
+  `;
+  document.body.appendChild(modal);
+
+  const form = modal.querySelector('#em-auth-form');
+  const errEl = modal.querySelector('#em-auth-error');
+  const btn = modal.querySelector('#em-auth-submit');
+
+  form.onsubmit = async (e) => {
+   e.preventDefault();
+   errEl.textContent = '';
+   btn.disabled = true;
+   btn.textContent = 'กำลังเข้าสู่ระบบ...';
+
+   const username = modal.querySelector('#em-auth-user').value.trim();
+   const password = modal.querySelector('#em-auth-pass').value;
+
+   try {
+    const res = await fetch('/api/v1/auth/login', {
+     method: 'POST',
+     credentials: 'same-origin',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({ username, password })
+    });
+    const result = await res.json();
+    if (!result.ok) throw new Error(result.error?.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+    currentUser = result.data;
+    window.currentUser = currentUser;
+    window.EM_CURRENT_USER = currentUser;
+    updateBadge();
+    modal.style.display = 'none';
+
+    if (result.data.mustChangePassword) {
+     await promptForceChangePassword();
+    }
+
+    if (loginPromise) {
+     const resolve = loginPromise.resolve;
+     loginPromise = null;
+     resolve(currentUser);
+    }
+   } catch (err) {
+    errEl.textContent = err.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่';
+   } finally {
+    btn.disabled = false;
+    btn.textContent = 'เข้าสู่ระบบ';
+   }
+  };
+
+  return modal;
+ }
+
+ function promptForceChangePassword() {
+  return new Promise((resolve) => {
+   let modal = document.getElementById('em-force-pass-overlay');
+   if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'em-force-pass-overlay';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.8);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:100000;';
+    modal.innerHTML = `
+     <div class="em-auth-card">
+      <div class="em-auth-title" style="color:#dc2626">⚠️ บังคับตั้งรหัสผ่านใหม่</div>
+      <div class="em-auth-sub">รหัสผ่านปัจจุบันต่ำกว่า 5 ตัวอักษร หรือได้รับการรีเซ็ต เพื่อความปลอดภัยกรุณาตั้งรหัสผ่านใหม่ (อย่างน้อย 5 ตัวอักษร)</div>
+      <form id="em-force-pass-form">
+       <div class="em-auth-field">
+        <label class="em-auth-label" for="em-new-pass">รหัสผ่านใหม่</label>
+        <input class="em-auth-input" id="em-new-pass" type="password" required minlength="5" placeholder="อย่างน้อย 5 ตัวอักษร">
+       </div>
+       <div class="em-auth-field">
+        <label class="em-auth-label" for="em-conf-pass">ยืนยันรหัสผ่านใหม่</label>
+        <input class="em-auth-input" id="em-conf-pass" type="password" required minlength="5" placeholder="พิมพ์ซ้ำอีกครั้ง">
+       </div>
+       <button class="em-auth-btn" id="em-force-submit" type="submit">บันทึกรหัสผ่านใหม่</button>
+       <div class="em-auth-err" id="em-force-err"></div>
+      </form>
+     </div>
+    `;
+    document.body.appendChild(modal);
+   }
+
+   modal.style.display = 'flex';
+   const form = modal.querySelector('#em-force-pass-form');
+   const errEl = modal.querySelector('#em-force-err');
+   const btn = modal.querySelector('#em-force-submit');
+   errEl.textContent = '';
+
+   form.onsubmit = async (e) => {
+    e.preventDefault();
+    errEl.textContent = '';
+    const p1 = modal.querySelector('#em-new-pass').value;
+    const p2 = modal.querySelector('#em-conf-pass').value;
+    if (p1 !== p2) {
+     errEl.textContent = 'รหัสผ่านทั้งสองช่องไม่ตรงกัน';
+     return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'กำลังบันทึก...';
+    try {
+     const res = await fetch('/api/v1/auth/change-password', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newPassword: p1 })
+     });
+     const r = await res.json();
+     if (!r.ok) throw new Error(r.error?.message || 'เปลี่ยนรหัสผ่านไม่สำเร็จ');
+     modal.style.display = 'none';
+     if (currentUser) currentUser.mustChangePassword = false;
+     resolve();
+    } catch (err) {
+     errEl.textContent = err.message || 'บันทึกรหัสผ่านไม่สำเร็จ';
+    } finally {
+     btn.disabled = false;
+     btn.textContent = 'บันทึกรหัสผ่านใหม่';
+    }
+   };
+  });
+ }
+
+ function promptLogin() {
+  if (loginPromise) return loginPromise.promise;
+  const modal = ensureLoginModal();
+  modal.style.display = 'flex';
+  const errEl = modal.querySelector('#em-auth-error');
+  if (errEl) errEl.textContent = '';
+  const userInput = modal.querySelector('#em-auth-user');
+  if (userInput) { userInput.value = ''; userInput.focus(); }
+  const passInput = modal.querySelector('#em-auth-pass');
+  if (passInput) passInput.value = '';
+
+  let resolve, reject;
+  const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
+  loginPromise = { promise, resolve, reject };
+  return promise;
+ }
+
+ function initNavUI() {
+    const hamburgerBtn = document.getElementById('em-hamburger-btn');
+    const drawer = document.getElementById('em-drawer');
+    const overlay = document.getElementById('em-drawer-overlay');
+    const closeBtn = document.getElementById('em-drawer-close');
+
+    function openDrawer() {
+      if (drawer) {
+        drawer.classList.add('is-active');
+        hamburgerBtn?.setAttribute('aria-expanded', 'true');
+      }
+      if (overlay) overlay.classList.add('is-active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      if (drawer) {
+        drawer.classList.remove('is-active');
+        hamburgerBtn?.setAttribute('aria-expanded', 'false');
+      }
+      if (overlay) overlay.classList.remove('is-active');
+      document.body.style.overflow = '';
+    }
+
+    if (hamburgerBtn) hamburgerBtn.onclick = openDrawer;
+    if (closeBtn) closeBtn.onclick = closeDrawer;
+    if (overlay) overlay.onclick = closeDrawer;
+
+    // Drawer accordions
+    document.querySelectorAll('.em-drawer-group-btn').forEach(btn => {
+      btn.onclick = () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!expanded));
+        const sublist = btn.nextElementSibling;
+        if (sublist) {
+          sublist.style.display = expanded ? 'none' : 'flex';
+        }
+      };
+    });
+
+    // Auto-handle ?dept= in Equipment BOM
+    if (location.pathname.startsWith('/bom')) {
+      const params = new URLSearchParams(location.search);
+      const targetDept = params.get('dept');
+      if (targetDept) {
+        try {
+          sessionStorage.setItem('BOM_LAST_DEPT', targetDept);
+          sessionStorage.removeItem('BOM_LAST_LINE');
+          sessionStorage.removeItem('BOM_LAST_MACHINE');
+        } catch (_) {}
+      } else if (!location.search && !sessionStorage.getItem('BOM_LAST_MACHINE')) {
+        try {
+          sessionStorage.removeItem('BOM_LAST_DEPT');
+          sessionStorage.removeItem('BOM_LAST_LINE');
+        } catch (_) {}
+      }
+    }
+
+    // Auto-handle ?view=bulk or ?action=add in Parts
+    if (location.pathname.startsWith('/parts')) {
+      const params = new URLSearchParams(location.search);
+      if (params.get('view') === 'bulk' || params.get('action') === 'bulk' || location.hash === '#bulk') {
+        const checkBulk = () => {
+          if (typeof window.switchView === 'function') {
+            window.switchView('bulk');
+          } else {
+            const btn = document.getElementById('nav-bulk') || document.getElementById('bulk-add-btn');
+            if (btn) btn.click();
+            else setTimeout(checkBulk, 80);
+          }
+        };
+        setTimeout(checkBulk, 80);
+      } else if (params.get('view') === 'batch' || location.hash === '#batch') {
+        const checkBatch = () => {
+          if (typeof window.switchView === 'function') {
+            window.switchView('batch');
+          } else {
+            const btn = document.getElementById('nav-batch');
+            if (btn) btn.click();
+            else setTimeout(checkBatch, 80);
+          }
+        };
+        setTimeout(checkBatch, 80);
+      } else if (params.get('action') === 'add') {
+        const checkAddBtn = () => {
+          const btn = document.getElementById('add-part');
+          if (btn && !btn.disabled) {
+            btn.click();
+          } else {
+            setTimeout(checkAddBtn, 100);
+          }
+        };
+        setTimeout(checkAddBtn, 300);
+      }
+
+      // Smooth in-page switching when clicking parts dropdown items
+      document.querySelectorAll('a[href*="/parts"]').forEach(a => {
+        a.addEventListener('click', (e) => {
+          if (!location.pathname.startsWith('/parts') || typeof window.switchView !== 'function') return;
+          const href = a.getAttribute('href') || '';
+          if (href.includes('view=bulk') || href.includes('action=bulk') || href.includes('#bulk')) {
+            e.preventDefault();
+            history.pushState(null, '', '/parts/?view=bulk');
+            window.switchView('bulk');
+          } else if (href.includes('view=batch') || href.includes('#batch')) {
+            e.preventDefault();
+            history.pushState(null, '', '/parts/?view=batch');
+            window.switchView('batch');
+          } else if (href === '/parts/' || href === '/parts') {
+            e.preventDefault();
+            history.pushState(null, '', '/parts/');
+            window.switchView('catalog');
+          }
+        });
+      });
+    }
+  }
+
+  function updateBadge() {
+    const badge = document.getElementById('em-user-badge');
+    const navUsers = document.getElementById('em-nav-users');
+    const drawerNavUsers = document.getElementById('em-drawer-nav-users');
+    const drawerUserCard = document.getElementById('em-drawer-user-card');
+    const drawerFooter = document.getElementById('em-drawer-footer');
+
+    const canManageUsers = currentUser && (currentUser.role === 'admin' || currentUser.permissions?.users === 'admin');
+    if (navUsers) navUsers.style.display = canManageUsers ? 'inline-flex' : 'none';
+    if (drawerNavUsers) drawerNavUsers.style.display = canManageUsers ? 'flex' : 'none';
+
+    try {
+      window.dispatchEvent(new CustomEvent('em-auth-changed', { detail: currentUser }));
+    } catch (_) {}
+
+    if (!currentUser) {
+      if (badge) {
+        badge.innerHTML = '<button id="em-open-login" style="background:linear-gradient(135deg, #0284c7, #0369a1);color:#fff;border:1px solid rgba(56,189,248,0.4);border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(2,132,199,0.3)">เข้าสู่ระบบ</button>';
+        const btn = document.getElementById('em-open-login');
+        if (btn) btn.onclick = () => promptLogin();
+      }
+      if (drawerUserCard) {
+        drawerUserCard.innerHTML = '<div style="font-size:13px;color:#94a3b8;margin-bottom:8px">ยังไม่ได้เข้าสู่ระบบ</div><button id="em-drawer-open-login" style="width:100%;background:linear-gradient(135deg, #0284c7, #0369a1);color:#fff;border:1px solid rgba(56,189,248,0.4);border-radius:6px;padding:8px;font-size:13px;font-weight:600;cursor:pointer">เข้าสู่ระบบ</button>';
+        const dBtn = document.getElementById('em-drawer-open-login');
+        if (dBtn) dBtn.onclick = () => {
+          const overlay = document.getElementById('em-drawer-overlay');
+          const drawer = document.getElementById('em-drawer');
+          if (drawer) drawer.classList.remove('is-active');
+          if (overlay) overlay.classList.remove('is-active');
+          document.body.style.overflow = '';
+          promptLogin();
+        };
+      }
+      if (drawerFooter) drawerFooter.innerHTML = '';
+      return;
+    }
+
+    const roleTh = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : currentUser.role === 'editor' ? 'แก้ไขได้' : 'ดูอย่างเดียว';
+
+    if (badge) {
+      badge.innerHTML = `
+        <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:5px;font-size:11.5px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <strong style="font-weight:600">${currentUser.displayName || currentUser.username}</strong>
+          <span style="font-size:10.5px;color:#94a3b8">(${roleTh})</span>
+        </span>
+        <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:5px;padding:2px 7px;font-size:11px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
+      `;
+      const logoutBtn = document.getElementById('em-btn-logout');
+      if (logoutBtn) {
+        logoutBtn.onclick = async () => {
+          try {
+            await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+          } catch (_) {}
+          location.reload();
+        };
+      }
+    }
+
+    if (drawerUserCard) {
+      drawerUserCard.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg, #1d4ed8, #0ea5e9);border:2px solid rgba(56,189,248,0.6);box-shadow:0 0 10px rgba(14,165,233,0.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">
+            ${(currentUser.displayName || currentUser.username).charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:14px;color:#fff">${currentUser.displayName || currentUser.username}</div>
+            <div style="font-size:12px;color:#94a3b8">${roleTh}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (drawerFooter) {
+      drawerFooter.innerHTML = `
+        <button id="em-drawer-btn-logout" style="width:100%;background:rgba(239, 68, 68, 0.15);color:#fca5a5;border:1px solid rgba(239, 68, 68, 0.3);border-radius:6px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          ออกจากระบบ
+        </button>
+      `;
+      const dLogoutBtn = document.getElementById('em-drawer-btn-logout');
+      if (dLogoutBtn) {
+        dLogoutBtn.onclick = async () => {
+          try {
+            await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+          } catch (_) {}
+          location.reload();
+        };
+      }
+    }
+  }
+
+
+  if (typeof window !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initNavUI();
+      fetch('/api/v1/auth/me', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(async res => {
+          if (res.ok && res.data) {
+            currentUser = res.data;
+            window.currentUser = currentUser;
+            window.EM_CURRENT_USER = currentUser;
+            updateBadge();
+            if (res.data.mustChangePassword) {
+              await promptForceChangePassword();
+            }
+          } else {
+            updateBadge();
+          }
+        })
+        .catch(() => updateBadge());
+    });
+  }
+
+  const safeUUID = () => {
+    if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+    return 'req-' + Date.now() + '-' + Math.random().toString(36).slice(2, 11) + '-' + Math.random().toString(36).slice(2, 9);
+  };
+
+  const executeRPC = async (targetScope, method, ...args) => {
+    const activeScope = targetScope || scope;
+    const signature = JSON.stringify([activeScope, method, args]);
+    const payload = [...args].reverse().find(a => a && typeof a === 'object' && !Array.isArray(a));
+    const requestId = payload?.requestId || payload?.operationId || inFlight.get(signature) || safeUUID();
+    inFlight.set(signature, requestId);
+
+    const doRequest = async () => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 60000);
+      try {
+        const response = await fetch(`/api/v1/${activeScope}/rpc`, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', 'Idempotency-Key': requestId },
+          body: JSON.stringify({ method, args }),
+          signal: controller.signal
+        });
+
+        if (response.status === 401) {
+          // Wait for user to log in via modal dialog
+          await promptLogin();
+          // Retry the request after successful login
+          return await doRequest();
+        }
+
+        if (response.redirected) {
+          if (typeof window !== 'undefined' && window.location.protocol === 'http:') {
+            throw Object.assign(new Error('คำขอถูก Redirect เนื่องจากเปิดด้วย HTTP กรุณาเข้าใช้งานผ่าน https://'), { code: 'REDIRECT_HTTP' });
+          }
+          throw Object.assign(new Error('การเชื่อมต่อถูก Redirect (เช่น เซสชัน Cloudflare Access หมดอายุ) กรุณารีเฟรชหน้าเว็บ'), { code: 'REDIRECT' });
+        }
+
+        const contentType = response.headers.get('Content-Type') || '';
+        if (!contentType.includes('application/json')) {
+          if (response.status === 404) {
+            throw Object.assign(new Error(`ไม่พบเซิร์ฟเวอร์หรือ API (/api/v1/${activeScope}/rpc) HTTP 404 - หากทดสอบ Local กรุณาตรวจสอบว่าเปิด npm run dev หรือยัง`), { code: 'NOT_FOUND' });
+          }
+          if (response.status >= 500) {
+            throw Object.assign(new Error(`เซิร์ฟเวอร์ขัดข้อง (HTTP ${response.status}) กรุณาตรวจสอบสถานะ Cloudflare Worker หรือฐานข้อมูล D1`), { code: 'SERVER_ERROR' });
+          }
+          throw Object.assign(new Error(`เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง (HTTP ${response.status}) กรุณารีเฟรชหน้าเว็บและลองใหม่อีกครั้ง`), { code: 'INVALID_RESPONSE' });
+        }
+
+        const result = await response.json();
+        if (!result.ok) {
+          if (result.error?.code === 'AUTH') {
+            await promptLogin();
+            return await doRequest();
+          }
+          throw Object.assign(new Error(result.error?.message || 'เชื่อมต่อไม่สำเร็จ'), result.error);
+        }
+
+        inFlight.delete(signature);
+        return result.data;
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          throw Object.assign(new Error('ยังยืนยันผลไม่ได้ กรุณาตรวจข้อมูลล่าสุดหรือลองคำขอเดิมอีกครั้ง'), { code: 'TIMEOUT' });
+        }
+        if (!error.code) {
+          const detail = error.message ? (' (' + error.message + ')') : '';
+          error.message = 'เชื่อมต่อไม่สำเร็จ ข้อมูลที่กรอกยังอยู่ กรุณาลองใหม่' + detail;
+          error.code = 'NETWORK';
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    };
+
+    return doRequest();
+  };
+
+  window.EM_RPC = async (method, ...args) => {
+    return executeRPC(scope, method, ...args);
+  };
+
+  window.EM_RPC_SCOPE = async (targetScope, method, ...args) => {
+    return executeRPC(targetScope, method, ...args);
+  };
+
+  window.isAdmin = () => Boolean(currentUser && (currentUser.role === 'admin' || currentUser.permissions?.bom === 'admin'));
+  window.promptLogin = promptLogin;
+  window.callRPC = async (method, ...args) => {
+    return window.EM_RPC(method, ...args);
+  };
+})();
+
+(function () {
+  'use strict';
+
+  const THAI_MONTHS = [
+    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+  ];
+
+  const THAI_MONTHS_SHORT = [
+    'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+    'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
+  ];
+
+  const state = {
+    activeTab: 'board',
+    startMonth: '',
+    currentMonth: '',
+    defaultBudget: 8000,
+    months: [],
+    items: [],
+    summary: {
+      totalBudget: 96000,
+      totalSpent: 0,
+      totalRemaining: 96000,
+      totalItems: 0,
+      totalUrgent: 0
+    },
+    filterMode: 'ALL',
+    searchQuery: '',
+    draggingItemId: null,
+    detailItemId: null
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function formatMoney(num) {
+    const val = Number(num) || 0;
+    return val.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
+
+  function formatThaiMonth(ym, short = false) {
+    if (!ym || !/^\d{4}-\d{2}$/.test(ym)) return ym || '-';
+    const [yStr, mStr] = ym.split('-');
+    const y = parseInt(yStr, 10) + 543;
+    const mIdx = parseInt(mStr, 10) - 1;
+    const mName = short ? THAI_MONTHS_SHORT[mIdx] : THAI_MONTHS[mIdx];
+    return `${mName} ${y}`;
+  }
+
+  function shiftYearMonth(ym, offset) {
+    if (!ym || !/^\d{4}-\d{2}$/.test(ym)) return ym;
+    const [yStr, mStr] = ym.split('-');
+    let y = parseInt(yStr, 10);
+    let m = parseInt(mStr, 10) - 1 + Number(offset || 0);
+    y += Math.floor(m / 12);
+    m = ((m % 12) + 12) % 12;
+    return `${y}-${String(m + 1).padStart(2, '0')}`;
+  }
+
+  function isLoggedIn() {
+    return Boolean(window.EM_CURRENT_USER || window.currentUser);
+  }
+
+  async function ensureAuthenticated() {
+    if (isLoggedIn()) return true;
+    if (typeof window.promptLogin === 'function') {
+      try {
+        await window.promptLogin();
+        updateAuthPill();
+        return isLoggedIn();
+      } catch (_) {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  function updateAuthPill() {
+    const pill = $('btn-auth-status');
+    const text = $('auth-status-text');
+    if (!pill || !text) return;
+
+    const user = window.EM_CURRENT_USER || window.currentUser;
+    if (user) {
+      pill.classList.remove('is-guest');
+      pill.classList.add('is-logged-in');
+      pill.title = 'เข้าสู่ระบบแล้ว สามารถเพิ่ม แก้ไข หรือลากย้ายเดือนได้ทันที';
+      text.textContent = `โหมดแก้ไขได้ (${user.displayName || user.username})`;
+    } else {
+      pill.classList.add('is-guest');
+      pill.classList.remove('is-logged-in');
+      pill.title = 'คลิกเพื่อเข้าสู่ระบบสำหรับแก้ไขข้อมูล';
+      text.textContent = 'ดูข้อมูลได้ไม่ต้องล็อกอิน · คลิกเพื่อล็อกอินแก้ไข';
+    }
+  }
+
+  async function rpcWrite(method, payload) {
+    const ok = await ensureAuthenticated();
+    if (!ok) throw new Error('กรุณาเข้าสู่ระบบก่อนแก้ไขข้อมูล');
+    return await window.EM_RPC_SCOPE('department-pay', method, payload);
+  }
+
+  async function loadPlan() {
+    try {
+      const qs = new URLSearchParams();
+      if (state.startMonth) qs.set('startMonth', state.startMonth);
+      qs.set('months', '12');
+
+      const res = await fetch(`/api/v1/department-pay/public?${qs.toString()}`, {
+        method: 'GET',
+        credentials: 'same-origin'
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error?.message || 'โหลดข้อมูลไม่สำเร็จ');
+
+      const data = json.data;
+      state.currentMonth = data.currentMonth;
+      state.startMonth = data.startMonth;
+      state.defaultBudget = data.defaultBudget;
+      state.months = data.months || [];
+      state.items = data.items || [];
+      state.summary = data.summary || state.summary;
+
+      if ($('input-start-month')) {
+        $('input-start-month').value = state.startMonth;
+      }
+
+      renderKPIs();
+      renderBoard();
+      renderTable();
+      populateMonthSelects();
+    } catch (err) {
+      console.error('Failed to load Department Pay plan:', err);
+    }
+  }
+
+  function renderKPIs() {
+    const s = state.summary;
+    if ($('kpi-default-budget')) $('kpi-default-budget').textContent = `${formatMoney(state.defaultBudget)} ฿`;
+    if ($('kpi-total-budget')) $('kpi-total-budget').textContent = `${formatMoney(s.totalBudget)} ฿`;
+    if ($('kpi-total-spent')) $('kpi-total-spent').textContent = `${formatMoney(s.totalSpent)} ฿`;
+
+    const remEl = $('kpi-total-remaining');
+    if (remEl) {
+      remEl.textContent = `${formatMoney(s.totalRemaining)} ฿`;
+      remEl.closest('.dp-kpi-chip')?.classList.toggle('is-over', s.totalRemaining < 0);
+    }
+    if ($('tab-count-items')) $('tab-count-items').textContent = s.totalItems || 0;
+  }
+
+  function filterItemMatchesSearch(item) {
+    if (!state.searchQuery) return true;
+    const q = state.searchQuery.toLowerCase();
+    return (
+      (item.description || '').toLowerCase().includes(q) ||
+      (item.brand || '').toLowerCase().includes(q) ||
+      (item.leadTime || '').toLowerCase().includes(q) ||
+      (item.remark || '').toLowerCase().includes(q)
+    );
+  }
+
+  // ==========================================================================
+  // TAB 1: 12-MONTH PLANNING BOARD (COMPACT & DRAG-AND-DROP)
+  // ==========================================================================
+  function renderBoard() {
+    const grid = $('dp-months-grid');
+    if (!grid) return;
+
+    let monthsToShow = state.months.slice();
+
+    if (state.filterMode === 'HAS_ITEMS') {
+      monthsToShow = monthsToShow.filter(m => m.items.some(filterItemMatchesSearch));
+    } else if (state.filterMode === 'URGENT') {
+      monthsToShow = monthsToShow.filter(m => m.items.some(i => i.isUrgent && filterItemMatchesSearch(i)));
+    } else if (state.filterMode === 'OVER_BUDGET') {
+      monthsToShow = monthsToShow.filter(m => m.isOverBudget);
+    } else if (state.searchQuery) {
+      monthsToShow = monthsToShow.filter(m => m.items.some(filterItemMatchesSearch));
+    }
+
+    if (monthsToShow.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; background:#fff; border:1px dashed var(--dp-border); border-radius:12px; padding:40px; text-align:center; color:var(--dp-ink-secondary);">
+          ไม่พบเดือนหรือรายการค่าใช้จ่ายที่ตรงกับเงื่อนไขการค้นหา
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+    monthsToShow.forEach(m => {
+      const filteredItems = m.items.filter(filterItemMatchesSearch);
+      const pct = Math.min(Math.max(m.usagePercent || 0, 0), 100);
+      const fillClass = m.isOverBudget ? 'is-over' : (m.usagePercent >= 85 ? 'is-warn' : '');
+      const remainLabel = m.remaining >= 0
+        ? `คงเหลือ ${formatMoney(m.remaining)} ฿`
+        : `เกินงบ ${formatMoney(Math.abs(m.remaining))} ฿`;
+
+      html += `
+        <article class="dp-month-card${m.isCurrentMonth ? ' is-current-month' : ''}${m.isOverBudget ? ' is-over-budget' : ''}" data-month="${escapeHtml(m.yearMonth)}">
+          <div class="dp-month-top-bar"></div>
+          <div class="dp-month-header">
+            <div class="dp-month-title-row">
+              <div class="dp-month-name-group">
+                <h2 class="dp-month-title">${escapeHtml(formatThaiMonth(m.yearMonth))}</h2>
+                ${m.isCurrentMonth ? '<span class="dp-badge-current">เดือนนี้</span>' : ''}
+              </div>
+              <button type="button" class="dp-btn-month-add" data-month="${escapeHtml(m.yearMonth)}" title="เพิ่มรายการในเดือนนี้">
+                + เพิ่ม
+              </button>
+            </div>
+
+            <div class="dp-budget-meter">
+              <div class="dp-budget-numbers">
+                <button type="button" class="dp-budget-edit-trigger" data-month="${escapeHtml(m.yearMonth)}" title="คลิกเพื่อปรับงบประมาณเดือนนี้">
+                  <span>ใช้ <strong>${formatMoney(m.spent)}</strong> / งบ ${formatMoney(m.budget)} ฿${m.isCustomBudget ? '*' : ''}</span>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                </button>
+                <span class="dp-remain-pill${m.isOverBudget ? ' is-over' : ''}">${remainLabel}</span>
+              </div>
+              <div class="dp-progress-track">
+                <div class="dp-progress-fill ${fillClass}" style="width: ${pct}%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dp-month-body" data-drop-month="${escapeHtml(m.yearMonth)}">
+            ${filteredItems.length === 0 ? `
+              <div class="dp-month-empty">
+                <span>ไม่มีรายการ — กด <strong>+ เพิ่ม</strong> หรือลากรายการมาวาง</span>
+              </div>
+            ` : filteredItems.map(item => renderItemCardHtml(item)).join('')}
+          </div>
+        </article>
+      `;
+    });
+
+    grid.innerHTML = html;
+    bindBoardEvents(grid);
+  }
+
+  function renderItemCardHtml(item) {
+    const subParts = [];
+    if (item.brand) subParts.push(escapeHtml(item.brand));
+    if (item.leadTime) subParts.push(`🚚 ${escapeHtml(item.leadTime)}`);
+
+    return `
+      <div class="dp-item-card${item.isUrgent ? ' is-urgent' : ''}" draggable="true" data-id="${escapeHtml(item.id)}" data-month="${escapeHtml(item.yearMonth)}" title="ลากเพื่อย้ายไปเดือนอื่น หรือกดปุ่ม i เพื่อดูรายละเอียด">
+        <div class="dp-item-left">
+          <span class="dp-drag-grip" aria-hidden="true">⠿</span>
+          <div class="dp-item-main">
+            <div class="dp-item-title-line">
+              ${item.isUrgent ? `<span class="dp-tag-urgent">ด่วน</span>` : ''}
+              <span class="dp-item-desc">${escapeHtml(item.description)}</span>
+              ${item.fileUrl ? `
+                <a href="${escapeHtml(item.fileUrl)}" target="_blank" rel="noopener noreferrer" class="dp-link-chip" title="เปิดไฟล์/ลิงก์แนบ" onclick="event.stopPropagation();">
+                  🔗
+                </a>
+              ` : ''}
+            </div>
+            ${subParts.length > 0 ? `<div class="dp-item-sub-line">${subParts.join(' · ')}</div>` : ''}
+          </div>
+        </div>
+
+        <div class="dp-item-right">
+          <span class="dp-item-price">${formatMoney(item.price)} ฿</span>
+          <div class="dp-edit-group">
+            <button type="button" class="dp-btn-act act-info btn-info-item" data-id="${escapeHtml(item.id)}" title="ดูรายละเอียดรายการ (i)">
+              i
+            </button>
+            <button type="button" class="dp-btn-act act-urgent btn-toggle-urgent${item.isUrgent ? ' is-active' : ''}" data-id="${escapeHtml(item.id)}" title="${item.isUrgent ? 'ยกเลิกสถานะด่วน' : 'ตั้งเป็นรายการด่วน'}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="${item.isUrgent ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            </button>
+            <button type="button" class="dp-btn-act btn-edit-item" data-id="${escapeHtml(item.id)}" title="แก้ไขรายการ">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            </button>
+            <button type="button" class="dp-btn-act act-delete btn-delete-item" data-id="${escapeHtml(item.id)}" title="ลบรายการ">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function bindBoardEvents(grid) {
+    grid.querySelectorAll('.dp-btn-month-add').forEach(btn => {
+      btn.onclick = () => openItemModal(null, btn.dataset.month);
+    });
+
+    grid.querySelectorAll('.dp-budget-edit-trigger').forEach(btn => {
+      btn.onclick = () => openBudgetModal(btn.dataset.month);
+    });
+
+    grid.querySelectorAll('.btn-info-item').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        openDetailModal(btn.dataset.id);
+      };
+    });
+
+    grid.querySelectorAll('.btn-toggle-urgent').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        handleToggleUrgent(btn.dataset.id);
+      };
+    });
+
+    grid.querySelectorAll('.btn-edit-item').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        openItemModal(btn.dataset.id);
+      };
+    });
+
+    grid.querySelectorAll('.btn-delete-item').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        handleDeleteItem(btn.dataset.id);
+      };
+    });
+
+    // Drag & Drop cards across months
+    grid.querySelectorAll('.dp-item-card').forEach(card => {
+      card.addEventListener('dragstart', (e) => {
+        state.draggingItemId = card.dataset.id;
+        e.dataTransfer.setData('text/plain', card.dataset.id);
+        card.style.opacity = '0.45';
+      });
+      card.addEventListener('dragend', () => {
+        state.draggingItemId = null;
+        card.style.opacity = '';
+        grid.querySelectorAll('.dp-month-card').forEach(mc => mc.classList.remove('is-drag-over'));
+      });
+    });
+
+    grid.querySelectorAll('.dp-month-card').forEach(monthCard => {
+      monthCard.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        monthCard.classList.add('is-drag-over');
+      });
+      monthCard.addEventListener('dragleave', () => {
+        monthCard.classList.remove('is-drag-over');
+      });
+      monthCard.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        monthCard.classList.remove('is-drag-over');
+        const itemId = state.draggingItemId || e.dataTransfer.getData('text/plain');
+        const targetMonth = monthCard.dataset.month;
+        if (!itemId || !targetMonth) return;
+        const item = state.items.find(i => i.id === itemId);
+        if (!item || item.yearMonth === targetMonth) return;
+        await handleMoveToMonth(itemId, targetMonth);
+      });
+    });
+  }
+
+  // ==========================================================================
+  // DETAIL MODAL (i BUTTON — NO LOGIN REQUIRED TO VIEW)
+  // ==========================================================================
+  function openDetailModal(itemId) {
+    const item = state.items.find(i => i.id === itemId);
+    if (!item) return;
+
+    state.detailItemId = item.id;
+    const body = $('dp-detail-body');
+    if (!body) return;
+
+    body.innerHTML = `
+      <div class="dp-detail-grid">
+        <div class="dp-detail-box full">
+          <span class="dp-detail-lbl">รายละเอียด (Description)</span>
+          <div class="dp-detail-val" style="font-size:15.5px;">
+            ${item.isUrgent ? '<span class="dp-tag-urgent" style="margin-right:6px;">ด่วน</span>' : ''}
+            ${escapeHtml(item.description)}
+          </div>
+        </div>
+
+        <div class="dp-detail-box">
+          <span class="dp-detail-lbl">เดือนที่วางแผน</span>
+          <div class="dp-detail-val">${escapeHtml(formatThaiMonth(item.yearMonth))} (${escapeHtml(item.yearMonth)})</div>
+        </div>
+
+        <div class="dp-detail-box">
+          <span class="dp-detail-lbl">ราคา (บาท)</span>
+          <div class="dp-detail-val font-mono" style="color:#0284c7; font-size:16px;">${formatMoney(item.price)} ฿</div>
+        </div>
+
+        <div class="dp-detail-box">
+          <span class="dp-detail-lbl">ยี่ห้อ (Brand)</span>
+          <div class="dp-detail-val">${escapeHtml(item.brand || '-')}</div>
+        </div>
+
+        <div class="dp-detail-box">
+          <span class="dp-detail-lbl">ระยะเวลาจัดส่ง (Lead Time)</span>
+          <div class="dp-detail-val">${escapeHtml(item.leadTime || '-')}</div>
+        </div>
+
+        <div class="dp-detail-box full">
+          <span class="dp-detail-lbl">ลิงก์ / URL ไฟล์แนบ</span>
+          <div class="dp-detail-val">
+            ${item.fileUrl ? `
+              <a href="${escapeHtml(item.fileUrl)}" target="_blank" rel="noopener noreferrer" class="dp-link-chip" style="font-size:12.5px; padding:4px 10px;">
+                🔗 เปิดลิงก์ / ไฟล์แนบ (${escapeHtml(item.fileUrl)})
+              </a>
+            ` : '<span style="color:var(--dp-ink-muted); font-weight:400;">ไม่มีลิงก์แนบ</span>'}
+          </div>
+        </div>
+
+        ${item.remark ? `
+          <div class="dp-detail-box full">
+            <span class="dp-detail-lbl">หมายเหตุเพิ่มเติม</span>
+            <div class="dp-detail-val" style="font-weight:400; font-size:13px;">${escapeHtml(item.remark)}</div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    $('modal-dp-detail').showModal();
+  }
+
+  // ==========================================================================
+  // TAB 2: TABLE VIEW
+  // ==========================================================================
+  function renderTable() {
+    const tbody = $('dp-table-body');
+    if (!tbody) return;
+
+    const filtered = state.items.filter(item => {
+      if (!filterItemMatchesSearch(item)) return false;
+      if (state.filterMode === 'URGENT' && !item.isUrgent) return false;
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align:center; padding:36px; color:var(--dp-ink-muted);">
+            ยังไม่มีรายการค่าใช้จ่ายแผนกในช่วง 12 เดือนนี้
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    let html = '';
+    filtered.forEach(item => {
+      const monthOptions = state.months.map(m => `
+        <option value="${escapeHtml(m.yearMonth)}"${m.yearMonth === item.yearMonth ? ' selected' : ''}>
+          ${escapeHtml(formatThaiMonth(m.yearMonth, true))} (${escapeHtml(m.yearMonth)})
+        </option>
+      `).join('');
+
+      html += `
+        <tr data-id="${escapeHtml(item.id)}">
+          <td>
+            <select class="dp-select font-mono dp-table-month-select" data-id="${escapeHtml(item.id)}" style="padding:4px 8px; font-size:12px;">
+              ${monthOptions}
+            </select>
+          </td>
+          <td>
+            <div style="font-weight:600; color:#0f172a;">
+              ${item.isUrgent ? '<span class="dp-tag-urgent" style="margin-right:5px;">ด่วน</span>' : ''}
+              ${escapeHtml(item.description)}
+            </div>
+            ${item.remark ? `<div style="font-size:11.5px; color:#64748b; margin-top:2px;">${escapeHtml(item.remark)}</div>` : ''}
+          </td>
+          <td>${escapeHtml(item.brand || '-')}</td>
+          <td style="text-align: right;" class="font-mono">
+            <strong>${formatMoney(item.price)} ฿</strong>
+          </td>
+          <td>${escapeHtml(item.leadTime || '-')}</td>
+          <td style="text-align: center;">
+            ${item.fileUrl ? `
+              <a href="${escapeHtml(item.fileUrl)}" target="_blank" rel="noopener noreferrer" class="dp-link-chip">
+                🔗 เปิดลิงก์
+              </a>
+            ` : '<span style="color:#94a3b8;">-</span>'}
+          </td>
+          <td style="text-align: center;">
+            <div class="dp-edit-group" style="display:inline-flex;">
+              <button type="button" class="dp-btn-act act-info btn-tbl-info" data-id="${escapeHtml(item.id)}" title="ดูรายละเอียด (i)">i</button>
+              <button type="button" class="dp-btn-act act-urgent btn-tbl-urgent${item.isUrgent ? ' is-active' : ''}" data-id="${escapeHtml(item.id)}" title="สลับสถานะด่วน">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="${item.isUrgent ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              </button>
+              <button type="button" class="dp-btn-act btn-tbl-edit" data-id="${escapeHtml(item.id)}" title="แก้ไข">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              </button>
+              <button type="button" class="dp-btn-act act-delete btn-tbl-del" data-id="${escapeHtml(item.id)}" title="ลบ">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+
+    tbody.querySelectorAll('.dp-table-month-select').forEach(sel => {
+      sel.onchange = () => handleMoveToMonth(sel.dataset.id, sel.value);
+    });
+    tbody.querySelectorAll('.btn-tbl-info').forEach(btn => {
+      btn.onclick = () => openDetailModal(btn.dataset.id);
+    });
+    tbody.querySelectorAll('.btn-tbl-urgent').forEach(btn => {
+      btn.onclick = () => handleToggleUrgent(btn.dataset.id);
+    });
+    tbody.querySelectorAll('.btn-tbl-edit').forEach(btn => {
+      btn.onclick = () => openItemModal(btn.dataset.id);
+    });
+    tbody.querySelectorAll('.btn-tbl-del').forEach(btn => {
+      btn.onclick = () => handleDeleteItem(btn.dataset.id);
+    });
+  }
+
+  // ==========================================================================
+  // MOVE & URGENT ACTIONS
+  // ==========================================================================
+  async function handleMoveToMonth(itemId, targetMonth, markUrgent) {
+    try {
+      const payload = { id: itemId, targetMonth };
+      if (markUrgent !== undefined) payload.isUrgent = markUrgent;
+      await rpcWrite('moveItem', payload);
+      await loadPlan();
+    } catch (err) {
+      if (err.message !== 'กรุณาเข้าสู่ระบบก่อนแก้ไขข้อมูล') {
+        alert(err.message || 'ย้ายเดือนไม่สำเร็จ');
+      }
+      await loadPlan();
+    }
+  }
+
+  async function handleToggleUrgent(itemId) {
+    const item = state.items.find(i => i.id === itemId);
+    if (!item) return;
+    try {
+      await rpcWrite('moveItem', {
+        id: itemId,
+        targetMonth: item.yearMonth,
+        isUrgent: !item.isUrgent
+      });
+      await loadPlan();
+    } catch (err) {
+      if (err.message !== 'กรุณาเข้าสู่ระบบก่อนแก้ไขข้อมูล') {
+        alert(err.message || 'อัปเดตสถานะด่วนไม่สำเร็จ');
+      }
+    }
+  }
+
+  // ==========================================================================
+  // MODAL 1: ADD / EDIT ITEM
+  // ==========================================================================
+  function populateMonthSelects() {
+    const html = state.months.map(m => `
+      <option value="${escapeHtml(m.yearMonth)}">
+        ${escapeHtml(formatThaiMonth(m.yearMonth))} (${escapeHtml(m.yearMonth)}) — คงเหลือ ${formatMoney(m.remaining)} ฿
+      </option>
+    `).join('');
+
+    if ($('item-year-month')) $('item-year-month').innerHTML = html;
+    if ($('budget-target-month')) $('budget-target-month').innerHTML = html;
+  }
+
+  async function openItemModal(itemId = null, defaultMonth = null) {
+    const ok = await ensureAuthenticated();
+    if (!ok) return;
+
+    const modal = $('modal-dp-item');
+    const errEl = $('item-form-error');
+    if (errEl) errEl.style.display = 'none';
+
+    populateMonthSelects();
+
+    if (itemId) {
+      const item = state.items.find(i => i.id === itemId);
+      if (!item) return;
+      $('modal-item-title').textContent = 'แก้ไขรายการค่าใช้จ่ายแผนก';
+      $('item-id').value = item.id;
+      $('item-year-month').value = item.yearMonth;
+      $('item-is-urgent').checked = Boolean(item.isUrgent);
+      $('item-description').value = item.description || '';
+      $('item-brand').value = item.brand || '';
+      $('item-price').value = item.price || '';
+      $('item-lead-time').value = item.leadTime || '';
+      $('item-file-url').value = item.fileUrl || '';
+      $('item-remark').value = item.remark || '';
+    } else {
+      $('modal-item-title').textContent = 'เพิ่มรายการค่าใช้จ่ายแผนก';
+      $('item-id').value = '';
+      $('item-year-month').value = defaultMonth || state.currentMonth || state.startMonth;
+      $('item-is-urgent').checked = false;
+      $('item-description').value = '';
+      $('item-brand').value = '';
+      $('item-price').value = '';
+      $('item-lead-time').value = '';
+      $('item-file-url').value = '';
+      $('item-remark').value = '';
+    }
+
+    updateItemBudgetPreview();
+    modal.showModal();
+    setTimeout(() => $('item-description')?.focus(), 30);
+  }
+
+  function updateItemBudgetPreview() {
+    const preview = $('item-budget-preview');
+    if (!preview) return;
+    const ym = $('item-year-month')?.value;
+    const itemId = $('item-id')?.value;
+    const enteredPrice = Number($('item-price')?.value) || 0;
+    const monthObj = state.months.find(m => m.yearMonth === ym);
+    if (!monthObj) {
+      preview.textContent = '';
+      return;
+    }
+
+    const existingItem = itemId ? state.items.find(i => i.id === itemId) : null;
+    const baseSpent = monthObj.spent - (existingItem && existingItem.yearMonth === ym ? existingItem.price : 0);
+    const projectedSpent = baseSpent + enteredPrice;
+    const projectedRemain = monthObj.budget - projectedSpent;
+
+    preview.innerHTML = `
+      เดือน <strong>${escapeHtml(formatThaiMonth(ym))}</strong>:
+      งบประมาณ <strong class="font-mono">${formatMoney(monthObj.budget)} ฿</strong> &middot;
+      รวมหลังบันทึกรายการนี้ <strong class="font-mono">${formatMoney(projectedSpent)} ฿</strong> &middot;
+      <span style="font-weight:700; color:${projectedRemain < 0 ? '#dc2626' : '#15803d'};">
+        ${projectedRemain >= 0 ? `คงเหลือ ${formatMoney(projectedRemain)} ฿` : `⚠️ เกินงบ ${formatMoney(Math.abs(projectedRemain))} ฿`}
+      </span>
+    `;
+  }
+
+  async function submitItemForm(e) {
+    e.preventDefault();
+    const errEl = $('item-form-error');
+    const submitBtn = $('btn-submit-item-modal');
+    errEl.style.display = 'none';
+
+    const id = $('item-id').value.trim();
+    const yearMonth = $('item-year-month').value;
+    const isUrgent = $('item-is-urgent').checked;
+    const description = $('item-description').value.trim();
+    const brand = $('item-brand').value.trim();
+    const price = Number($('item-price').value) || 0;
+    const leadTime = $('item-lead-time').value.trim();
+    const fileUrl = $('item-file-url').value.trim();
+    const remark = $('item-remark').value.trim();
+
+    if (!description) {
+      errEl.textContent = 'กรุณาระบุรายละเอียดรายการ (บังคับกรอก)';
+      errEl.style.display = 'block';
+      $('item-description')?.focus();
+      return;
+    }
+
+    submitBtn.disabled = true;
+    try {
+      await rpcWrite('saveItem', {
+        id: id || undefined,
+        yearMonth,
+        isUrgent,
+        description,
+        brand,
+        price,
+        leadTime,
+        fileUrl,
+        remark
+      });
+
+      await loadPlan();
+
+      const isContinuous = $('item-continuous-add')?.checked && !id;
+      if (isContinuous) {
+        $('item-description').value = '';
+        $('item-brand').value = '';
+        $('item-price').value = '';
+        $('item-lead-time').value = '';
+        $('item-file-url').value = '';
+        $('item-remark').value = '';
+        $('item-is-urgent').checked = false;
+        updateItemBudgetPreview();
+        $('item-description')?.focus();
+      } else {
+        $('modal-dp-item').close();
+      }
+    } catch (err) {
+      errEl.textContent = err.message || 'บันทึกข้อมูลไม่สำเร็จ';
+      errEl.style.display = 'block';
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
+
+  async function handleDeleteItem(itemId) {
+    const item = state.items.find(i => i.id === itemId);
+    if (!item) return;
+
+    const ok = await ensureAuthenticated();
+    if (!ok) return;
+
+    if (!confirm(`ต้องการลบรายการ "${item.description}" (${formatMoney(item.price)} ฿) ใช่หรือไม่?`)) return;
+
+    try {
+      await rpcWrite('deleteItem', itemId);
+      await loadPlan();
+    } catch (err) {
+      alert('ลบรายการไม่สำเร็จ: ' + err.message);
+    }
+  }
+
+  // ==========================================================================
+  // MODAL 2: BUDGET SETTINGS (DEFAULT 8,000 THB & PER-MONTH OVERRIDE)
+  // ==========================================================================
+  async function openBudgetModal(targetMonth = null) {
+    const ok = await ensureAuthenticated();
+    if (!ok) return;
+
+    populateMonthSelects();
+    $('budget-default-input').value = state.defaultBudget;
+
+    const selectedYm = targetMonth || state.currentMonth || state.startMonth;
+    if ($('budget-target-month')) $('budget-target-month').value = selectedYm;
+    syncBudgetModalMonthFields(selectedYm);
+
+    $('budget-form-error').style.display = 'none';
+    $('modal-dp-budget').showModal();
+  }
+
+  function syncBudgetModalMonthFields(ym) {
+    const m = state.months.find(x => x.yearMonth === ym);
+    if (!m) return;
+    $('budget-month-amount').value = m.isCustomBudget ? m.budget : '';
+    $('budget-month-note').value = m.budgetNote || '';
+  }
+
+  async function submitBudgetForm(e) {
+    e.preventDefault();
+    const errEl = $('budget-form-error');
+    errEl.style.display = 'none';
+
+    const defaultBudget = Number($('budget-default-input').value);
+    const yearMonth = $('budget-target-month').value;
+    const customAmountStr = $('budget-month-amount').value.trim();
+    const note = $('budget-month-note').value.trim();
+
+    if (!Number.isFinite(defaultBudget) || defaultBudget < 0) {
+      errEl.textContent = 'กรุณาระบุงบประมาณมาตรฐานต่อเดือนให้ถูกต้อง';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    try {
+      const payload = { defaultBudget };
+      if (yearMonth && customAmountStr !== '') {
+        payload.yearMonth = yearMonth;
+        payload.budgetAmount = Number(customAmountStr);
+        payload.note = note;
+      }
+      await rpcWrite('saveBudget', payload);
+      $('modal-dp-budget').close();
+      await loadPlan();
+    } catch (err) {
+      errEl.textContent = err.message || 'บันทึกงบประมาณไม่สำเร็จ';
+      errEl.style.display = 'block';
+    }
+  }
+
+  async function handleResetMonthBudget() {
+    const ym = $('budget-target-month')?.value;
+    if (!ym) return;
+    try {
+      await rpcWrite('saveBudget', { yearMonth: ym, resetToDefault: true });
+      await loadPlan();
+      syncBudgetModalMonthFields(ym);
+    } catch (err) {
+      alert(err.message || 'รีเซ็ตงบไม่สำเร็จ');
+    }
+  }
+
+  // ==========================================================================
+  // EXPORT EXCEL (.XLSX)
+  // ==========================================================================
+  function exportDepartmentPayExcel() {
+    if (typeof XLSX === 'undefined') {
+      alert('ไลบรารี Excel กำลังโหลด กรุณาลองใหม่อีกครั้ง');
+      return;
+    }
+
+    const summaryRows = state.months.map((m, idx) => ({
+      'ลำดับ': idx + 1,
+      'เดือน (YYYY-MM)': m.yearMonth,
+      'เดือนภาษาไทย': formatThaiMonth(m.yearMonth),
+      'งบประมาณประจำเดือน (บาท)': m.budget,
+      'วางแผนใช้ไป (บาท)': m.spent,
+      'งบคงเหลือ (บาท)': m.remaining,
+      'สัดส่วนการใช้ (%)': m.usagePercent,
+      'จำนวนรายการ': m.itemCount,
+      'รายการด่วน': m.urgentCount,
+      'หมายเหตุงบประมาณ': m.budgetNote || ''
+    }));
+
+    const itemRows = state.items.map((it, idx) => ({
+      'ลำดับ': idx + 1,
+      'เดือนที่วางแผน': it.yearMonth,
+      'ชื่อเดือน': formatThaiMonth(it.yearMonth),
+      'ความเร่งด่วน': it.isUrgent ? 'ด่วน' : 'ปกติ',
+      'รายละเอียด (Description)': it.description,
+      'ยี่ห้อ (Brand)': it.brand || '',
+      'ราคา (บาท)': it.price || 0,
+      'ระยะเวลาจัดส่ง (Lead Time)': it.leadTime || '',
+      'ลิงก์ / URL ไฟล์': it.fileUrl || '',
+      'หมายเหตุ': it.remark || ''
+    }));
+
+    const wb = XLSX.utils.book_new();
+    const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
+    wsSummary['!cols'] = [
+      { wch: 7 }, { wch: 15 }, { wch: 20 }, { wch: 22 }, { wch: 18 },
+      { wch: 18 }, { wch: 16 }, { wch: 14 }, { wch: 12 }, { wch: 26 }
+    ];
+    XLSX.utils.book_append_sheet(wb, wsSummary, 'สรุปงบ 12 เดือน');
+
+    const wsItems = XLSX.utils.json_to_sheet(itemRows.length ? itemRows : [{ 'ข้อความ': 'ยังไม่มีรายการค่าใช้จ่าย' }]);
+    wsItems['!cols'] = [
+      { wch: 7 }, { wch: 14 }, { wch: 18 }, { wch: 12 },
+      { wch: 36 }, { wch: 18 }, { wch: 14 }, { wch: 18 }, { wch: 36 }, { wch: 26 }
+    ];
+    XLSX.utils.book_append_sheet(wb, wsItems, 'รายการค่าใช้จ่ายแผนก');
+
+    const nowStr = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `Department_Pay_12Months_${nowStr}.xlsx`);
+  }
+
+  // ==========================================================================
+  // INITIALIZE
+  // ==========================================================================
+  function init() {
+    updateAuthPill();
+    window.addEventListener('em-auth-changed', updateAuthPill);
+
+    $('btn-auth-status')?.addEventListener('click', () => {
+      if (!isLoggedIn() && typeof window.promptLogin === 'function') {
+        window.promptLogin();
+      }
+    });
+
+    // View tabs
+    document.querySelectorAll('.dp-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.activeTab = btn.dataset.tab;
+        document.querySelectorAll('.dp-tab-btn').forEach(b => {
+          const active = b.dataset.tab === state.activeTab;
+          b.classList.toggle('active', active);
+          b.setAttribute('aria-selected', String(active));
+        });
+        $('tab-board').style.display = state.activeTab === 'board' ? 'block' : 'none';
+        $('tab-table').style.display = state.activeTab === 'table' ? 'block' : 'none';
+      });
+    });
+
+    // Header actions
+    $('btn-add-item')?.addEventListener('click', () => openItemModal(null, state.currentMonth || state.startMonth));
+    $('btn-refresh')?.addEventListener('click', loadPlan);
+    $('btn-export-excel')?.addEventListener('click', exportDepartmentPayExcel);
+    $('btn-open-budget-settings')?.addEventListener('click', () => openBudgetModal());
+
+    // 12-Month window navigation
+    $('btn-win-prev')?.addEventListener('click', () => {
+      state.startMonth = shiftYearMonth(state.startMonth || state.currentMonth, -1);
+      loadPlan();
+    });
+    $('btn-win-next')?.addEventListener('click', () => {
+      state.startMonth = shiftYearMonth(state.startMonth || state.currentMonth, 1);
+      loadPlan();
+    });
+    $('btn-win-current')?.addEventListener('click', () => {
+      state.startMonth = state.currentMonth;
+      loadPlan();
+    });
+    $('input-start-month')?.addEventListener('change', (e) => {
+      if (e.target.value) {
+        state.startMonth = e.target.value;
+        loadPlan();
+      }
+    });
+
+    // Filter pills
+    document.querySelectorAll('#dp-filter-pills .dp-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        state.filterMode = pill.dataset.filter || 'ALL';
+        document.querySelectorAll('#dp-filter-pills .dp-pill').forEach(p => {
+          p.classList.toggle('active', p === pill);
+        });
+        renderBoard();
+        renderTable();
+      });
+    });
+
+    // Search box
+    const searchInput = $('dp-search-input');
+    const searchClear = $('dp-search-clear');
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        state.searchQuery = searchInput.value.trim();
+        if (searchClear) searchClear.style.display = state.searchQuery ? 'inline-block' : 'none';
+        renderBoard();
+        renderTable();
+      });
+    }
+    if (searchClear) {
+      searchClear.addEventListener('click', () => {
+        searchInput.value = '';
+        state.searchQuery = '';
+        searchClear.style.display = 'none';
+        renderBoard();
+        renderTable();
+      });
+    }
+
+    // Detail Modal (i button) events
+    $('btn-close-detail-modal')?.addEventListener('click', () => $('modal-dp-detail').close());
+    $('btn-detail-close')?.addEventListener('click', () => $('modal-dp-detail').close());
+    $('btn-detail-edit')?.addEventListener('click', () => {
+      const id = state.detailItemId;
+      $('modal-dp-detail').close();
+      if (id) openItemModal(id);
+    });
+
+    // Item Modal events
+    $('btn-close-item-modal')?.addEventListener('click', () => $('modal-dp-item').close());
+    $('btn-cancel-item-modal')?.addEventListener('click', () => $('modal-dp-item').close());
+    $('form-dp-item')?.addEventListener('submit', submitItemForm);
+    $('item-year-month')?.addEventListener('change', updateItemBudgetPreview);
+    $('item-price')?.addEventListener('input', updateItemBudgetPreview);
+
+    // Budget Modal events
+    $('btn-close-budget-modal')?.addEventListener('click', () => $('modal-dp-budget').close());
+    $('btn-cancel-budget-modal')?.addEventListener('click', () => $('modal-dp-budget').close());
+    $('budget-target-month')?.addEventListener('change', (e) => syncBudgetModalMonthFields(e.target.value));
+    $('btn-reset-month-budget')?.addEventListener('click', handleResetMonthBudget);
+    $('form-dp-budget')?.addEventListener('submit', submitBudgetForm);
+
+    loadPlan();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+</script>
+</body>
+</html>

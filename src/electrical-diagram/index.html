@@ -2,12 +2,14 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>แผนผังระบบไฟฟ้า (Single Line Diagram) - แผนกซ่อมไฟฟ้า</title>
   <link rel="icon" type="image/png" href="/Logo%20small.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- APP_STYLE -->
 </head>
 <body>
@@ -70,6 +72,14 @@
           </div>
 
           <div class="el-header-actions">
+            <button type="button" id="btn-export-excel" class="btn btn-secondary btn-sm el-btn-excel-icon" title="ส่งออกข้อมูลเป็นไฟล์ Excel (.xlsx)" aria-label="ส่งออกข้อมูลเป็นไฟล์ Excel">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <path d="m9.5 12.5 5 5"></path>
+                <path d="m14.5 12.5-5 5"></path>
+              </svg>
+            </button>
             <button type="button" id="btn-refresh" class="btn btn-secondary btn-sm" title="รีเฟรชข้อมูล">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
               <span>รีเฟรช</span>
@@ -251,6 +261,7 @@
               <th>สถานที่</th>
               <th style="min-width: 280px;">จ่ายไฟมาจาก (เลือกตู้ต้นทาง Parent)</th>
               <th style="width: 120px;">สถานะสายเมน</th>
+              <th style="width: 80px; text-align: center;">จัดการ</th>
             </tr>
           </thead>
           <tbody id="wiring-table-body">
@@ -466,33 +477,35 @@
           </div>
         </div>
 
-        <div class="el-form-field">
-          <label for="form-remark" class="el-label">หมายเหตุ / ข้อมูลเพิ่มเติม</label>
-          <textarea id="form-remark" name="remark" class="el-textarea" rows="2" placeholder="เช่น ยี่ห้อเบรกเกอร์, ขนาดสายเมน, ข้อมูลตู้"></textarea>
-        </div>
+        <div class="el-form-row col-2">
+          <div class="el-form-field">
+            <label for="form-remark" class="el-label">หมายเหตุ / ข้อมูลเพิ่มเติม</label>
+            <textarea id="form-remark" name="remark" class="el-textarea" rows="3" style="height: 100%; min-height: 96px;" placeholder="เช่น ยี่ห้อเบรกเกอร์, ขนาดสายเมน, ข้อมูลตู้"></textarea>
+          </div>
 
-        <!-- Google Drive Photo Section -->
-        <div class="el-form-field">
-          <label class="el-label">รูปภาพตู้ (เชื่อมต่อ Google Drive)</label>
-          <div class="el-photo-uploader">
-            <div class="el-photo-preview-box" id="form-photo-preview">
-              <img id="form-preview-img" src="" alt="พรีวิวรูปภาพ" style="display:none;">
-              <div id="form-preview-empty" class="el-preview-empty">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                <span>เลือกไฟล์รูปภาพเพื่ออัปโหลด</span>
+          <!-- Google Drive Photo Section -->
+          <div class="el-form-field">
+            <label class="el-label">รูปภาพตู้ (เชื่อมต่อ Google Drive)</label>
+            <div class="el-photo-uploader">
+              <div class="el-photo-preview-box" id="form-photo-preview">
+                <img id="form-preview-img" src="" alt="พรีวิวรูปภาพ" style="display:none;">
+                <div id="form-preview-empty" class="el-preview-empty">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  <span>เลือกไฟล์รูปภาพเพื่ออัปโหลด</span>
+                </div>
               </div>
-            </div>
 
-            <div class="el-photo-controls">
-              <input type="file" id="form-file-input" accept="image/*" style="display:none;">
-              <button type="button" id="btn-select-file" class="btn btn-secondary btn-sm">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                <span>เลือกรูปจากเครื่อง</span>
-              </button>
-              <button type="button" id="btn-remove-photo" class="btn btn-danger-ghost btn-sm" style="display:none;">
-                <span>ลบรูป</span>
-              </button>
-              <div class="el-photo-tip">รองรับไฟล์ JPG, PNG, WEBP ขนาดไม่เกิน 15MB &middot; อัปโหลดตรงเข้า Google Drive อัตโนมัติ</div>
+              <div class="el-photo-controls">
+                <input type="file" id="form-file-input" accept="image/*" style="display:none;">
+                <button type="button" id="btn-select-file" class="btn btn-secondary btn-sm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  <span>เลือกรูปจากเครื่อง</span>
+                </button>
+                <button type="button" id="btn-remove-photo" class="btn btn-danger-ghost btn-sm" style="display:none;">
+                  <span>ลบรูป</span>
+                </button>
+                <div class="el-photo-tip">รองรับไฟล์ JPG, PNG, WEBP ขนาดไม่เกิน 15MB &middot; อัปโหลดตรงเข้า Google Drive อัตโนมัติ</div>
+              </div>
             </div>
           </div>
         </div>
@@ -579,13 +592,13 @@
             <table class="el-circuit-table">
               <thead>
                 <tr>
-                  <th style="width:36px; text-align:center;">#</th>
-                  <th style="width:130px;">รหัส / Tag Code *</th>
+                  <th style="width:42px; text-align:center;">#</th>
+                  <th style="width:18%; min-width:140px;">รหัส / Tag Code *</th>
                   <th>ชื่อตู้ / โหลดปลายทาง *</th>
-                  <th style="width:115px;">ประเภท</th>
-                  <th style="width:95px;">พิกัด (A)</th>
-                  <th style="width:150px;">สถานที่ติดตั้ง</th>
-                  <th style="width:40px; text-align:center;">ลบ</th>
+                  <th style="width:145px;">ประเภท</th>
+                  <th style="width:115px;">พิกัด (A)</th>
+                  <th style="width:20%; min-width:160px;">สถานที่ติดตั้ง</th>
+                  <th style="width:46px; text-align:center;">ลบ</th>
                 </tr>
               </thead>
               <tbody id="circuit-table-body">

@@ -8,6 +8,7 @@ import {listExpenses, importExpenseRecords, deleteExpenseItem, clearAllExpenses,
 import {getPRReferences, listPRItems, getPRItem, savePRItem, bulkSavePRItems, archivePRItems, bulkUpdateArea, deletePRItems, pruneOldPRItems} from './pr-service.js';
 import {listAirCoolingUnits, getAirCoolingUnit, saveAirCoolingUnit, deleteAirCoolingUnit, reportAirCoolingIssue, resolveAirCoolingIssue, syncFromGoogleSheets, getAirCoolingReferences} from './pm-aircooling-service.js';
 import {listElectricalNodes, getElectricalNode, saveElectricalNode, bulkUpdateWiring, deleteElectricalNode, getElectricalReferences} from './electrical-service.js';
+import {listDepartmentPayPlan, saveDepartmentPayItem, moveDepartmentPayItem, deleteDepartmentPayItem, saveDepartmentPayBudget} from './department-pay-service.js';
 import {AppError,fail,json} from './errors.js';
 
 export default {
@@ -36,6 +37,15 @@ export default {
    if(url.pathname.startsWith('/api/v1/announcements/media/')){
     const id=url.pathname.replace('/api/v1/announcements/media/','');
     return await getAnnouncementMedia(env,id,request);
+   }
+
+   // Public read API for Department Pay (No login required to view 12-month plan)
+   if(url.pathname==='/api/v1/department-pay/public'){
+    if(request.method!=='GET')fail('METHOD','ใช้ GET สำหรับดึงข้อมูลค่าใช้จ่ายแผนก',405);
+    const startMonth=url.searchParams.get('startMonth')||'';
+    const months=Number(url.searchParams.get('months'))||12;
+    const data=await listDepartmentPayPlan(env,{startMonth,months});
+    return json({ok:true,data});
    }
 
    // 1. Static Web Assets & Root Redirect (No Auth Required to load HTML/JS/CSS)
@@ -253,6 +263,23 @@ export default {
     }
     else if(method==='getReferences') result=await getElectricalReferences(env);
     else fail('NOT_FOUND','ไม่พบคำสั่งแผนผังไฟฟ้านี้',404);
+    return json({ok:true,data:result});
+   }
+
+   // Department Pay (12-Month Expense Planning) RPC (Authenticated writes)
+   if(url.pathname==='/api/v1/department-pay/rpc'){
+    if(request.method!=='POST')fail('METHOD','ใช้ POST สำหรับคำสั่งค่าใช้จ่ายแผนก',405);
+    let body;
+    try{ body=await request.json(); }catch{ fail('VALIDATION','รูปแบบคำขอไม่ถูกต้อง'); }
+    const method = body?.method || '';
+    const args = body?.args || [];
+    let result;
+    if(method==='listPlan') result=await listDepartmentPayPlan(env, args[0]);
+    else if(method==='saveItem') result=await saveDepartmentPayItem(env, actor, args[0]);
+    else if(method==='moveItem') result=await moveDepartmentPayItem(env, actor, args[0]);
+    else if(method==='deleteItem') result=await deleteDepartmentPayItem(env, actor, args[0]);
+    else if(method==='saveBudget') result=await saveDepartmentPayBudget(env, actor, args[0]);
+    else fail('NOT_FOUND','ไม่พบคำสั่งค่าใช้จ่ายแผนกนี้',404);
     return json({ok:true,data:result});
    }
 

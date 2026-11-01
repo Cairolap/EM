@@ -977,7 +977,7 @@
     if (!tbody) return;
 
     if (state.nodes.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px;">ไม่มีข้อมูลตู้</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">ไม่มีข้อมูลตู้</td></tr>';
       return;
     }
 
@@ -1033,7 +1033,7 @@
     if ($('wiring-btn-next')) $('wiring-btn-next').disabled = state.wiringPage >= totalPages;
 
     if (pagedItems.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--el-ink-muted);">ไม่พบรายการที่ตรงกับเงื่อนไข</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--el-ink-muted);">ไม่พบรายการที่ตรงกับเงื่อนไข</td></tr>';
       return;
     }
 
@@ -1063,6 +1063,11 @@
             </button>
           </td>
           <td class="wiring-status-cell">${statusPill}</td>
+          <td style="text-align: center;">
+            <button type="button" class="btn btn-danger-ghost btn-sm btn-wiring-delete" data-id="${node.id}" title="ลบตู้/อุปกรณ์นี้">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </td>
         </tr>
       `;
     });
@@ -1080,6 +1085,10 @@
           openWiringDropdown(btn);
         }
       });
+    });
+
+    tbody.querySelectorAll('.btn-wiring-delete').forEach(btn => {
+      btn.addEventListener('click', () => confirmDeleteNode(btn.dataset.id));
     });
 
     if (saveBtn) {
@@ -1964,6 +1973,10 @@
     const fallbackParentId = node.parentId || null;
     try {
       await rpc('deleteNode', id);
+      state.pendingWiring.delete(id);
+      for (const [k, v] of state.pendingWiring.entries()) {
+        if (v === id) state.pendingWiring.delete(k);
+      }
       state.selectedNodeId = fallbackParentId;
       await loadData();
     } catch (err) {
@@ -1976,6 +1989,165 @@
     if (!url) return;
     $('lightbox-img').src = url;
     $('modal-lightbox').showModal();
+  }
+
+  // Export Electrical Distribution Data to Excel (.xlsx)
+  function exportElectricalExcel() {
+    if (!state.nodes || state.nodes.length === 0) {
+      alert('ยังไม่มีข้อมูลตู้หรืออุปกรณ์ไฟฟ้าสำหรับส่งออก');
+      return;
+    }
+
+    const byId = new Map();
+    const childrenMap = new Map();
+    state.nodes.forEach(n => {
+      byId.set(n.id, n);
+      childrenMap.set(n.id, []);
+    });
+    state.nodes.forEach(n => {
+      if (n.parentId && childrenMap.has(n.parentId)) {
+        childrenMap.get(n.parentId).push(n);
+      }
+    });
+
+    function getHierarchyMeta(node) {
+      const chain = [];
+      const visited = new Set();
+      let curr = node;
+      while (curr && !visited.has(curr.id)) {
+        visited.add(curr.id);
+        chain.unshift(curr);
+        curr = curr.parentId ? byId.get(curr.parentId) : null;
+      }
+      const rootNode = chain[0] || node;
+      const rootMdb = rootNode.nodeType === 'MDB' ? rootNode.nodeCode : (node.parentId ? rootNode.nodeCode : 'สายอิสระ (ยังไม่ต่อ)');
+      const feederPath = chain.map(c => c.nodeCode).join(' > ');
+      return {
+        level: chain.length,
+        rootMdb,
+        feederPath
+      };
+    }
+
+    const allRows = state.nodes.map((n, idx) => {
+      const parent = n.parentId ? byId.get(n.parentId) : null;
+      const meta = getHierarchyMeta(n);
+      return {
+        'ลำดับ': idx + 1,
+        'สายประธานหลัก (MDB)': meta.rootMdb,
+        'ระดับชั้น': meta.level,
+        'รหัสตู้ / อุปกรณ์ (Tag Code)': n.nodeCode || '',
+        'ชื่อตู้ / อุปกรณ์': n.name || '',
+        'ประเภท (Type)': n.nodeType || '',
+        'พิกัดกระแส (A)': n.currentRating || 0,
+        'ระดับแรงดัน (Voltage)': n.voltage || '',
+        'สถานที่ติดตั้ง (Location)': n.location || '',
+        'จ่ายไฟมาจาก (Parent Code)': parent ? parent.nodeCode : (n.nodeType === 'MDB' ? 'ตู้ประธานหลัก (MDB)' : 'ยังไม่เชื่อมโยง'),
+        'ชื่อตู้ต้นทาง (Parent Name)': parent ? parent.name : '',
+        'เส้นทางสายไฟ (Feeder Path)': meta.feederPath,
+        'จำนวนวงจรย่อย': n.childCount || (childrenMap.get(n.id)?.length || 0),
+        'หมายเหตุ': n.remark || '',
+        'ลิงก์รูปถ่าย (Google Drive)': n.driveWebUrl || ''
+      };
+    });
+
+    const nowStr = new Date().toISOString().slice(0, 10);
+
+    if (typeof XLSX === 'undefined') {
+      // Fallback to UTF-8 BOM CSV if SheetJS is not loaded
+      const headers = Object.keys(allRows[0]);
+      const csvLines = [
+        headers.join(','),
+        ...allRows.map(row =>
+          headers.map(h => `"${String(row[h] ?? '').replace(/"/g, '""')}"`).join(',')
+        )
+      ];
+      const blob = new Blob(['\uFEFF' + csvLines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `Electrical_Distribution_${nowStr}.csv`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      return;
+    }
+
+    const colWidths = [
+      { wch: 7 },  // ลำดับ
+      { wch: 18 }, // สายประธานหลัก
+      { wch: 10 }, // ระดับชั้น
+      { wch: 22 }, // รหัสตู้
+      { wch: 34 }, // ชื่อตู้
+      { wch: 12 }, // ประเภท
+      { wch: 14 }, // พิกัดกระแส
+      { wch: 16 }, // ระดับแรงดัน
+      { wch: 24 }, // สถานที่ติดตั้ง
+      { wch: 22 }, // จ่ายไฟมาจาก
+      { wch: 28 }, // ชื่อตู้ต้นทาง
+      { wch: 42 }, // เส้นทางสายไฟ
+      { wch: 14 }, // จำนวนวงจรย่อย
+      { wch: 28 }, // หมายเหตุ
+      { wch: 36 }  // ลิงก์รูปถ่าย
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    const wsAll = XLSX.utils.json_to_sheet(allRows);
+    wsAll['!cols'] = colWidths;
+    XLSX.utils.book_append_sheet(workbook, wsAll, 'ทะเบียนตู้ทั้งหมด');
+
+    // Create dedicated hierarchical sheet per Root MDB
+    const rootMdbs = state.nodes
+      .filter(n => n.nodeType === 'MDB' && !n.parentId)
+      .sort((a, b) => (a.nodeCode || '').localeCompare(b.nodeCode || '', undefined, { numeric: true, sensitivity: 'base' }));
+
+    const usedSheetNames = new Set(['ทะเบียนตู้ทั้งหมด']);
+    rootMdbs.forEach(mdb => {
+      const treeNodes = [];
+      const visited = new Set();
+      function traverse(node) {
+        if (!node || visited.has(node.id)) return;
+        visited.add(node.id);
+        treeNodes.push(node);
+        const kids = (childrenMap.get(node.id) || []).slice().sort((a, b) =>
+          (a.nodeCode || '').localeCompare(b.nodeCode || '', undefined, { numeric: true, sensitivity: 'base' })
+        );
+        kids.forEach(traverse);
+      }
+      traverse(mdb);
+
+      const mdbRows = treeNodes.map((n, idx) => {
+        const parent = n.parentId ? byId.get(n.parentId) : null;
+        const meta = getHierarchyMeta(n);
+        return {
+          'ลำดับ': idx + 1,
+          'สายประธานหลัก (MDB)': mdb.nodeCode,
+          'ระดับชั้น': meta.level,
+          'รหัสตู้ / อุปกรณ์ (Tag Code)': n.nodeCode || '',
+          'ชื่อตู้ / อุปกรณ์': n.name || '',
+          'ประเภท (Type)': n.nodeType || '',
+          'พิกัดกระแส (A)': n.currentRating || 0,
+          'ระดับแรงดัน (Voltage)': n.voltage || '',
+          'สถานที่ติดตั้ง (Location)': n.location || '',
+          'จ่ายไฟมาจาก (Parent Code)': parent ? parent.nodeCode : 'ตู้ประธานหลัก (MDB)',
+          'ชื่อตู้ต้นทาง (Parent Name)': parent ? parent.name : '',
+          'เส้นทางสายไฟ (Feeder Path)': meta.feederPath,
+          'จำนวนวงจรย่อย': n.childCount || (childrenMap.get(n.id)?.length || 0),
+          'หมายเหตุ': n.remark || '',
+          'ลิงก์รูปถ่าย (Google Drive)': n.driveWebUrl || ''
+        };
+      });
+
+      let sheetName = (mdb.nodeCode || 'MDB').replace(/[\\/?*[\]:]/g, ' ').trim().slice(0, 31) || 'MDB';
+      if (usedSheetNames.has(sheetName)) {
+        sheetName = `${sheetName.slice(0, 27)}_${usedSheetNames.size}`;
+      }
+      usedSheetNames.add(sheetName);
+
+      const wsMdb = XLSX.utils.json_to_sheet(mdbRows);
+      wsMdb['!cols'] = colWidths;
+      XLSX.utils.book_append_sheet(workbook, wsMdb, sheetName);
+    });
+
+    XLSX.writeFile(workbook, `Electrical_Distribution_${nowStr}.xlsx`);
   }
 
   // Helpers
@@ -1996,9 +2168,10 @@
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
-    // 2. Add node button
+    // 2. Add node, refresh & export Excel buttons
     $('btn-add-node')?.addEventListener('click', openCreateModal);
     $('btn-refresh')?.addEventListener('click', loadData);
+    $('btn-export-excel')?.addEventListener('click', exportElectricalExcel);
 
     // 3. KPI card / chip filter clicks
     document.querySelectorAll('.el-kpi-card, .el-kpi-chip').forEach(card => {

@@ -152,6 +152,24 @@ html, body {
   gap: 6px;
 }
 
+.el-btn-excel-icon {
+  padding: 5px 8px;
+  color: #15803d;
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  transition: all var(--dur-fast) var(--ease);
+}
+.el-btn-excel-icon:hover:not(:disabled) {
+  background: #dcfce7;
+  border-color: #4ade80;
+  color: #166534;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.14);
+}
+.el-btn-excel-icon:focus-visible {
+  outline: 3px solid rgba(22, 163, 74, 0.35);
+  outline-offset: 2px;
+}
+
 /* Compact KPI Strip */
 .el-kpi-strip {
   display: flex;
@@ -1098,6 +1116,60 @@ html, body {
   .el-downstream-amp {
     font-size: 13.5px;
   }
+
+  /* Modal at 100% Large Screen Scale */
+  .el-modal {
+    width: min(1640px, 88vw);
+  }
+  .el-modal-header {
+    padding: 18px 28px;
+  }
+  .el-modal-title {
+    font-size: 18px;
+  }
+  .el-modal-form {
+    padding: 24px 28px;
+    gap: 16px;
+    max-height: 88vh;
+  }
+  .el-form-row {
+    gap: 18px;
+  }
+  .el-label {
+    font-size: 13.5px;
+  }
+  .el-select, .el-input, .el-textarea {
+    padding: 9px 14px;
+    font-size: 14px;
+  }
+  .el-circuit-builder-section {
+    padding: 18px 20px;
+    gap: 14px;
+  }
+  .el-circuit-builder-title {
+    font-size: 15.5px;
+  }
+  .el-circuit-builder-desc {
+    font-size: 13px;
+  }
+  .el-circuit-table-wrap {
+    max-height: 420px;
+  }
+  .el-circuit-table {
+    font-size: 13.5px;
+  }
+  .el-circuit-table thead th {
+    padding: 10px 12px;
+  }
+  .el-circuit-table tbody td {
+    padding: 7px 10px;
+  }
+  .el-circuit-table .el-input,
+  .el-circuit-table .el-select {
+    padding: 6px 10px;
+    font-size: 13.5px;
+    height: 36px;
+  }
 }
 
 @media (max-width: 1200px) {
@@ -2027,7 +2099,7 @@ html, body {
   background: transparent;
   padding: 0;
   max-width: 95vw;
-  width: 960px;
+  width: min(1360px, 90vw);
 }
 .el-modal::backdrop {
   background: rgba(15, 23, 42, 0.6);
@@ -2044,7 +2116,7 @@ html, body {
 }
 
 .el-modal-header {
-  padding: 16px 20px;
+  padding: 16px 24px;
   background: #0d1e38;
   color: #ffffff;
   display: flex;
@@ -2053,7 +2125,7 @@ html, body {
 }
 .el-modal-title {
   margin: 0;
-  font-size: 16px;
+  font-size: 16.5px;
   font-weight: 600;
 }
 .el-modal-header .btn-clear {
@@ -2061,11 +2133,11 @@ html, body {
 }
 
 .el-modal-form {
-  padding: 20px;
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-height: 80vh;
+  max-height: 86vh;
   overflow-y: auto;
 }
 
@@ -2240,7 +2312,7 @@ html, body {
   border-radius: 6px;
   background: #ffffff;
   overflow-x: auto;
-  max-height: 280px;
+  max-height: 340px;
   overflow-y: auto;
 }
 .el-circuit-table {
@@ -2363,5 +2435,20 @@ html, body {
   }
   .el-diagram-viewport {
     height: 560px;
+  }
+  /* Prevent mobile browsers (iOS Safari / Chrome Mobile) from auto-zooming on input focus */
+  input,
+  select,
+  textarea,
+  .el-input,
+  .el-select,
+  .el-textarea,
+  .el-select-sm,
+  .el-search-box input,
+  .el-explorer-search-box input,
+  .el-custom-select-search,
+  .el-circuit-table .el-input,
+  .el-circuit-table .el-select {
+    font-size: 16px !important;
   }
 }

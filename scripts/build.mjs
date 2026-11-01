@@ -47,7 +47,8 @@ for (const [sourceFile, scope] of [
   ['', 'pm-expenses'],
   ['', 'pr-tracker'],
   ['', 'pm-aircooling'],
-  ['', 'electrical-diagram']
+  ['', 'electrical-diagram'],
+  ['', 'department-pay']
 ]) {
   let output = '';
   if (scope === 'users') {
@@ -102,6 +103,14 @@ for (const [sourceFile, scope] of [
     const html = await read(new URL('src/electrical-diagram/index.html', root));
     const css = await read(new URL('src/electrical-diagram/styles.css', root));
     const appJs = await read(new URL('src/electrical-diagram/app.js', root));
+    const js = transportJs + '\n' + appJs;
+    output = html
+      .replace('<!-- APP_STYLE -->', () => '<style>\n' + css + '\n</style>')
+      .replace('<!-- APP_SCRIPT -->', () => '<script>\n' + js + '\n</script>');
+  } else if (scope === 'department-pay') {
+    const html = await read(new URL('src/department-pay/index.html', root));
+    const css = await read(new URL('src/department-pay/styles.css', root));
+    const appJs = await read(new URL('src/department-pay/app.js', root));
     const js = transportJs + '\n' + appJs;
     output = html
       .replace('<!-- APP_STYLE -->', () => '<style>\n' + css + '\n</style>')
@@ -200,15 +209,16 @@ for (const [sourceFile, scope] of [
         </div>
       </div>
 
-      <!-- 6. ค่าใช้จ่าย PM with Dropdown -->
+      <!-- 6. ค่าใช้จ่าย PM & ค่าใช้จ่ายแผนก with Dropdown -->
       <div class="em-dropdown em-dropdown-pm-expenses">
-        <a href="/pm-expenses/" class="em-nav-link em-dropdown-trigger${scope === 'pm-expenses' ? ' active' : ''}"${scope === 'pm-expenses' ? ' aria-current="page"' : ''}>
-          <span>ค่าใช้จ่าย PM</span>
+        <a href="/pm-expenses/" class="em-nav-link em-dropdown-trigger${scope === 'pm-expenses' || scope === 'department-pay' ? ' active' : ''}"${scope === 'pm-expenses' || scope === 'department-pay' ? ' aria-current="page"' : ''}>
+          <span>ค่าใช้จ่าย</span>
           <svg class="em-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="em-dropdown-menu">
           <a class="em-dropdown-item" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
           <a class="em-dropdown-item" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+          <a class="em-dropdown-item${scope === 'department-pay' ? ' active' : ''}" href="/department-pay/"><span class="em-item-icon">💳</span> ค่าใช้จ่ายแผนก (Dept Pay)</a>
         </div>
       </div>
 
@@ -311,18 +321,19 @@ for (const [sourceFile, scope] of [
           </div>
         </div>
 
-        <!-- 6. ค่าใช้จ่าย PM Accordion -->
+        <!-- 6. ค่าใช้จ่าย PM & แผนก Accordion -->
         <div class="em-drawer-group">
-          <button type="button" class="em-drawer-group-btn" aria-expanded="${scope === 'pm-expenses' ? 'true' : 'false'}">
+          <button type="button" class="em-drawer-group-btn" aria-expanded="${scope === 'pm-expenses' || scope === 'department-pay' ? 'true' : 'false'}">
             <span class="em-drawer-group-title">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-              ค่าใช้จ่าย PM
+              ค่าใช้จ่าย PM &amp; แผนก
             </span>
             <svg class="em-drawer-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
-          <div class="em-drawer-sublist"${scope === 'pm-expenses' ? '' : ' style="display:none;"'}>
+          <div class="em-drawer-sublist"${scope === 'pm-expenses' || scope === 'department-pay' ? '' : ' style="display:none;"'}>
             <a class="em-drawer-subitem" href="/pm-expenses/?tab=table"><span class="em-item-icon">📑</span> รายการค่าใช้จ่าย PM</a>
             <a class="em-drawer-subitem" href="/pm-expenses/?tab=dashboard"><span class="em-item-icon">📈</span> Dashboard งบประมาณ</a>
+            <a class="em-drawer-subitem${scope === 'department-pay' ? ' active' : ''}" href="/department-pay/"><span class="em-item-icon">💳</span> ค่าใช้จ่ายแผนก (Department Pay)</a>
           </div>
         </div>
 

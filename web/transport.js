@@ -8,6 +8,8 @@
   : location.pathname.startsWith('/pm-aircooling') ? 'pm-aircooling'
   : location.pathname.startsWith('/pm') ? 'pm'
   : location.pathname.startsWith('/pr-tracker') ? 'pr-tracker'
+  : location.pathname.startsWith('/electrical-diagram') ? 'electrical'
+  : location.pathname.startsWith('/department-pay') ? 'department-pay'
   : 'machines';
  const inFlight = new Map();
 
@@ -332,6 +334,10 @@
     if (navUsers) navUsers.style.display = canManageUsers ? 'inline-flex' : 'none';
     if (drawerNavUsers) drawerNavUsers.style.display = canManageUsers ? 'flex' : 'none';
 
+    try {
+      window.dispatchEvent(new CustomEvent('em-auth-changed', { detail: currentUser }));
+    } catch (_) {}
+
     if (!currentUser) {
       if (badge) {
         badge.innerHTML = '<button id="em-open-login" style="background:linear-gradient(135deg, #0284c7, #0369a1);color:#fff;border:1px solid rgba(56,189,248,0.4);border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(2,132,199,0.3)">เข้าสู่ระบบ</button>';
@@ -521,6 +527,7 @@
   };
 
   window.isAdmin = () => Boolean(currentUser && (currentUser.role === 'admin' || currentUser.permissions?.bom === 'admin'));
+  window.promptLogin = promptLogin;
   window.callRPC = async (method, ...args) => {
     return window.EM_RPC(method, ...args);
   };
