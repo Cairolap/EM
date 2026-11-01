@@ -150,18 +150,36 @@
       if (inputSearch) inputSearch.value = state.table.search;
       const btnClearSearch = document.getElementById('btn-clear-table-search');
       if (btnClearSearch) btnClearSearch.style.display = 'block';
+    } else {
+      state.table.search = '';
+      const inputSearch = document.getElementById('input-expense-search');
+      if (inputSearch) inputSearch.value = '';
+      const btnClearSearch = document.getElementById('btn-clear-table-search');
+      if (btnClearSearch) btnClearSearch.style.display = 'none';
     }
 
     if (lineParam) {
       state.table.lineId = lineParam.trim();
       const filterLine = document.getElementById('filter-line-select');
       if (filterLine) filterLine.value = state.table.lineId;
+      const filterPanel = document.getElementById('collapsible-filter-panel');
+      if (filterPanel) filterPanel.style.display = 'block';
+    } else {
+      state.table.lineId = '';
+      const filterLine = document.getElementById('filter-line-select');
+      if (filterLine) filterLine.value = '';
     }
 
     if (deptParam) {
       state.table.deptId = deptParam.trim();
       const filterDept = document.getElementById('filter-dept-select');
       if (filterDept) filterDept.value = state.table.deptId;
+      const filterPanel = document.getElementById('collapsible-filter-panel');
+      if (filterPanel) filterPanel.style.display = 'block';
+    } else {
+      state.table.deptId = '';
+      const filterDept = document.getElementById('filter-dept-select');
+      if (filterDept) filterDept.value = '';
     }
 
     // Determine target tab:
@@ -242,11 +260,26 @@
     if (deptSelect) {
       deptSelect.innerHTML = '<option value="">ทั้งหมด</option>' + 
         state.departments.map(d => `<option value="${escapeHtml(d.deptId)}">${escapeHtml(d.deptName || d.deptId)}</option>`).join('');
+      if (state.table.deptId) deptSelect.value = state.table.deptId;
     }
 
     if (lineSelect) {
       lineSelect.innerHTML = '<option value="">ทั้งหมด</option>' + 
         state.lines.map(l => `<option value="${escapeHtml(l.lineId)}">${escapeHtml(l.lineName || l.lineId)}</option>`).join('');
+      if (state.table.lineId) {
+        const matchedByName = !state.lines.some(l => l.lineId === state.table.lineId)
+          ? state.lines.find(l => (l.lineName || '').toLowerCase() === state.table.lineId.toLowerCase())
+          : null;
+        if (matchedByName) {
+          state.table.lineId = matchedByName.lineId;
+        } else if (!state.lines.some(l => l.lineId === state.table.lineId)) {
+          const opt = document.createElement('option');
+          opt.value = state.table.lineId;
+          opt.textContent = state.table.lineId;
+          lineSelect.appendChild(opt);
+        }
+        lineSelect.value = state.table.lineId;
+      }
     }
 
     // 2. Add/Edit form select
@@ -384,6 +417,12 @@
       state.table.startDate = document.getElementById('filter-start-date')?.value || '';
       state.table.endDate = document.getElementById('filter-end-date')?.value || '';
       state.table.page = 1;
+      const u = new URL(window.location.href);
+      if (state.table.deptId) u.searchParams.set('deptId', state.table.deptId);
+      else u.searchParams.delete('deptId');
+      if (state.table.lineId) u.searchParams.set('lineId', state.table.lineId);
+      else u.searchParams.delete('lineId');
+      history.pushState(null, '', u.toString());
       refreshTable();
     });
 
@@ -398,6 +437,10 @@
       state.table.startDate = '';
       state.table.endDate = '';
       state.table.page = 1;
+      const u = new URL(window.location.href);
+      u.searchParams.delete('deptId');
+      u.searchParams.delete('lineId');
+      history.pushState(null, '', u.toString());
       refreshTable();
     });
 
@@ -869,28 +912,65 @@
   }
 
   function drillDownToLine(lineId, lineName) {
-    const term = (lineName || lineId || '').trim();
-    if (!term) return;
+    const displayLineName = (lineName || lineId || '').trim();
+    let targetLineId = (lineId || '').trim();
+    if (!targetLineId && displayLineName) {
+      const matched = (state.lines || []).find(
+        l => (l.lineName || '').toLowerCase() === displayLineName.toLowerCase() || (l.lineId || '').toLowerCase() === displayLineName.toLowerCase()
+      );
+      targetLineId = matched ? matched.lineId : displayLineName;
+    }
+    if (!targetLineId) return;
 
     applyViewTab('table', false);
 
-    state.table.search = term;
+    state.table.search = '';
+    state.table.deptId = '';
+    state.table.lineId = targetLineId;
+    state.table.startDate = '';
+    state.table.endDate = '';
     state.table.page = 1;
 
     const inputSearch = document.getElementById('input-expense-search');
-    if (inputSearch) inputSearch.value = term;
+    if (inputSearch) inputSearch.value = '';
 
     const btnClearSearch = document.getElementById('btn-clear-table-search');
-    if (btnClearSearch) btnClearSearch.style.display = 'block';
+    if (btnClearSearch) btnClearSearch.style.display = 'none';
+
+    const filterPanel = document.getElementById('collapsible-filter-panel');
+    if (filterPanel) filterPanel.style.display = 'block';
+
+    const filterDept = document.getElementById('filter-dept-select');
+    if (filterDept) filterDept.value = '';
+
+    const filterLine = document.getElementById('filter-line-select');
+    if (filterLine) {
+      if (!Array.from(filterLine.options).some(opt => opt.value === targetLineId)) {
+        const opt = document.createElement('option');
+        opt.value = targetLineId;
+        opt.textContent = displayLineName || targetLineId;
+        filterLine.appendChild(opt);
+      }
+      filterLine.value = targetLineId;
+    }
+
+    const filterStart = document.getElementById('filter-start-date');
+    if (filterStart) filterStart.value = '';
+
+    const filterEnd = document.getElementById('filter-end-date');
+    if (filterEnd) filterEnd.value = '';
 
     const u = new URL(window.location.href);
     u.searchParams.set('tab', 'table');
-    u.searchParams.set('search', term);
+    u.searchParams.set('lineId', targetLineId);
+    u.searchParams.delete('search');
+    u.searchParams.delete('orderNo');
+    u.searchParams.delete('deptId');
     history.pushState(null, '', u.toString());
 
     refreshTable();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showToast(`แสดงรายการค่าใช้จ่ายของไลน์: ${term}`);
+    showToast(`แสดงรายการค่าใช้จ่ายของไลน์: ${displayLineName || targetLineId}`);
   }
 
   function renderBreakdownTable() {

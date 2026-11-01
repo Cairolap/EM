@@ -158,4 +158,83 @@ test('Electrical Distribution Service: CRUD lifecycle, 2-step panel creation, wi
 
   const afterDeleteList = await listElectricalNodes(env);
   assert.equal(afterDeleteList.length, 3);
+
+  // 9. Single-Page Panel + Outgoing Circuits (Master-Detail creation in 1 step)
+  const mdb2 = await saveElectricalNode(env, adminActor, {
+    nodeCode: 'MDB-02',
+    name: 'Main Distribution Board อาคาร 2',
+    nodeType: 'MDB',
+    currentRating: 3200,
+    voltage: '400V 3P4W',
+    location: 'ห้องไฟฟ้า อาคาร 2',
+    children: [
+      { nodeCode: 'Q1', name: 'DB-B2-01 อาคาร 2 ชั้น 1', nodeType: 'DB', currentRating: 400 },
+      { nodeCode: 'Q2', name: 'DB-B2-02 อาคาร 2 ชั้น 2', nodeType: 'DB', currentRating: 250 },
+      { nodeCode: 'Q3', name: 'SPARE MDB2', nodeType: 'DV', currentRating: 160 }
+    ]
+  });
+
+  assert.equal(mdb2.nodeCode, 'MDB-02');
+  assert.equal(mdb2.children.length, 3);
+  assert.equal(mdb2.children[0].nodeCode, 'Q1');
+  assert.equal(mdb2.children[0].currentRating, 400);
+  assert.equal(mdb2.children[1].nodeCode, 'Q2');
+  assert.equal(mdb2.children[2].nodeCode, 'Q3');
+
+  // Verify child nodes are in electrical_nodes and have parentId set to mdb2.id
+  const q1Detail = await getElectricalNode(env, mdb2.children[0].id);
+  assert.equal(q1Detail.parentId, mdb2.id);
+  assert.equal(q1Detail.parentCode, 'MDB-02');
+
+  // Update MDB-02: modify Q1, remove Q3, add Q4
+  const updatedMdb2 = await saveElectricalNode(env, adminActor, {
+    id: mdb2.id,
+    nodeCode: mdb2.nodeCode,
+    name: mdb2.name,
+    nodeType: mdb2.nodeType,
+    currentRating: mdb2.currentRating,
+    children: [
+      { id: mdb2.children[0].id, nodeCode: 'Q1', name: 'DB-B2-01 อัปเดตโหลดใหม่', nodeType: 'DB', currentRating: 500 },
+      { id: mdb2.children[1].id, nodeCode: 'Q2', name: 'DB-B2-02 อาคาร 2 ชั้น 2', nodeType: 'DB', currentRating: 250 },
+      { nodeCode: 'Q4', name: 'เครื่องทำความเย็น Chiller 1', nodeType: 'MC', currentRating: 630 }
+    ],
+    removedChildIds: [mdb2.children[2].id]
+  });
+
+  assert.equal(updatedMdb2.children.length, 3);
+  assert.equal(updatedMdb2.children[0].name, 'DB-B2-01 อัปเดตโหลดใหม่');
+  assert.equal(updatedMdb2.children[0].currentRating, 500);
+  assert.ok(updatedMdb2.children.some(c => c.nodeCode === 'Q4'));
+
+  // Verify Q3 was detached (parent_id = NULL)
+  const q3Detached = await getElectricalNode(env, mdb2.children[2].id);
+  assert.equal(q3Detached.parentId, null);
+
+  // 10. Verify Google Drive /file/d/<id>/view URLs are normalized to direct lh3 image URLs
+  const mdbWithDriveView = await saveElectricalNode(env, adminActor, {
+    nodeCode: 'MDB3-TEST',
+    name: 'MDB3',
+    nodeType: 'MDB',
+    currentRating: 2000,
+    imageUrl: 'https://drive.google.com/file/d/1UeWcz6LBaf4Rv2FL5CI5jMD8Gprna4Ee/view',
+    driveFileId: '1UeWcz6LBaf4Rv2FL5CI5jMD8Gprna4Ee'
+  });
+  assert.equal(mdbWithDriveView.imageUrl, 'https://lh3.googleusercontent.com/d/1UeWcz6LBaf4Rv2FL5CI5jMD8Gprna4Ee');
+  assert.equal(mdbWithDriveView.driveFileId, '1UeWcz6LBaf4Rv2FL5CI5jMD8Gprna4Ee');
+
+  // 11. Verify child circuits allow duplicate Tag Codes across panels and within the same panel
+  const mdbDupTest = await saveElectricalNode(env, adminActor, {
+    id: mdbWithDriveView.id,
+    nodeCode: 'MDB3-TEST',
+    name: 'MDB3',
+    nodeType: 'MDB',
+    currentRating: 2000,
+    children: [
+      { nodeCode: 'Q1', name: 'MDB3 Q1 (same code as MDB-02 Q1)', nodeType: 'DB', currentRating: 250 },
+      { nodeCode: 'SPARE', name: 'Spare 1', nodeType: 'DV', currentRating: 100 },
+      { nodeCode: 'SPARE', name: 'Spare 2', nodeType: 'DV', currentRating: 100 }
+    ]
+  });
+  assert.equal(mdbDupTest.children.length, 3);
+  assert.equal(mdbDupTest.children.filter(c => c.nodeCode === 'SPARE').length, 2);
 });

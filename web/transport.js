@@ -1,6 +1,14 @@
 (() => {
  'use strict';
- const scope = location.pathname.startsWith('/parts') ? 'parts' : location.pathname.startsWith('/bom') ? 'bom' : location.pathname.startsWith('/announcements') ? 'announcements' : location.pathname.startsWith('/users') ? 'users' : 'machines';
+ const scope = location.pathname.startsWith('/parts') ? 'parts'
+  : location.pathname.startsWith('/bom') ? 'bom'
+  : location.pathname.startsWith('/announcements') ? 'announcements'
+  : location.pathname.startsWith('/users') ? 'users'
+  : location.pathname.startsWith('/pm-expenses') ? 'pm-expenses'
+  : location.pathname.startsWith('/pm-aircooling') ? 'pm-aircooling'
+  : location.pathname.startsWith('/pm') ? 'pm'
+  : location.pathname.startsWith('/pr-tracker') ? 'pr-tracker'
+  : 'machines';
  const inFlight = new Map();
 
  let loginPromise = null;
@@ -21,7 +29,7 @@
     padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
     font-family: inherit;
    }
-   .em-auth-title { font-size: 18px; font-weight: 700; color: #18313d; margin-bottom: 6px; }
+   .em-auth-title { font-size: 18px; font-weight: 700; color: #0d1e38; margin-bottom: 6px; }
    .em-auth-sub { font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.4; }
    .em-auth-field { margin-bottom: 14px; text-align: left; }
    .em-auth-label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; }
@@ -29,12 +37,12 @@
     width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;
     box-sizing: border-box; transition: border-color 0.2s;
    }
-   .em-auth-input:focus { outline: none; border-color: #cc681c; box-shadow: 0 0 0 3px rgba(204, 104, 28, 0.15); }
+   .em-auth-input:focus { outline: none; border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
    .em-auth-btn {
-    width: 100%; padding: 10px; background: #cc681c; color: #ffffff; border: none; border-radius: 6px;
+    width: 100%; padding: 10px; background: #0284c7; color: #ffffff; border: none; border-radius: 6px;
     font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 8px;
    }
-   .em-auth-btn:hover { background: #b25814; }
+   .em-auth-btn:hover { background: #0369a1; }
    .em-auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
    .em-auth-err { font-size: 13px; color: #dc2626; margin-top: 10px; min-height: 18px; text-align: center; }
   `;
@@ -253,10 +261,32 @@
       }
     }
 
-    // Auto-handle ?action=add in Parts
+    // Auto-handle ?view=bulk or ?action=add in Parts
     if (location.pathname.startsWith('/parts')) {
       const params = new URLSearchParams(location.search);
-      if (params.get('action') === 'add') {
+      if (params.get('view') === 'bulk' || params.get('action') === 'bulk' || location.hash === '#bulk') {
+        const checkBulk = () => {
+          if (typeof window.switchView === 'function') {
+            window.switchView('bulk');
+          } else {
+            const btn = document.getElementById('nav-bulk') || document.getElementById('bulk-add-btn');
+            if (btn) btn.click();
+            else setTimeout(checkBulk, 80);
+          }
+        };
+        setTimeout(checkBulk, 80);
+      } else if (params.get('view') === 'batch' || location.hash === '#batch') {
+        const checkBatch = () => {
+          if (typeof window.switchView === 'function') {
+            window.switchView('batch');
+          } else {
+            const btn = document.getElementById('nav-batch');
+            if (btn) btn.click();
+            else setTimeout(checkBatch, 80);
+          }
+        };
+        setTimeout(checkBatch, 80);
+      } else if (params.get('action') === 'add') {
         const checkAddBtn = () => {
           const btn = document.getElementById('add-part');
           if (btn && !btn.disabled) {
@@ -267,6 +297,27 @@
         };
         setTimeout(checkAddBtn, 300);
       }
+
+      // Smooth in-page switching when clicking parts dropdown items
+      document.querySelectorAll('a[href*="/parts"]').forEach(a => {
+        a.addEventListener('click', (e) => {
+          if (!location.pathname.startsWith('/parts') || typeof window.switchView !== 'function') return;
+          const href = a.getAttribute('href') || '';
+          if (href.includes('view=bulk') || href.includes('action=bulk') || href.includes('#bulk')) {
+            e.preventDefault();
+            history.pushState(null, '', '/parts/?view=bulk');
+            window.switchView('bulk');
+          } else if (href.includes('view=batch') || href.includes('#batch')) {
+            e.preventDefault();
+            history.pushState(null, '', '/parts/?view=batch');
+            window.switchView('batch');
+          } else if (href === '/parts/' || href === '/parts') {
+            e.preventDefault();
+            history.pushState(null, '', '/parts/');
+            window.switchView('catalog');
+          }
+        });
+      });
     }
   }
 
@@ -283,12 +334,12 @@
 
     if (!currentUser) {
       if (badge) {
-        badge.innerHTML = '<button id="em-open-login" style="background:#cc681c;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s">เข้าสู่ระบบ</button>';
+        badge.innerHTML = '<button id="em-open-login" style="background:linear-gradient(135deg, #0284c7, #0369a1);color:#fff;border:1px solid rgba(56,189,248,0.4);border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(2,132,199,0.3)">เข้าสู่ระบบ</button>';
         const btn = document.getElementById('em-open-login');
         if (btn) btn.onclick = () => promptLogin();
       }
       if (drawerUserCard) {
-        drawerUserCard.innerHTML = '<div style="font-size:13px;color:#94a3b8;margin-bottom:8px">ยังไม่ได้เข้าสู่ระบบ</div><button id="em-drawer-open-login" style="width:100%;background:#cc681c;color:#fff;border:none;border-radius:6px;padding:8px;font-size:13px;font-weight:600;cursor:pointer">เข้าสู่ระบบ</button>';
+        drawerUserCard.innerHTML = '<div style="font-size:13px;color:#94a3b8;margin-bottom:8px">ยังไม่ได้เข้าสู่ระบบ</div><button id="em-drawer-open-login" style="width:100%;background:linear-gradient(135deg, #0284c7, #0369a1);color:#fff;border:1px solid rgba(56,189,248,0.4);border-radius:6px;padding:8px;font-size:13px;font-weight:600;cursor:pointer">เข้าสู่ระบบ</button>';
         const dBtn = document.getElementById('em-drawer-open-login');
         if (dBtn) dBtn.onclick = () => {
           const overlay = document.getElementById('em-drawer-overlay');
@@ -307,12 +358,12 @@
 
     if (badge) {
       badge.innerHTML = `
-        <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:6px">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span style="color:#e2e8f0;display:inline-flex;align-items:center;gap:5px;font-size:11.5px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           <strong style="font-weight:600">${currentUser.displayName || currentUser.username}</strong>
-          <span style="font-size:11.5px;color:#94a3b8">(${roleTh})</span>
+          <span style="font-size:10.5px;color:#94a3b8">(${roleTh})</span>
         </span>
-        <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
+        <button id="em-btn-logout" style="background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:5px;padding:2px 7px;font-size:11px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='#cbd5e1'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='#475569'">ออกจากระบบ</button>
       `;
       const logoutBtn = document.getElementById('em-btn-logout');
       if (logoutBtn) {
@@ -328,7 +379,7 @@
     if (drawerUserCard) {
       drawerUserCard.innerHTML = `
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;border-radius:50%;background:#cc681c;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg, #1d4ed8, #0ea5e9);border:2px solid rgba(56,189,248,0.6);box-shadow:0 0 10px rgba(14,165,233,0.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">
             ${(currentUser.displayName || currentUser.username).charAt(0).toUpperCase()}
           </div>
           <div>
@@ -381,58 +432,92 @@
     });
   }
 
- window.EM_RPC = async (method, ...args) => {
-  const signature = JSON.stringify([method, args]);
-  const payload = args.findLast(a => a && typeof a === 'object' && !Array.isArray(a));
-  const requestId = payload?.requestId || payload?.operationId || inFlight.get(signature) || crypto.randomUUID();
-  inFlight.set(signature, requestId);
-
-  const doRequest = async () => {
-   const controller = new AbortController();
-   const timer = setTimeout(() => controller.abort(), 60000);
-   try {
-    const response = await fetch(`/api/v1/${scope}/rpc`, {
-     method: 'POST',
-     credentials: 'same-origin',
-     headers: { 'Content-Type': 'application/json', 'Idempotency-Key': requestId },
-     body: JSON.stringify({ method, args }),
-     signal: controller.signal
-    });
-
-    if (response.status === 401) {
-     // Wait for user to log in via modal dialog
-     await promptLogin();
-     // Retry the request after successful login
-     return await doRequest();
+  const safeUUID = () => {
+    if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
     }
-
-    if (response.redirected || !response.headers.get('Content-Type')?.includes('application/json')) {
-     throw Object.assign(new Error('กรุณาเข้าสู่ระบบใหม่ แล้วลองคำขอเดิมอีกครั้ง'), { code: 'AUTH' });
-    }
-
-    const result = await response.json();
-    if (!result.ok) {
-     if (result.error?.code === 'AUTH') {
-      await promptLogin();
-      return await doRequest();
-     }
-     throw Object.assign(new Error(result.error?.message || 'เชื่อมต่อไม่สำเร็จ'), result.error);
-    }
-
-    inFlight.delete(signature);
-    return result.data;
-   } catch (error) {
-    if (error.name === 'AbortError') {
-     throw Object.assign(new Error('ยังยืนยันผลไม่ได้ กรุณาตรวจข้อมูลล่าสุดหรือลองคำขอเดิมอีกครั้ง'), { code: 'TIMEOUT' });
-    }
-    if (!error.code) error.message = 'เชื่อมต่อไม่สำเร็จ ข้อมูลที่กรอกยังอยู่ กรุณาลองใหม่';
-    throw error;
-   } finally {
-    clearTimeout(timer);
-   }
+    return 'req-' + Date.now() + '-' + Math.random().toString(36).slice(2, 11) + '-' + Math.random().toString(36).slice(2, 9);
   };
 
+  const executeRPC = async (targetScope, method, ...args) => {
+    const activeScope = targetScope || scope;
+    const signature = JSON.stringify([activeScope, method, args]);
+    const payload = [...args].reverse().find(a => a && typeof a === 'object' && !Array.isArray(a));
+    const requestId = payload?.requestId || payload?.operationId || inFlight.get(signature) || safeUUID();
+    inFlight.set(signature, requestId);
+
+    const doRequest = async () => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 60000);
+      try {
+        const response = await fetch(`/api/v1/${activeScope}/rpc`, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', 'Idempotency-Key': requestId },
+          body: JSON.stringify({ method, args }),
+          signal: controller.signal
+        });
+
+        if (response.status === 401) {
+          // Wait for user to log in via modal dialog
+          await promptLogin();
+          // Retry the request after successful login
+          return await doRequest();
+        }
+
+        if (response.redirected) {
+          if (typeof window !== 'undefined' && window.location.protocol === 'http:') {
+            throw Object.assign(new Error('คำขอถูก Redirect เนื่องจากเปิดด้วย HTTP กรุณาเข้าใช้งานผ่าน https://'), { code: 'REDIRECT_HTTP' });
+          }
+          throw Object.assign(new Error('การเชื่อมต่อถูก Redirect (เช่น เซสชัน Cloudflare Access หมดอายุ) กรุณารีเฟรชหน้าเว็บ'), { code: 'REDIRECT' });
+        }
+
+        const contentType = response.headers.get('Content-Type') || '';
+        if (!contentType.includes('application/json')) {
+          if (response.status === 404) {
+            throw Object.assign(new Error(`ไม่พบเซิร์ฟเวอร์หรือ API (/api/v1/${activeScope}/rpc) HTTP 404 - หากทดสอบ Local กรุณาตรวจสอบว่าเปิด npm run dev หรือยัง`), { code: 'NOT_FOUND' });
+          }
+          if (response.status >= 500) {
+            throw Object.assign(new Error(`เซิร์ฟเวอร์ขัดข้อง (HTTP ${response.status}) กรุณาตรวจสอบสถานะ Cloudflare Worker หรือฐานข้อมูล D1`), { code: 'SERVER_ERROR' });
+          }
+          throw Object.assign(new Error(`เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง (HTTP ${response.status}) กรุณารีเฟรชหน้าเว็บและลองใหม่อีกครั้ง`), { code: 'INVALID_RESPONSE' });
+        }
+
+        const result = await response.json();
+        if (!result.ok) {
+          if (result.error?.code === 'AUTH') {
+            await promptLogin();
+            return await doRequest();
+          }
+          throw Object.assign(new Error(result.error?.message || 'เชื่อมต่อไม่สำเร็จ'), result.error);
+        }
+
+        inFlight.delete(signature);
+        return result.data;
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          throw Object.assign(new Error('ยังยืนยันผลไม่ได้ กรุณาตรวจข้อมูลล่าสุดหรือลองคำขอเดิมอีกครั้ง'), { code: 'TIMEOUT' });
+        }
+        if (!error.code) {
+          const detail = error.message ? (' (' + error.message + ')') : '';
+          error.message = 'เชื่อมต่อไม่สำเร็จ ข้อมูลที่กรอกยังอยู่ กรุณาลองใหม่' + detail;
+          error.code = 'NETWORK';
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    };
+
     return doRequest();
+  };
+
+  window.EM_RPC = async (method, ...args) => {
+    return executeRPC(scope, method, ...args);
+  };
+
+  window.EM_RPC_SCOPE = async (targetScope, method, ...args) => {
+    return executeRPC(targetScope, method, ...args);
   };
 
   window.isAdmin = () => Boolean(currentUser && (currentUser.role === 'admin' || currentUser.permissions?.bom === 'admin'));

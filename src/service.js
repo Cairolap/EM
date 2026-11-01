@@ -9,8 +9,8 @@ import {authorizeWrite,authorizeDelete} from './auth.js';
 import {readPicture,uploadPicture} from './drive.js';
 
 const machineReads=new Set(['bootstrap','getMachines','getMachine','getMachinePhoto','getMachineTypes']);
-const partReads=new Set(['bootstrap','getParts','getAllParts','getBrands','getPicture']);
-const bomReads=new Set(['references','searchParts','lineMachineStats','list','history']);
+const partReads=new Set(['bootstrap','getParts','getAllParts','getBrands','getPicture','getPart','getPartMachines']);
+const bomReads=new Set(['references','searchParts','lineMachineStats','list','history','searchPartUsage','whereUsed']);
 
 export const isRead=(scope,method)=>(scope==='machines'?machineReads:scope==='parts'?partReads:bomReads).has(method);
 const publicMachine=({requestId,photoFileId,...m})=>({...m,hasPhoto:!!photoFileId});
@@ -31,7 +31,8 @@ async function bomReferences(repo, actor){
 function mapBomParts(rawParts){
  return rawParts.map(p=>({
   ID:p.id,'Part number':p.partNumber,Description:p.description,Brand:p.brand,
-  Price:p.price,Picture:p.picture,Thumbnail:p.thumbnail,'Store code':p.storeCode,'อายุอุปกรณ์ (ปี)':p.lifespan,Notes:p.notes
+  Price:p.price,Picture:p.picture,Thumbnail:p.thumbnail,'Store code':p.storeCode,'อายุอุปกรณ์ (ปี)':p.lifespan,Notes:p.notes,
+  brandId:p.brandId,version:p.version
  }));
 }
 
@@ -60,7 +61,9 @@ export async function dispatch(env,actor,scope,method,args,key){
    return m.photoFileId?readPicture(env,scope,m.photoFileId):null;
   }
   if(scope==='parts'){
-   if(method==='getBrands')return (await repo.brands()).filter(b=>b.active);
+   if(method==='getBrands')return (await repo.brands()).filter(b=>b.active).sort((a,b)=>a.name.localeCompare(b.name,'th',{numeric:true,sensitivity:'base'}));
+   if(method==='getPart'){const p=await repo.part(String(args[0]));if(!p)fail('NOT_FOUND','ไม่พบ Part นี้',404);return publicPart(p);}
+    if(method==='getPartMachines')return repo.partWhereUsed(String(args[0]));
    if(method==='getPicture'){const p=await repo.part(String(args[0]));if(!p)fail('NOT_FOUND','ไม่พบ Part นี้',404);const source=args[1]==='full'?p.picture:p.thumbnail||p.picture;return source?readPicture(env,scope,source):null;}
    const rows=await repo.catalog(scope);
    if(method==='bootstrap')return {parts:rows.map(publicPart),brands:(await repo.brands()).filter(b=>b.active),webAppUrl:'/parts/',role:actor.role};
@@ -69,6 +72,8 @@ export async function dispatch(env,actor,scope,method,args,key){
   }
   if(scope==='bom'){
    if(method==='references')return bomReferences(repo, actor);
+    if(method==='searchPartUsage')return repo.searchPartWhereUsed(String(args[0]||''));
+    if(method==='whereUsed')return repo.partWhereUsed(String(args[0]));
    if(method==='searchParts'){
     const query=args[0]||{};
     const {bomParts}=await bomContext(repo);
@@ -123,6 +128,7 @@ export async function dispatch(env,actor,scope,method,args,key){
  }
  if(['createBrand','deleteBrand'].includes(method))return saveBrand(repo,req,method,args);
  if(['createPart','updatePart','updatePartImage'].includes(method))return savePart(env,repo,req,method,args);
+ if(method==='createPartsBatch')return savePartsBatch(env,repo,req,args[0]);
  fail('NOT_FOUND','ไม่พบคำสั่งนี้',404);
 }
 
@@ -195,6 +201,135 @@ async function savePart(env,repo,req,method,args){
  else if(imageOnly)fail('VALIDATION','กรุณาเลือกรูปภาพ');
  const p={...value,id,brand:brand?.name||'',picture,thumbnail,createdAt:before?.createdAt||req.now,updatedAt:req.now,version:before?before.version+1:1,requestId:req.key};
  return repo.commit(req,'parts',id,before,{...columns(partFields,p),price_minor:value.price===null?null:Math.round(value.price*100)},{id,version:p.version,picture,thumbnail});
+}
+
+async function savePartsBatch(env,repo,req,rawItems){
+ const items=Array.isArray(rawItems)?rawItems:(rawItems?.parts||[]);
+ if(!items.length)fail('VALIDATION','ไม่พบข้อมูลรายการอะไหล่');
+
+ const allExisting=await repo.catalog('parts');
+ const dbPartNumbers=new Set(allExisting.map(p=>PartCore.normalize(p.partNumber)));
+ const seenInBatch=new Set();
+ const brands=await repo.brands();
+ const brandMap=new Map(brands.map(b=>[b.id,b]));
+ const brandNameMap=new Map(brands.map(b=>[PartCore.normalize(b.name),b]));
+
+ const validRows=[];
+ let skippedCount=0;
+
+ for(const item of items){
+  const pn=String(item.partNumber||'').trim();
+  if(!pn){skippedCount++;continue;}
+  const norm=PartCore.normalize(pn);
+  if(dbPartNumbers.has(norm)||seenInBatch.has(norm)){skippedCount++;continue;}
+  seenInBatch.add(norm);
+
+  const val=PartCore.validate({
+   partNumber:pn,
+   description:item.description||'-',
+   storeCode:item.storeCode||'',
+   lifespan:item.lifespan,
+   price:item.price,
+   brandId:item.brandId
+  });
+
+  if(Object.keys(val.errors).length>0){skippedCount++;continue;}
+
+  let brand=null;
+  if(val.value.brandId)brand=brandMap.get(val.value.brandId);
+  else if(item.brand)brand=brandNameMap.get(PartCore.normalize(item.brand));
+
+  validRows.push({item,value:val.value,brand});
+ }
+
+ if(!validRows.length){
+  return {success:true,createdCount:0,skippedCount,createdParts:[]};
+ }
+
+ const count=validRows.length;
+ const counterRes=await env.DB.prepare('UPDATE id_counters SET value=value+? WHERE kind=? RETURNING value').bind(count,'parts').first();
+ if(!counterRes)fail('SCHEMA','ยังไม่ได้เตรียมฐานข้อมูล',503);
+ const endVal=Number(counterRes.value);
+ const startVal=endVal-count+1;
+
+ const createdParts=[];
+ const statements=[];
+
+ for(let i=0;i<count;i++){
+  const {item,value,brand}=validRows[i];
+  const id='PART-'+String(startVal+i).padStart(6,'0');
+
+  let picture='',thumbnail='';
+  if(item.image){
+   try{
+    const uploadedPic=await uploadPicture(env,'parts',req,'bulk_'+id+'_full',item.image,id);
+    picture=uploadedPic.url;
+    if(item.thumbnail){
+     const uploadedThumb=await uploadPicture(env,'parts',req,'bulk_'+id+'_thumb',item.thumbnail,id,100000);
+     thumbnail=uploadedThumb.url;
+    }
+   }catch(err){
+    console.error('Image upload failed for part '+id,err);
+   }
+  }
+
+  const p={
+   ...value,
+   id,
+   brand:brand?.name||item.brand||'',
+   brandId:brand?.id||null,
+   picture,
+   thumbnail,
+   notes:item.notes||'',
+   createdAt:req.now,
+   updatedAt:req.now,
+   version:1,
+   requestId:req.key
+  };
+
+  const after={
+   ...columns(partFields,p),
+   price_minor:value.price===null?null:Math.round(value.price*100)
+  };
+
+  createdParts.push({
+   ...p,
+   brandActive:!!brand?.active,
+   price:value.price,
+   hasThumbnail:!!thumbnail,
+   _after: after
+  });
+ }
+
+ const response={
+  success:true,
+  createdCount:createdParts.length,
+  skippedCount,
+  createdParts: createdParts.map(({_after,...cp})=>cp)
+ };
+
+ statements.push(
+  env.DB.prepare("INSERT INTO requests VALUES(?,?,?,?,'DONE',?,?)").bind(req.key,req.actor,req.operation,req.payloadHash,JSON.stringify(response),req.now)
+ );
+
+ for(const cp of createdParts){
+  const after=cp._after;
+  statements.push(
+   env.DB.prepare(`INSERT INTO parts (${Object.keys(after).join(',')}) VALUES(${Object.keys(after).map(()=>'?').join(',')})`).bind(...Object.values(after))
+  );
+ }
+
+ statements.push(
+  env.DB.prepare('INSERT INTO audit_events(request_key,actor,operation,entity_id,before_json,after_json,created_at) VALUES(?,?,?,?,?,?,?)').bind(req.key,req.actor,req.operation,createdParts.map(cp=>cp.id).join(','),null,JSON.stringify(createdParts.map(cp=>cp._after)),req.now)
+ );
+
+ statements.push(
+  env.DB.prepare("UPDATE image_operations SET status='ATTACHED' WHERE request_key=? AND status='UPLOADED'").bind(req.key)
+ );
+
+ await env.DB.batch(statements);
+
+ return response;
 }
 
 async function saveBrand(repo,req,method,args){

@@ -49,8 +49,8 @@ export async function listExpenses(env, query = {}) {
   }
 
   if (lineId) {
-    conditions.push('e.line_id = ?');
-    params.push(lineId);
+    conditions.push('(e.line_id = ? OR LOWER(COALESCE(l.name, \'\')) = LOWER(?))');
+    params.push(lineId, lineId);
   }
 
   if (machineCode) {
@@ -72,9 +72,9 @@ export async function listExpenses(env, query = {}) {
     // Split space-separated search words
     const words = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
     words.forEach(word => {
-      conditions.push('(LOWER(e.description) LIKE ? OR LOWER(e.machine_code) LIKE ? OR LOWER(e.pm_order_no) LIKE ? OR LOWER(e.material_no) LIKE ? OR LOWER(e.doc_no) LIKE ? OR LOWER(e.line_id) LIKE ?)');
+      conditions.push('(LOWER(e.description) LIKE ? OR LOWER(e.machine_code) LIKE ? OR LOWER(e.pm_order_no) LIKE ? OR LOWER(e.material_no) LIKE ? OR LOWER(e.doc_no) LIKE ? OR LOWER(e.line_id) LIKE ? OR LOWER(COALESCE(l.name, \'\')) LIKE ?)');
       const pattern = `%${word}%`;
-      params.push(pattern, pattern, pattern, pattern, pattern, pattern);
+      params.push(pattern, pattern, pattern, pattern, pattern, pattern, pattern);
     });
   }
 
@@ -84,8 +84,9 @@ export async function listExpenses(env, query = {}) {
   const countSql = `
     SELECT 
       COUNT(*) as total_count,
-      COALESCE(SUM(amount), 0) as total_amount
+      COALESCE(SUM(e.amount), 0) as total_amount
     FROM pm_expenses e
+    LEFT JOIN lines l ON l.id = e.line_id
     ${whereClause}
   `;
   const countRow = await env.DB.prepare(countSql).bind(...params).first();

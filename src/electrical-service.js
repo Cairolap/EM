@@ -12,6 +12,27 @@ export function generateElectricalId(seq) {
 }
 
 /**
+ * Ensures Google Drive links (such as /file/d/<id>/view) are normalized to
+ * direct embeddable image URLs (https://lh3.googleusercontent.com/d/<id>).
+ */
+export function normalizeDriveImage(imageUrl, driveFileId) {
+  const rawUrl = String(imageUrl || '').trim();
+  const rawId = String(driveFileId || '').trim();
+  const extractedId = rawId
+    || rawUrl.match(/\/d\/([\w-]{10,})/)?.[1]
+    || rawUrl.match(/[?&]id=([\w-]{10,})/)?.[1]
+    || '';
+
+  if (extractedId) {
+    return {
+      imageUrl: `https://lh3.googleusercontent.com/d/${extractedId}`,
+      driveFileId: extractedId
+    };
+  }
+  return { imageUrl: rawUrl, driveFileId: rawId };
+}
+
+/**
  * Checks for circular dependency in electrical feeder hierarchy
  */
 export async function checkCircularDependency(db, nodeId, targetParentId) {
@@ -90,7 +111,10 @@ export async function listElectricalNodes(env, filters = {}) {
   sql += " ORDER BY (CASE WHEN n.node_type = 'MDB' THEN 1 ELSE 2 END) ASC, n.sort_order ASC, n.node_code ASC";
 
   const rows = (await db.prepare(sql).bind(...binds).all()).results || [];
-  return rows;
+  return rows.map(row => {
+    const norm = normalizeDriveImage(row.imageUrl, row.driveFileId);
+    return { ...row, imageUrl: norm.imageUrl, driveFileId: norm.driveFileId };
+  });
 }
 
 /**
@@ -123,6 +147,10 @@ export async function getElectricalNode(env, id) {
   `).bind(id).first();
 
   if (!node) fail('NOT_FOUND', 'ไม่พบข้อมูลตู้หรืออุปกรณ์ไฟฟ้านี้', 404);
+
+  const norm = normalizeDriveImage(node.imageUrl, node.driveFileId);
+  node.imageUrl = norm.imageUrl;
+  node.driveFileId = norm.driveFileId;
 
   const children = (await db.prepare(`
     SELECT id, node_code as nodeCode, name, node_type as nodeType, current_rating as currentRating, location
@@ -162,13 +190,15 @@ export async function saveElectricalNode(env, actor, data) {
   const isEdit = Boolean(data.id);
   let id = data.id ? String(data.id).trim() : '';
 
-  // Check code uniqueness
-  const dupCheck = await db.prepare(
-    `SELECT id FROM electrical_nodes WHERE node_code = ? ${isEdit ? 'AND id != ?' : ''}`
-  ).bind(...(isEdit ? [nodeCode, id] : [nodeCode])).first();
+  // Check code uniqueness only for root MDB panels (sub-panels & child circuits can share Tag Codes)
+  if (nodeType === 'MDB' && !parentId) {
+    const dupCheck = await db.prepare(
+      `SELECT id FROM electrical_nodes WHERE node_code = ? AND node_type = 'MDB' ${isEdit ? 'AND id != ?' : ''}`
+    ).bind(...(isEdit ? [nodeCode, id] : [nodeCode])).first();
 
-  if (dupCheck) {
-    fail('DUPLICATE', `รหัสตู้/อุปกรณ์ "${nodeCode}" มีอยู่ในระบบแล้ว กรุณาใช้รหัสอื่น`, 409);
+    if (dupCheck) {
+      fail('DUPLICATE', `รหัสตู้ประธาน "${nodeCode}" มีอยู่ในระบบแล้ว กรุณาใช้รหัสอื่น`, 409);
+    }
   }
 
   // Circular dependency check
@@ -189,9 +219,9 @@ export async function saveElectricalNode(env, actor, data) {
         actor: actor?.username || 'admin'
       };
       const uploadRes = await uploadPicture(env, 'electrical', reqMock, 'photo', data.image, nodeCode || 'EL');
-      if (uploadRes?.url) {
-        imageUrl = uploadRes.url;
+      if (uploadRes?.id || uploadRes?.url) {
         driveFileId = uploadRes.id || '';
+        imageUrl = driveFileId ? `https://lh3.googleusercontent.com/d/${driveFileId}` : uploadRes.url;
       }
     } catch (err) {
       console.error('Image upload to drive failed:', err);
@@ -208,6 +238,9 @@ export async function saveElectricalNode(env, actor, data) {
       imageUrl = '';
       driveFileId = '';
     }
+    const normImg = normalizeDriveImage(imageUrl, driveFileId);
+    imageUrl = normImg.imageUrl;
+    driveFileId = normImg.driveFileId;
 
     await db.prepare(`
       UPDATE electrical_nodes SET
@@ -230,6 +263,10 @@ export async function saveElectricalNode(env, actor, data) {
     ).run();
 
   } else {
+    const normImg = normalizeDriveImage(imageUrl, driveFileId);
+    imageUrl = normImg.imageUrl;
+    driveFileId = normImg.driveFileId;
+
     // Generate next monotonic ID
     const countRow = await db.prepare('SELECT COUNT(*) as cnt FROM electrical_nodes').first();
     const nextSeq = (countRow?.cnt || 0) + 1;
@@ -252,6 +289,92 @@ export async function saveElectricalNode(env, actor, data) {
       currentRating, voltage, location, remark,
       imageUrl, driveFileId, sortOrder, now, now
     ).run();
+  }
+
+  // Handle downstream child circuits if provided (duplicate Tag Codes allowed)
+  if (Array.isArray(data.children) && data.children.length > 0) {
+    for (let i = 0; i < data.children.length; i++) {
+      const child = data.children[i];
+      if (!child) continue;
+      const childCode = normalizeCode(child.nodeCode || child.node_code);
+      const childName = String(child.name || '').trim();
+
+      // Skip row if both code and name are blank
+      if (!childCode && !childName) continue;
+
+      if (!childCode) {
+        fail('VALIDATION', `กรุณาระบุรหัสตู้/อุปกรณ์สำหรับรายการย่อยลำดับที่ ${i + 1}`, 422);
+      }
+      if (!childName) {
+        fail('VALIDATION', `กรุณาระบุชื่อสำหรับรายการย่อย "${childCode}"`, 422);
+      }
+
+      const childType = String(child.nodeType || child.node_type || 'DB').toUpperCase();
+      if (!VALID_TYPES.has(childType)) {
+        fail('VALIDATION', `ประเภท "${childType}" ของรายการย่อย "${childCode}" ไม่ถูกต้อง`, 422);
+      }
+
+      const childRating = Math.max(0, parseFloat(child.currentRating ?? child.current_rating ?? 0) || 0);
+      const childVoltage = String(child.voltage || voltage || '400V 3P4W').trim();
+      const childLocation = String(child.location || location || '').trim();
+      const childRemark = String(child.remark || '').trim();
+      const childSortOrder = i;
+
+      let childId = child.id ? String(child.id).trim() : '';
+      const isChildEdit = Boolean(childId);
+
+      if (isChildEdit) {
+        await checkCircularDependency(db, childId, id);
+        await db.prepare(`
+          UPDATE electrical_nodes SET
+            node_code = ?,
+            name = ?,
+            node_type = ?,
+            parent_id = ?,
+            current_rating = ?,
+            voltage = ?,
+            location = ?,
+            remark = ?,
+            sort_order = ?,
+            updated_at = ?
+          WHERE id = ?
+        `).bind(
+          childCode, childName, childType, id, childRating,
+          childVoltage, childLocation, childRemark, childSortOrder, now, childId
+        ).run();
+      } else {
+        const countRowChild = await db.prepare('SELECT COUNT(*) as cnt FROM electrical_nodes').first();
+        let nextSeqChild = (countRowChild?.cnt || 0) + 1;
+        let candidateId = generateElectricalId(nextSeqChild);
+        let idTaken = await db.prepare('SELECT id FROM electrical_nodes WHERE id = ?').bind(candidateId).first();
+        while (idTaken) {
+          nextSeqChild++;
+          candidateId = generateElectricalId(nextSeqChild);
+          idTaken = await db.prepare('SELECT id FROM electrical_nodes WHERE id = ?').bind(candidateId).first();
+        }
+        childId = candidateId;
+
+        await db.prepare(`
+          INSERT INTO electrical_nodes (
+            id, node_code, name, node_type, parent_id,
+            current_rating, voltage, location, remark,
+            image_url, drive_file_id, sort_order, is_active, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '', '', ?, 1, ?, ?)
+        `).bind(
+          childId, childCode, childName, childType, id,
+          childRating, childVoltage, childLocation, childRemark,
+          childSortOrder, now, now
+        ).run();
+      }
+    }
+  }
+
+  // Handle removed child IDs if specified (detach by setting parent_id = NULL)
+  if (Array.isArray(data.removedChildIds) && data.removedChildIds.length > 0) {
+    for (const remId of data.removedChildIds) {
+      if (!remId) continue;
+      await db.prepare('UPDATE electrical_nodes SET parent_id = NULL, updated_at = ? WHERE id = ? AND parent_id = ?').bind(now, remId, id).run();
+    }
   }
 
   return getElectricalNode(env, id);

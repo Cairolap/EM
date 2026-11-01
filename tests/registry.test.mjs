@@ -30,6 +30,18 @@ test('machine display order moves within a line and is exposed to BOM',async()=>
  const references=await rpc(env,'bom','references');
  assert.deepEqual(references.data.machines.filter(item=>item.LineID==='L01').sort((a,b)=>a.LineOrder-b.LineOrder).map(item=>item.MachineCode),['M-02','M-01']);
 });
+test('machine create and update with explicit lineOrder field',async()=>{
+ const env=setup();
+ const created=await rpc(env,'machines','createMachine',[{...machine,machineCode:'M-ORD',lineOrder:5,requestId:crypto.randomUUID()}]);
+ assert.equal(created.status,200);
+ const fetched=await rpc(env,'machines','getMachine',[created.data.machineId]);
+ assert.equal(fetched.data.lineOrder,5);
+
+ const updated=await rpc(env,'machines','updateMachine',[created.data.machineId,{...machine,machineCode:'M-ORD',lineOrder:3,version:1,requestId:crypto.randomUUID()}]);
+ assert.equal(updated.status,200);
+ const fetchedUpdated=await rpc(env,'machines','getMachine',[created.data.machineId]);
+ assert.equal(fetchedUpdated.data.lineOrder,3);
+});
 test('references, unique normalized machine codes, inactive history and lifecycle',async()=>{
  const env=setup();let r=await rpc(env,'machines','createMachine',[{...machine,lineId:'bad',requestId:crypto.randomUUID()}]);assert.equal(r.status,422);
  r=await rpc(env,'machines','createMachine',[{...machine,requestId:crypto.randomUUID()}]);const id=r.data.machineId;
@@ -176,6 +188,18 @@ test('BOM reads and mutations (add, edit, split, replace, remove, history, stats
  }],opReplace);
  assert.equal(repRes.status,200);
 
+ // 5b. Backdated replace (installedAt earlier than row.InstalledAt)
+ const targetBackdated = splitSensors[1];
+ const opReplaceBackdated = crypto.randomUUID();
+ const repBackdatedRes = await rpc(env, 'bom', 'replace', [{
+  machineId,
+  operationId: opReplaceBackdated,
+  installedAt: '2021-01-26',
+  dueMode: 'PART_LIFE',
+  targets: [{recordId: targetBackdated.RecordID, expectedVersion: targetBackdated.Version, partId: partId1}]
+ }], opReplaceBackdated);
+ assert.equal(repBackdatedRes.status, 200);
+
  // 6. History
  const hist=await rpc(env,'bom','history',[{machineId,equipmentId:targetToReplace.EquipmentID}]);
  assert.ok(hist.data.records.items.length>=2); // original + replaced
@@ -267,7 +291,7 @@ test('user management: granular permissions, temporary expiry, reset to 1234 and
     role:'viewer',
     userType:'temporary',
     expiresAt:new Date(Date.now() + 60000).toISOString(), // expires in 1 min
-    permissions:{machines:'none',parts:'read',bom:'read',users:'none',can_delete:false}
+    permissions:{machines:'none',parts:'read',bom:'read',users:'none',can_delete:false,pm:'none',pm_expenses:'none',pr_tracker:'none',announcements:'none'}
    }]
   })
  }),env);
@@ -289,6 +313,38 @@ test('user management: granular permissions, temporary expiry, reset to 1234 and
   body:JSON.stringify({method:'getMachines',args:[{}]})
  }),env);
  assert.equal(machinesRes.status,403);
+
+ // 4.1 Temporary user tries to access /pm/rpc -> should get 403 FORBIDDEN
+ const pmRes=await worker.fetch(new Request('http://localhost/api/v1/pm/rpc',{
+  method:'POST',
+  headers:{'Content-Type':'application/json','Origin':'http://localhost',Cookie:tempCookie},
+  body:JSON.stringify({method:'getReferences',args:[]})
+ }),env);
+ assert.equal(pmRes.status,403);
+
+ // 4.2 Temporary user tries to access /pm-expenses/rpc -> should get 403 FORBIDDEN
+ const expRes=await worker.fetch(new Request('http://localhost/api/v1/pm-expenses/rpc',{
+  method:'POST',
+  headers:{'Content-Type':'application/json','Origin':'http://localhost',Cookie:tempCookie},
+  body:JSON.stringify({method:'getReferences',args:[]})
+ }),env);
+ assert.equal(expRes.status,403);
+
+ // 4.3 Temporary user tries to access /pr-tracker/rpc -> should get 403 FORBIDDEN
+ const prRes=await worker.fetch(new Request('http://localhost/api/v1/pr-tracker/rpc',{
+  method:'POST',
+  headers:{'Content-Type':'application/json','Origin':'http://localhost',Cookie:tempCookie},
+  body:JSON.stringify({method:'getReferences',args:[]})
+ }),env);
+ assert.equal(prRes.status,403);
+
+ // 4.4 Temporary user tries to access /announcements/rpc -> should get 403 FORBIDDEN
+ const annRes=await worker.fetch(new Request('http://localhost/api/v1/announcements/rpc',{
+  method:'POST',
+  headers:{'Content-Type':'application/json','Origin':'http://localhost',Cookie:tempCookie},
+  body:JSON.stringify({method:'list',args:[]})
+ }),env);
+ assert.equal(annRes.status,403);
 
  // 5. Temporary user tries to access /users/rpc -> should get 403 FORBIDDEN
  const usersRes=await worker.fetch(new Request('http://localhost/api/v1/users/rpc',{
@@ -491,3 +547,86 @@ test('BOM mutations: admin does not require reason, non-admin requires reason fo
  assert.equal(remEditorOk.status, 200);
 });
 
+test('createPartsBatch: bulk insert multiple parts, duplicate skipping, brand resolution, monotonic IDs and replay', async () => {
+ const env = setup();
+ const p1 = { partNumber: 'BATCH-001', description: 'Power Supply 24V', brand: 'ABB', storeCode: 'ST-01', lifespan: 5 };
+ const p2 = { partNumber: 'BATCH-002', description: 'Relay 24VDC', brandId: 'B01', storeCode: 'ST-02', lifespan: 2 };
+ const key = crypto.randomUUID();
+
+ const res = await rpc(env, 'parts', 'createPartsBatch', [[p1, p2]], key);
+ assert.equal(res.status, 200);
+ assert.equal(res.data.success, true);
+ assert.equal(res.data.createdCount, 2);
+ assert.equal(res.data.skippedCount, 0);
+ assert.equal(res.data.createdParts.length, 2);
+ assert.equal(res.data.createdParts[0].id, 'PART-000001');
+ assert.equal(res.data.createdParts[0].partNumber, 'BATCH-001');
+ assert.equal(res.data.createdParts[0].brand, 'ABB');
+ assert.equal(res.data.createdParts[1].id, 'PART-000002');
+ assert.equal(res.data.createdParts[1].partNumber, 'BATCH-002');
+
+ // Exact replay on same key
+ const replay = await rpc(env, 'parts', 'createPartsBatch', [[p1, p2]], key);
+ assert.deepEqual(replay.data, res.data);
+
+ // Second batch with duplicates: BATCH-001 (already in DB), BATCH-003 (new), BATCH-003 (duplicate in batch)
+ const p3 = { partNumber: 'BATCH-003', description: 'Fuse 10A', storeCode: 'ST-03' };
+ const p3dup = { partNumber: 'BATCH-003', description: 'Duplicate in batch' };
+ const res2 = await rpc(env, 'parts', 'createPartsBatch', [[p1, p3, p3dup]]);
+ assert.equal(res2.status, 200);
+ assert.equal(res2.data.createdCount, 1);
+ assert.equal(res2.data.skippedCount, 2);
+ assert.equal(res2.data.createdParts[0].id, 'PART-000003');
+ assert.equal(res2.data.createdParts[0].partNumber, 'BATCH-003');
+
+ // Catalog has all 3 parts
+ const catalog = await rpc(env, 'parts', 'getAllParts');
+ assert.equal(catalog.data.length, 3);
+});
+
+
+
+test('part where-used lookup in parts and bom searchPartUsage', async () => {
+ const env = setup();
+ const m1 = await rpc(env, 'machines', 'createMachine', [{ ...machine, machineCode: 'M-W01', machineName: 'Machine 1', requestId: crypto.randomUUID() }]);
+ const m2 = await rpc(env, 'machines', 'createMachine', [{ ...machine, machineCode: 'M-W02', machineName: 'Machine 2', requestId: crypto.randomUUID() }]);
+ const p1 = await rpc(env, 'parts', 'createPart', [{ partNumber: 'WU-PART-1', description: 'WhereUsed Motor', brandId: 'B01', price: 500, requestId: crypto.randomUUID() }]);
+ const partId = p1.data.id;
+
+ // Install part into Machine 1 (qty 2) and Machine 2 (qty 1)
+ const op1 = crypto.randomUUID();
+ await rpc(env, 'bom', 'add', [{
+  machineId: m1.data.machineId,
+  operationId: op1,
+  labels: [{ PartID: partId, Label: 'M1-PUMP', Quantity: 2, InstalledAt: '2026-01-01', DueMode: 'PART_LIFE' }]
+ }], op1);
+
+ const op2 = crypto.randomUUID();
+ await rpc(env, 'bom', 'add', [{
+  machineId: m2.data.machineId,
+  operationId: op2,
+  labels: [{ PartID: partId, Label: 'M2-PUMP', Quantity: 1, InstalledAt: '2026-01-01', DueMode: 'PART_LIFE' }]
+ }], op2);
+
+ // 1. parts.getPartMachines
+ const wuRes = await rpc(env, 'parts', 'getPartMachines', [partId]);
+ assert.equal(wuRes.status, 200);
+ assert.equal(wuRes.data.partId, partId);
+ assert.equal(wuRes.data.totalMachines, 2);
+ assert.equal(wuRes.data.totalQuantity, 3);
+ assert.equal(wuRes.data.machines.length, 2);
+
+ // 2. bom.whereUsed
+ const bomWuRes = await rpc(env, 'bom', 'whereUsed', [partId]);
+ assert.equal(bomWuRes.status, 200);
+ assert.equal(bomWuRes.data.totalMachines, 2);
+
+ // 3. bom.searchPartUsage
+ const searchRes = await rpc(env, 'bom', 'searchPartUsage', ['WhereUsed']);
+ assert.equal(searchRes.status, 200);
+ assert.equal(searchRes.data.items.length, 1);
+ assert.equal(searchRes.data.items[0].partId, partId);
+ assert.equal(searchRes.data.items[0].totalMachines, 2);
+ assert.equal(searchRes.data.items[0].totalQuantity, 3);
+ assert.equal(searchRes.data.items[0].machines[0].machineCode, 'M-W01');
+});

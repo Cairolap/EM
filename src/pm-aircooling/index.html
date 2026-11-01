@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจัดการ Air Cooling (PM) - แผนกซ่อมไฟฟ้า</title>
+  <link rel="icon" type="image/png" href="/Logo%20small.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- QRCode.js for equipment stickers -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <!-- APP_STYLE -->
+</head>
+<body>
+  <div class="ac-app-container">
+    
+    <!-- Top Header -->
+    <header class="ac-page-header">
+      <div class="ac-header-main-row">
+        <div class="ac-title-group">
+          <div class="ac-title-with-pill">
+            <h1 class="ac-page-title">
+              <svg class="ac-title-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M12 3a9 9 0 0 1 9 9M12 21a9 9 0 0 1-9-9"></path>
+              </svg>
+              <span>ระบบจัดการ Air Cooling</span>
+            </h1>
+            <span class="ac-meta-pill">
+              <span class="ac-status-dot pulse"></span>
+              ฐานข้อมูล Google Sheets &middot; ทะเบียนเครื่องปรับอากาศโรงงาน
+            </span>
+          </div>
+        </div>
+
+        <div class="ac-header-actions">
+          <button type="button" id="btn-sync-sheets" class="btn btn-secondary" title="ดึงข้อมูลล่าสุดจาก Google Sheets">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <span>ซิงค์ Sheets</span>
+          </button>
+          <a id="btn-open-sheet" href="https://docs.google.com/spreadsheets/d/1qmKINhpuUOenTavwDezQHV2IP4CaweJQ0o6ZL05rKiE/edit?gid=1502709574#gid=1502709574" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" title="เปิด Google Sheets ต้นฉบับ">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            <span>Google Sheets</span>
+          </a>
+          <button type="button" id="btn-export-excel" class="btn btn-secondary" title="ส่งออกข้อมูลเป็น Excel (.xlsx)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>ส่งออก Excel</span>
+          </button>
+          <button type="button" id="btn-add-unit" class="btn btn-primary" title="เพิ่มรายการเครื่องปรับอากาศใหม่">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>เพิ่มเครื่องใหม่</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="ac-stats-grid" id="ac-stats-container">
+        <div class="ac-stat-card stat-total" data-filter-status="all">
+          <div class="stat-icon">❄️</div>
+          <div class="stat-body">
+            <span class="stat-label">เครื่องทั้งหมด</span>
+            <span class="stat-val" id="stat-total-val">0</span>
+          </div>
+        </div>
+        <div class="ac-stat-card stat-normal" data-filter-status="normal">
+          <div class="stat-icon">🟢</div>
+          <div class="stat-body">
+            <span class="stat-label">รอบล้างปกติ</span>
+            <span class="stat-val" id="stat-normal-val">0</span>
+          </div>
+        </div>
+        <div class="ac-stat-card stat-duesoon" data-filter-status="due_soon">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-body">
+            <span class="stat-label">ใกล้ถึงกำหนด (&le;30 วัน)</span>
+            <span class="stat-val" id="stat-duesoon-val">0</span>
+          </div>
+        </div>
+        <div class="ac-stat-card stat-overdue" data-filter-status="overdue">
+          <div class="stat-icon">🔴</div>
+          <div class="stat-body">
+            <span class="stat-label">เกินกำหนดล้าง</span>
+            <span class="stat-val" id="stat-overdue-val">0</span>
+          </div>
+        </div>
+        <div class="ac-stat-card stat-reported" data-filter-status="reported">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-body">
+            <span class="stat-label">แจ้งปัญหา / ชำรุด</span>
+            <span class="stat-val" id="stat-reported-val">0</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Filter & Search Toolbar -->
+    <section class="ac-toolbar">
+      <div class="ac-toolbar-row">
+        <!-- Department Pills -->
+        <div class="ac-dept-pills" id="ac-dept-pills-container" role="radiogroup" aria-label="กรองตามแผนก">
+          <button type="button" class="dept-pill active" data-dept="ALL">ทุกแผนก</button>
+          <button type="button" class="dept-pill" data-dept="CC"><span class="badge badge-cc">CC</span> ฝาจีบ</button>
+          <button type="button" class="dept-pill" data-dept="PP"><span class="badge badge-pp">PP</span> ฝาเกลียว</button>
+          <button type="button" class="dept-pill" data-dept="MX"><span class="badge badge-mx">MX</span> ฝาแม็กซี่</button>
+          <button type="button" class="dept-pill" data-dept="PC"><span class="badge badge-pc">PC</span> ฝาพลาสติก</button>
+          <button type="button" class="dept-pill" data-dept="PR"><span class="badge badge-pr">PR</span> งานพิมพ์</button>
+          <button type="button" class="dept-pill" data-dept="OT"><span class="badge badge-ot">OT</span> อื่นๆ</button>
+        </div>
+
+        <!-- View Controls & Search -->
+        <div class="ac-toolbar-right">
+          <!-- Status Dropdown Filter -->
+          <div class="ac-select-wrap">
+            <select id="select-status-filter" class="ac-select" aria-label="สถานะการล้าง">
+              <option value="all">ทุกสถานะ</option>
+              <option value="overdue">🔴 เกินกำหนดล้าง</option>
+              <option value="due_soon">⏳ ใกล้ถึงกำหนดล้าง</option>
+              <option value="normal">🟢 รอบล้างปกติ</option>
+              <option value="reported">⚠️ มีการแจ้งปัญหา</option>
+            </select>
+          </div>
+
+          <!-- Search Input -->
+          <div class="ac-search-wrap">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="search" id="ac-search-input" class="ac-search-input" placeholder="ค้นหา Tag, ไลน์, ตำแหน่ง, ยี่ห้อ, Serial..." aria-label="ค้นหาข้อมูล">
+            <button type="button" id="ac-search-clear" class="search-clear-btn" aria-label="ล้างการค้นหา">&times;</button>
+          </div>
+
+          <!-- View Switcher (Table vs Card) -->
+          <div class="ac-view-switcher" role="tablist" aria-label="รูปแบบการแสดงผล">
+            <button type="button" id="btn-view-table" class="view-btn active" title="มุมมองตาราง" aria-selected="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+            </button>
+            <button type="button" id="btn-view-card" class="view-btn" title="มุมมองการ์ด" aria-selected="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="ac-main-content">
+      
+      <!-- Table View -->
+      <div id="ac-table-view-container" class="ac-view-panel active">
+        <div class="ac-table-responsive">
+          <table class="ac-table" id="ac-data-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">รูป</th>
+                <th style="width: 90px;">Tag ID</th>
+                <th style="width: 70px;">แผนก</th>
+                <th style="width: 80px;">ไลน์</th>
+                <th>ตำแหน่งติดตั้ง</th>
+                <th>ยี่ห้อ / รุ่น</th>
+                <th style="width: 80px;" class="text-right">กำลังไฟ</th>
+                <th>Serial No.</th>
+                <th style="width: 105px;">ล้างล่าสุด</th>
+                <th style="width: 105px;">ล้างรอบถัดไป</th>
+                <th style="width: 110px;">สถานะ</th>
+                <th style="width: 120px;" class="text-center">การจัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="ac-table-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Card Grid View -->
+      <div id="ac-card-view-container" class="ac-view-panel" style="display:none;">
+        <div class="ac-cards-grid" id="ac-cards-grid">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div id="ac-empty-state" class="ac-empty-state" style="display: none;">
+        <div class="empty-icon">❄️</div>
+        <h3>ไม่พบรายการ Air Cooling</h3>
+        <p class="empty-desc">ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหาหรือตัวกรองที่เลือก</p>
+        <button type="button" id="btn-reset-filters" class="btn btn-secondary">รีเซ็ตตัวกรองทั้งหมด</button>
+      </div>
+
+      <!-- Loading State -->
+      <div id="ac-loading-state" class="ac-loading-state">
+        <div class="spinner"></div>
+        <p>กำลังเชื่อมต่อและโหลดข้อมูล Air Cooling...</p>
+      </div>
+
+      <!-- Pagination / Summary Bar -->
+      <footer class="ac-table-footer">
+        <div class="footer-summary" id="ac-footer-summary">
+          แสดง 0 จาก 0 รายการ
+        </div>
+        <div class="footer-legend">
+          <span class="legend-item"><span class="legend-badge badge-normal"></span> ปกติ</span>
+          <span class="legend-item"><span class="legend-badge badge-duesoon"></span> ใกล้ถึงกำหนด (&le;30 วัน)</span>
+          <span class="legend-item"><span class="legend-badge badge-overdue"></span> เกินกำหนด</span>
+          <span class="legend-item"><span class="legend-badge badge-reported"></span> แจ้งปัญหา</span>
+        </div>
+      </footer>
+    </main>
+
+  </div>
+
+  <!-- ====================================================
+       MODALS
+       ==================================================== -->
+
+  <!-- 1. Add / Edit Unit Modal -->
+  <dialog id="modal-unit-form" class="ac-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="modal-form-title" class="modal-title">เพิ่มเครื่อง Air Cooling ใหม่</h2>
+        <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <form id="form-unit">
+        <input type="hidden" id="unit-id">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="form-dept" class="required">แผนก (Department)</label>
+              <select id="form-dept" class="form-control" required>
+                <option value="">เลือกแผนก...</option>
+                <option value="CC">CC - ฝาจีบ</option>
+                <option value="PP">PP - ฝาเกลียว</option>
+                <option value="MX">MX - ฝาแม็กซี่</option>
+                <option value="PC">PC - ฝาพลาสติก</option>
+                <option value="PR">PR - งานพิมพ์</option>
+                <option value="OT">OT - อื่นๆ</option>
+              </select>
+            </div>
+            <div class="form-group col-6">
+              <label for="form-id-tag" class="required">Tag ID (เช่น CC-01)</label>
+              <input type="text" id="form-id-tag" class="form-control" placeholder="CC-01" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="form-line">สายการผลิต (Line)</label>
+              <input type="text" id="form-line" class="form-control" placeholder="เช่น CC1, Line 2">
+            </div>
+            <div class="form-group col-6">
+              <label for="form-location">ตำแหน่งติดตั้ง (Location)</label>
+              <input type="text" id="form-location" class="form-control" placeholder="เช่น LNR120, PAC101">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-4">
+              <label for="form-brand">ยี่ห้อ (Brand)</label>
+              <input type="text" id="form-brand" class="form-control" placeholder="เช่น TEXA, nVent, Rittal">
+            </div>
+            <div class="form-group col-4">
+              <label for="form-power">กำลังไฟ (Watt)</label>
+              <input type="number" id="form-power" class="form-control text-right" placeholder="เช่น 930" min="0" step="1">
+            </div>
+            <div class="form-group col-4">
+              <label for="form-serial">Serial No. / Model</label>
+              <input type="text" id="form-serial" class="form-control" placeholder="00160322(DEK15BT0B)">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="form-last-clean">วันที่ล้างล่าสุด (Last Clean)</label>
+              <input type="date" id="form-last-clean" class="form-control">
+            </div>
+            <div class="form-group col-6">
+              <label for="form-next-clean">วันที่ล้างรอบถัดไป (Next Clean)</label>
+              <input type="date" id="form-next-clean" class="form-control">
+              <small class="form-hint">*เว้นว่างไว้เพื่อคำนวณอัตโนมัติ (+1 ปี)</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="form-details">รายละเอียดการติดตั้ง / อุปกรณ์</label>
+            <input type="text" id="form-details" class="form-control" placeholder="เช่น แอร์เป่าแผงคอนโทรลตู้หลัก">
+          </div>
+
+          <div class="form-group">
+            <label for="form-note">หมายเหตุ (Note)</label>
+            <textarea id="form-note" class="form-control" rows="2" placeholder="เช่น เคยวัดกระแสได้ 3.9A, เช็กท่อน้ำทิ้ง"></textarea>
+          </div>
+
+          <!-- Image Upload / Link -->
+          <div class="form-group">
+            <label>รูปภาพอุปกรณ์</label>
+            <div class="image-upload-box">
+              <div class="image-preview-area" id="image-preview-wrap">
+                <img id="image-preview-img" src="" alt="พรีวิวรูปภาพ" style="display:none;">
+                <div id="image-preview-placeholder" class="upload-placeholder">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  <span>คลิกเพื่อเลือกไฟล์รูปภาพ หรือกรอก URL ด้านล่าง</span>
+                </div>
+              </div>
+              <input type="file" id="form-image-file" accept="image/jpeg,image/png,image/webp" style="display:none;">
+              <input type="hidden" id="form-image-url">
+              <input type="hidden" id="form-drive-file-id">
+              <div class="image-actions-row">
+                <button type="button" id="btn-select-file" class="btn btn-secondary btn-sm">📁 เลือกไฟล์รูปภาพ</button>
+                <button type="button" id="btn-clear-image" class="btn btn-secondary btn-sm" style="display:none;">ลบรูป</button>
+                <input type="url" id="form-image-url-input" class="form-control form-control-sm" placeholder="หรือวางลิงก์รูปภาพ (Google Drive / Direct URL)">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>ยกเลิก</button>
+          <button type="submit" id="btn-save-unit" class="btn btn-primary">
+            <span class="btn-text">บันทึกข้อมูล</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- 2. Unit Detail Modal -->
+  <dialog id="modal-unit-detail" class="ac-modal">
+    <div class="modal-card modal-card-lg">
+      <div class="modal-header">
+        <div class="detail-header-info">
+          <span id="detail-tag-badge" class="detail-tag-badge">CC-01</span>
+          <h2 id="detail-title" class="modal-title">รายละเอียดเครื่อง Air Cooling</h2>
+        </div>
+        <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+
+      <div class="modal-body detail-body-layout">
+        <div class="detail-left-col">
+          <div class="detail-image-box">
+            <img id="detail-img" src="" alt="Air Cooling" style="display:none;">
+            <div id="detail-no-img" class="no-img-box">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              <span>ไม่มีรูปภาพ</span>
+            </div>
+          </div>
+          
+          <!-- Cleaning Countdown Banner -->
+          <div id="detail-status-banner" class="status-banner">
+            <div class="banner-status-text" id="detail-banner-text">ปกติ</div>
+            <div class="banner-days" id="detail-banner-days">เหลือ 120 วัน</div>
+          </div>
+
+          <!-- QR Code Preview Box -->
+          <div class="qr-preview-card">
+            <div class="qr-label">QR Code ประจำเครื่อง</div>
+            <div id="detail-qrcode-container" class="qrcode-wrapper"></div>
+            <button type="button" id="btn-print-sticker" class="btn btn-secondary btn-sm btn-block mt-2">🖨️ พิมพ์สติ๊กเกอร์ QR</button>
+          </div>
+        </div>
+
+        <div class="detail-right-col">
+          <div class="detail-spec-table">
+            <div class="spec-row">
+              <span class="spec-label">รหัสอ้างอิง (ID):</span>
+              <span class="spec-val font-mono" id="detail-id">-</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">แผนก (Department):</span>
+              <span class="spec-val" id="detail-dept">-</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">สายการผลิต (Line):</span>
+              <span class="spec-val" id="detail-line">-</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">ตำแหน่งติดตั้ง (Location):</span>
+              <span class="spec-val font-bold" id="detail-location">-</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">ยี่ห้อ (Brand):</span>
+              <span class="spec-val" id="detail-brand">-</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">กำลังไฟฟ้า (Power):</span>
+              <span class="spec-val" id="detail-power">-</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Serial No.:</span>
+              <span class="spec-val font-mono" id="detail-serial">-</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">วันที่ล้างล่าสุด:</span>
+              <span class="spec-val font-mono" id="detail-last-clean">-</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">กำหนดล้างรอบถัดไป:</span>
+              <span class="spec-val font-mono font-bold" id="detail-next-clean">-</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">รายละเอียด:</span>
+              <span class="spec-val" id="detail-details">-</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">หมายเหตุ:</span>
+              <span class="spec-val" id="detail-note">-</span>
+            </div>
+          </div>
+
+          <!-- Issue Section if reported -->
+          <div id="detail-issue-box" class="issue-alert-box" style="display:none;">
+            <div class="issue-header">
+              <span class="issue-badge">⚠️ กำลังแจ้งปัญหา</span>
+              <span class="issue-time" id="detail-issue-time"></span>
+            </div>
+            <div class="issue-title" id="detail-issue-title"></div>
+            <div class="issue-desc" id="detail-issue-desc"></div>
+            <div class="issue-reporter" id="detail-issue-reporter"></div>
+            <button type="button" id="btn-resolve-issue" class="btn btn-success btn-sm mt-2">✅ บันทึกแก้ไขปัญหาเรียบร้อย</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="btn-quick-clean-today" class="btn btn-success">
+          <span>🧼 บันทึกล้างเครื่องวันนี้</span>
+        </button>
+        <button type="button" id="btn-open-report" class="btn btn-warning">
+          <span>⚠️ แจ้งปัญหา</span>
+        </button>
+        <button type="button" id="btn-edit-current" class="btn btn-secondary">
+          <span>✏️ แก้ไขข้อมูล</span>
+        </button>
+        <button type="button" id="btn-delete-current" class="btn btn-danger">
+          <span>🗑️ ลบเครื่อง</span>
+        </button>
+        <button type="button" class="btn btn-secondary" data-close-modal>ปิด</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- 3. Report Issue Modal -->
+  <dialog id="modal-report-issue" class="ac-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">แจ้งปัญหา / ส่งซ่อม Air Cooling</h2>
+        <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <form id="form-report">
+        <input type="hidden" id="report-unit-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="required">หัวข้อปัญหาที่พบ</label>
+            <input type="text" id="report-issue-title" class="form-control" placeholder="เช่น แอร์ไม่เย็น, มีเสียงดังผิดปกติ, น้ำรั่ว" required>
+          </div>
+          <div class="form-group">
+            <label>รายละเอียดเพิ่มเติม</label>
+            <textarea id="report-issue-details" class="form-control" rows="3" placeholder="ระบุอาการผิดปกติ หรือสถานการณ์ที่พบ"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label class="required">ชื่อผู้แจ้ง</label>
+              <input type="text" id="report-reporter" class="form-control" placeholder="ชื่อ-นามสกุล" required>
+            </div>
+            <div class="form-group col-6">
+              <label>เบอร์โทรติดต่อ</label>
+              <input type="tel" id="report-phone" class="form-control" placeholder="เบอร์โทรภายใน หรือเบอร์มือถือ">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>ยกเลิก</button>
+          <button type="submit" class="btn btn-danger">ส่งรายงานปัญหา</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- 4. Printable QR Sticker Dialog -->
+  <dialog id="modal-print-sticker" class="ac-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">สติ๊กเกอร์ QR Code ประจำเครื่อง</h2>
+        <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="sticker-print-area" id="sticker-print-area">
+          <div class="sticker-card">
+            <div class="sticker-header">
+              <img src="/Logo%20small.png" alt="EM" class="sticker-logo">
+              <div class="sticker-title">
+                <strong>AIR COOLING PM</strong>
+                <small>แผนกซ่อมบำรุงไฟฟ้า</small>
+              </div>
+            </div>
+            <div class="sticker-body">
+              <div class="sticker-qr" id="printable-qrcode"></div>
+              <div class="sticker-info">
+                <div class="sticker-tag" id="sticker-tag">CC-01</div>
+                <div class="sticker-row"><span>แผนก:</span> <strong id="sticker-dept">CC</strong></div>
+                <div class="sticker-row"><span>ไลน์:</span> <strong id="sticker-line">CC1</strong></div>
+                <div class="sticker-row"><span>ตำแหน่ง:</span> <strong id="sticker-loc">LNR120</strong></div>
+                <div class="sticker-row"><span>ยี่ห้อ:</span> <span id="sticker-brand">TEXA</span></div>
+              </div>
+            </div>
+            <div class="sticker-footer">
+              สแกน QR เพื่อดูประวัติและแจ้งซ่อมบำรุง
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal>ปิด</button>
+        <button type="button" id="btn-trigger-print" class="btn btn-primary">🖨️ สั่งพิมพ์สติ๊กเกอร์</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast-notification"></div>
+
+  <!-- APP_SCRIPT -->
+</body>
+</html>

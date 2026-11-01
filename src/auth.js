@@ -160,10 +160,12 @@ export async function authenticate(request, env) {
 }
 
 export function authorizeWrite(actor, env, scope = 'machines') {
-  if (actor.role === 'admin') {
+  if (actor.role === 'admin' || actor.permissions?.users === 'admin') {
     // Admin has full write access to all scopes
-  } else if (actor.permissions) {
+  } else if (actor.permissions && actor.permissions[scope] !== undefined) {
     if (actor.permissions[scope] !== 'write') fail('FORBIDDEN', 'บัญชีนี้ไม่มีสิทธิ์แก้ไขข้อมูลในส่วนนี้', 403);
+  } else if (actor.permissions && scope === 'pm_expenses' && actor.permissions.pm !== undefined) {
+    if (actor.permissions.pm !== 'write') fail('FORBIDDEN', 'บัญชีนี้ไม่มีสิทธิ์แก้ไขข้อมูลในส่วนนี้', 403);
   } else if (!['editor', 'admin'].includes(actor.role)) {
     fail('FORBIDDEN', 'บัญชีนี้ไม่มีสิทธิ์แก้ไขข้อมูล', 403);
   }

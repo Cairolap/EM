@@ -129,9 +129,9 @@ var BomService = (() => {
         if(!C.date(payload.installedAt)) C.fail('ระบุวันที่เปลี่ยนอุปกรณ์','VALIDATION',{InstalledAt:'ระบุวันที่เปลี่ยน'});
         payload.targets.forEach(t=> {
           const row=target(t);
-          if(row.InstalledAt&&payload.installedAt<row.InstalledAt) C.fail('วันที่เปลี่ยนต้องไม่ก่อนวันติดตั้งเดิม','VALIDATION',{InstalledAt:'วันที่เปลี่ยนก่อนรอบเดิม'});
           const values=validate({...row,PartID:t.partId||row.PartID,InstalledAt:payload.installedAt,DueMode:payload.dueMode,ManualExpiryDate:payload.manualExpiryDate||'',Notes:payload.notes===undefined?row.Notes:payload.notes});
-          changes.push({before:row,after:{...row,RecordStatus:'REPLACED',EndedAt:payload.installedAt,UpdatedAt:now,Version:row.Version+1,OperationID:payload.operationId}});
+          const prevInstalledAt = row.InstalledAt && row.InstalledAt > payload.installedAt ? payload.installedAt : row.InstalledAt;
+          changes.push({before:row,after:{...row,InstalledAt:prevInstalledAt,RecordStatus:'REPLACED',EndedAt:payload.installedAt,UpdatedAt:now,Version:row.Version+1,OperationID:payload.operationId}});
           additions.push(newRecord(values,row.EquipmentID,row.RecordID));
         });
       } else if(kind==='remove') {

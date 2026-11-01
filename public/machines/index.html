@@ -1123,6 +1123,11 @@ tbody tr:last-child td { border-bottom: 0; }
 }
 
 .field-wide { grid-column: 1 / -1; }
+.field-triple {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px 18px;
+}
 .field-error {
   display: block;
   min-height: 20px;
@@ -1419,6 +1424,7 @@ tbody tr:last-child td { border-bottom: 0; }
   .dialog-body { padding: 14px; }
   .form-grid { grid-template-columns: 1fr; }
   .field-wide { grid-column: auto; }
+  .field-triple { grid-template-columns: 1fr; }
   .photo-preview,
   .detail-grid { grid-template-columns: 1fr; }
   .detail-fields { grid-template-columns: 1fr; }
@@ -1748,8 +1754,8 @@ html, body {
   padding: 0;
 }
 .em-hamburger-btn:hover {
-  background: rgba(128, 24, 42, 0.28);
-  border-color: #80182a;
+  background: rgba(14, 165, 233, 0.2);
+  border-color: #38bdf8;
   color: #ffffff;
   transform: scale(1.04);
 }
@@ -1809,8 +1815,8 @@ html, body {
 .em-nav-link.active {
   color: #ffffff;
   font-weight: 600;
-  background: rgba(128, 24, 42, 0.22);
-  border-bottom-color: #80182a;
+  background: rgba(14, 165, 233, 0.18);
+  border-bottom-color: #38bdf8;
 }
 .em-caret {
   width: 12px;
@@ -1828,11 +1834,11 @@ html, body {
   top: calc(100% + 4px);
   left: 0;
   min-width: 180px;
-  background: #18313d;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #0f223d;
+  border: 1px solid rgba(56, 189, 248, 0.24);
   border-radius: 7px;
   padding: 5px;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+  box-shadow: 0 12px 28px rgba(7, 16, 33, 0.55);
   opacity: 0;
   visibility: hidden;
   transform: translateY(4px);
@@ -1854,9 +1860,9 @@ html, body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #94a3b8;
+  color: #7dd3fc;
   padding: 4px 8px 3px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.14);
   margin-bottom: 3px;
 }
 .em-dropdown-item {
@@ -1871,12 +1877,12 @@ html, body {
   transition: all 0.15s ease;
 }
 .em-dropdown-item:hover {
-  background: rgba(128, 24, 42, 0.3);
+  background: rgba(14, 165, 233, 0.22);
   color: #ffffff;
 }
 .em-dropdown-item.active {
-  background: rgba(128, 24, 42, 0.28);
-  color: #f3c4ce;
+  background: rgba(14, 165, 233, 0.25);
+  color: #7dd3fc;
   font-weight: 600;
 }
 .em-dept-badge {
@@ -1885,16 +1891,16 @@ html, body {
   font-weight: 700;
   font-size: 10px;
   padding: 1px 5px;
-  background: rgba(128, 24, 42, 0.38);
-  color: #f3c4ce;
-  border: 1px solid rgba(243, 196, 206, 0.45);
+  background: rgba(14, 165, 233, 0.18);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.38);
   border-radius: 4px;
 }
 .em-item-icon {
   font-size: 13px;
   width: 16px;
   text-align: center;
-  color: #d68a9a;
+  color: #38bdf8;
 }
 
 /* Right User Info Badge */
@@ -1933,7 +1939,7 @@ html, body {
   left: 0;
   bottom: 0;
   width: min(320px, 86vw);
-  background: #13242e;
+  background: #0a1728;
   color: #ffffff;
   z-index: 10003;
   transform: translateX(-100%);
@@ -2017,10 +2023,10 @@ html, body {
   color: #ffffff;
 }
 .em-drawer-link.active {
-  background: rgba(128, 24, 42, 0.3);
-  color: #f3c4ce;
+  background: rgba(14, 165, 233, 0.18);
+  color: #38bdf8;
   font-weight: 600;
-  border-left: 3px solid #80182a;
+  border-left: 3px solid #38bdf8;
 }
 .em-drawer-group {
   border-radius: 8px;
@@ -2058,7 +2064,7 @@ html, body {
 }
 .em-drawer-group-btn[aria-expanded="true"] .em-drawer-arrow {
   transform: rotate(180deg);
-  color: #f3c4ce;
+  color: #38bdf8;
 }
 .em-drawer-sublist {
   padding: 4px 8px 10px 32px;
@@ -2079,11 +2085,11 @@ html, body {
 }
 .em-drawer-subitem:hover {
   color: #ffffff;
-  background: rgba(128, 24, 42, 0.22);
+  background: rgba(14, 165, 233, 0.18);
 }
 .em-drawer-subitem.active {
-  color: #f3c4ce;
-  background: rgba(128, 24, 42, 0.28);
+  color: #38bdf8;
+  background: rgba(14, 165, 233, 0.22);
   font-weight: 600;
 }
 .em-drawer-footer {
@@ -2117,6 +2123,118 @@ html, body {
   }
 }
 </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2506,15 +2624,24 @@ html, body {
             <input id="machine-name" name="machineName" maxlength="200" required>
             <span class="field-error" id="machine-name-error"></span>
           </div>
-          <div class="field">
-            <label for="department">แผนก <span aria-hidden="true">*</span></label>
-            <select id="department" name="deptId" required></select>
-            <span class="field-error" id="department-error"></span>
-          </div>
-          <div class="field">
-            <label for="line">ไลน์ผลิต <span aria-hidden="true">*</span></label>
-            <select id="line" name="lineId" required></select>
-            <span class="field-error" id="line-error"></span>
+          <div class="field-triple field-wide">
+            <div class="field">
+              <label for="department">แผนก <span aria-hidden="true">*</span></label>
+              <select id="department" name="deptId" required></select>
+              <span class="field-error" id="department-error"></span>
+            </div>
+            <div class="field">
+              <label for="line">ไลน์ผลิต <span aria-hidden="true">*</span></label>
+              <select id="line" name="lineId" required></select>
+              <span class="field-error" id="line-error"></span>
+            </div>
+            <div class="field">
+              <label for="line-order">ลำดับการแสดงในไลน์ผลิต</label>
+              <select id="line-order" name="lineOrder">
+                <option value="">— กรุณาเลือกไลน์ผลิตก่อน —</option>
+              </select>
+              <span class="field-error" id="line-order-error"></span>
+            </div>
           </div>
           <div class="field">
             <label for="manufacturer">ผู้ผลิต</label>
@@ -2777,7 +2904,7 @@ html, body {
     padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
     font-family: inherit;
    }
-   .em-auth-title { font-size: 18px; font-weight: 700; color: #18313d; margin-bottom: 6px; }
+   .em-auth-title { font-size: 18px; font-weight: 700; color: #0d1e38; margin-bottom: 6px; }
    .em-auth-sub { font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.4; }
    .em-auth-field { margin-bottom: 14px; text-align: left; }
    .em-auth-label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; }
@@ -2785,12 +2912,12 @@ html, body {
     width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;
     box-sizing: border-box; transition: border-color 0.2s;
    }
-   .em-auth-input:focus { outline: none; border-color: #cc681c; box-shadow: 0 0 0 3px rgba(204, 104, 28, 0.15); }
+   .em-auth-input:focus { outline: none; border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
    .em-auth-btn {
-    width: 100%; padding: 10px; background: #cc681c; color: #ffffff; border: none; border-radius: 6px;
+    width: 100%; padding: 10px; background: #0284c7; color: #ffffff; border: none; border-radius: 6px;
     font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 8px;
    }
-   .em-auth-btn:hover { background: #b25814; }
+   .em-auth-btn:hover { background: #0369a1; }
    .em-auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
    .em-auth-err { font-size: 13px; color: #dc2626; margin-top: 10px; min-height: 18px; text-align: center; }
   `;
@@ -3082,12 +3209,12 @@ html, body {
 
     if (!currentUser) {
       if (badge) {
-        badge.innerHTML = '<button id="em-open-login" style="background:#cc681c;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s">เข้าสู่ระบบ</button>';
+        badge.innerHTML = '<button id="em-open-login" style="background:linear-gradient(135deg, #0284c7, #0369a1);color:#fff;border:1px solid rgba(56,189,248,0.4);border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(2,132,199,0.3)">เข้าสู่ระบบ</button>';
         const btn = document.getElementById('em-open-login');
         if (btn) btn.onclick = () => promptLogin();
       }
       if (drawerUserCard) {
-        drawerUserCard.innerHTML = '<div style="font-size:13px;color:#94a3b8;margin-bottom:8px">ยังไม่ได้เข้าสู่ระบบ</div><button id="em-drawer-open-login" style="width:100%;background:#cc681c;color:#fff;border:none;border-radius:6px;padding:8px;font-size:13px;font-weight:600;cursor:pointer">เข้าสู่ระบบ</button>';
+        drawerUserCard.innerHTML = '<div style="font-size:13px;color:#94a3b8;margin-bottom:8px">ยังไม่ได้เข้าสู่ระบบ</div><button id="em-drawer-open-login" style="width:100%;background:linear-gradient(135deg, #0284c7, #0369a1);color:#fff;border:1px solid rgba(56,189,248,0.4);border-radius:6px;padding:8px;font-size:13px;font-weight:600;cursor:pointer">เข้าสู่ระบบ</button>';
         const dBtn = document.getElementById('em-drawer-open-login');
         if (dBtn) dBtn.onclick = () => {
           const overlay = document.getElementById('em-drawer-overlay');
@@ -3127,7 +3254,7 @@ html, body {
     if (drawerUserCard) {
       drawerUserCard.innerHTML = `
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;border-radius:50%;background:#cc681c;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg, #1d4ed8, #0ea5e9);border:2px solid rgba(56,189,248,0.6);box-shadow:0 0 10px rgba(14,165,233,0.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">
             ${(currentUser.displayName || currentUser.username).charAt(0).toUpperCase()}
           </div>
           <div>
@@ -3966,7 +4093,7 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       nameCell.appendChild(create('span', 'machine-name', machine.machineName));
       nameCell.appendChild(create('span', 'cell-sub', machine.machineType || machine.serialNo || '—'));
       row.appendChild(nameCell);
-      row.appendChild(twoLineCell(machine.departmentName, machine.lineName));
+      row.appendChild(twoLineCell(machine.departmentName, machine.lineName + (machine.lineOrder ? ' (ลำดับ ' + machine.lineOrder + ')' : '')));
       row.appendChild(twoLineCell(machine.model, machine.manufacturer));
       const criticalityCell = create('td');
       criticalityCell.appendChild(criticalityBadge(machine.criticality));
@@ -3994,7 +4121,7 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       if (machine.isActive === false) head.appendChild(visibilityBadge(false));
       card.appendChild(head);
       const list = create('dl');
-      [['แผนก',machine.departmentName],['ไลน์',machine.lineName],['รุ่น',machine.model || '—'],['ความสำคัญ',machine.criticality]].forEach(([label,value]) => {
+      [['แผนก',machine.departmentName],['ไลน์',machine.lineName + (machine.lineOrder ? ' (ลำดับ ' + machine.lineOrder + ')' : '')],['รุ่น',machine.model || '—'],['ความสำคัญ',machine.criticality]].forEach(([label,value]) => {
         list.appendChild(create('dt','',label));
         list.appendChild(create('dd','',value));
       });
@@ -4156,6 +4283,7 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       machineName:byId('machine-name').value,
       deptId:byId('department').value,
       lineId:byId('line').value,
+      lineOrder:byId('line-order').value,
       manufacturer:byId('manufacturer').value,
       model:byId('model').value,
       serialNo:byId('serial-no').value,
@@ -4175,6 +4303,7 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
     machineName:'machine-name',
     deptId:'department',
     lineId:'line',
+    lineOrder:'line-order',
     manufacturer:'manufacturer',
     model:'model',
     serialNo:'serial-no',
@@ -4324,14 +4453,14 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
 
   function setFormValues(machine) {
     const values = machine || {
-      machineId:'',version:'',machineCode:'',machineName:'',deptId:'',lineId:'',
+      machineId:'',version:'',machineCode:'',machineName:'',deptId:'',lineId:'',lineOrder:'',
       manufacturer:'',model:'',serialNo:'',machineType:'',installDate:'',
       criticality:'กลาง',status:'ใช้งาน',locationDetail:'',manualUrl:'',remark:'',isActive:true
     };
     byId('machine-id').value = values.machineId || '';
     byId('machine-version').value = values.version || '';
     for (const [key, id] of Object.entries(fieldIds)) {
-      if (key === 'deptId' || key === 'lineId') continue;
+      if (key === 'deptId' || key === 'lineId' || key === 'lineOrder') continue;
       byId(id).value = values[key] == null ? '' : values[key];
     }
     byId('department').value = values.deptId || '';
@@ -4345,6 +4474,67 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
     byId('machine-type').value = values.machineType || '';
     updateLineOptions(byId('line'), values.deptId || '', 'เลือกไลน์ผลิต', values.lineId || '');
     byId('is-active').checked = values.isActive !== false;
+  }
+
+  async function updateLineOrderOptions(deptId, lineId, currentMachineId, preferredOrder) {
+    const select = byId('line-order');
+    if (!select) return;
+    if (!deptId || !lineId) {
+      select.innerHTML = '<option value="">— กรุณาเลือกไลน์ผลิตก่อน —</option>';
+      select.value = '';
+      return;
+    }
+    select.innerHTML = '<option value="">กำลังโหลดลำดับ…</option>';
+    try {
+      const result = await rpc('getMachines', {
+        deptId,
+        lineId,
+        visibility: 'all',
+        sortBy: 'lineOrder',
+        sortOrder: 'asc',
+        page: 1,
+        pageSize: 200
+      });
+      const items = result.items || [];
+      select.replaceChildren();
+
+      const currentIndex = items.findIndex(item => item.machineId === currentMachineId);
+      const isExistingInLine = currentIndex !== -1;
+
+      items.forEach((item, index) => {
+        const pos = index + 1;
+        const isCurrent = item.machineId === currentMachineId;
+        const option = create('option', '', `${pos} — ${item.machineCode} ${item.machineName}${isCurrent ? ' (ลำดับปัจจุบัน)' : ''}`);
+        option.value = String(pos);
+        select.appendChild(option);
+      });
+
+      if (!isExistingInLine || items.length === 0) {
+        const nextPos = items.length + 1;
+        const endOption = create('option', '', `${nextPos} — ต่อท้ายสุด (ลำดับที่ ${nextPos})`);
+        endOption.value = String(nextPos);
+        select.appendChild(endOption);
+      }
+
+      const unassignedOption = create('option', '', '— ไม่ระบุลำดับ —');
+      unassignedOption.value = '';
+      select.appendChild(unassignedOption);
+
+      if (preferredOrder !== undefined && preferredOrder !== null && preferredOrder !== '') {
+        const orderStr = String(preferredOrder);
+        if (Array.from(select.options).some(o => o.value === orderStr)) {
+          select.value = orderStr;
+        } else {
+          select.value = isExistingInLine ? String(currentIndex + 1) : String(items.length + 1);
+        }
+      } else if (isExistingInLine) {
+        select.value = String(currentIndex + 1);
+      } else {
+        select.value = String(items.length + 1);
+      }
+    } catch (err) {
+      select.innerHTML = '<option value="">— ไม่สามารถโหลดลำดับได้ —</option>';
+    }
   }
 
   async function openEditor(machineId) {
@@ -4364,6 +4554,12 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       }
     }
     setFormValues(machine);
+    await updateLineOrderOptions(
+      machine ? machine.deptId : '',
+      machine ? machine.lineId : '',
+      machine ? machine.machineId : '',
+      machine ? machine.lineOrder : ''
+    );
     byId('editor-mode').textContent = machine ? machine.machineCode : 'เพิ่มรายการ';
     byId('editor-title').textContent = machine ? 'แก้ไขเครื่องจักร' : 'เพิ่มเครื่องจักร';
     byId('save-machine').querySelector('.button-label').textContent = machine ? 'บันทึกการแก้ไข' : 'บันทึกเครื่องจักร';
@@ -4430,7 +4626,17 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       control.disabled = true;
     });
     try {
-      await rpc(id ? 'updateMachine' : 'createMachine', ...(id ? [id, payload] : [payload]));
+      const saved = await rpc(id ? 'updateMachine' : 'createMachine', ...(id ? [id, payload] : [payload]));
+      if (payload.lineOrder) {
+        try {
+          await rpc('reorderMachine', id || saved.machineId, {
+            position: Number(payload.lineOrder),
+            requestId: newRequestId()
+          });
+        } catch (reorderErr) {
+          console.warn('Reorder after save warning:', reorderErr);
+        }
+      }
       state.formDirty = false;
       closeEditorNow();
       await loadMachines();
@@ -4478,6 +4684,7 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
       detailField(list, 'ความสำคัญ', criticalityBadge(machine.criticality));
       detailField(list, 'แผนก', machine.departmentName);
       detailField(list, 'ไลน์ผลิต', machine.lineName);
+      detailField(list, 'ลำดับการแสดงในไลน์ผลิต', machine.lineOrder != null && machine.lineOrder !== '' ? machine.lineOrder : '—');
       detailField(list, 'ประเภทเครื่อง', machine.machineType);
       detailField(list, 'ผู้ผลิต', machine.manufacturer);
       detailField(list, 'รุ่น / Model', machine.model);
@@ -4765,8 +4972,13 @@ if (typeof module !== 'undefined') module.exports = MachineImage;
         if (error) error.textContent = '';
       }
     });
-    byId('department').addEventListener('change', event => {
+    byId('department').addEventListener('change', async event => {
       updateLineOptions(byId('line'), event.target.value, 'เลือกไลน์ผลิต', '');
+      await updateLineOrderOptions(event.target.value, '', byId('machine-id').value);
+      refreshDirtyState();
+    });
+    byId('line').addEventListener('change', async event => {
+      await updateLineOrderOptions(byId('department').value, event.target.value, byId('machine-id').value);
       refreshDirtyState();
     });
     byId('close-editor').addEventListener('click', requestCloseEditor);

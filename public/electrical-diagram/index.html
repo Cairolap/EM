@@ -71,9 +71,11 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
   padding: 0;
+  max-width: 100%;
+  overflow-x: hidden;
   background-color: var(--el-bg-page);
   color: var(--el-ink);
   font-family: var(--font-body);
@@ -88,161 +90,119 @@ body {
 
 /* App Layout */
 .el-app-container {
-  max-width: 1720px;
+  max-width: 1860px;
+  width: 100%;
   margin: 0 auto;
-  padding: 20px 24px 60px;
+  padding: 12px 20px 36px;
 }
 
-/* Header */
+/* Compact Header */
 .el-page-header {
   background: var(--el-bg-surface);
   border: 1px solid var(--el-border);
-  border-radius: 12px;
-  padding: 20px 24px;
-  margin-bottom: 20px;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
   box-shadow: var(--el-shadow-sm);
 }
 
-.el-header-main-row {
+.el-header-compact-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 18px;
 }
 
-.el-title-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.el-title-with-pill {
+.el-header-left-group {
   display: flex;
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.el-header-right-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .el-page-title {
   margin: 0;
-  font-size: 24px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #0d1e38;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
+  white-space: nowrap;
 }
 
 .el-title-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   background: #fef3c7;
   border: 1px solid #fde68a;
-  border-radius: 8px;
-  font-size: 18px;
-}
-
-.el-page-subtitle {
-  margin: 0;
-  color: var(--el-ink-secondary);
-  font-size: 13.5px;
-}
-
-.el-meta-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 12px;
-  background: var(--el-bg-surface-muted);
-  border: 1px solid var(--el-border-subtle);
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--el-ink-secondary);
-}
-
-.el-status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #16a34a;
-}
-.el-status-dot.pulse {
-  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
-  animation: el-pulse 2s infinite;
-}
-@keyframes el-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6); }
-  70% { box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+  border-radius: 6px;
+  font-size: 14px;
 }
 
 .el-header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-/* KPI Grid */
-.el-kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.el-kpi-card {
-  background: var(--el-bg-surface-muted);
-  border: 1px solid var(--el-border-subtle);
-  border-radius: 10px;
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  cursor: pointer;
-  transition: all var(--dur-fast) var(--ease);
-}
-.el-kpi-card:hover {
-  border-color: var(--el-border);
-  transform: translateY(-1px);
-  box-shadow: var(--el-shadow-sm);
-}
-
-.el-kpi-label {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--el-ink-secondary);
-  display: flex;
-  align-items: center;
   gap: 6px;
 }
 
-.el-kpi-value {
-  font-size: 24px;
-  font-weight: 700;
-  font-family: var(--font-mono);
-  color: var(--el-ink);
-  line-height: 1.1;
+/* Compact KPI Strip */
+.el-kpi-strip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
 }
 
-.el-kpi-sub {
-  font-size: 11px;
-  color: var(--el-ink-muted);
+.el-kpi-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--el-bg-surface-muted);
+  border: 1px solid var(--el-border-subtle);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  color: var(--el-ink-secondary);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+}
+.el-kpi-chip:hover {
+  border-color: #0284c7;
+  background: #f0f9ff;
+}
+.el-kpi-chip strong {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--el-ink);
 }
 
 /* Type Badges */
 .kpi-badge {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 1px 5px;
   border-radius: 4px;
   line-height: 1.2;
 }
@@ -252,52 +212,53 @@ body {
 .badge-mc  { background: var(--type-mc-bg);  color: var(--type-mc);  border: 1px solid var(--type-mc-border); }
 .badge-dv  { background: var(--type-dv-bg);  color: var(--type-dv);  border: 1px solid var(--type-dv-border); }
 
-/* View Tabs */
+/* View Tabs (Inline Compact) */
 .el-view-tabs {
   display: flex;
-  gap: 8px;
-  border-top: 1px solid var(--el-border-subtle);
-  padding-top: 16px;
+  gap: 4px;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 8px;
   overflow-x: auto;
 }
 
 .el-tab-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 9px 18px;
-  border-radius: 8px;
-  border: 1px solid transparent;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: none;
   background: transparent;
   color: var(--el-ink-secondary);
   font-family: var(--font-body);
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--dur-fast) var(--ease);
   white-space: nowrap;
 }
 .el-tab-btn:hover {
-  background: var(--el-bg-surface-muted);
   color: var(--el-ink);
 }
 .el-tab-btn.active {
   background: #0d1e38;
   color: #ffffff;
   font-weight: 600;
+  box-shadow: 0 1px 3px rgba(13, 30, 56, 0.2);
 }
 
 .el-tab-count {
   font-family: var(--font-mono);
-  font-size: 11px;
-  padding: 1px 7px;
+  font-size: 10.5px;
+  padding: 0 6px;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.2);
   color: #ffffff;
 }
 .el-tab-btn:not(.active) .el-tab-count {
-  background: var(--el-border);
-  color: var(--el-ink-secondary);
+  background: #cbd5e1;
+  color: #334155;
 }
 
 /* Tab Contents */
@@ -309,267 +270,1112 @@ body {
 }
 
 /* ==========================================================================
-   TAB 1: DIAGRAM CANVAS
+   TAB 1: PANEL EXPLORER (COMPACT MDB HOME CARDS & DRILL-DOWN DETAIL VIEW)
    ========================================================================== */
-.el-diagram-toolbar {
+.el-explorer-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 10px;
   background: var(--el-bg-surface);
   border: 1px solid var(--el-border);
-  border-radius: 10px 10px 0 0;
-  padding: 10px 18px;
+  border-radius: 10px;
+  padding: 7px 12px;
+  margin-bottom: 10px;
+  box-shadow: var(--el-shadow-sm);
   flex-wrap: wrap;
 }
 
-.el-toolbar-left, .el-toolbar-right {
+.el-explorer-nav {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 5px;
+  flex-wrap: wrap;
 }
 
-.el-filter-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--el-ink-secondary);
-}
-
-.el-checkbox-label {
+.el-crumb-btn,
+.el-crumb-home {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--el-ink);
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--el-border-subtle);
+  background: var(--el-bg-surface-muted);
+  color: var(--el-ink-secondary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  user-select: none;
+  transition: all var(--dur-fast) var(--ease);
+  white-space: nowrap;
 }
-
-.el-zoom-controls {
+.el-crumb-btn:hover,
+.el-crumb-home:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+.el-crumb-btn.is-active,
+.el-crumb-home.is-active {
+  background: #0d1e38;
+  border-color: #0d1e38;
+  color: #ffffff;
+  font-weight: 600;
+}
+.el-crumb-back {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: var(--el-bg-surface-muted);
-  border: 1px solid var(--el-border);
-  border-radius: 8px;
-  padding: 3px 6px;
-}
-
-.el-zoom-level {
-  font-family: var(--font-mono);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: var(--font-body);
   font-size: 12px;
   font-weight: 600;
-  min-width: 44px;
-  text-align: center;
-  color: var(--el-ink-secondary);
-}
-
-/* Diagram Viewport & Pan Layer */
-.el-diagram-viewport {
-  position: relative;
-  width: 100%;
-  height: 720px;
-  background: #0f172a;
-  background-image: 
-    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-    radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 28px 28px, 14px 14px;
-  background-position: 0 0, 7px 7px;
-  border: 1px solid var(--el-border);
-  border-top: none;
-  border-radius: 0 0 12px 12px;
-  overflow: hidden;
-  cursor: grab;
-  user-select: none;
-}
-.el-diagram-viewport:active {
-  cursor: grabbing;
-}
-.el-diagram-viewport.is-fullscreen {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 10005;
-  border-radius: 0;
-}
-
-.el-diagram-pan-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  transform-origin: 0 0;
-  will-change: transform;
-}
-
-.el-svg-connections {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 6000px;
-  height: 6000px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.el-diagram-nodes-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 6000px;
-  height: 6000px;
-  z-index: 2;
-}
-
-.el-diagram-hint {
-  position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #e2e8f0;
-  font-size: 12px;
-  padding: 6px 16px;
-  border-radius: 9999px;
-  pointer-events: none;
-  z-index: 5;
-}
-
-/* Diagram Node Card */
-.el-node-card {
-  position: absolute;
-  width: 240px;
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  color: #f8fafc;
   cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease), border-color var(--dur-fast), box-shadow var(--dur-fast);
-  overflow: hidden;
+  transition: all var(--dur-fast) var(--ease);
+}
+.el-crumb-back:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+.el-crumb-sep {
+  color: #94a3b8;
+  font-size: 13px;
   user-select: none;
 }
-.el-node-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(56, 189, 248, 0.6);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.2);
-}
-.el-node-card.is-selected {
-  border-color: #38bdf8;
-  box-shadow: 0 0 0 2px #38bdf8, 0 14px 34px rgba(0, 0, 0, 0.6);
-}
 
-.el-node-card-accent {
-  height: 4px;
+/* Explorer Search & Instant Jump Dropdown */
+.el-explorer-search-wrap {
+  position: relative;
+  min-width: 240px;
+  flex: 0 1 320px;
+  margin-left: auto;
+}
+.el-explorer-search-box {
+  min-width: 0 !important;
+  max-width: 100% !important;
   width: 100%;
+  background: #f8fafc;
+  padding: 5px 10px !important;
 }
-.el-node-card.type-mdb .el-node-card-accent { background: var(--type-mdb); }
-.el-node-card.type-db  .el-node-card-accent { background: var(--type-db); }
-.el-node-card.type-lp  .el-node-card-accent { background: var(--type-lp); }
-.el-node-card.type-mc  .el-node-card-accent { background: var(--type-mc); }
-.el-node-card.type-dv  .el-node-card-accent { background: var(--type-dv); }
-
-.el-node-card-content {
-  padding: 10px 12px;
+.el-explorer-search-box input {
+  font-size: 12.5px !important;
+}
+.el-explorer-search-box:focus-within {
+  background: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14);
 }
 
-.el-node-header {
+.el-search-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid var(--el-border);
+  border-radius: 8px;
+  box-shadow: var(--el-shadow-lg);
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 1000;
+  padding: 4px;
+}
+.el-search-drop-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 6px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 120ms ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+.el-search-drop-item:last-child {
+  border-bottom: none;
+}
+.el-search-drop-item:hover {
+  background: #f0f9ff;
 }
 
-.el-node-code {
-  font-family: var(--font-mono);
-  font-size: 13.5px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+/* Quick MDB Switcher Strip (Integrated inline inside .el-explorer-bar) */
+.el-mdb-quick-strip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  flex: 1;
+}
+.el-mdb-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--el-border-subtle);
+  background: var(--el-bg-surface-muted);
+  color: var(--el-ink-secondary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--dur-fast) var(--ease);
+}
+.el-mdb-pill:hover {
+  border-color: #0284c7;
+  color: #0d1e38;
+  background: #f0f9ff;
+}
+.el-mdb-pill.is-active {
+  background: #0d1e38;
+  border-color: #0d1e38;
   color: #ffffff;
 }
-
-.el-node-name {
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #cbd5e1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 8px;
+.el-mdb-pill-count {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.08);
+  color: inherit;
+}
+.el-mdb-pill.is-active .el-mdb-pill-count {
+  background: rgba(56, 189, 248, 0.25);
+  color: #7dd3fc;
 }
 
-.el-node-meta-row {
+/* Search Banner (Only shown when searching) */
+.el-explorer-section-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+}
+.el-explorer-section-title {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0369a1;
+}
+.el-mdb-count-pill {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #0369a1;
+}
+
+/* Compact MDB Cards Grid (4 columns x 2 rows on Desktop for balanced 8 MDB layout) */
+.el-mdb-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.el-mdb-home-card {
+  background: var(--el-bg-surface);
+  border: 1px solid var(--el-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--el-shadow-sm);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), border-color var(--dur-fast);
+}
+.el-mdb-home-card:hover {
+  transform: translateY(-2px);
+  border-color: #0284c7;
+  box-shadow: var(--el-shadow-md);
+}
+
+.el-mdb-card-top-bar {
+  height: 4px;
+  width: 100%;
+  background: var(--type-mdb);
+}
+.el-mdb-home-card.type-db .el-mdb-card-top-bar { background: var(--type-db); }
+.el-mdb-home-card.type-lp .el-mdb-card-top-bar { background: var(--type-lp); }
+.el-mdb-home-card.type-mc .el-mdb-card-top-bar { background: var(--type-mc); }
+.el-mdb-home-card.type-dv .el-mdb-card-top-bar { background: var(--type-dv); }
+
+.el-mdb-card-body {
+  padding: 15px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+.el-mdb-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.el-mdb-card-title-wrap {
+  min-width: 0;
+  flex: 1;
+}
+.el-mdb-card-code-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.el-mdb-card-code {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: #0d1e38;
+  line-height: 1.2;
+}
+.el-mdb-card-name {
+  font-size: 12.5px;
+  color: var(--el-ink-secondary);
+  margin-top: 4px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.el-mdb-card-thumb {
+  width: 78px;
+  height: 58px;
+  border-radius: 7px;
+  object-fit: cover;
+  border: 1px solid var(--el-border);
+  flex-shrink: 0;
+  background: #f1f5f9;
+}
+
+.el-mdb-card-specs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.el-mdb-spec-box {
+  background: var(--el-bg-surface-muted);
+  border: 1px solid var(--el-border-subtle);
+  border-radius: 7px;
+  padding: 7px 10px;
+}
+.el-mdb-spec-box.full-row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.el-mdb-spec-lbl {
+  display: block;
+  font-size: 11px;
+  color: var(--el-ink-muted);
+  line-height: 1.25;
+}
+.el-mdb-spec-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--el-ink);
+}
+
+.el-mdb-card-footer {
+  padding: 10px 16px;
+  background: #f8fafc;
+  border-top: 1px solid var(--el-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.el-mdb-subcount {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+}
+.el-mdb-open-cta {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0284c7;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* ==========================================================================
+   VIEW B: NODE DETAIL CARD VIEW (Compact & Space-Saving)
+   ========================================================================== */
+.el-detail-card {
+  background: var(--el-bg-surface);
+  border: 1px solid var(--el-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--el-shadow-md);
+}
+
+.el-detail-header {
+  background: #0d1e38;
+  color: #ffffff;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+.el-detail-header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.el-detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.el-detail-code {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.el-detail-subtitle {
+  font-size: 13px;
+  color: #94a3b8;
+}
+.el-detail-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.el-detail-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all var(--dur-fast);
+}
+.el-detail-close-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+/* Responsive 2-column on Desktop, 1-column on Mobile */
+.el-detail-body {
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: 365px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.el-detail-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.el-detail-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* Photo frame & Google Drive link bar */
+.el-detail-photo-card {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--el-border);
+  background: var(--el-bg-surface-muted);
+}
+.el-detail-photo-img {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  display: block;
+  cursor: zoom-in;
+}
+.el-detail-photo-empty {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--el-ink-muted);
+  background: #f8fafc;
+  font-size: 12.5px;
+}
+
+/* Technical Specs 2x2 Grid */
+.el-detail-spec-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.el-detail-spec-box {
+  background: #f8fafc;
+  border: 1px solid var(--el-border-subtle);
+  border-radius: 7px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.el-detail-spec-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+.el-detail-spec-value {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+.el-feeder-jump-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #0284c7;
+  text-decoration: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+.el-feeder-jump-link:hover {
+  text-decoration: underline;
+  color: #0369a1;
+}
+
+/* Downstream / Outgoing Circuits List (Multi-column grid on desktop to save vertical space!) */
+.el-downstream-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.el-downstream-title {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.el-downstream-filter {
+  margin-bottom: 2px;
+}
+.el-downstream-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.el-downstream-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 7px;
+  border: 1px solid var(--el-border-subtle);
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 120ms var(--ease);
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+.el-downstream-item:hover {
+  background: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.1);
+}
+.el-downstream-item-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+.el-downstream-text-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+.el-downstream-main-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+.el-downstream-code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.el-downstream-name {
+  font-size: 12.5px;
+  color: #475569;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.el-downstream-loc {
   font-size: 11.5px;
   color: #94a3b8;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 6px;
-  margin-top: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-.el-node-current {
+.el-downstream-item-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.el-downstream-sub-pill {
   font-family: var(--font-mono);
-  font-weight: 600;
-  color: #fde047;
-}
-
-.el-node-children-tag {
   font-size: 10.5px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 1px 6px;
-  border-radius: 4px;
-  color: #cbd5e1;
-}
-
-/* SVG Connection Lines */
-.el-conn-line {
-  fill: none;
-  stroke: #475569;
-  stroke-width: 2;
-  transition: stroke 0.2s;
-}
-.el-conn-line:hover, .el-conn-line.is-active {
-  stroke: #38bdf8;
-  stroke-width: 3;
-}
-.el-conn-text {
-  font-family: var(--font-mono);
-  font-size: 10px;
   font-weight: 600;
-  fill: #94a3b8;
-  text-anchor: middle;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: #e0f2fe;
+  color: #0369a1;
+}
+.el-downstream-amp {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #b45309;
+  text-align: right;
+}
+.el-downstream-arrow {
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 700;
+}
+.el-downstream-item:hover .el-downstream-arrow {
+  color: #0284c7;
 }
 
-/* Empty State */
-.el-empty-state {
+/* Detail Footer Actions */
+.el-detail-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+/* Empty State Card */
+.el-empty-state-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  color: #e2e8f0;
+  background: var(--el-bg-surface);
+  border: 1px dashed var(--el-border);
+  border-radius: 10px;
+  color: var(--el-ink);
   text-align: center;
-  padding: 40px;
+  padding: 36px 20px;
 }
 .el-empty-icon {
-  font-size: 48px;
-  margin-bottom: 14px;
+  font-size: 36px;
+  margin-bottom: 10px;
 }
-.el-empty-state h3 {
-  margin: 0 0 8px;
-  font-size: 20px;
+.el-empty-state-card h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
 }
-.el-empty-state p {
-  color: #94a3b8;
-  max-width: 440px;
-  margin: 0 0 20px;
+.el-empty-state-card p {
+  color: var(--el-ink-secondary);
+  max-width: 400px;
+  margin: 0 0 14px;
+  font-size: 13px;
+}
+
+/* ==========================================================================
+   HIGH-RESOLUTION / 100% SCALE DESKTOP SCALING (Viewport >= 1680px)
+   Automatically scales up cards, fonts, photos & spacing on Full HD 100%
+   while preserving the exact 125% layout (~1536px viewport).
+   ========================================================================== */
+@media (min-width: 1680px) {
+  .el-app-container {
+    max-width: 1920px;
+    padding: 16px 28px 44px;
+  }
+  .el-page-header {
+    padding: 13px 20px;
+    margin-bottom: 14px;
+    border-radius: 12px;
+  }
+  .el-page-title {
+    font-size: 19px;
+    gap: 9px;
+  }
+  .el-title-badge {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+  .el-tab-btn {
+    padding: 7px 15px;
+    font-size: 13.5px;
+  }
+  .el-kpi-chip {
+    padding: 6px 11px;
+    font-size: 12.5px;
+    border-radius: 7px;
+  }
+  .el-kpi-chip strong {
+    font-size: 14px;
+  }
+  .kpi-badge {
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+  .el-explorer-bar {
+    padding: 10px 16px;
+    margin-bottom: 14px;
+    border-radius: 12px;
+  }
+  .el-mdb-pill,
+  .el-crumb-btn,
+  .el-crumb-home,
+  .el-crumb-back {
+    padding: 6px 13px;
+    font-size: 13px;
+    border-radius: 7px;
+  }
+  .el-mdb-pill-count {
+    font-size: 11.5px;
+    padding: 1px 6px;
+  }
+  .el-explorer-search-wrap {
+    flex: 0 1 380px;
+  }
+  .el-explorer-search-box {
+    padding: 7px 14px !important;
+  }
+  .el-explorer-search-box input {
+    font-size: 13.5px !important;
+  }
+  .el-mdb-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  .el-mdb-home-card {
+    border-radius: 14px;
+  }
+  .el-mdb-card-top-bar {
+    height: 5px;
+  }
+  .el-mdb-card-body {
+    padding: 20px 22px;
+    gap: 15px;
+  }
+  .el-mdb-card-code {
+    font-size: 21px;
+  }
+  .el-mdb-card-name {
+    font-size: 14px;
+    margin-top: 5px;
+  }
+  .el-mdb-card-thumb {
+    width: 96px;
+    height: 72px;
+    border-radius: 8px;
+  }
+  .el-mdb-card-specs {
+    gap: 10px;
+  }
+  .el-mdb-spec-box {
+    padding: 10px 14px;
+    border-radius: 8px;
+  }
+  .el-mdb-spec-lbl {
+    font-size: 12px;
+  }
+  .el-mdb-spec-val {
+    font-size: 15px;
+  }
+  .el-mdb-card-footer {
+    padding: 12px 22px;
+  }
+  .el-mdb-subcount,
+  .el-mdb-open-cta {
+    font-size: 13.5px;
+  }
+  .el-sub-badge {
+    font-size: 12px;
+    padding: 2px 8px;
+  }
+
+  /* Detail View at 100% Scale */
+  .el-detail-card {
+    border-radius: 14px;
+  }
+  .el-detail-header {
+    padding: 14px 22px;
+  }
+  .el-detail-code {
+    font-size: 21px;
+  }
+  .el-detail-subtitle {
+    font-size: 14px;
+  }
+  .el-detail-body {
+    padding: 22px 24px;
+    grid-template-columns: 420px 1fr;
+    gap: 26px;
+  }
+  .el-detail-col-left {
+    gap: 16px;
+  }
+  .el-detail-col-right {
+    gap: 14px;
+  }
+  .el-detail-photo-img {
+    max-height: 285px;
+  }
+  .el-detail-spec-grid {
+    gap: 10px;
+  }
+  .el-detail-spec-box {
+    padding: 10px 14px;
+    border-radius: 8px;
+  }
+  .el-detail-spec-label {
+    font-size: 12px;
+  }
+  .el-detail-spec-value {
+    font-size: 15px;
+  }
+  .el-downstream-title {
+    font-size: 15px;
+  }
+  .el-downstream-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .el-downstream-item {
+    padding: 11px 15px;
+    border-radius: 8px;
+  }
+  .el-downstream-code {
+    font-size: 14px;
+  }
+  .el-downstream-name {
+    font-size: 13.5px;
+  }
+  .el-downstream-amp {
+    font-size: 13.5px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .el-mdb-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .el-detail-body {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px;
+    gap: 14px;
+  }
+  .el-detail-col-left,
+  .el-detail-col-right {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .el-explorer-search-wrap {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  .el-downstream-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .el-app-container {
+    padding: 8px 10px 32px;
+  }
+  .el-page-header {
+    padding: 10px 10px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+  }
+  .el-header-compact-row {
+    gap: 8px;
+  }
+  .el-header-left-group,
+  .el-header-right-group {
+    display: contents;
+  }
+  .el-page-title {
+    order: 1;
+    font-size: 15.5px;
+    gap: 6px;
+  }
+  .el-title-badge {
+    width: 24px;
+    height: 24px;
+    font-size: 13px;
+  }
+  .el-header-actions {
+    order: 2;
+    margin-left: auto;
+    gap: 5px;
+  }
+  .el-header-actions .btn-sm {
+    padding: 5px 8px;
+    font-size: 11.5px;
+  }
+  .el-view-tabs {
+    order: 3;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+    padding: 3px;
+  }
+  .el-tab-btn {
+    justify-content: center;
+    padding: 6px 4px;
+    font-size: 11px;
+    gap: 4px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .el-tab-btn svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+  .el-tab-count {
+    font-size: 9.5px;
+    padding: 0 4px;
+  }
+  .el-kpi-strip {
+    order: 4;
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 4px;
+    padding-bottom: 1px;
+  }
+  .el-kpi-strip::-webkit-scrollbar {
+    display: none;
+  }
+  .el-kpi-chip {
+    padding: 3px 6px;
+    font-size: 10.5px;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .el-kpi-chip strong {
+    font-size: 11.5px;
+  }
+
+  /* Explorer Bar on Mobile */
+  .el-explorer-bar {
+    padding: 8px 10px;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .el-mdb-quick-strip {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    width: 100%;
+    flex: 1 1 100%;
+    padding-bottom: 2px;
+  }
+  .el-mdb-quick-strip::-webkit-scrollbar {
+    display: none;
+  }
+  .el-explorer-nav {
+    width: 100%;
+    gap: 4px;
+  }
+  .el-crumb-btn,
+  .el-crumb-home,
+  .el-crumb-back {
+    padding: 4px 8px;
+    font-size: 11.5px;
+  }
+
+  /* MDB Home Cards on Mobile (2-Column Compact Grid) */
+  .el-mdb-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .el-mdb-home-card {
+    border-radius: 10px;
+  }
+  .el-mdb-card-body {
+    padding: 10px 10px;
+    gap: 8px;
+  }
+  .el-mdb-card-head {
+    gap: 6px;
+  }
+  .el-mdb-card-code-row {
+    gap: 4px;
+  }
+  .el-mdb-card-code {
+    font-size: 14.5px;
+  }
+  .el-mdb-card-name {
+    font-size: 11px;
+    margin-top: 2px;
+  }
+  .el-mdb-card-thumb {
+    width: 46px;
+    height: 36px;
+    border-radius: 5px;
+  }
+  .el-mdb-card-specs {
+    gap: 5px;
+  }
+  .el-mdb-spec-box {
+    padding: 5px 6px;
+    border-radius: 5px;
+    min-width: 0;
+  }
+  .el-mdb-spec-lbl {
+    font-size: 9.5px;
+  }
+  .el-mdb-spec-val {
+    font-size: 11px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .el-mdb-card-footer {
+    padding: 6px 10px;
+  }
+  .el-mdb-subcount,
+  .el-mdb-open-cta {
+    font-size: 11px;
+  }
+
+  /* Detail View on Mobile */
+  .el-detail-header {
+    padding: 10px 12px;
+  }
+  .el-detail-code {
+    font-size: 16.5px;
+  }
+  .el-detail-body {
+    padding: 10px 12px;
+    gap: 12px;
+  }
+  .el-detail-photo-img {
+    max-height: 200px;
+  }
+  .el-detail-spec-grid {
+    gap: 6px;
+  }
+  .el-detail-spec-box {
+    padding: 7px 9px;
+    min-width: 0;
+  }
+  .el-detail-spec-label {
+    font-size: 10px;
+  }
+  .el-detail-spec-value {
+    font-size: 12.5px;
+    word-break: break-word;
+  }
+  .el-downstream-item {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  .el-downstream-text-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+  }
+  .el-downstream-main-line {
+    width: 100%;
+  }
+  .el-downstream-code {
+    font-size: 12.5px;
+  }
+  .el-downstream-name {
+    font-size: 12px;
+  }
+  .el-downstream-loc {
+    font-size: 10.5px;
+    max-width: 100%;
+  }
+  .el-downstream-amp {
+    font-size: 12px;
+  }
+
+  /* Directory & Wiring Tables on Mobile */
+  .el-search-box {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+  .el-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 360px) {
+  .el-mdb-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* ==========================================================================
@@ -1097,13 +1903,142 @@ body {
   width: auto;
 }
 
+/* Searchable Custom Dropdown (Select2 style) */
+.el-custom-select {
+  position: relative;
+  width: 100%;
+}
+.el-custom-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  background: var(--el-bg-surface);
+}
+.el-custom-select.is-open .el-custom-select-trigger,
+.el-custom-select-trigger.is-open {
+  border-color: var(--el-primary);
+  box-shadow: 0 0 0 3px rgba(23, 100, 135, 0.15);
+}
+.el-custom-select-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.el-custom-select-arrow {
+  flex-shrink: 0;
+  color: var(--el-ink-secondary);
+  transition: transform var(--dur-fast) var(--ease);
+}
+.el-custom-select.is-open .el-custom-select-arrow,
+.el-custom-select-trigger.is-open .el-custom-select-arrow {
+  transform: rotate(180deg);
+  color: var(--el-primary);
+}
+.el-custom-select-dropdown {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.18);
+  z-index: 120;
+  overflow: hidden;
+}
+.el-wiring-floating-dropdown {
+  position: fixed;
+  right: auto;
+  z-index: 9999;
+}
+.el-custom-select-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--el-border-subtle);
+}
+.el-custom-select-search {
+  width: 100%;
+  padding: 6px 52px 6px 10px;
+  border: 1px solid var(--el-border);
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--el-ink);
+  background: #ffffff;
+  outline: none;
+}
+.el-custom-select-search:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.14);
+}
+.el-custom-select-search-icon {
+  position: absolute;
+  right: 14px;
+  color: #64748b;
+  pointer-events: none;
+}
+.el-custom-select-clear {
+  position: absolute;
+  right: 32px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.el-custom-select-clear:hover {
+  color: var(--el-ink);
+}
+.el-custom-select-options {
+  max-height: 230px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.el-custom-select-option {
+  padding: 6px 12px;
+  font-size: 12.5px;
+  color: var(--el-ink);
+  cursor: pointer;
+  line-height: 1.4;
+  transition: background 80ms ease;
+  word-break: break-word;
+}
+.el-custom-select-option:hover,
+.el-custom-select-option.is-highlighted {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+.el-custom-select-option.is-selected {
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+}
+.el-custom-select-empty {
+  padding: 12px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--el-ink-muted);
+}
+
 /* Modal */
 .el-modal {
   border: none;
   background: transparent;
   padding: 0;
-  max-width: 90vw;
-  width: 640px;
+  max-width: 95vw;
+  width: 960px;
 }
 .el-modal::backdrop {
   background: rgba(15, 23, 42, 0.6);
@@ -1247,55 +2182,189 @@ body {
   font-size: 13px;
 }
 
+/* Circuit Builder Section */
+.el-circuit-builder-section {
+  margin-top: 6px;
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.el-circuit-builder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.el-circuit-builder-title {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.el-circuit-builder-desc {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+.el-circuit-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.el-quick-panel {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 12px;
+  box-shadow: var(--el-shadow-sm);
+}
+.el-quick-panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+.el-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) 140px;
+  gap: 8px;
+  align-items: flex-end;
+}
+.el-label-sm {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  display: block;
+  margin-bottom: 3px;
+}
+.el-circuit-table-wrap {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  overflow-x: auto;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.el-circuit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.el-circuit-table thead th {
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.el-circuit-table tbody td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+.el-circuit-table tbody tr:hover {
+  background: #f8fafc;
+}
+.el-circuit-table .el-input,
+.el-circuit-table .el-select {
+  padding: 5px 8px;
+  font-size: 12.5px;
+  height: 32px;
+}
+.el-circuit-empty {
+  padding: 24px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 12.5px;
+  background: #ffffff;
+}
 .el-modal-footer {
-  padding: 16px 20px;
+  padding: 14px 20px;
   background: var(--el-bg-surface-muted);
   border-top: 1px solid var(--el-border);
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.el-modal-footer-left {
+  display: flex;
+  align-items: center;
+}
+.el-modal-footer-right {
+  display: flex;
+  align-items: center;
   gap: 10px;
+  margin-left: auto;
 }
 
 /* Lightbox Modal */
 .el-lightbox {
   border: none;
   background: transparent;
-  padding: 0;
-  max-width: 90vw;
-  max-height: 90vh;
+  padding: 20px;
+  max-width: 94vw;
+  max-height: 94vh;
+  overflow: visible;
+  outline: none;
 }
 .el-lightbox::backdrop {
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(6px);
 }
 .el-lightbox-inner {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .el-lightbox-inner img {
-  max-width: 90vw;
+  max-width: 88vw;
   max-height: 85vh;
   object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  border-radius: 10px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.65);
+  display: block;
 }
 .el-lightbox-close {
   position: absolute;
-  top: -14px;
-  right: -14px;
-  background: #ffffff;
-  color: #0f172a;
-  border: none;
+  top: 12px;
+  right: 12px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #ffffff;
+  border: 2px solid #ffffff;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  font-size: 20px;
+  width: 38px;
+  height: 38px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  z-index: 10;
+  transition: transform var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.el-lightbox-close:hover {
+  background: #dc2626;
+  transform: scale(1.08);
 }
 
 /* Responsive adjustments */
@@ -1592,8 +2661,8 @@ html, body {
   padding: 0;
 }
 .em-hamburger-btn:hover {
-  background: rgba(128, 24, 42, 0.28);
-  border-color: #80182a;
+  background: rgba(14, 165, 233, 0.2);
+  border-color: #38bdf8;
   color: #ffffff;
   transform: scale(1.04);
 }
@@ -1653,8 +2722,8 @@ html, body {
 .em-nav-link.active {
   color: #ffffff;
   font-weight: 600;
-  background: rgba(128, 24, 42, 0.22);
-  border-bottom-color: #80182a;
+  background: rgba(14, 165, 233, 0.18);
+  border-bottom-color: #38bdf8;
 }
 .em-caret {
   width: 12px;
@@ -1672,11 +2741,11 @@ html, body {
   top: calc(100% + 4px);
   left: 0;
   min-width: 180px;
-  background: #18313d;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #0f223d;
+  border: 1px solid rgba(56, 189, 248, 0.24);
   border-radius: 7px;
   padding: 5px;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+  box-shadow: 0 12px 28px rgba(7, 16, 33, 0.55);
   opacity: 0;
   visibility: hidden;
   transform: translateY(4px);
@@ -1698,9 +2767,9 @@ html, body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #94a3b8;
+  color: #7dd3fc;
   padding: 4px 8px 3px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.14);
   margin-bottom: 3px;
 }
 .em-dropdown-item {
@@ -1715,12 +2784,12 @@ html, body {
   transition: all 0.15s ease;
 }
 .em-dropdown-item:hover {
-  background: rgba(128, 24, 42, 0.3);
+  background: rgba(14, 165, 233, 0.22);
   color: #ffffff;
 }
 .em-dropdown-item.active {
-  background: rgba(128, 24, 42, 0.28);
-  color: #f3c4ce;
+  background: rgba(14, 165, 233, 0.25);
+  color: #7dd3fc;
   font-weight: 600;
 }
 .em-dept-badge {
@@ -1729,16 +2798,16 @@ html, body {
   font-weight: 700;
   font-size: 10px;
   padding: 1px 5px;
-  background: rgba(128, 24, 42, 0.38);
-  color: #f3c4ce;
-  border: 1px solid rgba(243, 196, 206, 0.45);
+  background: rgba(14, 165, 233, 0.18);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.38);
   border-radius: 4px;
 }
 .em-item-icon {
   font-size: 13px;
   width: 16px;
   text-align: center;
-  color: #d68a9a;
+  color: #38bdf8;
 }
 
 /* Right User Info Badge */
@@ -1777,7 +2846,7 @@ html, body {
   left: 0;
   bottom: 0;
   width: min(320px, 86vw);
-  background: #13242e;
+  background: #0a1728;
   color: #ffffff;
   z-index: 10003;
   transform: translateX(-100%);
@@ -1861,10 +2930,10 @@ html, body {
   color: #ffffff;
 }
 .em-drawer-link.active {
-  background: rgba(128, 24, 42, 0.3);
-  color: #f3c4ce;
+  background: rgba(14, 165, 233, 0.18);
+  color: #38bdf8;
   font-weight: 600;
-  border-left: 3px solid #80182a;
+  border-left: 3px solid #38bdf8;
 }
 .em-drawer-group {
   border-radius: 8px;
@@ -1902,7 +2971,7 @@ html, body {
 }
 .em-drawer-group-btn[aria-expanded="true"] .em-drawer-arrow {
   transform: rotate(180deg);
-  color: #f3c4ce;
+  color: #38bdf8;
 }
 .em-drawer-sublist {
   padding: 4px 8px 10px 32px;
@@ -1923,11 +2992,11 @@ html, body {
 }
 .em-drawer-subitem:hover {
   color: #ffffff;
-  background: rgba(128, 24, 42, 0.22);
+  background: rgba(14, 165, 233, 0.18);
 }
 .em-drawer-subitem.active {
-  color: #f3c4ce;
-  background: rgba(128, 24, 42, 0.28);
+  color: #38bdf8;
+  background: rgba(14, 165, 233, 0.22);
   font-weight: 600;
 }
 .em-drawer-footer {
@@ -1964,144 +3033,119 @@ html, body {
 
   <div class="el-app-container">
     
-    <!-- Top Header -->
+    <!-- Compact Top Header -->
     <header class="el-page-header">
-      <div class="el-header-main-row">
-        <div class="el-title-group">
-          <div class="el-title-with-pill">
-            <h1 class="el-page-title">
-              <span class="el-title-badge">⚡</span>
-              <span>แผนผังระบบไฟฟ้า</span>
-            </h1>
-            <span class="el-meta-pill">
-              <span class="el-status-dot pulse"></span>
-              ผังการจ่ายกระแสไฟฟ้า &middot; Single Line Distribution Diagram
-            </span>
+      <div class="el-header-compact-row">
+        <div class="el-header-left-group">
+          <h1 class="el-page-title">
+            <span class="el-title-badge">⚡</span>
+            <span>แผนผังระบบไฟฟ้า</span>
+          </h1>
+
+          <!-- View Navigation Tabs inline -->
+          <nav class="el-view-tabs" role="tablist">
+            <button type="button" class="el-tab-btn active" data-tab="diagram" role="tab" aria-selected="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>แผนผังโครงข่าย</span>
+            </button>
+            <button type="button" class="el-tab-btn" data-tab="directory" role="tab" aria-selected="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span>ทะเบียนตู้/อุปกรณ์</span>
+              <span class="el-tab-count" id="tab-count-all">0</span>
+            </button>
+            <button type="button" class="el-tab-btn" data-tab="wiring" role="tab" aria-selected="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
+              <span>จัดการสายจ่ายไฟ</span>
+            </button>
+          </nav>
+        </div>
+
+        <div class="el-header-right-group">
+          <!-- Compact KPI Chips -->
+          <div class="el-kpi-strip">
+            <button type="button" class="el-kpi-chip" data-filter-type="ALL" title="ดูทั้งหมด">
+              <span>ทั้งหมด</span>
+              <strong id="kpi-total">0</strong>
+            </button>
+            <button type="button" class="el-kpi-chip type-mdb" data-filter-type="MDB" title="ตู้จ่ายไฟหลัก (Main Board)">
+              <span class="kpi-badge badge-mdb">MDB</span>
+              <strong id="kpi-mdb">0</strong>
+            </button>
+            <button type="button" class="el-kpi-chip type-db" data-filter-type="DB" title="ตู้จ่ายไฟย่อย (Dist. Board)">
+              <span class="kpi-badge badge-db">DB</span>
+              <strong id="kpi-db">0</strong>
+            </button>
+            <button type="button" class="el-kpi-chip type-lp" data-filter-type="LP" title="แผงย่อยโหลด (Load Panel)">
+              <span class="kpi-badge badge-lp">LP</span>
+              <strong id="kpi-lp">0</strong>
+            </button>
+            <button type="button" class="el-kpi-chip type-mc" data-filter-type="MC" title="เครื่องจักร (Machine)">
+              <span class="kpi-badge badge-mc">MC</span>
+              <strong id="kpi-mc">0</strong>
+            </button>
+            <button type="button" class="el-kpi-chip type-dv" data-filter-type="DV" title="อุปกรณ์ไฟฟ้า (Device)">
+              <span class="kpi-badge badge-dv">DV</span>
+              <strong id="kpi-dv">0</strong>
+            </button>
           </div>
-          <p class="el-page-subtitle">บันทึกพิกัดตู้ MDB, DB, Load Panel, เครื่องจักร และผังการเชื่อมโยงระบบจ่ายไฟโรงงาน</p>
-        </div>
 
-        <div class="el-header-actions">
-          <button type="button" id="btn-refresh" class="btn btn-secondary" title="รีเฟรชข้อมูล">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-            <span>รีเฟรช</span>
-          </button>
-          <button type="button" id="btn-add-node" class="btn btn-primary" title="เพิ่มตู้ควบคุมหรืออุปกรณ์ใหม่">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span>เพิ่มตู้/อุปกรณ์</span>
-          </button>
+          <div class="el-header-actions">
+            <button type="button" id="btn-refresh" class="btn btn-secondary btn-sm" title="รีเฟรชข้อมูล">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <span>รีเฟรช</span>
+            </button>
+            <button type="button" id="btn-add-node" class="btn btn-primary btn-sm" title="เพิ่มตู้ควบคุมหรืออุปกรณ์ใหม่">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>เพิ่มตู้/อุปกรณ์</span>
+            </button>
+          </div>
         </div>
       </div>
-
-      <!-- KPI Summary Cards -->
-      <div class="el-kpi-grid">
-        <div class="el-kpi-card" data-filter-type="ALL">
-          <div class="el-kpi-label">ทั้งหมด</div>
-          <div class="el-kpi-value" id="kpi-total">0</div>
-          <div class="el-kpi-sub">ตู้และอุปกรณ์</div>
-        </div>
-        <div class="el-kpi-card type-mdb" data-filter-type="MDB">
-          <div class="el-kpi-label"><span class="kpi-badge badge-mdb">MDB</span> Main Board</div>
-          <div class="el-kpi-value" id="kpi-mdb">0</div>
-          <div class="el-kpi-sub">ตู้จ่ายไฟหลัก</div>
-        </div>
-        <div class="el-kpi-card type-db" data-filter-type="DB">
-          <div class="el-kpi-label"><span class="kpi-badge badge-db">DB</span> Dist. Board</div>
-          <div class="el-kpi-value" id="kpi-db">0</div>
-          <div class="el-kpi-sub">ตู้จ่ายไฟย่อย</div>
-        </div>
-        <div class="el-kpi-card type-lp" data-filter-type="LP">
-          <div class="el-kpi-label"><span class="kpi-badge badge-lp">LP</span> Load Panel</div>
-          <div class="el-kpi-value" id="kpi-lp">0</div>
-          <div class="el-kpi-sub">แผงย่อยโหลด</div>
-        </div>
-        <div class="el-kpi-card type-mc" data-filter-type="MC">
-          <div class="el-kpi-label"><span class="kpi-badge badge-mc">MC</span> Machine</div>
-          <div class="el-kpi-value" id="kpi-mc">0</div>
-          <div class="el-kpi-sub">เครื่องจักร</div>
-        </div>
-        <div class="el-kpi-card type-dv" data-filter-type="DV">
-          <div class="el-kpi-label"><span class="kpi-badge badge-dv">DV</span> Device</div>
-          <div class="el-kpi-value" id="kpi-dv">0</div>
-          <div class="el-kpi-sub">อุปกรณ์ไฟฟ้า</div>
-        </div>
-      </div>
-
-      <!-- View Navigation Tabs -->
-      <nav class="el-view-tabs" role="tablist">
-        <button type="button" class="el-tab-btn active" data-tab="diagram" role="tab" aria-selected="true">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-          <span>แผนผังโครงข่าย (Single Line Tree)</span>
-        </button>
-        <button type="button" class="el-tab-btn" data-tab="directory" role="tab" aria-selected="false">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-          <span>ทะเบียนตู้/อุปกรณ์ (Panel Directory)</span>
-          <span class="el-tab-count" id="tab-count-all">0</span>
-        </button>
-        <button type="button" class="el-tab-btn" data-tab="wiring" role="tab" aria-selected="false">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
-          <span>จัดการสายจ่ายไฟ (Quick Wiring)</span>
-        </button>
-      </nav>
     </header>
 
-    <!-- TAB 1: INTERACTIVE SINGLE LINE DIAGRAM -->
+    <!-- TAB 1: INTERACTIVE PANEL EXPLORER (MDB HOME & DRILL-DOWN DETAIL VIEW) -->
     <section id="tab-diagram" class="el-tab-content active" role="tabpanel">
-      <!-- Diagram Toolbar -->
-      <div class="el-diagram-toolbar">
-        <div class="el-toolbar-left">
-          <label class="el-filter-label" for="filter-tree-root">เลือกดูสายเมน:</label>
-          <select id="filter-tree-root" class="el-select el-select-sm">
-            <option value="ALL">ดูทุกสายเมน (All MDBs)</option>
-          </select>
+      <!-- Single Unified Toolbar: Breadcrumbs / Quick MDB Strip + Search -->
+      <div class="el-explorer-bar">
+        <div class="el-explorer-nav" id="explorer-breadcrumbs"></div>
+        <div class="el-mdb-quick-strip" id="explorer-mdb-strip"></div>
 
-          <label class="el-checkbox-label">
-            <input type="checkbox" id="toggle-show-machines">
-            <span>แสดงเครื่องจักร/โหลด (MC/DV)</span>
-          </label>
-        </div>
-
-        <div class="el-toolbar-right">
-          <div class="el-zoom-controls">
-            <button type="button" id="btn-zoom-in" class="btn-icon" title="ซูมเข้า (Zoom In)">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-            </button>
-            <span id="zoom-level-text" class="el-zoom-level">100%</span>
-            <button type="button" id="btn-zoom-out" class="btn-icon" title="ซูมออก (Zoom Out)">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-            </button>
-            <button type="button" id="btn-zoom-reset" class="btn-icon" title="รีเซ็ตขนาดปกติ (Fit View)">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-            </button>
+        <div class="el-explorer-search-wrap">
+          <div class="el-search-box el-explorer-search-box">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="explorer-search-input" placeholder="ค้นหารหัสตู้, ชื่อตู้, วงจรย่อย, สถานที่..." autocomplete="off">
+            <button type="button" id="explorer-search-clear" class="btn-clear" title="ล้างคำค้นหา" style="display:none;">&times;</button>
           </div>
-          <button type="button" id="btn-fullscreen" class="btn btn-secondary btn-sm" title="ขยายเต็มจอ">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-            <span>เต็มจอ</span>
-          </button>
+          <!-- Instant Search Results Dropdown -->
+          <div id="explorer-search-dropdown" class="el-search-dropdown" style="display:none;"></div>
         </div>
       </div>
 
-      <!-- Diagram Interactive Canvas -->
-      <div id="diagram-viewport" class="el-diagram-viewport">
-        <div id="diagram-pan-layer" class="el-diagram-pan-layer">
-          <svg id="diagram-svg-connections" class="el-svg-connections"></svg>
-          <div id="diagram-nodes-layer" class="el-diagram-nodes-layer"></div>
+      <!-- VIEW A: MDB HOME CARDS (Default initial screen & search results grid) -->
+      <div id="explorer-home-view" class="el-explorer-home">
+        <div class="el-explorer-section-head" id="explorer-search-banner" style="display:none;">
+          <span class="el-explorer-section-title" id="explorer-home-title">ผลการค้นหา</span>
+          <span class="el-mdb-count-pill" id="explorer-home-count">0 รายการ</span>
         </div>
 
-        <!-- Empty State in Diagram -->
-        <div id="diagram-empty-state" class="el-empty-state" style="display:none;">
+        <div id="explorer-mdb-grid" class="el-mdb-grid">
+          <!-- MDB Cards rendered here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="diagram-empty-state" class="el-empty-state-card" style="display:none;">
           <div class="el-empty-icon">⚡</div>
-          <h3>ยังไม่มีรายการตู้ควบคุมไฟฟ้า</h3>
-          <p>เริ่มต้นสร้างตู้จ่ายไฟหลัก (MDB) หรือตู้ย่อยในแท็บ "ทะเบียนตู้/อุปกรณ์" เพื่อเริ่มสร้างผัง</p>
+          <h3>ยังไม่มีรายการตู้ควบคุมหลัก (MDB)</h3>
+          <p>เริ่มต้นสร้างตู้จ่ายไฟหลัก (MDB) หรือตู้ย่อยเพื่อเริ่มใช้งานแผนผังโครงข่าย</p>
           <button type="button" class="btn btn-primary" onclick="document.getElementById('btn-add-node').click()">
             + เพิ่มตู้ใบแรก
           </button>
         </div>
+      </div>
 
-        <!-- Floating Hint -->
-        <div class="el-diagram-hint">
-          <span>💡 เลื่อนล้อเมาส์เพื่อซูม &middot; คลิกค้างลากเพื่อเลื่อนผัง &middot; คลิกตู้เพื่อดูข้อมูล</span>
-        </div>
+      <!-- VIEW B: NODE DETAIL CARD VIEW (Matches reference design, responsive for Mobile & Desktop) -->
+      <div id="explorer-detail-view" class="el-explorer-detail" style="display:none;">
+        <!-- Rendered dynamically by renderExplorerDetail() -->
       </div>
     </section>
 
@@ -2200,7 +3244,6 @@ html, body {
 
         <div class="el-filter-pills" id="wiring-type-pills">
           <button type="button" class="el-pill active" data-type="ALL">ทั้งหมด</button>
-          <button type="button" class="el-pill" data-type="MDB">MDB</button>
           <button type="button" class="el-pill" data-type="DB">DB</button>
           <button type="button" class="el-pill" data-type="LP">LP</button>
           <button type="button" class="el-pill" data-type="MC">MC</button>
@@ -2210,7 +3253,7 @@ html, body {
         <div class="el-status-filter">
           <select id="wiring-status-filter" class="el-select el-select-sm">
             <option value="ALL">ทุกสถานะสายเมน</option>
-            <option value="UNLINKED">เฉพาะสายอิสระ (ยังไม่ต่อ)</option>
+            <option value="UNLINKED" selected>เฉพาะสายอิสระ (ยังไม่ต่อ)</option>
             <option value="LINKED">เชื่อมต่อแล้ว</option>
             <option value="PENDING">เฉพาะรอยืนยัน</option>
           </select>
@@ -2253,6 +3296,16 @@ html, body {
             <button type="button" class="btn btn-secondary btn-sm" id="wiring-btn-next">ถัดไป &rarr;</button>
           </div>
         </div>
+      </div>
+
+      <!-- Shared Searchable Dropdown for Wiring Matrix -->
+      <div id="wiring-select-dropdown" class="el-custom-select-dropdown el-wiring-floating-dropdown" style="display:none;">
+        <div class="el-custom-select-search-wrap">
+          <input type="text" id="wiring-select-search" class="el-custom-select-search" placeholder="ค้นหารหัสตู้, ชื่อตู้ต้นทาง..." autocomplete="off">
+          <button type="button" id="wiring-select-search-clear" class="el-custom-select-clear" title="ล้างคำค้นหา" style="display:none;">&times;</button>
+          <svg class="el-custom-select-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </div>
+        <div id="wiring-select-options" class="el-custom-select-options font-mono" role="listbox"></div>
       </div>
     </section>
 
@@ -2318,10 +3371,16 @@ html, body {
 
       <!-- Connected Downstream Loads -->
       <div class="el-inspector-section">
-        <h4 class="el-section-title">
-          <span>ตู้และอุปกรณ์ที่รับไฟต่อไป</span>
-          <span id="inspect-children-count" class="el-sub-badge">0</span>
-        </h4>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h4 class="el-section-title" style="margin:0;">
+            <span>ตู้และอุปกรณ์ที่รับไฟต่อไป</span>
+            <span id="inspect-children-count" class="el-sub-badge">0</span>
+          </h4>
+          <button type="button" id="btn-inspect-add-child" class="btn btn-secondary btn-sm" title="เพิ่มอุปกรณ์ที่รับไฟจากตู้นี้">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>เพิ่มลูกตู้/วงจร</span>
+          </button>
+        </div>
         <div id="inspect-children-list" class="el-children-list">
           <div class="el-empty-sub">ไม่มีสายย่อยแยกจากตู้นี้</div>
         </div>
@@ -2407,10 +3466,22 @@ html, body {
           </div>
 
           <div class="el-form-field">
-            <label for="form-parent-id" class="el-label">รับไฟมาจาก (ตู้ต้นทาง Parent)</label>
-            <select id="form-parent-id" name="parentId" class="el-select font-mono">
-              <option value="">-- ไม่มี (เป็นตู้ประธาน MDB หรือยังไม่เชื่อมโยง) --</option>
-            </select>
+            <label for="parent-select-trigger" class="el-label">รับไฟมาจาก (ตู้ต้นทาง Parent)</label>
+            <div class="el-custom-select" id="parent-select-container">
+              <input type="hidden" id="form-parent-id" name="parentId" value="">
+              <button type="button" id="parent-select-trigger" class="el-select el-custom-select-trigger font-mono" aria-haspopup="listbox" aria-expanded="false">
+                <span id="parent-select-label" class="el-custom-select-label">-- ไม่มี (เป็นตู้ประธาน MDB หรือยังไม่เชื่อมโยง) --</span>
+                <svg class="el-custom-select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div id="parent-select-dropdown" class="el-custom-select-dropdown" style="display:none;">
+                <div class="el-custom-select-search-wrap">
+                  <input type="text" id="parent-select-search" class="el-custom-select-search" placeholder="ค้นหารหัสตู้, ชื่อตู้ต้นทาง..." autocomplete="off">
+                  <button type="button" id="parent-select-search-clear" class="el-custom-select-clear" title="ล้างคำค้นหา" style="display:none;">&times;</button>
+                  <svg class="el-custom-select-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <div id="parent-select-options" class="el-custom-select-options font-mono" role="listbox"></div>
+              </div>
+            </div>
             <small class="el-help">สามารถเว้นว่างไว้ก่อน แล้วค่อยมาเชื่อมโยงทีหลังได้</small>
           </div>
         </div>
@@ -2446,13 +3517,123 @@ html, body {
           </div>
         </div>
 
+        <!-- Section: Outgoing Circuits / Child Nodes (บันทึกจบในหน้าเดียว) -->
+        <div class="el-circuit-builder-section">
+          <div class="el-circuit-builder-header">
+            <div>
+              <h4 class="el-circuit-builder-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polyline></svg>
+                <span>รายการตู้ย่อย / วงจรย่อยที่รับไฟต่อไป (Outgoing Circuits)</span>
+                <span id="circuit-count-badge" class="el-sub-badge">0 รายการ</span>
+              </h4>
+              <p class="el-circuit-builder-desc">เพิ่มเบรกเกอร์ย่อย ตู้ลูก หรือเครื่องจักรที่รับไฟจากตู้นี้ได้ในหน้าเดียว ระบบจะบันทึกและผูกตู้ต้นทางให้อัตโนมัติ</p>
+            </div>
+            <div class="el-circuit-tools">
+              <button type="button" id="btn-add-circuit-row" class="btn btn-secondary btn-sm" title="เพิ่มแถวใหม่">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>เพิ่มแถว</span>
+              </button>
+              <button type="button" id="btn-add-circuit-5" class="btn btn-secondary btn-sm" title="เพิ่มทีละ 5 แถว">
+                <span>+ 5 แถว</span>
+              </button>
+              <button type="button" id="btn-circuit-auto-gen" class="btn btn-secondary btn-sm" title="สร้างรหัสชุดด่วน เช่น Q1-Q10">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>ชุดด่วน (Q1..)</span>
+              </button>
+              <button type="button" id="btn-circuit-excel-paste" class="btn btn-secondary btn-sm" title="วางข้อมูลจาก Excel">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                <span>แปะจาก Excel</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Auto Gen Box (Collapsible) -->
+          <div id="panel-auto-gen" class="el-quick-panel" style="display:none;">
+            <div class="el-quick-panel-title">⚡ สร้างชุดรหัสวงจรย่อยอัตโนมัติ</div>
+            <div class="el-quick-grid">
+              <div>
+                <label class="el-label-sm" for="auto-gen-prefix">คำนำหน้า (Prefix)</label>
+                <input type="text" id="auto-gen-prefix" class="el-input el-input-sm font-mono" value="Q" placeholder="เช่น Q, DB-, LP-">
+              </div>
+              <div>
+                <label class="el-label-sm" for="auto-gen-start">เริ่มจากเลข</label>
+                <input type="number" id="auto-gen-start" class="el-input el-input-sm font-mono" value="1" min="1" max="999">
+              </div>
+              <div>
+                <label class="el-label-sm" for="auto-gen-count">จำนวน (ช่อง)</label>
+                <input type="number" id="auto-gen-count" class="el-input el-input-sm font-mono" value="10" min="1" max="50">
+              </div>
+              <div>
+                <label class="el-label-sm" for="auto-gen-type">ประเภท</label>
+                <select id="auto-gen-type" class="el-select el-select-sm">
+                  <option value="DB">DB (ตู้ย่อย)</option>
+                  <option value="LP">LP (โหลดพาเนล)</option>
+                  <option value="MC">MC (เครื่องจักร)</option>
+                  <option value="DV" selected>DV (อุปกรณ์/เบรกเกอร์ย่อย)</option>
+                </select>
+              </div>
+              <div>
+                <label class="el-label-sm" for="auto-gen-amp">พิกัดกระแส (A)</label>
+                <input type="number" id="auto-gen-amp" class="el-input el-input-sm font-mono" value="160" min="0">
+              </div>
+              <div style="display:flex; align-items:flex-end; gap:6px;">
+                <button type="button" id="btn-run-auto-gen" class="btn btn-primary btn-sm">สร้างแถว</button>
+                <button type="button" id="btn-close-auto-gen" class="btn btn-secondary btn-sm">ปิด</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Excel Paste Box (Collapsible) -->
+          <div id="panel-excel-paste" class="el-quick-panel" style="display:none;">
+            <div class="el-quick-panel-title">📋 คัดลอกตารางจาก Excel หรือ ทะเบียนกลาง มาวาง</div>
+            <p class="el-help" style="margin-bottom:6px;">รองรับคอลัมน์: <strong>รหัสตู้/อุปกรณ์ [Tab] ชื่ออุปกรณ์ [Tab] ประเภท (DB/LP/MC/DV) [Tab] แอมป์ (A) [Tab] สถานที่</strong></p>
+            <textarea id="excel-paste-text" class="el-textarea font-mono" rows="4" placeholder="วางข้อมูลที่ Copy มาที่นี่... เช่น&#10;Q10	DB10-10 (28STD4)	DB	160	เสา 14&#10;Q11	MDB10 Spare	DV	160	ห้อง MDB&#10;Q12	LP 100A PP CAP	LP	100	อาคาร 1"></textarea>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+              <button type="button" id="btn-close-excel-paste" class="btn btn-secondary btn-sm">ยกเลิก</button>
+              <button type="button" id="btn-apply-excel-paste" class="btn btn-primary btn-sm">นำเข้าข้อมูลลงตาราง</button>
+            </div>
+          </div>
+
+          <!-- Outgoing Circuits Table -->
+          <div class="el-circuit-table-wrap">
+            <table class="el-circuit-table">
+              <thead>
+                <tr>
+                  <th style="width:36px; text-align:center;">#</th>
+                  <th style="width:130px;">รหัส / Tag Code *</th>
+                  <th>ชื่อตู้ / โหลดปลายทาง *</th>
+                  <th style="width:115px;">ประเภท</th>
+                  <th style="width:95px;">พิกัด (A)</th>
+                  <th style="width:150px;">สถานที่ติดตั้ง</th>
+                  <th style="width:40px; text-align:center;">ลบ</th>
+                </tr>
+              </thead>
+              <tbody id="circuit-table-body">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+            <div id="circuit-empty-state" class="el-circuit-empty">
+              <span>ยังไม่มีวงจรย่อย — กด <strong>"+ เพิ่มแถว"</strong>, <strong>"ชุดด่วน"</strong> หรือ <strong>"แปะจาก Excel"</strong> หากต้องการบันทึกรายการย่อยพร้อมตู้หลัก</span>
+            </div>
+          </div>
+        </div>
+
         <div id="form-error-msg" class="el-form-error" style="display:none;"></div>
 
         <div class="el-modal-footer">
-          <button type="button" id="btn-modal-cancel" class="btn btn-secondary">ยกเลิก</button>
-          <button type="submit" id="btn-modal-submit" class="btn btn-primary">
-            <span>บันทึกข้อมูล</span>
-          </button>
+          <div class="el-modal-footer-left">
+            <label class="el-checkbox-label" style="font-size:12.5px; user-select:none; cursor:pointer;">
+              <input type="checkbox" id="form-continuous-add">
+              <span>บันทึกแล้วเปิดฟอร์มตู้ถัดไปทันที (คงค่าสถานที่เดิม)</span>
+            </label>
+          </div>
+          <div class="el-modal-footer-right">
+            <button type="button" id="btn-modal-cancel" class="btn btn-secondary">ยกเลิก</button>
+            <button type="submit" id="btn-modal-submit" class="btn btn-primary">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              <span>บันทึกข้อมูลทั้งหมด</span>
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -2498,7 +3679,7 @@ html, body {
     padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
     font-family: inherit;
    }
-   .em-auth-title { font-size: 18px; font-weight: 700; color: #18313d; margin-bottom: 6px; }
+   .em-auth-title { font-size: 18px; font-weight: 700; color: #0d1e38; margin-bottom: 6px; }
    .em-auth-sub { font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.4; }
    .em-auth-field { margin-bottom: 14px; text-align: left; }
    .em-auth-label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; }
@@ -2506,12 +3687,12 @@ html, body {
     width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;
     box-sizing: border-box; transition: border-color 0.2s;
    }
-   .em-auth-input:focus { outline: none; border-color: #cc681c; box-shadow: 0 0 0 3px rgba(204, 104, 28, 0.15); }
+   .em-auth-input:focus { outline: none; border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
    .em-auth-btn {
-    width: 100%; padding: 10px; background: #cc681c; color: #ffffff; border: none; border-radius: 6px;
+    width: 100%; padding: 10px; background: #0284c7; color: #ffffff; border: none; border-radius: 6px;
     font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 8px;
    }
-   .em-auth-btn:hover { background: #b25814; }
+   .em-auth-btn:hover { background: #0369a1; }
    .em-auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
    .em-auth-err { font-size: 13px; color: #dc2626; margin-top: 10px; min-height: 18px; text-align: center; }
   `;
@@ -2803,12 +3984,12 @@ html, body {
 
     if (!currentUser) {
       if (badge) {
-        badge.innerHTML = '<button id="em-open-login" style="background:#cc681c;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s">เข้าสู่ระบบ</button>';
+        badge.innerHTML = '<button id="em-open-login" style="background:linear-gradient(135deg, #0284c7, #0369a1);color:#fff;border:1px solid rgba(56,189,248,0.4);border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(2,132,199,0.3)">เข้าสู่ระบบ</button>';
         const btn = document.getElementById('em-open-login');
         if (btn) btn.onclick = () => promptLogin();
       }
       if (drawerUserCard) {
-        drawerUserCard.innerHTML = '<div style="font-size:13px;color:#94a3b8;margin-bottom:8px">ยังไม่ได้เข้าสู่ระบบ</div><button id="em-drawer-open-login" style="width:100%;background:#cc681c;color:#fff;border:none;border-radius:6px;padding:8px;font-size:13px;font-weight:600;cursor:pointer">เข้าสู่ระบบ</button>';
+        drawerUserCard.innerHTML = '<div style="font-size:13px;color:#94a3b8;margin-bottom:8px">ยังไม่ได้เข้าสู่ระบบ</div><button id="em-drawer-open-login" style="width:100%;background:linear-gradient(135deg, #0284c7, #0369a1);color:#fff;border:1px solid rgba(56,189,248,0.4);border-radius:6px;padding:8px;font-size:13px;font-weight:600;cursor:pointer">เข้าสู่ระบบ</button>';
         const dBtn = document.getElementById('em-drawer-open-login');
         if (dBtn) dBtn.onclick = () => {
           const overlay = document.getElementById('em-drawer-overlay');
@@ -2848,7 +4029,7 @@ html, body {
     if (drawerUserCard) {
       drawerUserCard.innerHTML = `
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;border-radius:50%;background:#cc681c;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg, #1d4ed8, #0ea5e9);border:2px solid rgba(56,189,248,0.6);box-shadow:0 0 10px rgba(14,165,233,0.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">
             ${(currentUser.displayName || currentUser.username).charAt(0).toUpperCase()}
           </div>
           <div>
@@ -3019,17 +4200,24 @@ html, body {
     // Quick Wiring pagination & filters
     wiringFilterType: 'ALL',
     wiringSearchQuery: '',
-    wiringStatusFilter: 'ALL',
+    wiringStatusFilter: 'UNLINKED',
     wiringPage: 1,
     wiringPageSize: 50,
 
     selectedNodeId: null,
-    showMachines: false, // Default to FALSE so diagram renders instantly with 169 panels!
-    treeRootFilter: 'ALL',
-    panZoom: { x: 40, y: 40, scale: 1.0, isPanning: false, startX: 0, startY: 0 },
+    explorerSearchQuery: '',
+    downstreamFilterQuery: '',
     pendingWiring: new Map(), // id -> parentId
     formImage: null, // { mime, base64 } or null
-    removeImageFlag: false
+    removeImageFlag: false,
+    formRemovedChildIds: [],
+    parentExcludeId: null,
+    parentDropdownOpen: false,
+    parentHighlightIndex: -1,
+    wiringDropdownOpen: false,
+    wiringDropdownNodeId: null,
+    wiringDropdownTrigger: null,
+    wiringHighlightIndex: -1
   };
 
   // DOM Elements cache
@@ -3141,6 +4329,7 @@ html, body {
 
   // Switch Active Tab
   function switchTab(tabName) {
+    closeWiringDropdown();
     state.currentTab = tabName;
     document.querySelectorAll('.el-tab-btn').forEach(btn => {
       const active = btn.dataset.tab === tabName;
@@ -3164,249 +4353,649 @@ html, body {
     }
   }
 
+  // Natural sort comparator so MDB1, MDB2..MDB10 and Q1, Q2..Q10 sort numerically
+  function naturalCompare(a, b) {
+    return String(a.nodeCode || '').localeCompare(String(b.nodeCode || ''), undefined, {
+      numeric: true,
+      sensitivity: 'base'
+    });
+  }
+
+  function getNodeById(id) {
+    if (!id) return null;
+    return state.nodes.find(n => n.id === id) || null;
+  }
+
+  function getChildrenOf(parentId) {
+    if (!parentId) return [];
+    return state.nodes.filter(n => n.parentId === parentId).sort(naturalCompare);
+  }
+
+  function getAncestorsOf(nodeId) {
+    const chain = [];
+    const visited = new Set();
+    let curr = getNodeById(nodeId);
+    while (curr && !visited.has(curr.id)) {
+      visited.add(curr.id);
+      chain.unshift(curr);
+      curr = curr.parentId ? getNodeById(curr.parentId) : null;
+    }
+    return chain;
+  }
+
+  function getNodeDriveFileId(node) {
+    if (!node) return '';
+    const rawId = String(node.driveFileId || '').trim();
+    if (rawId) return rawId;
+    const rawUrl = String(node.imageUrl || '').trim();
+    return rawUrl.match(/\/d\/([\w-]{10,})/)?.[1]
+      || rawUrl.match(/[?&]id=([\w-]{10,})/)?.[1]
+      || '';
+  }
+
+  function getNodePhotoUrl(node) {
+    if (!node) return '';
+    const fileId = getNodeDriveFileId(node);
+    if (fileId) {
+      return `https://lh3.googleusercontent.com/d/${fileId}`;
+    }
+    const rawUrl = String(node.imageUrl || '').trim();
+    if (rawUrl && !rawUrl.includes('drive.google.com/file/d/')) {
+      return rawUrl;
+    }
+    return '';
+  }
+
   // ==========================================================================
-  // TAB 1: INTERACTIVE SINGLE LINE DIAGRAM
+  // TAB 1: PANEL EXPLORER (MDB HOME CARDS & DRILL-DOWN DETAIL VIEW)
   // ==========================================================================
+
+  function openNodeInExplorer(nodeId, options = {}) {
+    state.selectedNodeId = nodeId || null;
+    state.downstreamFilterQuery = '';
+    const drop = $('explorer-search-dropdown');
+    if (drop) drop.style.display = 'none';
+
+    if (state.currentTab !== 'diagram') {
+      switchTab('diagram');
+    } else {
+      renderDiagram();
+    }
+
+    if (options.scrollToTop !== false) {
+      const targetEl = $('tab-diagram');
+      if (targetEl) {
+        const rect = targetEl.getBoundingClientRect();
+        if (rect.top < 0 || rect.top > 260) {
+          window.scrollTo({ top: Math.max(0, window.scrollY + rect.top - 72), behavior: 'smooth' });
+        }
+      }
+    }
+  }
 
   function renderDiagram() {
-    const nodesLayer = $('diagram-nodes-layer');
-    const svgLayer = $('diagram-svg-connections');
+    const homeView = $('explorer-home-view');
+    const detailView = $('explorer-detail-view');
     const emptyState = $('diagram-empty-state');
-    if (!nodesLayer || !svgLayer) return;
+    const mdbGrid = $('explorer-mdb-grid');
+    if (!homeView || !detailView || !mdbGrid) return;
 
-    nodesLayer.innerHTML = '';
-    svgLayer.innerHTML = '';
+    renderMdbQuickStrip();
+    renderExplorerBreadcrumbs();
 
-    if (state.nodes.length === 0) {
-      emptyState.style.display = 'flex';
+    // If selectedNodeId is set, verify it still exists
+    const activeNode = state.selectedNodeId ? getNodeById(state.selectedNodeId) : null;
+    if (state.selectedNodeId && !activeNode) {
+      state.selectedNodeId = null;
+    }
+
+    if (activeNode) {
+      homeView.style.display = 'none';
+      detailView.style.display = 'block';
+      renderExplorerDetail(activeNode);
+    } else {
+      detailView.style.display = 'none';
+      homeView.style.display = 'block';
+      renderExplorerHome();
+    }
+  }
+
+  function renderMdbQuickStrip() {
+    const strip = $('explorer-mdb-strip');
+    if (!strip) return;
+
+    // Only show MDB quick strip when on Home View; when inside a panel, show Breadcrumbs instead so we keep a single compact bar!
+    const mdbs = state.nodes.filter(n => n.nodeType === 'MDB').sort(naturalCompare);
+    if (mdbs.length === 0 || state.selectedNodeId) {
+      strip.style.display = 'none';
       return;
     }
+    strip.style.display = 'flex';
+
+    let html = `
+      <button type="button" class="el-mdb-pill is-active" data-mdb-id="">
+        <span>⚡ MDB ทั้งหมด</span>
+        <span class="el-mdb-pill-count">${mdbs.length}</span>
+      </button>
+    `;
+
+    mdbs.forEach(m => {
+      const childCount = getChildrenOf(m.id).length;
+      html += `
+        <button type="button" class="el-mdb-pill" data-mdb-id="${m.id}" title="${escapeHtml(m.name)}">
+          <span>${escapeHtml(m.nodeCode)}</span>
+          <span class="el-mdb-pill-count">${childCount}</span>
+        </button>
+      `;
+    });
+
+    strip.innerHTML = html;
+
+    strip.querySelectorAll('.el-mdb-pill').forEach(btn => {
+      btn.onclick = () => {
+        const targetId = btn.dataset.mdbId;
+        if (!targetId) {
+          state.explorerSearchQuery = '';
+          const sInput = $('explorer-search-input');
+          const sClear = $('explorer-search-clear');
+          if (sInput) sInput.value = '';
+          if (sClear) sClear.style.display = 'none';
+          openNodeInExplorer(null, { scrollToTop: false });
+        } else {
+          openNodeInExplorer(targetId);
+        }
+      };
+    });
+  }
+
+  function renderExplorerBreadcrumbs() {
+    const nav = $('explorer-breadcrumbs');
+    if (!nav) return;
+
+    if (!state.selectedNodeId) {
+      nav.style.display = 'none';
+      nav.innerHTML = '';
+      return;
+    }
+    nav.style.display = 'flex';
+
+    const chain = getAncestorsOf(state.selectedNodeId);
+    const current = chain[chain.length - 1];
+    const parentId = current?.parentId || '';
+
+    let html = `
+      <button type="button" class="el-crumb-back" id="btn-explorer-back" title="ย้อนกลับไปขั้นก่อนหน้า">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>ย้อนกลับ</span>
+      </button>
+      <button type="button" class="el-crumb-home" data-jump-id="">
+        <span>🏠 MDB ทั้งหมด</span>
+      </button>
+    `;
+
+    chain.forEach((item, idx) => {
+      const isLast = idx === chain.length - 1;
+      html += `
+        <span class="el-crumb-sep">&rsaquo;</span>
+        <button type="button" class="el-crumb-btn${isLast ? ' is-active' : ''}" data-jump-id="${item.id}">
+          <span class="kpi-badge badge-${item.nodeType.toLowerCase()}">${escapeHtml(item.nodeType)}</span>
+          <span class="font-mono">${escapeHtml(item.nodeCode)}</span>
+        </button>
+      `;
+    });
+
+    nav.innerHTML = html;
+
+    $('btn-explorer-back')?.addEventListener('click', () => {
+      openNodeInExplorer(parentId || null);
+    });
+
+    nav.querySelectorAll('[data-jump-id]').forEach(btn => {
+      btn.onclick = () => {
+        const targetId = btn.dataset.jumpId;
+        openNodeInExplorer(targetId || null);
+      };
+    });
+  }
+
+  function renderExplorerHome() {
+    const mdbGrid = $('explorer-mdb-grid');
+    const emptyState = $('diagram-empty-state');
+    const searchBanner = $('explorer-search-banner');
+    const titleEl = $('explorer-home-title');
+    const countEl = $('explorer-home-count');
+    if (!mdbGrid || !emptyState) return;
+
+    const q = (state.explorerSearchQuery || '').trim().toLowerCase();
+    let cardsToShow = [];
+
+    if (q) {
+      cardsToShow = state.nodes.filter(n =>
+        (n.nodeCode || '').toLowerCase().includes(q) ||
+        (n.name || '').toLowerCase().includes(q) ||
+        (n.location || '').toLowerCase().includes(q) ||
+        (n.remark || '').toLowerCase().includes(q) ||
+        (n.parentCode || '').toLowerCase().includes(q)
+      ).sort(naturalCompare);
+
+      if (searchBanner) searchBanner.style.display = 'flex';
+      if (titleEl) titleEl.textContent = `ผลการค้นหา "${state.explorerSearchQuery}"`;
+      if (countEl) countEl.textContent = `${cardsToShow.length} รายการ`;
+    } else {
+      // Initial / Home screen: show ONLY MDB cards, no extra header banner!
+      cardsToShow = state.nodes.filter(n => n.nodeType === 'MDB').sort(naturalCompare);
+      if (searchBanner) searchBanner.style.display = 'none';
+    }
+
+    if (cardsToShow.length === 0) {
+      mdbGrid.innerHTML = '';
+      emptyState.style.display = 'flex';
+      const h3 = emptyState.querySelector('h3');
+      const p = emptyState.querySelector('p');
+      if (q) {
+        if (h3) h3.textContent = `ไม่พบตู้หรืออุปกรณ์ที่ตรงกับ "${state.explorerSearchQuery}"`;
+        if (p) p.textContent = 'ลองค้นหาด้วยรหัสตู้ ชื่อตู้ หรือสถานที่ติดตั้งอีกครั้ง';
+      } else {
+        if (h3) h3.textContent = 'ยังไม่มีรายการตู้ควบคุมหลัก (MDB)';
+        if (p) p.textContent = 'เริ่มต้นสร้างตู้จ่ายไฟหลัก (MDB) เพื่อเริ่มใช้งานแผนผังโครงข่าย';
+      }
+      return;
+    }
+
     emptyState.style.display = 'none';
 
-    // Filter nodes according to toolbar controls
-    let filteredNodes = state.nodes.slice();
-    if (!state.showMachines) {
-      filteredNodes = filteredNodes.filter(n => n.nodeType !== 'MC' && n.nodeType !== 'DV');
-    }
+    let html = '';
+    cardsToShow.forEach(node => {
+      const children = getChildrenOf(node.id);
+      const photoUrl = getNodePhotoUrl(node);
+      const fileId = getNodeDriveFileId(node);
+      const fallbackThumb = fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w300` : '';
+      const isMdb = node.nodeType === 'MDB';
+      const hasDistinctName = !isMdb && node.name && node.name.trim().toUpperCase() !== (node.nodeCode || '').trim().toUpperCase();
+      const subtitleText = hasDistinctName ? node.name : (node.location ? `📍 ${node.location}` : (node.name || 'ตู้จ่ายไฟหลัก'));
+      const parentInfo = node.parentCode ? `${escapeHtml(node.parentCode)}` : '';
 
-    // Build children mapping
-    const nodeMap = new Map();
-    const childrenMap = new Map();
-    filteredNodes.forEach(n => {
-      nodeMap.set(n.id, n);
-      childrenMap.set(n.id, []);
-    });
+      html += `
+        <article class="el-mdb-home-card type-${node.nodeType.toLowerCase()}" data-id="${node.id}">
+          <div class="el-mdb-card-top-bar"></div>
+          <div class="el-mdb-card-body">
+            <div class="el-mdb-card-head">
+              <div class="el-mdb-card-title-wrap">
+                <div class="el-mdb-card-code-row">
+                  <span class="kpi-badge badge-${node.nodeType.toLowerCase()}">${escapeHtml(node.nodeType)}</span>
+                  <span class="el-mdb-card-code">${escapeHtml(node.nodeCode)}</span>
+                </div>
+                <div class="el-mdb-card-name" title="${escapeHtml(subtitleText)}">${escapeHtml(subtitleText)}</div>
+              </div>
+              ${photoUrl ? `
+                <img src="${escapeHtml(photoUrl)}" class="el-mdb-card-thumb" alt="${escapeHtml(node.nodeCode)}" loading="lazy" data-fallback="${escapeHtml(fallbackThumb)}" onerror="if(this.dataset.fallback && this.src!==this.dataset.fallback){this.src=this.dataset.fallback;}else{this.style.display='none';}">
+              ` : ''}
+            </div>
 
-    const roots = [];
-    filteredNodes.forEach(n => {
-      if (n.parentId && nodeMap.has(n.parentId)) {
-        childrenMap.get(n.parentId).push(n);
-      } else {
-        roots.push(n);
-      }
-    });
-
-    // If root filter is active, only show the selected root tree
-    let effectiveRoots = roots;
-    if (state.treeRootFilter !== 'ALL') {
-      effectiveRoots = roots.filter(r => r.id === state.treeRootFilter);
-      if (effectiveRoots.length === 0) {
-        effectiveRoots = roots;
-      }
-    }
-
-    // Compute Left-to-Right Orthogonal Hierarchy Coordinates
-    const CARD_WIDTH = 240;
-    const CARD_HEIGHT = 100;
-    const GAP_X = 140; // horizontal distance between columns
-    const GAP_Y = 28;  // vertical distance between sibling cards
-
-    const positions = new Map(); // id -> { x, y }
-    let currentGlobalY = 40;
-
-    function layoutSubtree(nodeId, level) {
-      const children = childrenMap.get(nodeId) || [];
-      const x = 50 + level * (CARD_WIDTH + GAP_X);
-
-      if (children.length === 0) {
-        const y = currentGlobalY;
-        currentGlobalY += CARD_HEIGHT + GAP_Y;
-        positions.set(nodeId, { x, y });
-        return { topY: y, bottomY: y };
-      }
-
-      const childPositions = [];
-      children.forEach(child => {
-        childPositions.push(layoutSubtree(child.id, level + 1));
-      });
-
-      const firstChildY = childPositions[0].topY;
-      const lastChildY = childPositions[childPositions.length - 1].bottomY;
-      const y = Math.round((firstChildY + lastChildY) / 2);
-
-      positions.set(nodeId, { x, y });
-      return { topY: firstChildY, bottomY: lastChildY };
-    }
-
-    effectiveRoots.forEach(root => {
-      layoutSubtree(root.id, 0);
-      currentGlobalY += 30; // Extra gap between major trees
-    });
-
-    // Draw SVG connections first (busbars / power feed lines)
-    let svgLines = '';
-    filteredNodes.forEach(child => {
-      if (!child.parentId || !positions.has(child.id) || !positions.has(child.parentId)) return;
-
-      const pPos = positions.get(child.parentId);
-      const cPos = positions.get(child.id);
-
-      const x1 = pPos.x + CARD_WIDTH;
-      const y1 = pPos.y + (CARD_HEIGHT / 2);
-      const x2 = cPos.x;
-      const y2 = cPos.y + (CARD_HEIGHT / 2);
-      const xMid = Math.round((x1 + x2) / 2);
-
-      const d = `M ${x1} ${y1} H ${xMid} V ${y2} H ${x2}`;
-      const isSelected = state.selectedNodeId === child.id || state.selectedNodeId === child.parentId;
-
-      svgLines += `<path class="el-conn-line${isSelected ? ' is-active' : ''}" d="${d}" data-child-id="${child.id}" data-parent-id="${child.parentId}"></path>`;
-      
-      // Voltage / Current rating label on connecting busbar
-      if (child.currentRating > 0 && Math.abs(x2 - x1) > 60) {
-        svgLines += `<text class="el-conn-text" x="${xMid}" y="${y2 - 6}">${child.currentRating}A</text>`;
-      }
-    });
-    svgLayer.innerHTML = svgLines;
-
-    // Render node cards using DocumentFragment
-    const fragment = document.createDocumentFragment();
-    filteredNodes.forEach(node => {
-      if (!positions.has(node.id)) return;
-      const pos = positions.get(node.id);
-
-      const card = document.createElement('div');
-      card.className = `el-node-card type-${node.nodeType.toLowerCase()}${state.selectedNodeId === node.id ? ' is-selected' : ''}`;
-      card.style.left = pos.x + 'px';
-      card.style.top = pos.y + 'px';
-      card.dataset.id = node.id;
-
-      const children = childrenMap.get(node.id) || [];
-      const hasPhoto = Boolean(node.imageUrl || node.driveFileId);
-
-      card.innerHTML = `
-        <div class="el-node-card-accent"></div>
-        <div class="el-node-card-content">
-          <div class="el-node-header">
-            <span class="kpi-badge badge-${node.nodeType.toLowerCase()}">${escapeHtml(node.nodeType)}</span>
-            <span class="el-node-code">${escapeHtml(node.nodeCode)}</span>
-            ${hasPhoto ? '<span title="มีรูปภาพ" style="font-size:12px;">📷</span>' : ''}
+            <div class="el-mdb-card-specs">
+              <div class="el-mdb-spec-box">
+                <span class="el-mdb-spec-lbl">พิกัดกระแส</span>
+                <span class="el-mdb-spec-val font-mono">${node.currentRating ? node.currentRating + ' A' : '-'}</span>
+              </div>
+              <div class="el-mdb-spec-box">
+                <span class="el-mdb-spec-lbl">แรงดัน</span>
+                <span class="el-mdb-spec-val">${escapeHtml(node.voltage || '-')}</span>
+              </div>
+              ${hasDistinctName && node.location ? `
+                <div class="el-mdb-spec-box full-row">
+                  <span class="el-mdb-spec-lbl">สถานที่</span>
+                  <span class="el-mdb-spec-val">${escapeHtml(node.location)}</span>
+                </div>
+              ` : ''}
+              ${parentInfo ? `
+                <div class="el-mdb-spec-box full-row">
+                  <span class="el-mdb-spec-lbl">ต้นทาง</span>
+                  <span class="el-mdb-spec-val font-mono" style="color:#0284c7;">${parentInfo}</span>
+                </div>
+              ` : ''}
+            </div>
           </div>
-          <div class="el-node-name" title="${escapeHtml(node.name)}">${escapeHtml(node.name)}</div>
-          <div class="el-node-meta-row">
-            <span class="el-node-current">${node.currentRating ? node.currentRating + ' A' : '-'}</span>
-            ${children.length > 0 ? `<span class="el-node-children-tag">${children.length} สายย่อย</span>` : '<span style="font-size:11px;color:#94a3b8;">ปลายทาง</span>'}
+          <div class="el-mdb-card-footer">
+            <span class="el-mdb-subcount">
+              <span>🔌 วงจรย่อย:</span>
+              <span class="el-sub-badge">${children.length}</span>
+            </span>
+            <span class="el-mdb-open-cta">เปิดผัง &rarr;</span>
           </div>
+        </article>
+      `;
+    });
+
+    mdbGrid.innerHTML = html;
+
+    mdbGrid.querySelectorAll('.el-mdb-home-card').forEach(card => {
+      card.onclick = () => openNodeInExplorer(card.dataset.id);
+    });
+  }
+
+  function renderExplorerDetail(node) {
+    const detailContainer = $('explorer-detail-view');
+    if (!detailContainer) return;
+
+    const children = getChildrenOf(node.id);
+    const photoUrl = getNodePhotoUrl(node);
+    const fileId = getNodeDriveFileId(node);
+    const fallbackLarge = fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w800` : '';
+    const driveHref = fileId ? `https://drive.google.com/file/d/${fileId}/view` : '';
+    const hasDistinctName = node.name && node.name.trim().toUpperCase() !== (node.nodeCode || '').trim().toUpperCase();
+
+    const parentHtml = node.parentId && node.parentCode
+      ? `<a class="el-feeder-jump-link font-mono" id="detail-jump-parent" data-id="${node.parentId}">
+           <span>${escapeHtml(node.parentCode)} (${escapeHtml(node.parentName || '')})</span>
+           <span>&uarr;</span>
+         </a>`
+      : 'ตู้ประธาน (MDB) / ยังไม่เชื่อมโยง';
+
+    const filterVal = (state.downstreamFilterQuery || '').trim().toLowerCase();
+    const visibleChildren = filterVal
+      ? children.filter(c =>
+          (c.nodeCode || '').toLowerCase().includes(filterVal) ||
+          (c.name || '').toLowerCase().includes(filterVal) ||
+          (c.location || '').toLowerCase().includes(filterVal)
+        )
+      : children;
+
+    let childrenHtml = '';
+    if (children.length === 0) {
+      childrenHtml = `
+        <div class="el-empty-sub" style="grid-column: 1 / -1; padding:16px; text-align:center; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px;">
+          ไม่มีตู้หรืออุปกรณ์ย่อยที่ต่อออกจากรายการนี้ (ปลายทาง / End Load)
         </div>
       `;
-
-      card.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openInspector(node.id);
+    } else if (visibleChildren.length === 0) {
+      childrenHtml = `
+        <div class="el-empty-sub" style="grid-column: 1 / -1; padding:14px; text-align:center; background:#f8fafc; border-radius:8px;">
+          ไม่พบลูกตู้ที่ตรงกับคำค้นหา "${escapeHtml(state.downstreamFilterQuery)}"
+        </div>
+      `;
+    } else {
+      visibleChildren.forEach(c => {
+        const subCount = getChildrenOf(c.id).length;
+        const showLoc = c.location && c.location !== node.location;
+        childrenHtml += `
+          <div class="el-downstream-item" data-child-id="${c.id}" title="${escapeHtml(c.nodeCode)} - ${escapeHtml(c.name)}">
+            <div class="el-downstream-item-left">
+              <span class="kpi-badge badge-${c.nodeType.toLowerCase()}">${escapeHtml(c.nodeType)}</span>
+              <div class="el-downstream-text-group">
+                <div class="el-downstream-main-line">
+                  <strong class="el-downstream-code">${escapeHtml(c.nodeCode)}</strong>
+                  <span class="el-downstream-name">${escapeHtml(c.name)}</span>
+                </div>
+                ${showLoc ? `<span class="el-downstream-loc">&middot; ${escapeHtml(c.location)}</span>` : ''}
+              </div>
+            </div>
+            <div class="el-downstream-item-right">
+              ${subCount > 0 ? `<span class="el-downstream-sub-pill">${subCount}</span>` : ''}
+              <span class="el-downstream-amp">${c.currentRating ? c.currentRating + 'A' : ''}</span>
+              <span class="el-downstream-arrow">&rsaquo;</span>
+            </div>
+          </div>
+        `;
       });
-
-      fragment.appendChild(card);
-    });
-
-    nodesLayer.appendChild(fragment);
-
-    applyPanZoomTransform();
-  }
-
-  function applyPanZoomTransform() {
-    const panLayer = $('diagram-pan-layer');
-    if (panLayer) {
-      const { x, y, scale } = state.panZoom;
-      panLayer.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-      const zoomText = $('zoom-level-text');
-      if (zoomText) zoomText.textContent = Math.round(scale * 100) + '%';
     }
+
+    detailContainer.innerHTML = `
+      <div class="el-detail-card">
+        <!-- Compact Dark Navy Header -->
+        <div class="el-detail-header">
+          <div class="el-detail-header-left">
+            <div class="el-detail-title-row">
+              <span class="kpi-badge badge-${node.nodeType.toLowerCase()}">${escapeHtml(node.nodeType)}</span>
+              <h2 class="el-detail-code">${escapeHtml(node.nodeCode)}</h2>
+            </div>
+            ${hasDistinctName ? `<div class="el-detail-subtitle">${escapeHtml(node.name)}</div>` : ''}
+          </div>
+
+          <div class="el-detail-header-actions">
+            <button type="button" class="el-detail-close-btn" id="btn-detail-close" title="ปิดและกลับไปหน้าหลัก MDB" aria-label="ปิด">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Responsive Body: 2 columns on Desktop, 1 column on Mobile -->
+        <div class="el-detail-body">
+          <!-- Left Column: Photo, Technical Specs, Remark, Actions -->
+          <div class="el-detail-col-left">
+            <div class="el-detail-photo-card">
+              ${photoUrl ? `
+                <img src="${escapeHtml(photoUrl)}" class="el-detail-photo-img" id="detail-photo-img" alt="${escapeHtml(node.nodeCode)}" data-fallback="${escapeHtml(fallbackLarge)}" onerror="if(this.dataset.fallback && this.src!==this.dataset.fallback){this.src=this.dataset.fallback;}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
+                <div class="el-detail-photo-empty" style="display:none;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  <span>ไม่มีรูปภาพในระบบ</span>
+                </div>
+              ` : `
+                <div class="el-detail-photo-empty">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  <span>ไม่มีรูปภาพในระบบ</span>
+                </div>
+              `}
+              ${driveHref ? `
+                <a href="${escapeHtml(driveHref)}" target="_blank" rel="noopener noreferrer" class="el-drive-link" style="padding:5px 10px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                  <span>เปิดดูใน Google Drive</span>
+                </a>
+              ` : ''}
+            </div>
+
+            <div>
+              <h4 class="el-section-title" style="margin-bottom:6px; font-size:11.5px;">ข้อมูลทางเทคนิค (TECHNICAL SPECS)</h4>
+              <div class="el-detail-spec-grid">
+                <div class="el-detail-spec-box">
+                  <span class="el-detail-spec-label">พิกัดกระแส (Rating)</span>
+                  <span class="el-detail-spec-value font-mono">${node.currentRating ? node.currentRating + ' A' : '-'}</span>
+                </div>
+                <div class="el-detail-spec-box">
+                  <span class="el-detail-spec-label">ระดับแรงดัน (Voltage)</span>
+                  <span class="el-detail-spec-value">${escapeHtml(node.voltage || '-')}</span>
+                </div>
+                <div class="el-detail-spec-box">
+                  <span class="el-detail-spec-label">สถานที่ติดตั้ง (Location)</span>
+                  <span class="el-detail-spec-value">${escapeHtml(node.location || '-')}</span>
+                </div>
+                <div class="el-detail-spec-box">
+                  <span class="el-detail-spec-label">ตู้ต้นทาง (Feeder Source)</span>
+                  <span class="el-detail-spec-value">${parentHtml}</span>
+                </div>
+              </div>
+            </div>
+
+            ${node.remark && node.remark !== '-' ? `
+              <div>
+                <h4 class="el-section-title" style="margin-bottom:4px; font-size:11.5px;">หมายเหตุ / ข้อมูลเพิ่มเติม</h4>
+                <p class="el-inspector-remark" style="padding:7px 10px; font-size:12px;">${escapeHtml(node.remark)}</p>
+              </div>
+            ` : ''}
+
+            <div class="el-detail-footer">
+              <button type="button" id="btn-detail-edit" class="btn btn-secondary btn-sm" style="flex:1;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                <span>แก้ไขข้อมูล</span>
+              </button>
+              <button type="button" id="btn-detail-delete" class="btn btn-danger-ghost btn-sm" title="ลบตู้/อุปกรณ์นี้">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Column: Downstream Connected Panels / Circuits -->
+          <div class="el-detail-col-right">
+            <div class="el-downstream-header">
+              <h4 class="el-downstream-title">
+                <span>ตู้และอุปกรณ์ที่รับไฟต่อไป</span>
+                <span class="el-sub-badge">${children.length}</span>
+              </h4>
+              <button type="button" id="btn-detail-add-child" class="btn btn-secondary btn-sm">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>เพิ่มลูกตู้/วงจร</span>
+              </button>
+            </div>
+
+            ${children.length > 6 ? `
+              <div class="el-downstream-filter">
+                <input type="text" id="detail-downstream-search" class="el-input el-select-sm" style="width:100%;" placeholder="กรองค้นหาลูกตู้/วงจรใน ${escapeHtml(node.nodeCode)}..." value="${escapeHtml(state.downstreamFilterQuery)}">
+              </div>
+            ` : ''}
+
+            <div class="el-downstream-list" id="detail-downstream-list">
+              ${childrenHtml}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Wire up detail events
+    $('btn-detail-close')?.addEventListener('click', () => {
+      openNodeInExplorer(null);
+    });
+
+    $('detail-photo-img')?.addEventListener('click', () => {
+      openLightbox(photoUrl);
+    });
+
+    $('detail-jump-parent')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openNodeInExplorer(node.parentId);
+    });
+
+    $('btn-detail-add-child')?.addEventListener('click', () => {
+      openCreateModal({
+        parentId: node.id,
+        location: node.location,
+        voltage: node.voltage
+      });
+    });
+
+    $('btn-detail-edit')?.addEventListener('click', () => {
+      openEditModal(node.id);
+    });
+
+    $('btn-detail-delete')?.addEventListener('click', () => {
+      confirmDeleteNode(node.id);
+    });
+
+    const dsSearch = $('detail-downstream-search');
+    if (dsSearch) {
+      dsSearch.addEventListener('input', (e) => {
+        state.downstreamFilterQuery = e.target.value;
+        const pos = dsSearch.selectionStart;
+        renderExplorerDetail(node);
+        const newInput = $('detail-downstream-search');
+        if (newInput) {
+          newInput.focus();
+          if (typeof pos === 'number') newInput.setSelectionRange(pos, pos);
+        }
+      });
+    }
+
+    detailContainer.querySelectorAll('.el-downstream-item').forEach(item => {
+      item.onclick = () => {
+        openNodeInExplorer(item.dataset.childId);
+      };
+    });
   }
 
-  // Diagram Zoom & Pan Event Listeners
-  function initDiagramPanZoom() {
-    const viewport = $('diagram-viewport');
-    if (!viewport) return;
+  function initExplorerSearch() {
+    const searchInput = $('explorer-search-input');
+    const clearBtn = $('explorer-search-clear');
+    const dropdown = $('explorer-search-dropdown');
+    if (!searchInput) return;
 
-    // Pan with mouse drag
-    viewport.addEventListener('mousedown', (e) => {
-      if (e.target.closest('.el-node-card')) return;
-      state.panZoom.isPanning = true;
-      state.panZoom.startX = e.clientX - state.panZoom.x;
-      state.panZoom.startY = e.clientY - state.panZoom.y;
+    function updateSearchDropdown(query) {
+      if (!dropdown) return;
+      const q = (query || '').trim().toLowerCase();
+      if (!q || !state.selectedNodeId) {
+        dropdown.style.display = 'none';
+        return;
+      }
+
+      const matches = state.nodes.filter(n =>
+        (n.nodeCode || '').toLowerCase().includes(q) ||
+        (n.name || '').toLowerCase().includes(q) ||
+        (n.location || '').toLowerCase().includes(q)
+      ).sort(naturalCompare).slice(0, 15);
+
+      if (matches.length === 0) {
+        dropdown.innerHTML = `<div style="padding:12px; color:#64748b; font-size:13px; text-align:center;">ไม่พบตู้หรืออุปกรณ์ที่ตรงกับ "${escapeHtml(query)}"</div>`;
+        dropdown.style.display = 'block';
+        return;
+      }
+
+      let html = '';
+      matches.forEach(m => {
+        html += `
+          <div class="el-search-drop-item" data-id="${m.id}">
+            <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+              <span class="kpi-badge badge-${m.nodeType.toLowerCase()}">${escapeHtml(m.nodeType)}</span>
+              <strong class="font-mono" style="color:#0f172a;">${escapeHtml(m.nodeCode)}</strong>
+              <span style="color:#475569; font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(m.name)}</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+              ${m.parentCode ? `<span class="font-mono" style="font-size:11px; color:#0284c7;">&larr; ${escapeHtml(m.parentCode)}</span>` : ''}
+              <span class="font-mono" style="font-size:12px; font-weight:600; color:#b45309;">${m.currentRating ? m.currentRating + 'A' : ''}</span>
+            </div>
+          </div>
+        `;
+      });
+      dropdown.innerHTML = html;
+      dropdown.style.display = 'block';
+
+      dropdown.querySelectorAll('.el-search-drop-item').forEach(item => {
+        item.onclick = () => {
+          dropdown.style.display = 'none';
+          searchInput.value = '';
+          state.explorerSearchQuery = '';
+          if (clearBtn) clearBtn.style.display = 'none';
+          openNodeInExplorer(item.dataset.id);
+        };
+      });
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const val = e.target.value;
+      state.explorerSearchQuery = val.trim();
+      if (clearBtn) clearBtn.style.display = state.explorerSearchQuery ? 'inline-block' : 'none';
+
+      if (state.selectedNodeId) {
+        updateSearchDropdown(state.explorerSearchQuery);
+      } else {
+        if (dropdown) dropdown.style.display = 'none';
+        renderExplorerHome();
+      }
     });
 
-    window.addEventListener('mousemove', (e) => {
-      if (!state.panZoom.isPanning) return;
-      state.panZoom.x = e.clientX - state.panZoom.startX;
-      state.panZoom.y = e.clientY - state.panZoom.startY;
-      applyPanZoomTransform();
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && state.explorerSearchQuery) {
+        e.preventDefault();
+        if (dropdown) dropdown.style.display = 'none';
+        // Switch to Home grid showing all search results if currently inside a node
+        if (state.selectedNodeId) {
+          state.selectedNodeId = null;
+          renderDiagram();
+        }
+      }
     });
 
-    window.addEventListener('mouseup', () => {
-      state.panZoom.isPanning = false;
+    clearBtn?.addEventListener('click', () => {
+      searchInput.value = '';
+      state.explorerSearchQuery = '';
+      clearBtn.style.display = 'none';
+      if (dropdown) dropdown.style.display = 'none';
+      if (!state.selectedNodeId) {
+        renderExplorerHome();
+      }
     });
 
-    // Zoom with scroll wheel
-    viewport.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const delta = e.deltaY > 0 ? -0.1 : 0.1;
-      const newScale = Math.min(2.5, Math.max(0.3, state.panZoom.scale + delta));
-      
-      const rect = viewport.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      state.panZoom.x = mouseX - (mouseX - state.panZoom.x) * (newScale / state.panZoom.scale);
-      state.panZoom.y = mouseY - (mouseY - state.panZoom.y) * (newScale / state.panZoom.scale);
-      state.panZoom.scale = newScale;
-
-      applyPanZoomTransform();
-    }, { passive: false });
-
-    // Zoom buttons
-    $('btn-zoom-in')?.addEventListener('click', () => {
-      state.panZoom.scale = Math.min(2.5, state.panZoom.scale + 0.15);
-      applyPanZoomTransform();
-    });
-    $('btn-zoom-out')?.addEventListener('click', () => {
-      state.panZoom.scale = Math.max(0.3, state.panZoom.scale - 0.15);
-      applyPanZoomTransform();
-    });
-    $('btn-zoom-reset')?.addEventListener('click', () => {
-      state.panZoom.scale = 1.0;
-      state.panZoom.x = 40;
-      state.panZoom.y = 40;
-      applyPanZoomTransform();
-    });
-
-    // Fullscreen toggle
-    $('btn-fullscreen')?.addEventListener('click', () => {
-      viewport.classList.toggle('is-fullscreen');
-      const isFull = viewport.classList.contains('is-fullscreen');
-      $('btn-fullscreen').querySelector('span').textContent = isFull ? 'ออกเต็มจอ' : 'เต็มจอ';
-    });
-
-    // Tree root filter
-    $('filter-tree-root')?.addEventListener('change', (e) => {
-      state.treeRootFilter = e.target.value;
-      renderDiagram();
-    });
-
-    // Toggle show machines
-    $('toggle-show-machines')?.addEventListener('change', (e) => {
-      state.showMachines = e.target.checked;
-      renderDiagram();
+    document.addEventListener('click', (e) => {
+      if (dropdown && !e.target.closest('.el-explorer-search-wrap')) {
+        dropdown.style.display = 'none';
+      }
     });
   }
 
@@ -3473,14 +5062,16 @@ html, body {
 
     let html = '';
     pagedItems.forEach(node => {
-      const thumbUrl = node.imageUrl || (node.driveFileId ? `https://drive.google.com/thumbnail?id=${node.driveFileId}&sz=w100` : '');
+      const thumbUrl = getNodePhotoUrl(node);
+      const fileId = getNodeDriveFileId(node);
+      const fallbackThumb = fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w200` : '';
       const parentLabel = node.parentCode ? `${escapeHtml(node.parentCode)} - ${escapeHtml(node.parentName)}` : '<span style="color:#94a3b8;">- เมนหลัก / ยังไม่ต่อ -</span>';
 
       html += `
         <tr data-id="${node.id}">
           <td>
             ${thumbUrl ? `
-              <img src="${escapeHtml(thumbUrl)}" class="el-table-thumbnail" alt="ตู้" data-large="${escapeHtml(node.imageUrl || thumbUrl)}">
+              <img src="${escapeHtml(thumbUrl)}" class="el-table-thumbnail" alt="ตู้" data-large="${escapeHtml(thumbUrl)}" data-fallback="${escapeHtml(fallbackThumb)}" onerror="if(this.dataset.fallback && this.src!==this.dataset.fallback){this.src=this.dataset.fallback;}else{this.style.display='none';}">
             ` : `
               <div class="el-table-thumb-empty">⚡</div>
             `}
@@ -3568,8 +5159,8 @@ html, body {
       return;
     }
 
-    // 1. Filter nodes
-    let items = state.nodes.slice();
+    // 1. Filter nodes (Exclude MDB since MDB is a main root board)
+    let items = state.nodes.filter(n => n.nodeType !== 'MDB');
 
     if (state.wiringFilterType !== 'ALL') {
       items = items.filter(n => n.nodeType === state.wiringFilterType);
@@ -3586,10 +5177,8 @@ html, body {
 
     if (state.wiringStatusFilter === 'UNLINKED') {
       items = items.filter(n => {
-        const effectiveParent = state.pendingWiring.has(n.id)
-          ? state.pendingWiring.get(n.id)
-          : n.parentId;
-        return !effectiveParent;
+        if (state.pendingWiring.has(n.id)) return true;
+        return !n.parentId;
       });
     } else if (state.wiringStatusFilter === 'LINKED') {
       items = items.filter(n => {
@@ -3626,21 +5215,14 @@ html, body {
       return;
     }
 
-    // Feeder candidates: Power feeds come exclusively from distribution panels (MDB, DB, LP)
-    const feederCandidates = state.nodes.filter(n => n.nodeType === 'MDB' || n.nodeType === 'DB' || n.nodeType === 'LP');
-
     let html = '';
     pagedItems.forEach(node => {
       const currentParentId = state.pendingWiring.has(node.id)
         ? state.pendingWiring.get(node.id)
         : (node.parentId || '');
 
-      let options = '<option value="">-- เป็นตู้ประธานหลัก (MDB) หรือยังไม่เชื่อมโยง --</option>';
-      feederCandidates.forEach(opt => {
-        if (opt.id === node.id) return; // Prevent picking self
-        const selected = opt.id === currentParentId ? ' selected' : '';
-        options += `<option value="${opt.id}"${selected}>${escapeHtml(opt.nodeCode)} - ${escapeHtml(opt.name)} (${opt.nodeType})</option>`;
-      });
+      const parentNode = currentParentId ? state.nodes.find(n => n.id === currentParentId) : null;
+      const selectedLabel = getParentOptionLabel(parentNode);
 
       const isChanged = state.pendingWiring.has(node.id) && state.pendingWiring.get(node.id) !== (node.parentId || '');
       const statusPill = getWiringStatusBadge(isChanged, currentParentId);
@@ -3653,9 +5235,10 @@ html, body {
           <td class="font-mono">${node.currentRating ? node.currentRating + ' A' : '-'}</td>
           <td>${escapeHtml(node.location || '-')}</td>
           <td>
-            <select class="el-select el-wiring-select" data-id="${node.id}" style="width:100%;">
-              ${options}
-            </select>
+            <button type="button" class="el-select el-custom-select-trigger el-wiring-select-trigger font-mono" data-id="${node.id}" data-value="${escapeHtml(currentParentId)}" aria-haspopup="listbox" aria-expanded="false">
+              <span class="el-custom-select-label">${escapeHtml(selectedLabel)}</span>
+              <svg class="el-custom-select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
           </td>
           <td class="wiring-status-cell">${statusPill}</td>
         </tr>
@@ -3663,38 +5246,18 @@ html, body {
     });
 
     tbody.innerHTML = html;
+    closeWiringDropdown();
 
-    // Attach wiring change listener: TARGETED ROW UPDATE (Instant 60fps)
-    tbody.querySelectorAll('.el-wiring-select').forEach(sel => {
-      sel.onchange = (e) => {
-        const nodeId = sel.dataset.id;
-        const newParentId = e.target.value;
-        const node = state.nodes.find(n => n.id === nodeId);
-        const origParentId = node?.parentId || '';
-
-        if (newParentId === origParentId) {
-          state.pendingWiring.delete(nodeId);
+    tbody.querySelectorAll('.el-wiring-select-trigger').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (state.wiringDropdownOpen && state.wiringDropdownNodeId === btn.dataset.id) {
+          closeWiringDropdown();
         } else {
-          state.pendingWiring.set(nodeId, newParentId);
+          openWiringDropdown(btn);
         }
-
-        const isChanged = state.pendingWiring.has(nodeId);
-        const row = sel.closest('tr');
-        if (row) {
-          row.classList.toggle('is-modified', isChanged);
-          const statusCell = row.querySelector('.wiring-status-cell');
-          if (statusCell) {
-            statusCell.innerHTML = getWiringStatusBadge(isChanged, newParentId);
-          }
-        }
-
-        if (saveBtn) {
-          saveBtn.disabled = state.pendingWiring.size === 0;
-          saveBtn.querySelector('span').textContent = state.pendingWiring.size > 0
-            ? `บันทึกการเชื่อมโยง (${state.pendingWiring.size})`
-            : 'บันทึกการเชื่อมโยง';
-        }
-      };
+      });
     });
 
     if (saveBtn) {
@@ -3703,6 +5266,262 @@ html, body {
         ? `บันทึกการเชื่อมโยง (${state.pendingWiring.size})`
         : 'บันทึกการเชื่อมโยง';
     }
+  }
+
+  function applyWiringSelection(nodeId, newParentId, newLabel) {
+    const trigger = state.wiringDropdownTrigger || document.querySelector(`.el-wiring-select-trigger[data-id="${nodeId}"]`);
+    const saveBtn = $('btn-save-all-wiring');
+    const node = state.nodes.find(n => n.id === nodeId);
+    const origParentId = node?.parentId || '';
+    const val = newParentId || '';
+
+    if (trigger) {
+      trigger.dataset.value = val;
+      const lblEl = trigger.querySelector('.el-custom-select-label');
+      if (lblEl) lblEl.textContent = newLabel || getParentOptionLabel(null);
+    }
+
+    if (val === origParentId) {
+      state.pendingWiring.delete(nodeId);
+    } else {
+      state.pendingWiring.set(nodeId, val);
+    }
+
+    const isChanged = state.pendingWiring.has(nodeId);
+    const row = trigger ? trigger.closest('tr') : document.querySelector(`#wiring-table-body tr[data-id="${nodeId}"]`);
+    if (row) {
+      row.classList.toggle('is-modified', isChanged);
+      const statusCell = row.querySelector('.wiring-status-cell');
+      if (statusCell) {
+        statusCell.innerHTML = getWiringStatusBadge(isChanged, val);
+      }
+    }
+
+    if (saveBtn) {
+      saveBtn.disabled = state.pendingWiring.size === 0;
+      saveBtn.querySelector('span').textContent = state.pendingWiring.size > 0
+        ? `บันทึกการเชื่อมโยง (${state.pendingWiring.size})`
+        : 'บันทึกการเชื่อมโยง';
+    }
+
+    closeWiringDropdown();
+  }
+
+  function positionWiringDropdown() {
+    const dropdown = $('wiring-select-dropdown');
+    const trigger = state.wiringDropdownTrigger;
+    if (!dropdown || !trigger || !state.wiringDropdownOpen) return;
+
+    const rect = trigger.getBoundingClientRect();
+    if (rect.bottom < 54 || rect.top > window.innerHeight) {
+      closeWiringDropdown();
+      return;
+    }
+
+    dropdown.style.width = `${rect.width}px`;
+    dropdown.style.left = `${rect.left}px`;
+
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top - 54;
+    if (spaceBelow < 280 && spaceAbove > spaceBelow) {
+      dropdown.style.top = 'auto';
+      dropdown.style.bottom = `${window.innerHeight - rect.top + 3}px`;
+    } else {
+      dropdown.style.bottom = 'auto';
+      dropdown.style.top = `${rect.bottom + 3}px`;
+    }
+  }
+
+  function renderWiringDropdownOptions(query = '') {
+    const listEl = $('wiring-select-options');
+    if (!listEl) return;
+
+    const nodeId = state.wiringDropdownNodeId;
+    const currentParentId = state.wiringDropdownTrigger?.dataset.value || '';
+    const q = (query || '').trim().toLowerCase();
+
+    const defaultLabel = getParentOptionLabel(null);
+    const items = [];
+
+    if (!q || defaultLabel.toLowerCase().includes(q)) {
+      items.push({ value: '', label: defaultLabel });
+    }
+
+    const feederCandidates = state.nodes.filter(
+      n => (n.nodeType === 'MDB' || n.nodeType === 'DB' || n.nodeType === 'LP') && n.id !== nodeId
+    );
+
+    feederCandidates.forEach(n => {
+      const label = getParentOptionLabel(n);
+      if (
+        !q ||
+        (n.nodeCode || '').toLowerCase().includes(q) ||
+        (n.name || '').toLowerCase().includes(q) ||
+        (n.nodeType || '').toLowerCase().includes(q) ||
+        (n.location || '').toLowerCase().includes(q) ||
+        label.toLowerCase().includes(q)
+      ) {
+        items.push({ value: n.id, label });
+      }
+    });
+
+    if (items.length === 0) {
+      listEl.innerHTML = `<div class="el-custom-select-empty">ไม่พบตู้ต้นทางที่ค้นหา "${escapeHtml(query)}"</div>`;
+      state.wiringHighlightIndex = -1;
+      return;
+    }
+
+    let html = '';
+    let selectedIdx = -1;
+    items.forEach((item, idx) => {
+      const isSelected = item.value === currentParentId;
+      if (isSelected) selectedIdx = idx;
+      html += `
+        <div class="el-custom-select-option${isSelected ? ' is-selected' : ''}" data-value="${escapeHtml(item.value)}" data-label="${escapeHtml(item.label)}" role="option" aria-selected="${isSelected}">
+          ${escapeHtml(item.label)}
+        </div>
+      `;
+    });
+
+    listEl.innerHTML = html;
+    state.wiringHighlightIndex = selectedIdx >= 0 ? selectedIdx : (q ? 0 : -1);
+    updateWiringOptionHighlight();
+
+    listEl.querySelectorAll('.el-custom-select-option').forEach(optEl => {
+      optEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        applyWiringSelection(nodeId, optEl.dataset.value, optEl.dataset.label);
+      });
+    });
+  }
+
+  function updateWiringOptionHighlight() {
+    const listEl = $('wiring-select-options');
+    if (!listEl) return;
+    const opts = listEl.querySelectorAll('.el-custom-select-option');
+    opts.forEach((el, idx) => {
+      el.classList.toggle('is-highlighted', idx === state.wiringHighlightIndex);
+    });
+    if (state.wiringHighlightIndex >= 0 && opts[state.wiringHighlightIndex]) {
+      opts[state.wiringHighlightIndex].scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function openWiringDropdown(trigger) {
+    const dropdown = $('wiring-select-dropdown');
+    const searchInput = $('wiring-select-search');
+    const clearBtn = $('wiring-select-search-clear');
+    if (!dropdown || !trigger) return;
+
+    if (state.wiringDropdownTrigger && state.wiringDropdownTrigger !== trigger) {
+      state.wiringDropdownTrigger.classList.remove('is-open');
+      state.wiringDropdownTrigger.setAttribute('aria-expanded', 'false');
+    }
+
+    state.wiringDropdownOpen = true;
+    state.wiringDropdownNodeId = trigger.dataset.id;
+    state.wiringDropdownTrigger = trigger;
+
+    trigger.classList.add('is-open');
+    trigger.setAttribute('aria-expanded', 'true');
+    dropdown.style.display = 'block';
+
+    if (searchInput) searchInput.value = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+
+    renderWiringDropdownOptions('');
+    positionWiringDropdown();
+
+    const selectedEl = dropdown.querySelector('.el-custom-select-option.is-selected');
+    if (selectedEl) {
+      selectedEl.scrollIntoView({ block: 'nearest' });
+    }
+
+    setTimeout(() => searchInput?.focus(), 10);
+  }
+
+  function closeWiringDropdown() {
+    const dropdown = $('wiring-select-dropdown');
+    if (state.wiringDropdownTrigger) {
+      state.wiringDropdownTrigger.classList.remove('is-open');
+      state.wiringDropdownTrigger.setAttribute('aria-expanded', 'false');
+    }
+    state.wiringDropdownOpen = false;
+    state.wiringDropdownNodeId = null;
+    state.wiringDropdownTrigger = null;
+    state.wiringHighlightIndex = -1;
+    if (dropdown) dropdown.style.display = 'none';
+  }
+
+  function initWiringSelectDropdown() {
+    const dropdown = $('wiring-select-dropdown');
+    const searchInput = $('wiring-select-search');
+    const clearBtn = $('wiring-select-search-clear');
+    const listEl = $('wiring-select-options');
+    if (!dropdown) return;
+
+    searchInput?.addEventListener('input', (e) => {
+      const val = e.target.value;
+      if (clearBtn) clearBtn.style.display = val ? 'inline-block' : 'none';
+      renderWiringDropdownOptions(val);
+    });
+
+    clearBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+      }
+      clearBtn.style.display = 'none';
+      renderWiringDropdownOptions('');
+    });
+
+    searchInput?.addEventListener('keydown', (e) => {
+      const opts = listEl ? listEl.querySelectorAll('.el-custom-select-option') : [];
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (opts.length > 0) {
+          state.wiringHighlightIndex = (state.wiringHighlightIndex + 1) % opts.length;
+          updateWiringOptionHighlight();
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (opts.length > 0) {
+          state.wiringHighlightIndex = (state.wiringHighlightIndex - 1 + opts.length) % opts.length;
+          updateWiringOptionHighlight();
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const targetOpt = opts[state.wiringHighlightIndex] || opts[0];
+        if (targetOpt && state.wiringDropdownNodeId) {
+          applyWiringSelection(state.wiringDropdownNodeId, targetOpt.dataset.value, targetOpt.dataset.label);
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        const prevTrigger = state.wiringDropdownTrigger;
+        closeWiringDropdown();
+        prevTrigger?.focus();
+      }
+    });
+
+    window.addEventListener('scroll', () => {
+      if (state.wiringDropdownOpen) positionWiringDropdown();
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+      if (state.wiringDropdownOpen) positionWiringDropdown();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (
+        state.wiringDropdownOpen &&
+        !dropdown.contains(e.target) &&
+        (!state.wiringDropdownTrigger || !state.wiringDropdownTrigger.contains(e.target))
+      ) {
+        closeWiringDropdown();
+      }
+    });
   }
 
   // Save all pending wiring changes in batch
@@ -3732,119 +5551,7 @@ html, body {
   // ==========================================================================
 
   async function openInspector(nodeId) {
-    state.selectedNodeId = nodeId;
-    const drawer = $('node-inspector');
-    const overlay = $('inspector-overlay');
-    if (!drawer || !overlay) return;
-
-    try {
-      const node = await rpc('getNode', nodeId);
-      if (!node) return;
-
-      $('inspect-code').textContent = node.nodeCode;
-      $('inspect-name').textContent = node.name;
-
-      const badge = $('inspect-badge');
-      badge.className = `kpi-badge badge-${node.nodeType.toLowerCase()}`;
-      badge.textContent = node.nodeType;
-
-      $('inspect-current').textContent = node.currentRating ? node.currentRating + ' A' : '-';
-      $('inspect-voltage').textContent = node.voltage || '-';
-      $('inspect-location').textContent = node.location || '-';
-
-      // Upstream Feeder Breadcrumb
-      if (node.parentCode) {
-        $('inspect-parent').innerHTML = `
-          <a href="#" class="btn-inspect-jump font-mono" data-id="${node.parentId}" style="color:var(--el-primary); text-decoration:none;">
-            ${escapeHtml(node.parentCode)} (${escapeHtml(node.parentName)}) &rarr;
-          </a>
-        `;
-        $('inspect-parent').querySelector('a').onclick = (e) => {
-          e.preventDefault();
-          openInspector(node.parentId);
-        };
-      } else {
-        $('inspect-parent').textContent = 'ตู้ประธาน (MDB) หรือยังไม่ได้เชื่อมโยง';
-      }
-
-      $('inspect-remark').textContent = node.remark || '-';
-
-      // Photos & Drive Link
-      const photoEl = $('inspect-photo');
-      const placeholder = $('inspect-photo-placeholder');
-      const driveLink = $('inspect-drive-link');
-
-      const photoUrl = node.imageUrl || (node.driveFileId ? `https://drive.google.com/thumbnail?id=${node.driveFileId}&sz=w600` : '');
-      if (photoUrl) {
-        photoEl.src = photoUrl;
-        photoEl.style.display = 'block';
-        placeholder.style.display = 'none';
-        photoEl.onclick = () => openLightbox(node.imageUrl || photoUrl);
-      } else {
-        photoEl.style.display = 'none';
-        placeholder.style.display = 'flex';
-      }
-
-      if (node.driveFileId || node.imageUrl) {
-        const fileId = node.driveFileId || (node.imageUrl.match(/\/d\/([\w-]+)/)?.[1]);
-        if (fileId) {
-          driveLink.href = `https://drive.google.com/file/d/${fileId}/view`;
-          driveLink.style.display = 'inline-flex';
-        } else {
-          driveLink.style.display = 'none';
-        }
-      } else {
-        driveLink.style.display = 'none';
-      }
-
-      // Children list
-      const childrenList = $('inspect-children-list');
-      const childrenCount = $('inspect-children-count');
-      childrenCount.textContent = node.children.length;
-
-      if (node.children.length === 0) {
-        childrenList.innerHTML = '<div class="el-empty-sub">ไม่มีสายย่อยแยกจากตู้นี้ (End Node)</div>';
-      } else {
-        let cHtml = '';
-        node.children.forEach(c => {
-          cHtml += `
-            <div class="el-child-item" data-id="${c.id}">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span class="kpi-badge badge-${c.nodeType.toLowerCase()}">${c.nodeType}</span>
-                <strong class="font-mono">${escapeHtml(c.nodeCode)}</strong>
-                <span style="font-size:12px; color:#475569;">${escapeHtml(c.name)}</span>
-              </div>
-              <span class="font-mono" style="font-size:12px; font-weight:600; color:#b45309;">${c.currentRating ? c.currentRating + 'A' : ''}</span>
-            </div>
-          `;
-        });
-        childrenList.innerHTML = cHtml;
-
-        childrenList.querySelectorAll('.el-child-item').forEach(item => {
-          item.onclick = () => openInspector(item.dataset.id);
-        });
-      }
-
-      // Action buttons
-      $('btn-inspect-edit').onclick = () => {
-        closeInspector();
-        openEditModal(node.id);
-      };
-      $('btn-inspect-delete').onclick = () => {
-        confirmDeleteNode(node.id);
-      };
-
-      drawer.classList.add('is-open');
-      overlay.classList.add('is-open');
-      drawer.setAttribute('aria-hidden', 'false');
-
-      // Highlight in diagram if active
-      if (state.currentTab === 'diagram') {
-        renderDiagram();
-      }
-    } catch (err) {
-      console.error('Error fetching node details:', err);
-    }
+    openNodeInExplorer(nodeId);
   }
 
   function closeInspector() {
@@ -3862,31 +5569,160 @@ html, body {
   }
 
   // ==========================================================================
+  // CIRCUIT BUILDER (OUTGOING BRANCH CIRCUITS TABLE)
+  // ==========================================================================
+
+  function resetCircuitTable() {
+    state.formRemovedChildIds = [];
+    const tbody = $('circuit-table-body');
+    if (tbody) tbody.innerHTML = '';
+    updateCircuitBadge();
+    const p1 = $('panel-auto-gen');
+    if (p1) p1.style.display = 'none';
+    const p2 = $('panel-excel-paste');
+    if (p2) p2.style.display = 'none';
+  }
+
+  function updateCircuitBadge() {
+    const tbody = $('circuit-table-body');
+    const rows = tbody ? tbody.querySelectorAll('tr') : [];
+    const badge = $('circuit-count-badge');
+    const emptyState = $('circuit-empty-state');
+    if (badge) badge.textContent = `${rows.length} รายการ`;
+    if (emptyState) emptyState.style.display = rows.length === 0 ? 'block' : 'none';
+
+    rows.forEach((tr, idx) => {
+      const idxCell = tr.querySelector('.row-idx');
+      if (idxCell) idxCell.textContent = idx + 1;
+    });
+  }
+
+  function addCircuitRow(data = {}) {
+    const tbody = $('circuit-table-body');
+    if (!tbody) return null;
+
+    const tr = document.createElement('tr');
+    if (data.id) tr.dataset.childId = data.id;
+
+    const rowNum = tbody.querySelectorAll('tr').length + 1;
+    const typeVal = (data.nodeType || 'DB').toUpperCase();
+
+    tr.innerHTML = `
+      <td class="row-idx" style="text-align:center; font-weight:600; color:#64748b;">${rowNum}</td>
+      <td>
+        <input type="text" class="el-input font-mono circuit-code" placeholder="เช่น Q10, LP-01" value="${escapeHtml(data.nodeCode || '')}" style="text-transform:uppercase;">
+      </td>
+      <td>
+        <input type="text" class="el-input circuit-name" placeholder="เช่น ตู้จ่ายไฟย่อย, ปั๊มน้ำ, โหลด 1" value="${escapeHtml(data.name || '')}">
+      </td>
+      <td>
+        <select class="el-select circuit-type">
+          <option value="DB"${typeVal === 'DB' ? ' selected' : ''}>DB (ตู้ย่อย)</option>
+          <option value="LP"${typeVal === 'LP' ? ' selected' : ''}>LP (โหลดพาเนล)</option>
+          <option value="MC"${typeVal === 'MC' ? ' selected' : ''}>MC (เครื่องจักร)</option>
+          <option value="DV"${typeVal === 'DV' ? ' selected' : ''}>DV (อุปกรณ์)</option>
+        </select>
+      </td>
+      <td>
+        <input type="number" class="el-input font-mono circuit-rating" placeholder="แอมป์" value="${data.currentRating ? data.currentRating : ''}" min="0" step="any">
+      </td>
+      <td>
+        <input type="text" class="el-input circuit-location" placeholder="ใช้ตามตู้หลัก" value="${escapeHtml(data.location || '')}">
+      </td>
+      <td style="text-align:center;">
+        <button type="button" class="btn btn-danger-ghost btn-sm btn-delete-row" title="ลบแถวนี้" style="padding:4px 6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+      </td>
+    `;
+
+    tr.querySelector('.btn-delete-row').onclick = () => {
+      if (tr.dataset.childId) {
+        state.formRemovedChildIds.push(tr.dataset.childId);
+      }
+      tr.remove();
+      updateCircuitBadge();
+    };
+
+    tr.querySelector('.circuit-location')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const nextTr = tr.nextElementSibling;
+        if (nextTr) {
+          nextTr.querySelector('.circuit-code')?.focus();
+        } else {
+          const newTr = addCircuitRow();
+          newTr?.querySelector('.circuit-code')?.focus();
+        }
+      }
+    });
+
+    tbody.appendChild(tr);
+    updateCircuitBadge();
+    return tr;
+  }
+
+  function collectCircuitRows() {
+    const tbody = $('circuit-table-body');
+    if (!tbody) return [];
+    const rows = tbody.querySelectorAll('tr');
+    const children = [];
+
+    rows.forEach(tr => {
+      const codeInput = tr.querySelector('.circuit-code');
+      const nameInput = tr.querySelector('.circuit-name');
+      const typeSelect = tr.querySelector('.circuit-type');
+      const ratingInput = tr.querySelector('.circuit-rating');
+      const locationInput = tr.querySelector('.circuit-location');
+
+      const nodeCode = codeInput?.value.trim().toUpperCase() || '';
+      const name = nameInput?.value.trim() || '';
+      const nodeType = typeSelect?.value || 'DB';
+      const currentRating = parseFloat(ratingInput?.value) || 0;
+      const location = locationInput?.value.trim() || '';
+      const id = tr.dataset.childId || undefined;
+
+      if (nodeCode || name) {
+        children.push({ id, nodeCode, name, nodeType, currentRating, location });
+      }
+    });
+
+    return children;
+  }
+
+  // ==========================================================================
   // NODE FORM MODAL (CREATE / EDIT)
   // ==========================================================================
 
-  function openCreateModal() {
-    $('modal-form-title').textContent = 'เพิ่มตู้ / อุปกรณ์ไฟฟ้าใหม่';
+  function openCreateModal(initialData = {}) {
+    $('modal-form-title').textContent = 'เพิ่มตู้ / อุปกรณ์ไฟฟ้าใหม่ (พร้อมรายการวงจรย่อย)';
     $('form-id').value = '';
-    $('form-node-code').value = '';
-    $('form-node-type').value = 'DB';
-    $('form-name').value = '';
-    $('form-current-rating').value = '';
-    $('form-voltage').value = '400V 3P4W';
-    $('form-location').value = '';
-    $('form-remark').value = '';
+    $('form-node-code').value = initialData.nodeCode || '';
+    $('form-node-type').value = initialData.nodeType || 'DB';
+    $('form-name').value = initialData.name || '';
+    $('form-current-rating').value = initialData.currentRating || '';
+    $('form-voltage').value = initialData.voltage || '400V 3P4W';
+    $('form-location').value = initialData.location || '';
+    $('form-remark').value = initialData.remark || '';
     $('form-error-msg').style.display = 'none';
 
     state.formImage = null;
     state.removeImageFlag = false;
     resetPhotoPreview();
-    updateParentSelector('');
-    toggleMachinePickerRow('DB');
+    updateParentSelector(initialData.parentId || '');
+    toggleMachinePickerRow(initialData.nodeType || 'DB');
+
+    // Reset circuits table and start with 3 blank rows for immediate entry
+    resetCircuitTable();
+    addCircuitRow();
+    addCircuitRow();
+    addCircuitRow();
 
     $('modal-node-form').showModal();
+    setTimeout(() => $('form-node-code')?.focus(), 50);
   }
 
-  function openEditModal(nodeId) {
+  async function openEditModal(nodeId) {
     const node = state.nodes.find(n => n.id === nodeId);
     if (!node) return;
 
@@ -3905,28 +5741,239 @@ html, body {
     state.removeImageFlag = false;
 
     // Photo preview
-    const photoUrl = node.imageUrl || (node.driveFileId ? `https://drive.google.com/thumbnail?id=${node.driveFileId}&sz=w300` : '');
+    const photoUrl = getNodePhotoUrl(node);
     setPhotoPreview(photoUrl);
 
     updateParentSelector(node.parentId, node.id);
     toggleMachinePickerRow(node.nodeType);
 
+    // Reset circuits table and load existing children
+    resetCircuitTable();
+    try {
+      const full = await rpc('getNode', node.id);
+      if (full?.children && full.children.length > 0) {
+        full.children.forEach(c => addCircuitRow(c));
+      } else {
+        addCircuitRow();
+      }
+    } catch {
+      addCircuitRow();
+    }
+
     $('modal-node-form').showModal();
   }
 
-  function updateParentSelector(currentParentId, excludeId) {
-    const sel = $('form-parent-id');
-    if (!sel) return;
+  function getParentOptionLabel(node) {
+    if (!node) return '-- ไม่มี (เป็นตู้ประธาน MDB หรือยังไม่เชื่อมโยง) --';
+    return `${node.nodeCode} - ${node.name} (${node.nodeType})`;
+  }
 
-    let html = '<option value="">-- ไม่มี (เป็นตู้ประธาน MDB หรือยังไม่เชื่อมโยง) --</option>';
-    // Prioritize distribution panels (MDB, DB, LP)
-    const feederCandidates = state.nodes.filter(n => n.nodeType === 'MDB' || n.nodeType === 'DB' || n.nodeType === 'LP');
+  function updateParentSelector(currentParentId, excludeId) {
+    const hiddenInput = $('form-parent-id');
+    const labelEl = $('parent-select-label');
+    state.parentExcludeId = excludeId || null;
+
+    const val = currentParentId || '';
+    if (hiddenInput) hiddenInput.value = val;
+
+    const selectedNode = val ? state.nodes.find(n => n.id === val) : null;
+    if (labelEl) {
+      labelEl.textContent = getParentOptionLabel(selectedNode);
+    }
+
+    closeParentDropdown();
+  }
+
+  function renderParentDropdownOptions(query = '') {
+    const listEl = $('parent-select-options');
+    if (!listEl) return;
+
+    const currentParentId = $('form-parent-id')?.value || '';
+    const excludeId = state.parentExcludeId;
+    const q = (query || '').trim().toLowerCase();
+
+    const defaultLabel = '-- ไม่มี (เป็นตู้ประธาน MDB หรือยังไม่เชื่อมโยง) --';
+    const items = [];
+
+    if (!q || defaultLabel.toLowerCase().includes(q)) {
+      items.push({ value: '', label: defaultLabel });
+    }
+
+    const feederCandidates = state.nodes.filter(
+      n => (n.nodeType === 'MDB' || n.nodeType === 'DB' || n.nodeType === 'LP') && n.id !== excludeId
+    );
+
     feederCandidates.forEach(n => {
-      if (n.id === excludeId) return; // Cannot be own parent
-      const selected = n.id === currentParentId ? ' selected' : '';
-      html += `<option value="${n.id}"${selected}>${escapeHtml(n.nodeCode)} - ${escapeHtml(n.name)} (${n.nodeType})</option>`;
+      const label = getParentOptionLabel(n);
+      if (
+        !q ||
+        (n.nodeCode || '').toLowerCase().includes(q) ||
+        (n.name || '').toLowerCase().includes(q) ||
+        (n.nodeType || '').toLowerCase().includes(q) ||
+        (n.location || '').toLowerCase().includes(q) ||
+        label.toLowerCase().includes(q)
+      ) {
+        items.push({ value: n.id, label });
+      }
     });
-    sel.innerHTML = html;
+
+    if (items.length === 0) {
+      listEl.innerHTML = `<div class="el-custom-select-empty">ไม่พบตู้ต้นทางที่ค้นหา "${escapeHtml(query)}"</div>`;
+      state.parentHighlightIndex = -1;
+      return;
+    }
+
+    let html = '';
+    let selectedIdx = -1;
+    items.forEach((item, idx) => {
+      const isSelected = item.value === currentParentId;
+      if (isSelected) selectedIdx = idx;
+      html += `
+        <div class="el-custom-select-option${isSelected ? ' is-selected' : ''}" data-value="${escapeHtml(item.value)}" data-label="${escapeHtml(item.label)}" role="option" aria-selected="${isSelected}">
+          ${escapeHtml(item.label)}
+        </div>
+      `;
+    });
+
+    listEl.innerHTML = html;
+    state.parentHighlightIndex = selectedIdx >= 0 ? selectedIdx : (q ? 0 : -1);
+    updateParentOptionHighlight();
+
+    listEl.querySelectorAll('.el-custom-select-option').forEach(optEl => {
+      optEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectParentOption(optEl.dataset.value, optEl.dataset.label);
+      });
+    });
+  }
+
+  function updateParentOptionHighlight() {
+    const listEl = $('parent-select-options');
+    if (!listEl) return;
+    const opts = listEl.querySelectorAll('.el-custom-select-option');
+    opts.forEach((el, idx) => {
+      el.classList.toggle('is-highlighted', idx === state.parentHighlightIndex);
+    });
+    if (state.parentHighlightIndex >= 0 && opts[state.parentHighlightIndex]) {
+      opts[state.parentHighlightIndex].scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function selectParentOption(value, label) {
+    const hiddenInput = $('form-parent-id');
+    const labelEl = $('parent-select-label');
+    if (hiddenInput) hiddenInput.value = value || '';
+    if (labelEl) labelEl.textContent = label || getParentOptionLabel(null);
+    closeParentDropdown();
+  }
+
+  function openParentDropdown() {
+    const container = $('parent-select-container');
+    const trigger = $('parent-select-trigger');
+    const dropdown = $('parent-select-dropdown');
+    const searchInput = $('parent-select-search');
+    const clearBtn = $('parent-select-search-clear');
+    if (!container || !dropdown) return;
+
+    state.parentDropdownOpen = true;
+    container.classList.add('is-open');
+    if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    dropdown.style.display = 'block';
+
+    if (searchInput) searchInput.value = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+
+    renderParentDropdownOptions('');
+
+    const selectedEl = dropdown.querySelector('.el-custom-select-option.is-selected');
+    if (selectedEl) {
+      selectedEl.scrollIntoView({ block: 'nearest' });
+    }
+
+    setTimeout(() => searchInput?.focus(), 10);
+  }
+
+  function closeParentDropdown() {
+    const container = $('parent-select-container');
+    const trigger = $('parent-select-trigger');
+    const dropdown = $('parent-select-dropdown');
+    state.parentDropdownOpen = false;
+    state.parentHighlightIndex = -1;
+    if (container) container.classList.remove('is-open');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    if (dropdown) dropdown.style.display = 'none';
+  }
+
+  function initParentSelectDropdown() {
+    const container = $('parent-select-container');
+    const trigger = $('parent-select-trigger');
+    const dropdown = $('parent-select-dropdown');
+    const searchInput = $('parent-select-search');
+    const clearBtn = $('parent-select-search-clear');
+    const listEl = $('parent-select-options');
+    if (!container || !trigger || !dropdown) return;
+
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (state.parentDropdownOpen) {
+        closeParentDropdown();
+      } else {
+        openParentDropdown();
+      }
+    });
+
+    searchInput?.addEventListener('input', (e) => {
+      const val = e.target.value;
+      if (clearBtn) clearBtn.style.display = val ? 'inline-block' : 'none';
+      renderParentDropdownOptions(val);
+    });
+
+    clearBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+      }
+      clearBtn.style.display = 'none';
+      renderParentDropdownOptions('');
+    });
+
+    searchInput?.addEventListener('keydown', (e) => {
+      const opts = listEl ? listEl.querySelectorAll('.el-custom-select-option') : [];
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (opts.length > 0) {
+          state.parentHighlightIndex = (state.parentHighlightIndex + 1) % opts.length;
+          updateParentOptionHighlight();
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (opts.length > 0) {
+          state.parentHighlightIndex = (state.parentHighlightIndex - 1 + opts.length) % opts.length;
+          updateParentOptionHighlight();
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const targetOpt = opts[state.parentHighlightIndex] || opts[0];
+        if (targetOpt) {
+          selectParentOption(targetOpt.dataset.value, targetOpt.dataset.label);
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        closeParentDropdown();
+        trigger.focus();
+      }
+    });
+
+    // Close when clicking outside inside modal or document
+    document.addEventListener('click', (e) => {
+      if (state.parentDropdownOpen && !container.contains(e.target)) {
+        closeParentDropdown();
+      }
+    });
   }
 
   function toggleMachinePickerRow(type) {
@@ -4002,8 +6049,24 @@ html, body {
       return;
     }
 
+    // Collect child circuits
+    const children = collectCircuitRows();
+    for (let i = 0; i < children.length; i++) {
+      const c = children[i];
+      if (!c.nodeCode) {
+        errorEl.textContent = `กรุณาระบุรหัสตู้/อุปกรณ์สำหรับรายการย่อยลำดับที่ ${i + 1}`;
+        errorEl.style.display = 'block';
+        return;
+      }
+      if (!c.name) {
+        errorEl.textContent = `กรุณาระบุชื่อสำหรับรายการย่อย "${c.nodeCode}"`;
+        errorEl.style.display = 'block';
+        return;
+      }
+    }
+
     submitBtn.disabled = true;
-    submitBtn.querySelector('span').textContent = 'กำลังบันทึก...';
+    submitBtn.querySelector('span').textContent = 'กำลังบันทึกข้อมูล...';
 
     try {
       const payload = {
@@ -4017,22 +6080,54 @@ html, body {
         parentId: parentId || null,
         remark,
         image: state.formImage,
-        removeImage: state.removeImageFlag
+        removeImage: state.removeImageFlag,
+        children,
+        removedChildIds: state.formRemovedChildIds
       };
 
-      await rpc('saveNode', payload);
-      $('modal-node-form').close();
+      const savedNode = await rpc('saveNode', payload);
       await loadData();
 
-      if (id && state.selectedNodeId === id) {
-        openInspector(id);
+      const isContinuous = $('form-continuous-add')?.checked && !id;
+
+      if (isContinuous) {
+        // Continuous Add mode: keep location, parentId, voltage; clear code, name, and children
+        $('form-node-code').value = '';
+        $('form-name').value = '';
+        $('form-current-rating').value = '';
+        $('form-remark').value = '';
+        state.formImage = null;
+        state.removeImageFlag = false;
+        resetPhotoPreview();
+        resetCircuitTable();
+        addCircuitRow();
+        addCircuitRow();
+        addCircuitRow();
+
+        errorEl.style.display = 'block';
+        errorEl.style.background = '#ecfdf5';
+        errorEl.style.borderColor = '#6ee7b7';
+        errorEl.style.color = '#065f46';
+        errorEl.textContent = `✓ บันทึก "${nodeCode}" สำเร็จแล้ว สามารถกรอกรายการถัดไปได้ทันที`;
+        $('form-node-code')?.focus();
+        setTimeout(() => {
+          if (errorEl.textContent.startsWith('✓')) errorEl.style.display = 'none';
+        }, 3500);
+      } else {
+        $('modal-node-form').close();
+        if (savedNode?.id) {
+          openInspector(savedNode.id);
+        }
       }
     } catch (err) {
-      errorEl.textContent = err.message || 'บันทึกข้อมูลไม่สำเร็จ';
       errorEl.style.display = 'block';
+      errorEl.style.background = '#fef2f2';
+      errorEl.style.borderColor = '#fca5a5';
+      errorEl.style.color = '#dc2626';
+      errorEl.textContent = err.message || 'บันทึกข้อมูลไม่สำเร็จ';
     } finally {
       submitBtn.disabled = false;
-      submitBtn.querySelector('span').textContent = 'บันทึกข้อมูล';
+      submitBtn.querySelector('span').textContent = 'บันทึกข้อมูลทั้งหมด';
     }
   }
 
@@ -4044,9 +6139,10 @@ html, body {
     const msg = `ต้องการลบตู้/อุปกรณ์ "${node.nodeCode} - ${node.name}" ใช่หรือไม่?\n\n*หมายเหตุ: สายย่อยที่รับไฟจากตู้นี้จะถูกปลดสายออก (ตั้งค่าต้นทางเป็นว่าง) โดยไม่ถูกลบ`;
     if (!confirm(msg)) return;
 
+    const fallbackParentId = node.parentId || null;
     try {
       await rpc('deleteNode', id);
-      closeInspector();
+      state.selectedNodeId = fallbackParentId;
       await loadData();
     } catch (err) {
       alert('ลบข้อมูลไม่สำเร็จ: ' + err.message);
@@ -4082,8 +6178,8 @@ html, body {
     $('btn-add-node')?.addEventListener('click', openCreateModal);
     $('btn-refresh')?.addEventListener('click', loadData);
 
-    // 3. KPI card filter clicks
-    document.querySelectorAll('.el-kpi-card').forEach(card => {
+    // 3. KPI card / chip filter clicks
+    document.querySelectorAll('.el-kpi-card, .el-kpi-chip').forEach(card => {
       card.addEventListener('click', () => {
         const type = card.dataset.filterType;
         if (type) {
@@ -4216,9 +6312,111 @@ html, body {
     $('inspector-overlay')?.addEventListener('click', closeInspector);
 
     // 7. Modal form events
-    $('btn-modal-close')?.addEventListener('click', () => $('modal-node-form').close());
-    $('btn-modal-cancel')?.addEventListener('click', () => $('modal-node-form').close());
+    $('btn-modal-close')?.addEventListener('click', () => {
+      closeParentDropdown();
+      $('modal-node-form').close();
+    });
+    $('btn-modal-cancel')?.addEventListener('click', () => {
+      closeParentDropdown();
+      $('modal-node-form').close();
+    });
+    $('modal-node-form')?.addEventListener('cancel', (e) => {
+      if (state.parentDropdownOpen) {
+        e.preventDefault();
+        closeParentDropdown();
+      }
+    });
     $('form-node')?.addEventListener('submit', submitNodeForm);
+    initParentSelectDropdown();
+    initWiringSelectDropdown();
+
+    // Circuit Builder toolbar events
+    $('btn-add-circuit-row')?.addEventListener('click', () => {
+      const tr = addCircuitRow();
+      tr?.querySelector('.circuit-code')?.focus();
+    });
+    $('btn-add-circuit-5')?.addEventListener('click', () => {
+      for (let i = 0; i < 5; i++) addCircuitRow();
+    });
+    $('btn-circuit-auto-gen')?.addEventListener('click', () => {
+      const panel = $('panel-auto-gen');
+      if (panel) {
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        $('panel-excel-paste').style.display = 'none';
+      }
+    });
+    $('btn-close-auto-gen')?.addEventListener('click', () => {
+      $('panel-auto-gen').style.display = 'none';
+    });
+    $('btn-run-auto-gen')?.addEventListener('click', () => {
+      const prefix = ($('auto-gen-prefix').value || 'Q').trim().toUpperCase();
+      const start = parseInt($('auto-gen-start').value, 10) || 1;
+      const count = Math.min(50, Math.max(1, parseInt($('auto-gen-count').value, 10) || 10));
+      const nodeType = $('auto-gen-type').value || 'DV';
+      const amp = parseFloat($('auto-gen-amp').value) || 0;
+      const parentLoc = $('form-location').value.trim();
+
+      for (let i = 0; i < count; i++) {
+        const num = start + i;
+        const code = `${prefix}${num}`;
+        addCircuitRow({
+          nodeCode: code,
+          name: `${code} Load`,
+          nodeType,
+          currentRating: amp,
+          location: parentLoc
+        });
+      }
+      $('panel-auto-gen').style.display = 'none';
+    });
+
+    $('btn-circuit-excel-paste')?.addEventListener('click', () => {
+      const panel = $('panel-excel-paste');
+      if (panel) {
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        $('panel-auto-gen').style.display = 'none';
+        if (panel.style.display !== 'none') {
+          $('excel-paste-text')?.focus();
+        }
+      }
+    });
+    $('btn-close-excel-paste')?.addEventListener('click', () => {
+      $('panel-excel-paste').style.display = 'none';
+    });
+    $('btn-apply-excel-paste')?.addEventListener('click', () => {
+      const rawText = ($('excel-paste-text').value || '').trim();
+      if (!rawText) return;
+
+      const lines = rawText.split(/\r?\n/);
+      const parentLoc = $('form-location').value.trim();
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        const parts = trimmed.includes('\t') ? trimmed.split('\t') : trimmed.split(',');
+        const code = (parts[0] || '').trim().toUpperCase();
+        const name = (parts[1] || '').trim() || code;
+        let type = (parts[2] || '').trim().toUpperCase();
+        if (!['MDB', 'DB', 'LP', 'MC', 'DV'].includes(type)) {
+          type = 'DB';
+        }
+        const amp = parseFloat(parts[3]) || 0;
+        const loc = (parts[4] || '').trim() || parentLoc;
+
+        if (code) {
+          addCircuitRow({
+            nodeCode: code,
+            name,
+            nodeType: type,
+            currentRating: amp,
+            location: loc
+          });
+        }
+      });
+
+      $('excel-paste-text').value = '';
+      $('panel-excel-paste').style.display = 'none';
+    });
 
     // Machine Picker auto-populate
     $('form-node-type')?.addEventListener('change', (e) => {
@@ -4245,9 +6443,14 @@ html, body {
 
     // Lightbox close
     $('btn-lightbox-close')?.addEventListener('click', () => $('modal-lightbox').close());
+    $('modal-lightbox')?.addEventListener('click', (e) => {
+      if (e.target === $('modal-lightbox')) {
+        $('modal-lightbox').close();
+      }
+    });
 
-    // 8. Pan & Zoom
-    initDiagramPanZoom();
+    // 8. Explorer Search & Navigation
+    initExplorerSearch();
 
     // 9. Load data
     loadData();

@@ -73,8 +73,8 @@ html, body {
   background-color: var(--pr-bg-page);
   color: var(--pr-ink);
   font-family: var(--font-body);
-  font-size: 13.5px;
-  line-height: 1.45;
+  font-size: 12.5px;
+  line-height: 1.4;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -109,11 +109,11 @@ html, body {
 .pr-header {
   background: #ffffff;
   border-bottom: 1px solid var(--pr-border-subtle);
-  padding: 8px 18px;
+  padding: 6px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 54px;
@@ -123,7 +123,7 @@ html, body {
 .pr-header-left {
   display: flex;
   align-items: center;
-  min-width: 240px;
+  min-width: 220px;
 }
 
 .pr-brand-title {
@@ -138,18 +138,18 @@ html, body {
 }
 
 .pr-title-text {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--pr-brand-dark);
   letter-spacing: -0.01em;
 }
 
 .pr-mode-pill {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
   background: var(--pr-primary-surface);
   color: var(--pr-primary);
-  padding: 1px 7px;
+  padding: 1px 6px;
   border-radius: var(--radius-pill);
 }
 
@@ -157,7 +157,7 @@ html, body {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
   color: #b45309;
   background: #fef3c7;
@@ -313,13 +313,13 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 40px;
+  height: 38px;
   background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   color: #ffffff;
   border: none;
   border-radius: var(--radius-pill);
   font-family: var(--font-body);
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 2px 10px rgba(2, 132, 199, 0.35);
@@ -353,11 +353,11 @@ html, body {
 .nav-folder-link {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 7px 12px;
+  gap: 8px;
+  padding: 6px 10px;
   color: var(--pr-ink-secondary);
   text-decoration: none;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
   border-radius: var(--radius-pill);
   transition: all var(--duration-fast) var(--ease);
@@ -543,12 +543,12 @@ html, body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border: none;
   background: transparent;
   color: var(--pr-ink-secondary);
   font-family: var(--font-body);
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 500;
   border-radius: var(--radius-pill);
   cursor: pointer;
@@ -584,8 +584,8 @@ html, body {
 }
 
 .tab-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
 }
 .dot-amber { background: var(--stage-amber); }
@@ -594,8 +594,8 @@ html, body {
 
 .tab-count {
   font-family: var(--font-mono);
-  font-size: 11px;
-  padding: 1px 6px;
+  font-size: 10px;
+  padding: 1px 5px;
   border-radius: var(--radius-pill);
   background: rgba(0, 0, 0, 0.08);
 }
@@ -612,17 +612,17 @@ html, body {
 .inline-filters-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .filter-select-sm {
-  height: 32px;
-  padding: 4px 8px;
+  height: 30px;
+  padding: 3px 7px;
   border: 1px solid var(--pr-border);
   border-radius: var(--radius-sm);
   background: #ffffff;
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--pr-ink);
   cursor: pointer;
 }
@@ -632,19 +632,19 @@ html, body {
   align-items: center;
   gap: 4px;
   background: #ffffff;
-  padding: 2px 6px;
+  padding: 2px 5px;
   border: 1px solid var(--pr-border);
   border-radius: var(--radius-sm);
-  height: 32px;
+  height: 30px;
 }
 .filter-date-input {
   border: none;
   font-family: var(--font-body);
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--pr-ink);
   background: transparent;
   padding: 0;
-  width: 105px;
+  width: 100px;
 }
 .filter-date-input:focus {
   outline: none;
@@ -834,7 +834,7 @@ html, body {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--pr-ink);
 }
 
@@ -844,9 +844,9 @@ html, body {
   background: #f8fafc;
   color: var(--pr-ink-secondary);
   font-weight: 600;
-  font-size: 11px;
+  font-size: 10.5px;
   letter-spacing: 0.02em;
-  padding: 8px 10px;
+  padding: 6px 8px;
   border-bottom: 1px solid var(--pr-border);
   text-align: left;
   white-space: nowrap;
@@ -863,35 +863,35 @@ html, body {
   background-color: #e0f2fe;
 }
 .pr-table tbody td {
-  padding: 6px 10px;
+  padding: 5px 8px;
   border-bottom: 1px solid var(--pr-border-subtle);
   vertical-align: middle;
 }
 
 /* Table Cell Details */
 .th-check, .td-check { width: 34px; text-align: center; }
-.th-stage, .td-stage { width: 100px; }
-.th-doc, .td-doc { width: 175px; min-width: 160px; }
-.th-date, .td-date { width: 92px; font-family: var(--font-mono); font-size: 11.5px; }
-.th-area, .td-area { width: 125px; }
-.th-order, .td-order { width: 98px; }
+.th-stage, .td-stage { width: 95px; }
+.th-doc, .td-doc { width: 165px; min-width: 150px; }
+.th-date, .td-date { width: 88px; font-family: var(--font-mono); font-size: 11px; }
+.th-area, .td-area { width: 120px; }
+.th-order, .td-order { width: 95px; }
 .th-desc, .td-desc { min-width: 220px; }
-.th-qty, .td-qty { width: 75px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-.th-price, .td-price { width: 85px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-.th-total, .td-total { width: 100px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; }
-.th-po, .td-po { width: 105px; }
-.th-delivery, .td-delivery { width: 110px; }
-.th-archived, .td-archived { width: 105px; font-size: 11px; color: var(--pr-ink-muted); }
-.th-actions, .td-actions { width: 75px; text-align: center; }
+.th-qty, .td-qty { width: 70px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 11.5px; }
+.th-price, .td-price { width: 80px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 11.5px; }
+.th-total, .td-total { width: 95px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; font-size: 11.5px; }
+.th-po, .td-po { width: 100px; }
+.th-delivery, .td-delivery { width: 105px; }
+.th-archived, .td-archived { width: 100px; font-size: 10.5px; color: var(--pr-ink-muted); }
+.th-actions, .td-actions { width: 70px; text-align: center; }
 
 /* Status Badges */
 .badge-stage {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 1px 7px;
+  padding: 1px 6px;
   border-radius: var(--radius-pill);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -919,7 +919,7 @@ html, body {
 .doc-badge-wrap {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   white-space: nowrap;
   vertical-align: middle;
 }
@@ -927,9 +927,9 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 2px 6px;
+  padding: 1.5px 5px;
   border-radius: var(--radius-xs);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
   line-height: 1.25;
   flex-shrink: 0;
@@ -947,7 +947,7 @@ html, body {
 }
 .doc-no-text {
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--pr-ink);
   letter-spacing: -0.01em;
@@ -957,7 +957,7 @@ html, body {
 .order-badge {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
   padding: 1px 5px;
   background: rgba(23, 100, 135, 0.08);
@@ -972,12 +972,12 @@ html, body {
 }
 .area-line {
   font-weight: 700;
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--pr-brand-dark);
   letter-spacing: -0.01em;
 }
 .area-machine {
-  font-size: 11px;
+  font-size: 10px;
   color: #475569;
   font-family: var(--font-mono);
   font-weight: 600;
@@ -991,6 +991,7 @@ html, body {
   text-overflow: ellipsis;
   word-break: break-word;
   line-height: 1.35;
+  font-size: 12px;
   cursor: pointer;
 }
 .desc-text:hover {
@@ -1005,10 +1006,10 @@ html, body {
 }
 .delivery-date {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10.5px;
 }
 .tag-overdue {
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
   padding: 0 4px;
   border-radius: var(--radius-xs);
@@ -1017,7 +1018,7 @@ html, body {
   width: fit-content;
 }
 .tag-near {
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
   padding: 0 4px;
   border-radius: var(--radius-xs);

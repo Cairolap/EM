@@ -80,6 +80,118 @@ export class Repository {
   if(!r)return null;
   return {OperationID:r.id,Fingerprint:r.fingerprint,MachineID:r.machine_id,Status:r.status,Plan:r.plan_json,Result:r.result_json,CreatedAt:r.created_at,SessionRef:r.session_ref};
  }
+  async partWhereUsed(partId){
+    const cleanId = String(partId || '').trim();
+    if(!cleanId) return { partId: '', totalMachines: 0, totalQuantity: 0, machines: [] };
+    const sql = `
+      SELECT 
+        er.machine_id AS machineId,
+        m.code AS machineCode,
+        m.name AS machineName,
+        m.status AS machineStatus,
+        m.line_order AS lineOrder,
+        d.id AS deptId,
+        d.name AS deptName,
+        l.id AS lineId,
+        l.name AS lineName,
+        COUNT(er.id) AS labelCount,
+        SUM(er.quantity) AS totalQuantity,
+        GROUP_CONCAT(NULLIF(er.label, ''), ', ') AS labels
+      FROM equipment_records er
+      JOIN machines m ON er.machine_id = m.id
+      LEFT JOIN departments d ON m.department_id = d.id
+      LEFT JOIN lines l ON m.line_id = l.id
+      WHERE (er.part_id = ? OR er.part_id IN (SELECT id FROM parts WHERE part_number = ?)) AND er.record_status = 'ACTIVE'
+      GROUP BY er.machine_id, m.code, m.name, m.status, m.line_order, d.id, d.name, l.id, l.name
+      ORDER BY d.id ASC, l.id ASC, m.line_order ASC, m.code ASC
+    `;
+    const rows = await this.all(sql, cleanId, cleanId);
+    const totalQuantity = rows.reduce((acc, r) => acc + (Number(r.totalQuantity) || 0), 0);
+    return {
+      partId: cleanId,
+      totalMachines: rows.length,
+      totalQuantity,
+      machines: rows.map(r => ({
+        ...r,
+        labelCount: Number(r.labelCount) || 0,
+        totalQuantity: Number(r.totalQuantity) || 0,
+        labels: r.labels || ''
+      }))
+    };
+  }
+  async searchPartWhereUsed(keyword, limit = 40){
+    const clean = String(keyword || '').trim();
+    if(!clean) return { items: [] };
+    const pattern = '%' + clean + '%';
+    const sql = `
+      SELECT 
+        p.id AS partId,
+        p.part_number AS partNumber,
+        p.description,
+        COALESCE(b.name, p.legacy_brand_name, '') AS brand,
+        p.thumbnail_source AS thumbnail,
+        p.picture_source AS picture,
+        p.lifespan_years AS lifespan,
+        COUNT(DISTINCT er.machine_id) AS totalMachines,
+        SUM(er.quantity) AS totalQuantity
+      FROM parts p
+      LEFT JOIN brands b ON b.id = p.brand_id
+      JOIN equipment_records er ON er.part_id = p.id AND er.record_status = 'ACTIVE'
+      WHERE (
+          p.id LIKE ? OR p.part_number LIKE ? OR p.description LIKE ? OR COALESCE(b.name, p.legacy_brand_name, '') LIKE ?
+        )
+      GROUP BY p.id, p.part_number, p.description, b.name, p.legacy_brand_name, p.thumbnail_source, p.picture_source, p.lifespan_years
+      ORDER BY totalQuantity DESC, p.part_number ASC
+      LIMIT ?
+    `;
+    const parts = await this.all(sql, pattern, pattern, pattern, pattern, limit);
+    if(!parts.length) return { items: [] };
+
+    const partIds = parts.map(p => p.partId);
+    const placeholders = partIds.map(() => '?').join(',');
+    const detailSql = `
+      SELECT 
+        er.part_id AS partId,
+        er.machine_id AS machineId,
+        m.code AS machineCode,
+        m.name AS machineName,
+        m.status AS machineStatus,
+        d.id AS deptId,
+        d.name AS deptName,
+        l.id AS lineId,
+        l.name AS lineName,
+        COUNT(er.id) AS labelCount,
+        SUM(er.quantity) AS totalQuantity,
+        GROUP_CONCAT(NULLIF(er.label, ''), ', ') AS labels
+      FROM equipment_records er
+      JOIN machines m ON er.machine_id = m.id
+      LEFT JOIN departments d ON m.department_id = d.id
+      LEFT JOIN lines l ON m.line_id = l.id
+      WHERE er.part_id IN (${placeholders}) AND er.record_status = 'ACTIVE'
+      GROUP BY er.part_id, er.machine_id, m.code, m.name, m.status, d.id, d.name, l.id, l.name
+      ORDER BY d.id ASC, l.id ASC, m.line_order ASC, m.code ASC
+    `;
+    const details = await this.all(detailSql, ...partIds);
+    const machineMap = new Map();
+    details.forEach(d => {
+      if(!machineMap.has(d.partId)) machineMap.set(d.partId, []);
+      machineMap.get(d.partId).push({
+        ...d,
+        labelCount: Number(d.labelCount) || 0,
+        totalQuantity: Number(d.totalQuantity) || 0,
+        labels: d.labels || ''
+      });
+    });
+
+    const items = parts.map(p => ({
+      ...p,
+      totalMachines: Number(p.totalMachines) || 0,
+      totalQuantity: Number(p.totalQuantity) || 0,
+      machines: machineMap.get(p.partId) || []
+    }));
+
+    return { items };
+  }
  async bomEvents(machineId,equipmentId){
   const rows=await this.all("SELECT * FROM equipment_operations WHERE machine_id=? AND status='COMMITTED' ORDER BY created_at DESC",machineId);
   return rows.map(o=>{

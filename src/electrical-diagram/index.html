@@ -13,144 +13,119 @@
 <body>
   <div class="el-app-container">
     
-    <!-- Top Header -->
+    <!-- Compact Top Header -->
     <header class="el-page-header">
-      <div class="el-header-main-row">
-        <div class="el-title-group">
-          <div class="el-title-with-pill">
-            <h1 class="el-page-title">
-              <span class="el-title-badge">⚡</span>
-              <span>แผนผังระบบไฟฟ้า</span>
-            </h1>
-            <span class="el-meta-pill">
-              <span class="el-status-dot pulse"></span>
-              ผังการจ่ายกระแสไฟฟ้า &middot; Single Line Distribution Diagram
-            </span>
+      <div class="el-header-compact-row">
+        <div class="el-header-left-group">
+          <h1 class="el-page-title">
+            <span class="el-title-badge">⚡</span>
+            <span>แผนผังระบบไฟฟ้า</span>
+          </h1>
+
+          <!-- View Navigation Tabs inline -->
+          <nav class="el-view-tabs" role="tablist">
+            <button type="button" class="el-tab-btn active" data-tab="diagram" role="tab" aria-selected="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>แผนผังโครงข่าย</span>
+            </button>
+            <button type="button" class="el-tab-btn" data-tab="directory" role="tab" aria-selected="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span>ทะเบียนตู้/อุปกรณ์</span>
+              <span class="el-tab-count" id="tab-count-all">0</span>
+            </button>
+            <button type="button" class="el-tab-btn" data-tab="wiring" role="tab" aria-selected="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
+              <span>จัดการสายจ่ายไฟ</span>
+            </button>
+          </nav>
+        </div>
+
+        <div class="el-header-right-group">
+          <!-- Compact KPI Chips -->
+          <div class="el-kpi-strip">
+            <button type="button" class="el-kpi-chip" data-filter-type="ALL" title="ดูทั้งหมด">
+              <span>ทั้งหมด</span>
+              <strong id="kpi-total">0</strong>
+            </button>
+            <button type="button" class="el-kpi-chip type-mdb" data-filter-type="MDB" title="ตู้จ่ายไฟหลัก (Main Board)">
+              <span class="kpi-badge badge-mdb">MDB</span>
+              <strong id="kpi-mdb">0</strong>
+            </button>
+            <button type="button" class="el-kpi-chip type-db" data-filter-type="DB" title="ตู้จ่ายไฟย่อย (Dist. Board)">
+              <span class="kpi-badge badge-db">DB</span>
+              <strong id="kpi-db">0</strong>
+            </button>
+            <button type="button" class="el-kpi-chip type-lp" data-filter-type="LP" title="แผงย่อยโหลด (Load Panel)">
+              <span class="kpi-badge badge-lp">LP</span>
+              <strong id="kpi-lp">0</strong>
+            </button>
+            <button type="button" class="el-kpi-chip type-mc" data-filter-type="MC" title="เครื่องจักร (Machine)">
+              <span class="kpi-badge badge-mc">MC</span>
+              <strong id="kpi-mc">0</strong>
+            </button>
+            <button type="button" class="el-kpi-chip type-dv" data-filter-type="DV" title="อุปกรณ์ไฟฟ้า (Device)">
+              <span class="kpi-badge badge-dv">DV</span>
+              <strong id="kpi-dv">0</strong>
+            </button>
           </div>
-          <p class="el-page-subtitle">บันทึกพิกัดตู้ MDB, DB, Load Panel, เครื่องจักร และผังการเชื่อมโยงระบบจ่ายไฟโรงงาน</p>
-        </div>
 
-        <div class="el-header-actions">
-          <button type="button" id="btn-refresh" class="btn btn-secondary" title="รีเฟรชข้อมูล">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-            <span>รีเฟรช</span>
-          </button>
-          <button type="button" id="btn-add-node" class="btn btn-primary" title="เพิ่มตู้ควบคุมหรืออุปกรณ์ใหม่">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span>เพิ่มตู้/อุปกรณ์</span>
-          </button>
+          <div class="el-header-actions">
+            <button type="button" id="btn-refresh" class="btn btn-secondary btn-sm" title="รีเฟรชข้อมูล">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <span>รีเฟรช</span>
+            </button>
+            <button type="button" id="btn-add-node" class="btn btn-primary btn-sm" title="เพิ่มตู้ควบคุมหรืออุปกรณ์ใหม่">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>เพิ่มตู้/อุปกรณ์</span>
+            </button>
+          </div>
         </div>
       </div>
-
-      <!-- KPI Summary Cards -->
-      <div class="el-kpi-grid">
-        <div class="el-kpi-card" data-filter-type="ALL">
-          <div class="el-kpi-label">ทั้งหมด</div>
-          <div class="el-kpi-value" id="kpi-total">0</div>
-          <div class="el-kpi-sub">ตู้และอุปกรณ์</div>
-        </div>
-        <div class="el-kpi-card type-mdb" data-filter-type="MDB">
-          <div class="el-kpi-label"><span class="kpi-badge badge-mdb">MDB</span> Main Board</div>
-          <div class="el-kpi-value" id="kpi-mdb">0</div>
-          <div class="el-kpi-sub">ตู้จ่ายไฟหลัก</div>
-        </div>
-        <div class="el-kpi-card type-db" data-filter-type="DB">
-          <div class="el-kpi-label"><span class="kpi-badge badge-db">DB</span> Dist. Board</div>
-          <div class="el-kpi-value" id="kpi-db">0</div>
-          <div class="el-kpi-sub">ตู้จ่ายไฟย่อย</div>
-        </div>
-        <div class="el-kpi-card type-lp" data-filter-type="LP">
-          <div class="el-kpi-label"><span class="kpi-badge badge-lp">LP</span> Load Panel</div>
-          <div class="el-kpi-value" id="kpi-lp">0</div>
-          <div class="el-kpi-sub">แผงย่อยโหลด</div>
-        </div>
-        <div class="el-kpi-card type-mc" data-filter-type="MC">
-          <div class="el-kpi-label"><span class="kpi-badge badge-mc">MC</span> Machine</div>
-          <div class="el-kpi-value" id="kpi-mc">0</div>
-          <div class="el-kpi-sub">เครื่องจักร</div>
-        </div>
-        <div class="el-kpi-card type-dv" data-filter-type="DV">
-          <div class="el-kpi-label"><span class="kpi-badge badge-dv">DV</span> Device</div>
-          <div class="el-kpi-value" id="kpi-dv">0</div>
-          <div class="el-kpi-sub">อุปกรณ์ไฟฟ้า</div>
-        </div>
-      </div>
-
-      <!-- View Navigation Tabs -->
-      <nav class="el-view-tabs" role="tablist">
-        <button type="button" class="el-tab-btn active" data-tab="diagram" role="tab" aria-selected="true">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-          <span>แผนผังโครงข่าย (Single Line Tree)</span>
-        </button>
-        <button type="button" class="el-tab-btn" data-tab="directory" role="tab" aria-selected="false">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-          <span>ทะเบียนตู้/อุปกรณ์ (Panel Directory)</span>
-          <span class="el-tab-count" id="tab-count-all">0</span>
-        </button>
-        <button type="button" class="el-tab-btn" data-tab="wiring" role="tab" aria-selected="false">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
-          <span>จัดการสายจ่ายไฟ (Quick Wiring)</span>
-        </button>
-      </nav>
     </header>
 
-    <!-- TAB 1: INTERACTIVE SINGLE LINE DIAGRAM -->
+    <!-- TAB 1: INTERACTIVE PANEL EXPLORER (MDB HOME & DRILL-DOWN DETAIL VIEW) -->
     <section id="tab-diagram" class="el-tab-content active" role="tabpanel">
-      <!-- Diagram Toolbar -->
-      <div class="el-diagram-toolbar">
-        <div class="el-toolbar-left">
-          <label class="el-filter-label" for="filter-tree-root">เลือกดูสายเมน:</label>
-          <select id="filter-tree-root" class="el-select el-select-sm">
-            <option value="ALL">ดูทุกสายเมน (All MDBs)</option>
-          </select>
+      <!-- Single Unified Toolbar: Breadcrumbs / Quick MDB Strip + Search -->
+      <div class="el-explorer-bar">
+        <div class="el-explorer-nav" id="explorer-breadcrumbs"></div>
+        <div class="el-mdb-quick-strip" id="explorer-mdb-strip"></div>
 
-          <label class="el-checkbox-label">
-            <input type="checkbox" id="toggle-show-machines">
-            <span>แสดงเครื่องจักร/โหลด (MC/DV)</span>
-          </label>
-        </div>
-
-        <div class="el-toolbar-right">
-          <div class="el-zoom-controls">
-            <button type="button" id="btn-zoom-in" class="btn-icon" title="ซูมเข้า (Zoom In)">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-            </button>
-            <span id="zoom-level-text" class="el-zoom-level">100%</span>
-            <button type="button" id="btn-zoom-out" class="btn-icon" title="ซูมออก (Zoom Out)">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-            </button>
-            <button type="button" id="btn-zoom-reset" class="btn-icon" title="รีเซ็ตขนาดปกติ (Fit View)">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-            </button>
+        <div class="el-explorer-search-wrap">
+          <div class="el-search-box el-explorer-search-box">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="explorer-search-input" placeholder="ค้นหารหัสตู้, ชื่อตู้, วงจรย่อย, สถานที่..." autocomplete="off">
+            <button type="button" id="explorer-search-clear" class="btn-clear" title="ล้างคำค้นหา" style="display:none;">&times;</button>
           </div>
-          <button type="button" id="btn-fullscreen" class="btn btn-secondary btn-sm" title="ขยายเต็มจอ">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-            <span>เต็มจอ</span>
-          </button>
+          <!-- Instant Search Results Dropdown -->
+          <div id="explorer-search-dropdown" class="el-search-dropdown" style="display:none;"></div>
         </div>
       </div>
 
-      <!-- Diagram Interactive Canvas -->
-      <div id="diagram-viewport" class="el-diagram-viewport">
-        <div id="diagram-pan-layer" class="el-diagram-pan-layer">
-          <svg id="diagram-svg-connections" class="el-svg-connections"></svg>
-          <div id="diagram-nodes-layer" class="el-diagram-nodes-layer"></div>
+      <!-- VIEW A: MDB HOME CARDS (Default initial screen & search results grid) -->
+      <div id="explorer-home-view" class="el-explorer-home">
+        <div class="el-explorer-section-head" id="explorer-search-banner" style="display:none;">
+          <span class="el-explorer-section-title" id="explorer-home-title">ผลการค้นหา</span>
+          <span class="el-mdb-count-pill" id="explorer-home-count">0 รายการ</span>
         </div>
 
-        <!-- Empty State in Diagram -->
-        <div id="diagram-empty-state" class="el-empty-state" style="display:none;">
+        <div id="explorer-mdb-grid" class="el-mdb-grid">
+          <!-- MDB Cards rendered here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="diagram-empty-state" class="el-empty-state-card" style="display:none;">
           <div class="el-empty-icon">⚡</div>
-          <h3>ยังไม่มีรายการตู้ควบคุมไฟฟ้า</h3>
-          <p>เริ่มต้นสร้างตู้จ่ายไฟหลัก (MDB) หรือตู้ย่อยในแท็บ "ทะเบียนตู้/อุปกรณ์" เพื่อเริ่มสร้างผัง</p>
+          <h3>ยังไม่มีรายการตู้ควบคุมหลัก (MDB)</h3>
+          <p>เริ่มต้นสร้างตู้จ่ายไฟหลัก (MDB) หรือตู้ย่อยเพื่อเริ่มใช้งานแผนผังโครงข่าย</p>
           <button type="button" class="btn btn-primary" onclick="document.getElementById('btn-add-node').click()">
             + เพิ่มตู้ใบแรก
           </button>
         </div>
+      </div>
 
-        <!-- Floating Hint -->
-        <div class="el-diagram-hint">
-          <span>💡 เลื่อนล้อเมาส์เพื่อซูม &middot; คลิกค้างลากเพื่อเลื่อนผัง &middot; คลิกตู้เพื่อดูข้อมูล</span>
-        </div>
+      <!-- VIEW B: NODE DETAIL CARD VIEW (Matches reference design, responsive for Mobile & Desktop) -->
+      <div id="explorer-detail-view" class="el-explorer-detail" style="display:none;">
+        <!-- Rendered dynamically by renderExplorerDetail() -->
       </div>
     </section>
 
@@ -249,7 +224,6 @@
 
         <div class="el-filter-pills" id="wiring-type-pills">
           <button type="button" class="el-pill active" data-type="ALL">ทั้งหมด</button>
-          <button type="button" class="el-pill" data-type="MDB">MDB</button>
           <button type="button" class="el-pill" data-type="DB">DB</button>
           <button type="button" class="el-pill" data-type="LP">LP</button>
           <button type="button" class="el-pill" data-type="MC">MC</button>
@@ -259,7 +233,7 @@
         <div class="el-status-filter">
           <select id="wiring-status-filter" class="el-select el-select-sm">
             <option value="ALL">ทุกสถานะสายเมน</option>
-            <option value="UNLINKED">เฉพาะสายอิสระ (ยังไม่ต่อ)</option>
+            <option value="UNLINKED" selected>เฉพาะสายอิสระ (ยังไม่ต่อ)</option>
             <option value="LINKED">เชื่อมต่อแล้ว</option>
             <option value="PENDING">เฉพาะรอยืนยัน</option>
           </select>
@@ -302,6 +276,16 @@
             <button type="button" class="btn btn-secondary btn-sm" id="wiring-btn-next">ถัดไป &rarr;</button>
           </div>
         </div>
+      </div>
+
+      <!-- Shared Searchable Dropdown for Wiring Matrix -->
+      <div id="wiring-select-dropdown" class="el-custom-select-dropdown el-wiring-floating-dropdown" style="display:none;">
+        <div class="el-custom-select-search-wrap">
+          <input type="text" id="wiring-select-search" class="el-custom-select-search" placeholder="ค้นหารหัสตู้, ชื่อตู้ต้นทาง..." autocomplete="off">
+          <button type="button" id="wiring-select-search-clear" class="el-custom-select-clear" title="ล้างคำค้นหา" style="display:none;">&times;</button>
+          <svg class="el-custom-select-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </div>
+        <div id="wiring-select-options" class="el-custom-select-options font-mono" role="listbox"></div>
       </div>
     </section>
 
@@ -367,10 +351,16 @@
 
       <!-- Connected Downstream Loads -->
       <div class="el-inspector-section">
-        <h4 class="el-section-title">
-          <span>ตู้และอุปกรณ์ที่รับไฟต่อไป</span>
-          <span id="inspect-children-count" class="el-sub-badge">0</span>
-        </h4>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h4 class="el-section-title" style="margin:0;">
+            <span>ตู้และอุปกรณ์ที่รับไฟต่อไป</span>
+            <span id="inspect-children-count" class="el-sub-badge">0</span>
+          </h4>
+          <button type="button" id="btn-inspect-add-child" class="btn btn-secondary btn-sm" title="เพิ่มอุปกรณ์ที่รับไฟจากตู้นี้">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>เพิ่มลูกตู้/วงจร</span>
+          </button>
+        </div>
         <div id="inspect-children-list" class="el-children-list">
           <div class="el-empty-sub">ไม่มีสายย่อยแยกจากตู้นี้</div>
         </div>
@@ -456,10 +446,22 @@
           </div>
 
           <div class="el-form-field">
-            <label for="form-parent-id" class="el-label">รับไฟมาจาก (ตู้ต้นทาง Parent)</label>
-            <select id="form-parent-id" name="parentId" class="el-select font-mono">
-              <option value="">-- ไม่มี (เป็นตู้ประธาน MDB หรือยังไม่เชื่อมโยง) --</option>
-            </select>
+            <label for="parent-select-trigger" class="el-label">รับไฟมาจาก (ตู้ต้นทาง Parent)</label>
+            <div class="el-custom-select" id="parent-select-container">
+              <input type="hidden" id="form-parent-id" name="parentId" value="">
+              <button type="button" id="parent-select-trigger" class="el-select el-custom-select-trigger font-mono" aria-haspopup="listbox" aria-expanded="false">
+                <span id="parent-select-label" class="el-custom-select-label">-- ไม่มี (เป็นตู้ประธาน MDB หรือยังไม่เชื่อมโยง) --</span>
+                <svg class="el-custom-select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div id="parent-select-dropdown" class="el-custom-select-dropdown" style="display:none;">
+                <div class="el-custom-select-search-wrap">
+                  <input type="text" id="parent-select-search" class="el-custom-select-search" placeholder="ค้นหารหัสตู้, ชื่อตู้ต้นทาง..." autocomplete="off">
+                  <button type="button" id="parent-select-search-clear" class="el-custom-select-clear" title="ล้างคำค้นหา" style="display:none;">&times;</button>
+                  <svg class="el-custom-select-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <div id="parent-select-options" class="el-custom-select-options font-mono" role="listbox"></div>
+              </div>
+            </div>
             <small class="el-help">สามารถเว้นว่างไว้ก่อน แล้วค่อยมาเชื่อมโยงทีหลังได้</small>
           </div>
         </div>
@@ -495,13 +497,123 @@
           </div>
         </div>
 
+        <!-- Section: Outgoing Circuits / Child Nodes (บันทึกจบในหน้าเดียว) -->
+        <div class="el-circuit-builder-section">
+          <div class="el-circuit-builder-header">
+            <div>
+              <h4 class="el-circuit-builder-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polyline></svg>
+                <span>รายการตู้ย่อย / วงจรย่อยที่รับไฟต่อไป (Outgoing Circuits)</span>
+                <span id="circuit-count-badge" class="el-sub-badge">0 รายการ</span>
+              </h4>
+              <p class="el-circuit-builder-desc">เพิ่มเบรกเกอร์ย่อย ตู้ลูก หรือเครื่องจักรที่รับไฟจากตู้นี้ได้ในหน้าเดียว ระบบจะบันทึกและผูกตู้ต้นทางให้อัตโนมัติ</p>
+            </div>
+            <div class="el-circuit-tools">
+              <button type="button" id="btn-add-circuit-row" class="btn btn-secondary btn-sm" title="เพิ่มแถวใหม่">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>เพิ่มแถว</span>
+              </button>
+              <button type="button" id="btn-add-circuit-5" class="btn btn-secondary btn-sm" title="เพิ่มทีละ 5 แถว">
+                <span>+ 5 แถว</span>
+              </button>
+              <button type="button" id="btn-circuit-auto-gen" class="btn btn-secondary btn-sm" title="สร้างรหัสชุดด่วน เช่น Q1-Q10">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>ชุดด่วน (Q1..)</span>
+              </button>
+              <button type="button" id="btn-circuit-excel-paste" class="btn btn-secondary btn-sm" title="วางข้อมูลจาก Excel">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                <span>แปะจาก Excel</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Auto Gen Box (Collapsible) -->
+          <div id="panel-auto-gen" class="el-quick-panel" style="display:none;">
+            <div class="el-quick-panel-title">⚡ สร้างชุดรหัสวงจรย่อยอัตโนมัติ</div>
+            <div class="el-quick-grid">
+              <div>
+                <label class="el-label-sm" for="auto-gen-prefix">คำนำหน้า (Prefix)</label>
+                <input type="text" id="auto-gen-prefix" class="el-input el-input-sm font-mono" value="Q" placeholder="เช่น Q, DB-, LP-">
+              </div>
+              <div>
+                <label class="el-label-sm" for="auto-gen-start">เริ่มจากเลข</label>
+                <input type="number" id="auto-gen-start" class="el-input el-input-sm font-mono" value="1" min="1" max="999">
+              </div>
+              <div>
+                <label class="el-label-sm" for="auto-gen-count">จำนวน (ช่อง)</label>
+                <input type="number" id="auto-gen-count" class="el-input el-input-sm font-mono" value="10" min="1" max="50">
+              </div>
+              <div>
+                <label class="el-label-sm" for="auto-gen-type">ประเภท</label>
+                <select id="auto-gen-type" class="el-select el-select-sm">
+                  <option value="DB">DB (ตู้ย่อย)</option>
+                  <option value="LP">LP (โหลดพาเนล)</option>
+                  <option value="MC">MC (เครื่องจักร)</option>
+                  <option value="DV" selected>DV (อุปกรณ์/เบรกเกอร์ย่อย)</option>
+                </select>
+              </div>
+              <div>
+                <label class="el-label-sm" for="auto-gen-amp">พิกัดกระแส (A)</label>
+                <input type="number" id="auto-gen-amp" class="el-input el-input-sm font-mono" value="160" min="0">
+              </div>
+              <div style="display:flex; align-items:flex-end; gap:6px;">
+                <button type="button" id="btn-run-auto-gen" class="btn btn-primary btn-sm">สร้างแถว</button>
+                <button type="button" id="btn-close-auto-gen" class="btn btn-secondary btn-sm">ปิด</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Excel Paste Box (Collapsible) -->
+          <div id="panel-excel-paste" class="el-quick-panel" style="display:none;">
+            <div class="el-quick-panel-title">📋 คัดลอกตารางจาก Excel หรือ Google Sheets มาวาง</div>
+            <p class="el-help" style="margin-bottom:6px;">รองรับคอลัมน์: <strong>รหัสตู้/อุปกรณ์ [Tab] ชื่ออุปกรณ์ [Tab] ประเภท (DB/LP/MC/DV) [Tab] แอมป์ (A) [Tab] สถานที่</strong></p>
+            <textarea id="excel-paste-text" class="el-textarea font-mono" rows="4" placeholder="วางข้อมูลที่ Copy มาที่นี่... เช่น&#10;Q10	DB10-10 (28STD4)	DB	160	เสา 14&#10;Q11	MDB10 Spare	DV	160	ห้อง MDB&#10;Q12	LP 100A PP CAP	LP	100	อาคาร 1"></textarea>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+              <button type="button" id="btn-close-excel-paste" class="btn btn-secondary btn-sm">ยกเลิก</button>
+              <button type="button" id="btn-apply-excel-paste" class="btn btn-primary btn-sm">นำเข้าข้อมูลลงตาราง</button>
+            </div>
+          </div>
+
+          <!-- Outgoing Circuits Table -->
+          <div class="el-circuit-table-wrap">
+            <table class="el-circuit-table">
+              <thead>
+                <tr>
+                  <th style="width:36px; text-align:center;">#</th>
+                  <th style="width:130px;">รหัส / Tag Code *</th>
+                  <th>ชื่อตู้ / โหลดปลายทาง *</th>
+                  <th style="width:115px;">ประเภท</th>
+                  <th style="width:95px;">พิกัด (A)</th>
+                  <th style="width:150px;">สถานที่ติดตั้ง</th>
+                  <th style="width:40px; text-align:center;">ลบ</th>
+                </tr>
+              </thead>
+              <tbody id="circuit-table-body">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+            <div id="circuit-empty-state" class="el-circuit-empty">
+              <span>ยังไม่มีวงจรย่อย — กด <strong>"+ เพิ่มแถว"</strong>, <strong>"ชุดด่วน"</strong> หรือ <strong>"แปะจาก Excel"</strong> หากต้องการบันทึกรายการย่อยพร้อมตู้หลัก</span>
+            </div>
+          </div>
+        </div>
+
         <div id="form-error-msg" class="el-form-error" style="display:none;"></div>
 
         <div class="el-modal-footer">
-          <button type="button" id="btn-modal-cancel" class="btn btn-secondary">ยกเลิก</button>
-          <button type="submit" id="btn-modal-submit" class="btn btn-primary">
-            <span>บันทึกข้อมูล</span>
-          </button>
+          <div class="el-modal-footer-left">
+            <label class="el-checkbox-label" style="font-size:12.5px; user-select:none; cursor:pointer;">
+              <input type="checkbox" id="form-continuous-add">
+              <span>บันทึกแล้วเปิดฟอร์มตู้ถัดไปทันที (คงค่าสถานที่เดิม)</span>
+            </label>
+          </div>
+          <div class="el-modal-footer-right">
+            <button type="button" id="btn-modal-cancel" class="btn btn-secondary">ยกเลิก</button>
+            <button type="submit" id="btn-modal-submit" class="btn btn-primary">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              <span>บันทึกข้อมูลทั้งหมด</span>
+            </button>
+          </div>
         </div>
       </form>
     </div>

@@ -22,17 +22,24 @@
     // Quick Wiring pagination & filters
     wiringFilterType: 'ALL',
     wiringSearchQuery: '',
-    wiringStatusFilter: 'ALL',
+    wiringStatusFilter: 'UNLINKED',
     wiringPage: 1,
     wiringPageSize: 50,
 
     selectedNodeId: null,
-    showMachines: false, // Default to FALSE so diagram renders instantly with 169 panels!
-    treeRootFilter: 'ALL',
-    panZoom: { x: 40, y: 40, scale: 1.0, isPanning: false, startX: 0, startY: 0 },
+    explorerSearchQuery: '',
+    downstreamFilterQuery: '',
     pendingWiring: new Map(), // id -> parentId
     formImage: null, // { mime, base64 } or null
-    removeImageFlag: false
+    removeImageFlag: false,
+    formRemovedChildIds: [],
+    parentExcludeId: null,
+    parentDropdownOpen: false,
+    parentHighlightIndex: -1,
+    wiringDropdownOpen: false,
+    wiringDropdownNodeId: null,
+    wiringDropdownTrigger: null,
+    wiringHighlightIndex: -1
   };
 
   // DOM Elements cache
@@ -144,6 +151,7 @@
 
   // Switch Active Tab
   function switchTab(tabName) {
+    closeWiringDropdown();
     state.currentTab = tabName;
     document.querySelectorAll('.el-tab-btn').forEach(btn => {
       const active = btn.dataset.tab === tabName;
@@ -167,249 +175,649 @@
     }
   }
 
+  // Natural sort comparator so MDB1, MDB2..MDB10 and Q1, Q2..Q10 sort numerically
+  function naturalCompare(a, b) {
+    return String(a.nodeCode || '').localeCompare(String(b.nodeCode || ''), undefined, {
+      numeric: true,
+      sensitivity: 'base'
+    });
+  }
+
+  function getNodeById(id) {
+    if (!id) return null;
+    return state.nodes.find(n => n.id === id) || null;
+  }
+
+  function getChildrenOf(parentId) {
+    if (!parentId) return [];
+    return state.nodes.filter(n => n.parentId === parentId).sort(naturalCompare);
+  }
+
+  function getAncestorsOf(nodeId) {
+    const chain = [];
+    const visited = new Set();
+    let curr = getNodeById(nodeId);
+    while (curr && !visited.has(curr.id)) {
+      visited.add(curr.id);
+      chain.unshift(curr);
+      curr = curr.parentId ? getNodeById(curr.parentId) : null;
+    }
+    return chain;
+  }
+
+  function getNodeDriveFileId(node) {
+    if (!node) return '';
+    const rawId = String(node.driveFileId || '').trim();
+    if (rawId) return rawId;
+    const rawUrl = String(node.imageUrl || '').trim();
+    return rawUrl.match(/\/d\/([\w-]{10,})/)?.[1]
+      || rawUrl.match(/[?&]id=([\w-]{10,})/)?.[1]
+      || '';
+  }
+
+  function getNodePhotoUrl(node) {
+    if (!node) return '';
+    const fileId = getNodeDriveFileId(node);
+    if (fileId) {
+      return `https://lh3.googleusercontent.com/d/${fileId}`;
+    }
+    const rawUrl = String(node.imageUrl || '').trim();
+    if (rawUrl && !rawUrl.includes('drive.google.com/file/d/')) {
+      return rawUrl;
+    }
+    return '';
+  }
+
   // ==========================================================================
-  // TAB 1: INTERACTIVE SINGLE LINE DIAGRAM
+  // TAB 1: PANEL EXPLORER (MDB HOME CARDS & DRILL-DOWN DETAIL VIEW)
   // ==========================================================================
+
+  function openNodeInExplorer(nodeId, options = {}) {
+    state.selectedNodeId = nodeId || null;
+    state.downstreamFilterQuery = '';
+    const drop = $('explorer-search-dropdown');
+    if (drop) drop.style.display = 'none';
+
+    if (state.currentTab !== 'diagram') {
+      switchTab('diagram');
+    } else {
+      renderDiagram();
+    }
+
+    if (options.scrollToTop !== false) {
+      const targetEl = $('tab-diagram');
+      if (targetEl) {
+        const rect = targetEl.getBoundingClientRect();
+        if (rect.top < 0 || rect.top > 260) {
+          window.scrollTo({ top: Math.max(0, window.scrollY + rect.top - 72), behavior: 'smooth' });
+        }
+      }
+    }
+  }
 
   function renderDiagram() {
-    const nodesLayer = $('diagram-nodes-layer');
-    const svgLayer = $('diagram-svg-connections');
+    const homeView = $('explorer-home-view');
+    const detailView = $('explorer-detail-view');
     const emptyState = $('diagram-empty-state');
-    if (!nodesLayer || !svgLayer) return;
+    const mdbGrid = $('explorer-mdb-grid');
+    if (!homeView || !detailView || !mdbGrid) return;
 
-    nodesLayer.innerHTML = '';
-    svgLayer.innerHTML = '';
+    renderMdbQuickStrip();
+    renderExplorerBreadcrumbs();
 
-    if (state.nodes.length === 0) {
-      emptyState.style.display = 'flex';
+    // If selectedNodeId is set, verify it still exists
+    const activeNode = state.selectedNodeId ? getNodeById(state.selectedNodeId) : null;
+    if (state.selectedNodeId && !activeNode) {
+      state.selectedNodeId = null;
+    }
+
+    if (activeNode) {
+      homeView.style.display = 'none';
+      detailView.style.display = 'block';
+      renderExplorerDetail(activeNode);
+    } else {
+      detailView.style.display = 'none';
+      homeView.style.display = 'block';
+      renderExplorerHome();
+    }
+  }
+
+  function renderMdbQuickStrip() {
+    const strip = $('explorer-mdb-strip');
+    if (!strip) return;
+
+    // Only show MDB quick strip when on Home View; when inside a panel, show Breadcrumbs instead so we keep a single compact bar!
+    const mdbs = state.nodes.filter(n => n.nodeType === 'MDB').sort(naturalCompare);
+    if (mdbs.length === 0 || state.selectedNodeId) {
+      strip.style.display = 'none';
       return;
     }
+    strip.style.display = 'flex';
+
+    let html = `
+      <button type="button" class="el-mdb-pill is-active" data-mdb-id="">
+        <span>⚡ MDB ทั้งหมด</span>
+        <span class="el-mdb-pill-count">${mdbs.length}</span>
+      </button>
+    `;
+
+    mdbs.forEach(m => {
+      const childCount = getChildrenOf(m.id).length;
+      html += `
+        <button type="button" class="el-mdb-pill" data-mdb-id="${m.id}" title="${escapeHtml(m.name)}">
+          <span>${escapeHtml(m.nodeCode)}</span>
+          <span class="el-mdb-pill-count">${childCount}</span>
+        </button>
+      `;
+    });
+
+    strip.innerHTML = html;
+
+    strip.querySelectorAll('.el-mdb-pill').forEach(btn => {
+      btn.onclick = () => {
+        const targetId = btn.dataset.mdbId;
+        if (!targetId) {
+          state.explorerSearchQuery = '';
+          const sInput = $('explorer-search-input');
+          const sClear = $('explorer-search-clear');
+          if (sInput) sInput.value = '';
+          if (sClear) sClear.style.display = 'none';
+          openNodeInExplorer(null, { scrollToTop: false });
+        } else {
+          openNodeInExplorer(targetId);
+        }
+      };
+    });
+  }
+
+  function renderExplorerBreadcrumbs() {
+    const nav = $('explorer-breadcrumbs');
+    if (!nav) return;
+
+    if (!state.selectedNodeId) {
+      nav.style.display = 'none';
+      nav.innerHTML = '';
+      return;
+    }
+    nav.style.display = 'flex';
+
+    const chain = getAncestorsOf(state.selectedNodeId);
+    const current = chain[chain.length - 1];
+    const parentId = current?.parentId || '';
+
+    let html = `
+      <button type="button" class="el-crumb-back" id="btn-explorer-back" title="ย้อนกลับไปขั้นก่อนหน้า">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>ย้อนกลับ</span>
+      </button>
+      <button type="button" class="el-crumb-home" data-jump-id="">
+        <span>🏠 MDB ทั้งหมด</span>
+      </button>
+    `;
+
+    chain.forEach((item, idx) => {
+      const isLast = idx === chain.length - 1;
+      html += `
+        <span class="el-crumb-sep">&rsaquo;</span>
+        <button type="button" class="el-crumb-btn${isLast ? ' is-active' : ''}" data-jump-id="${item.id}">
+          <span class="kpi-badge badge-${item.nodeType.toLowerCase()}">${escapeHtml(item.nodeType)}</span>
+          <span class="font-mono">${escapeHtml(item.nodeCode)}</span>
+        </button>
+      `;
+    });
+
+    nav.innerHTML = html;
+
+    $('btn-explorer-back')?.addEventListener('click', () => {
+      openNodeInExplorer(parentId || null);
+    });
+
+    nav.querySelectorAll('[data-jump-id]').forEach(btn => {
+      btn.onclick = () => {
+        const targetId = btn.dataset.jumpId;
+        openNodeInExplorer(targetId || null);
+      };
+    });
+  }
+
+  function renderExplorerHome() {
+    const mdbGrid = $('explorer-mdb-grid');
+    const emptyState = $('diagram-empty-state');
+    const searchBanner = $('explorer-search-banner');
+    const titleEl = $('explorer-home-title');
+    const countEl = $('explorer-home-count');
+    if (!mdbGrid || !emptyState) return;
+
+    const q = (state.explorerSearchQuery || '').trim().toLowerCase();
+    let cardsToShow = [];
+
+    if (q) {
+      cardsToShow = state.nodes.filter(n =>
+        (n.nodeCode || '').toLowerCase().includes(q) ||
+        (n.name || '').toLowerCase().includes(q) ||
+        (n.location || '').toLowerCase().includes(q) ||
+        (n.remark || '').toLowerCase().includes(q) ||
+        (n.parentCode || '').toLowerCase().includes(q)
+      ).sort(naturalCompare);
+
+      if (searchBanner) searchBanner.style.display = 'flex';
+      if (titleEl) titleEl.textContent = `ผลการค้นหา "${state.explorerSearchQuery}"`;
+      if (countEl) countEl.textContent = `${cardsToShow.length} รายการ`;
+    } else {
+      // Initial / Home screen: show ONLY MDB cards, no extra header banner!
+      cardsToShow = state.nodes.filter(n => n.nodeType === 'MDB').sort(naturalCompare);
+      if (searchBanner) searchBanner.style.display = 'none';
+    }
+
+    if (cardsToShow.length === 0) {
+      mdbGrid.innerHTML = '';
+      emptyState.style.display = 'flex';
+      const h3 = emptyState.querySelector('h3');
+      const p = emptyState.querySelector('p');
+      if (q) {
+        if (h3) h3.textContent = `ไม่พบตู้หรืออุปกรณ์ที่ตรงกับ "${state.explorerSearchQuery}"`;
+        if (p) p.textContent = 'ลองค้นหาด้วยรหัสตู้ ชื่อตู้ หรือสถานที่ติดตั้งอีกครั้ง';
+      } else {
+        if (h3) h3.textContent = 'ยังไม่มีรายการตู้ควบคุมหลัก (MDB)';
+        if (p) p.textContent = 'เริ่มต้นสร้างตู้จ่ายไฟหลัก (MDB) เพื่อเริ่มใช้งานแผนผังโครงข่าย';
+      }
+      return;
+    }
+
     emptyState.style.display = 'none';
 
-    // Filter nodes according to toolbar controls
-    let filteredNodes = state.nodes.slice();
-    if (!state.showMachines) {
-      filteredNodes = filteredNodes.filter(n => n.nodeType !== 'MC' && n.nodeType !== 'DV');
-    }
+    let html = '';
+    cardsToShow.forEach(node => {
+      const children = getChildrenOf(node.id);
+      const photoUrl = getNodePhotoUrl(node);
+      const fileId = getNodeDriveFileId(node);
+      const fallbackThumb = fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w300` : '';
+      const isMdb = node.nodeType === 'MDB';
+      const hasDistinctName = !isMdb && node.name && node.name.trim().toUpperCase() !== (node.nodeCode || '').trim().toUpperCase();
+      const subtitleText = hasDistinctName ? node.name : (node.location ? `📍 ${node.location}` : (node.name || 'ตู้จ่ายไฟหลัก'));
+      const parentInfo = node.parentCode ? `${escapeHtml(node.parentCode)}` : '';
 
-    // Build children mapping
-    const nodeMap = new Map();
-    const childrenMap = new Map();
-    filteredNodes.forEach(n => {
-      nodeMap.set(n.id, n);
-      childrenMap.set(n.id, []);
-    });
+      html += `
+        <article class="el-mdb-home-card type-${node.nodeType.toLowerCase()}" data-id="${node.id}">
+          <div class="el-mdb-card-top-bar"></div>
+          <div class="el-mdb-card-body">
+            <div class="el-mdb-card-head">
+              <div class="el-mdb-card-title-wrap">
+                <div class="el-mdb-card-code-row">
+                  <span class="kpi-badge badge-${node.nodeType.toLowerCase()}">${escapeHtml(node.nodeType)}</span>
+                  <span class="el-mdb-card-code">${escapeHtml(node.nodeCode)}</span>
+                </div>
+                <div class="el-mdb-card-name" title="${escapeHtml(subtitleText)}">${escapeHtml(subtitleText)}</div>
+              </div>
+              ${photoUrl ? `
+                <img src="${escapeHtml(photoUrl)}" class="el-mdb-card-thumb" alt="${escapeHtml(node.nodeCode)}" loading="lazy" data-fallback="${escapeHtml(fallbackThumb)}" onerror="if(this.dataset.fallback && this.src!==this.dataset.fallback){this.src=this.dataset.fallback;}else{this.style.display='none';}">
+              ` : ''}
+            </div>
 
-    const roots = [];
-    filteredNodes.forEach(n => {
-      if (n.parentId && nodeMap.has(n.parentId)) {
-        childrenMap.get(n.parentId).push(n);
-      } else {
-        roots.push(n);
-      }
-    });
-
-    // If root filter is active, only show the selected root tree
-    let effectiveRoots = roots;
-    if (state.treeRootFilter !== 'ALL') {
-      effectiveRoots = roots.filter(r => r.id === state.treeRootFilter);
-      if (effectiveRoots.length === 0) {
-        effectiveRoots = roots;
-      }
-    }
-
-    // Compute Left-to-Right Orthogonal Hierarchy Coordinates
-    const CARD_WIDTH = 240;
-    const CARD_HEIGHT = 100;
-    const GAP_X = 140; // horizontal distance between columns
-    const GAP_Y = 28;  // vertical distance between sibling cards
-
-    const positions = new Map(); // id -> { x, y }
-    let currentGlobalY = 40;
-
-    function layoutSubtree(nodeId, level) {
-      const children = childrenMap.get(nodeId) || [];
-      const x = 50 + level * (CARD_WIDTH + GAP_X);
-
-      if (children.length === 0) {
-        const y = currentGlobalY;
-        currentGlobalY += CARD_HEIGHT + GAP_Y;
-        positions.set(nodeId, { x, y });
-        return { topY: y, bottomY: y };
-      }
-
-      const childPositions = [];
-      children.forEach(child => {
-        childPositions.push(layoutSubtree(child.id, level + 1));
-      });
-
-      const firstChildY = childPositions[0].topY;
-      const lastChildY = childPositions[childPositions.length - 1].bottomY;
-      const y = Math.round((firstChildY + lastChildY) / 2);
-
-      positions.set(nodeId, { x, y });
-      return { topY: firstChildY, bottomY: lastChildY };
-    }
-
-    effectiveRoots.forEach(root => {
-      layoutSubtree(root.id, 0);
-      currentGlobalY += 30; // Extra gap between major trees
-    });
-
-    // Draw SVG connections first (busbars / power feed lines)
-    let svgLines = '';
-    filteredNodes.forEach(child => {
-      if (!child.parentId || !positions.has(child.id) || !positions.has(child.parentId)) return;
-
-      const pPos = positions.get(child.parentId);
-      const cPos = positions.get(child.id);
-
-      const x1 = pPos.x + CARD_WIDTH;
-      const y1 = pPos.y + (CARD_HEIGHT / 2);
-      const x2 = cPos.x;
-      const y2 = cPos.y + (CARD_HEIGHT / 2);
-      const xMid = Math.round((x1 + x2) / 2);
-
-      const d = `M ${x1} ${y1} H ${xMid} V ${y2} H ${x2}`;
-      const isSelected = state.selectedNodeId === child.id || state.selectedNodeId === child.parentId;
-
-      svgLines += `<path class="el-conn-line${isSelected ? ' is-active' : ''}" d="${d}" data-child-id="${child.id}" data-parent-id="${child.parentId}"></path>`;
-      
-      // Voltage / Current rating label on connecting busbar
-      if (child.currentRating > 0 && Math.abs(x2 - x1) > 60) {
-        svgLines += `<text class="el-conn-text" x="${xMid}" y="${y2 - 6}">${child.currentRating}A</text>`;
-      }
-    });
-    svgLayer.innerHTML = svgLines;
-
-    // Render node cards using DocumentFragment
-    const fragment = document.createDocumentFragment();
-    filteredNodes.forEach(node => {
-      if (!positions.has(node.id)) return;
-      const pos = positions.get(node.id);
-
-      const card = document.createElement('div');
-      card.className = `el-node-card type-${node.nodeType.toLowerCase()}${state.selectedNodeId === node.id ? ' is-selected' : ''}`;
-      card.style.left = pos.x + 'px';
-      card.style.top = pos.y + 'px';
-      card.dataset.id = node.id;
-
-      const children = childrenMap.get(node.id) || [];
-      const hasPhoto = Boolean(node.imageUrl || node.driveFileId);
-
-      card.innerHTML = `
-        <div class="el-node-card-accent"></div>
-        <div class="el-node-card-content">
-          <div class="el-node-header">
-            <span class="kpi-badge badge-${node.nodeType.toLowerCase()}">${escapeHtml(node.nodeType)}</span>
-            <span class="el-node-code">${escapeHtml(node.nodeCode)}</span>
-            ${hasPhoto ? '<span title="มีรูปภาพ" style="font-size:12px;">📷</span>' : ''}
+            <div class="el-mdb-card-specs">
+              <div class="el-mdb-spec-box">
+                <span class="el-mdb-spec-lbl">พิกัดกระแส</span>
+                <span class="el-mdb-spec-val font-mono">${node.currentRating ? node.currentRating + ' A' : '-'}</span>
+              </div>
+              <div class="el-mdb-spec-box">
+                <span class="el-mdb-spec-lbl">แรงดัน</span>
+                <span class="el-mdb-spec-val">${escapeHtml(node.voltage || '-')}</span>
+              </div>
+              ${hasDistinctName && node.location ? `
+                <div class="el-mdb-spec-box full-row">
+                  <span class="el-mdb-spec-lbl">สถานที่</span>
+                  <span class="el-mdb-spec-val">${escapeHtml(node.location)}</span>
+                </div>
+              ` : ''}
+              ${parentInfo ? `
+                <div class="el-mdb-spec-box full-row">
+                  <span class="el-mdb-spec-lbl">ต้นทาง</span>
+                  <span class="el-mdb-spec-val font-mono" style="color:#0284c7;">${parentInfo}</span>
+                </div>
+              ` : ''}
+            </div>
           </div>
-          <div class="el-node-name" title="${escapeHtml(node.name)}">${escapeHtml(node.name)}</div>
-          <div class="el-node-meta-row">
-            <span class="el-node-current">${node.currentRating ? node.currentRating + ' A' : '-'}</span>
-            ${children.length > 0 ? `<span class="el-node-children-tag">${children.length} สายย่อย</span>` : '<span style="font-size:11px;color:#94a3b8;">ปลายทาง</span>'}
+          <div class="el-mdb-card-footer">
+            <span class="el-mdb-subcount">
+              <span>🔌 วงจรย่อย:</span>
+              <span class="el-sub-badge">${children.length}</span>
+            </span>
+            <span class="el-mdb-open-cta">เปิดผัง &rarr;</span>
           </div>
+        </article>
+      `;
+    });
+
+    mdbGrid.innerHTML = html;
+
+    mdbGrid.querySelectorAll('.el-mdb-home-card').forEach(card => {
+      card.onclick = () => openNodeInExplorer(card.dataset.id);
+    });
+  }
+
+  function renderExplorerDetail(node) {
+    const detailContainer = $('explorer-detail-view');
+    if (!detailContainer) return;
+
+    const children = getChildrenOf(node.id);
+    const photoUrl = getNodePhotoUrl(node);
+    const fileId = getNodeDriveFileId(node);
+    const fallbackLarge = fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w800` : '';
+    const driveHref = fileId ? `https://drive.google.com/file/d/${fileId}/view` : '';
+    const hasDistinctName = node.name && node.name.trim().toUpperCase() !== (node.nodeCode || '').trim().toUpperCase();
+
+    const parentHtml = node.parentId && node.parentCode
+      ? `<a class="el-feeder-jump-link font-mono" id="detail-jump-parent" data-id="${node.parentId}">
+           <span>${escapeHtml(node.parentCode)} (${escapeHtml(node.parentName || '')})</span>
+           <span>&uarr;</span>
+         </a>`
+      : 'ตู้ประธาน (MDB) / ยังไม่เชื่อมโยง';
+
+    const filterVal = (state.downstreamFilterQuery || '').trim().toLowerCase();
+    const visibleChildren = filterVal
+      ? children.filter(c =>
+          (c.nodeCode || '').toLowerCase().includes(filterVal) ||
+          (c.name || '').toLowerCase().includes(filterVal) ||
+          (c.location || '').toLowerCase().includes(filterVal)
+        )
+      : children;
+
+    let childrenHtml = '';
+    if (children.length === 0) {
+      childrenHtml = `
+        <div class="el-empty-sub" style="grid-column: 1 / -1; padding:16px; text-align:center; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px;">
+          ไม่มีตู้หรืออุปกรณ์ย่อยที่ต่อออกจากรายการนี้ (ปลายทาง / End Load)
         </div>
       `;
-
-      card.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openInspector(node.id);
+    } else if (visibleChildren.length === 0) {
+      childrenHtml = `
+        <div class="el-empty-sub" style="grid-column: 1 / -1; padding:14px; text-align:center; background:#f8fafc; border-radius:8px;">
+          ไม่พบลูกตู้ที่ตรงกับคำค้นหา "${escapeHtml(state.downstreamFilterQuery)}"
+        </div>
+      `;
+    } else {
+      visibleChildren.forEach(c => {
+        const subCount = getChildrenOf(c.id).length;
+        const showLoc = c.location && c.location !== node.location;
+        childrenHtml += `
+          <div class="el-downstream-item" data-child-id="${c.id}" title="${escapeHtml(c.nodeCode)} - ${escapeHtml(c.name)}">
+            <div class="el-downstream-item-left">
+              <span class="kpi-badge badge-${c.nodeType.toLowerCase()}">${escapeHtml(c.nodeType)}</span>
+              <div class="el-downstream-text-group">
+                <div class="el-downstream-main-line">
+                  <strong class="el-downstream-code">${escapeHtml(c.nodeCode)}</strong>
+                  <span class="el-downstream-name">${escapeHtml(c.name)}</span>
+                </div>
+                ${showLoc ? `<span class="el-downstream-loc">&middot; ${escapeHtml(c.location)}</span>` : ''}
+              </div>
+            </div>
+            <div class="el-downstream-item-right">
+              ${subCount > 0 ? `<span class="el-downstream-sub-pill">${subCount}</span>` : ''}
+              <span class="el-downstream-amp">${c.currentRating ? c.currentRating + 'A' : ''}</span>
+              <span class="el-downstream-arrow">&rsaquo;</span>
+            </div>
+          </div>
+        `;
       });
-
-      fragment.appendChild(card);
-    });
-
-    nodesLayer.appendChild(fragment);
-
-    applyPanZoomTransform();
-  }
-
-  function applyPanZoomTransform() {
-    const panLayer = $('diagram-pan-layer');
-    if (panLayer) {
-      const { x, y, scale } = state.panZoom;
-      panLayer.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-      const zoomText = $('zoom-level-text');
-      if (zoomText) zoomText.textContent = Math.round(scale * 100) + '%';
     }
+
+    detailContainer.innerHTML = `
+      <div class="el-detail-card">
+        <!-- Compact Dark Navy Header -->
+        <div class="el-detail-header">
+          <div class="el-detail-header-left">
+            <div class="el-detail-title-row">
+              <span class="kpi-badge badge-${node.nodeType.toLowerCase()}">${escapeHtml(node.nodeType)}</span>
+              <h2 class="el-detail-code">${escapeHtml(node.nodeCode)}</h2>
+            </div>
+            ${hasDistinctName ? `<div class="el-detail-subtitle">${escapeHtml(node.name)}</div>` : ''}
+          </div>
+
+          <div class="el-detail-header-actions">
+            <button type="button" class="el-detail-close-btn" id="btn-detail-close" title="ปิดและกลับไปหน้าหลัก MDB" aria-label="ปิด">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Responsive Body: 2 columns on Desktop, 1 column on Mobile -->
+        <div class="el-detail-body">
+          <!-- Left Column: Photo, Technical Specs, Remark, Actions -->
+          <div class="el-detail-col-left">
+            <div class="el-detail-photo-card">
+              ${photoUrl ? `
+                <img src="${escapeHtml(photoUrl)}" class="el-detail-photo-img" id="detail-photo-img" alt="${escapeHtml(node.nodeCode)}" data-fallback="${escapeHtml(fallbackLarge)}" onerror="if(this.dataset.fallback && this.src!==this.dataset.fallback){this.src=this.dataset.fallback;}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
+                <div class="el-detail-photo-empty" style="display:none;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  <span>ไม่มีรูปภาพในระบบ</span>
+                </div>
+              ` : `
+                <div class="el-detail-photo-empty">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  <span>ไม่มีรูปภาพในระบบ</span>
+                </div>
+              `}
+              ${driveHref ? `
+                <a href="${escapeHtml(driveHref)}" target="_blank" rel="noopener noreferrer" class="el-drive-link" style="padding:5px 10px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                  <span>เปิดดูใน Google Drive</span>
+                </a>
+              ` : ''}
+            </div>
+
+            <div>
+              <h4 class="el-section-title" style="margin-bottom:6px; font-size:11.5px;">ข้อมูลทางเทคนิค (TECHNICAL SPECS)</h4>
+              <div class="el-detail-spec-grid">
+                <div class="el-detail-spec-box">
+                  <span class="el-detail-spec-label">พิกัดกระแส (Rating)</span>
+                  <span class="el-detail-spec-value font-mono">${node.currentRating ? node.currentRating + ' A' : '-'}</span>
+                </div>
+                <div class="el-detail-spec-box">
+                  <span class="el-detail-spec-label">ระดับแรงดัน (Voltage)</span>
+                  <span class="el-detail-spec-value">${escapeHtml(node.voltage || '-')}</span>
+                </div>
+                <div class="el-detail-spec-box">
+                  <span class="el-detail-spec-label">สถานที่ติดตั้ง (Location)</span>
+                  <span class="el-detail-spec-value">${escapeHtml(node.location || '-')}</span>
+                </div>
+                <div class="el-detail-spec-box">
+                  <span class="el-detail-spec-label">ตู้ต้นทาง (Feeder Source)</span>
+                  <span class="el-detail-spec-value">${parentHtml}</span>
+                </div>
+              </div>
+            </div>
+
+            ${node.remark && node.remark !== '-' ? `
+              <div>
+                <h4 class="el-section-title" style="margin-bottom:4px; font-size:11.5px;">หมายเหตุ / ข้อมูลเพิ่มเติม</h4>
+                <p class="el-inspector-remark" style="padding:7px 10px; font-size:12px;">${escapeHtml(node.remark)}</p>
+              </div>
+            ` : ''}
+
+            <div class="el-detail-footer">
+              <button type="button" id="btn-detail-edit" class="btn btn-secondary btn-sm" style="flex:1;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                <span>แก้ไขข้อมูล</span>
+              </button>
+              <button type="button" id="btn-detail-delete" class="btn btn-danger-ghost btn-sm" title="ลบตู้/อุปกรณ์นี้">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Column: Downstream Connected Panels / Circuits -->
+          <div class="el-detail-col-right">
+            <div class="el-downstream-header">
+              <h4 class="el-downstream-title">
+                <span>ตู้และอุปกรณ์ที่รับไฟต่อไป</span>
+                <span class="el-sub-badge">${children.length}</span>
+              </h4>
+              <button type="button" id="btn-detail-add-child" class="btn btn-secondary btn-sm">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>เพิ่มลูกตู้/วงจร</span>
+              </button>
+            </div>
+
+            ${children.length > 6 ? `
+              <div class="el-downstream-filter">
+                <input type="text" id="detail-downstream-search" class="el-input el-select-sm" style="width:100%;" placeholder="กรองค้นหาลูกตู้/วงจรใน ${escapeHtml(node.nodeCode)}..." value="${escapeHtml(state.downstreamFilterQuery)}">
+              </div>
+            ` : ''}
+
+            <div class="el-downstream-list" id="detail-downstream-list">
+              ${childrenHtml}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Wire up detail events
+    $('btn-detail-close')?.addEventListener('click', () => {
+      openNodeInExplorer(null);
+    });
+
+    $('detail-photo-img')?.addEventListener('click', () => {
+      openLightbox(photoUrl);
+    });
+
+    $('detail-jump-parent')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openNodeInExplorer(node.parentId);
+    });
+
+    $('btn-detail-add-child')?.addEventListener('click', () => {
+      openCreateModal({
+        parentId: node.id,
+        location: node.location,
+        voltage: node.voltage
+      });
+    });
+
+    $('btn-detail-edit')?.addEventListener('click', () => {
+      openEditModal(node.id);
+    });
+
+    $('btn-detail-delete')?.addEventListener('click', () => {
+      confirmDeleteNode(node.id);
+    });
+
+    const dsSearch = $('detail-downstream-search');
+    if (dsSearch) {
+      dsSearch.addEventListener('input', (e) => {
+        state.downstreamFilterQuery = e.target.value;
+        const pos = dsSearch.selectionStart;
+        renderExplorerDetail(node);
+        const newInput = $('detail-downstream-search');
+        if (newInput) {
+          newInput.focus();
+          if (typeof pos === 'number') newInput.setSelectionRange(pos, pos);
+        }
+      });
+    }
+
+    detailContainer.querySelectorAll('.el-downstream-item').forEach(item => {
+      item.onclick = () => {
+        openNodeInExplorer(item.dataset.childId);
+      };
+    });
   }
 
-  // Diagram Zoom & Pan Event Listeners
-  function initDiagramPanZoom() {
-    const viewport = $('diagram-viewport');
-    if (!viewport) return;
+  function initExplorerSearch() {
+    const searchInput = $('explorer-search-input');
+    const clearBtn = $('explorer-search-clear');
+    const dropdown = $('explorer-search-dropdown');
+    if (!searchInput) return;
 
-    // Pan with mouse drag
-    viewport.addEventListener('mousedown', (e) => {
-      if (e.target.closest('.el-node-card')) return;
-      state.panZoom.isPanning = true;
-      state.panZoom.startX = e.clientX - state.panZoom.x;
-      state.panZoom.startY = e.clientY - state.panZoom.y;
+    function updateSearchDropdown(query) {
+      if (!dropdown) return;
+      const q = (query || '').trim().toLowerCase();
+      if (!q || !state.selectedNodeId) {
+        dropdown.style.display = 'none';
+        return;
+      }
+
+      const matches = state.nodes.filter(n =>
+        (n.nodeCode || '').toLowerCase().includes(q) ||
+        (n.name || '').toLowerCase().includes(q) ||
+        (n.location || '').toLowerCase().includes(q)
+      ).sort(naturalCompare).slice(0, 15);
+
+      if (matches.length === 0) {
+        dropdown.innerHTML = `<div style="padding:12px; color:#64748b; font-size:13px; text-align:center;">ไม่พบตู้หรืออุปกรณ์ที่ตรงกับ "${escapeHtml(query)}"</div>`;
+        dropdown.style.display = 'block';
+        return;
+      }
+
+      let html = '';
+      matches.forEach(m => {
+        html += `
+          <div class="el-search-drop-item" data-id="${m.id}">
+            <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+              <span class="kpi-badge badge-${m.nodeType.toLowerCase()}">${escapeHtml(m.nodeType)}</span>
+              <strong class="font-mono" style="color:#0f172a;">${escapeHtml(m.nodeCode)}</strong>
+              <span style="color:#475569; font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(m.name)}</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+              ${m.parentCode ? `<span class="font-mono" style="font-size:11px; color:#0284c7;">&larr; ${escapeHtml(m.parentCode)}</span>` : ''}
+              <span class="font-mono" style="font-size:12px; font-weight:600; color:#b45309;">${m.currentRating ? m.currentRating + 'A' : ''}</span>
+            </div>
+          </div>
+        `;
+      });
+      dropdown.innerHTML = html;
+      dropdown.style.display = 'block';
+
+      dropdown.querySelectorAll('.el-search-drop-item').forEach(item => {
+        item.onclick = () => {
+          dropdown.style.display = 'none';
+          searchInput.value = '';
+          state.explorerSearchQuery = '';
+          if (clearBtn) clearBtn.style.display = 'none';
+          openNodeInExplorer(item.dataset.id);
+        };
+      });
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const val = e.target.value;
+      state.explorerSearchQuery = val.trim();
+      if (clearBtn) clearBtn.style.display = state.explorerSearchQuery ? 'inline-block' : 'none';
+
+      if (state.selectedNodeId) {
+        updateSearchDropdown(state.explorerSearchQuery);
+      } else {
+        if (dropdown) dropdown.style.display = 'none';
+        renderExplorerHome();
+      }
     });
 
-    window.addEventListener('mousemove', (e) => {
-      if (!state.panZoom.isPanning) return;
-      state.panZoom.x = e.clientX - state.panZoom.startX;
-      state.panZoom.y = e.clientY - state.panZoom.startY;
-      applyPanZoomTransform();
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && state.explorerSearchQuery) {
+        e.preventDefault();
+        if (dropdown) dropdown.style.display = 'none';
+        // Switch to Home grid showing all search results if currently inside a node
+        if (state.selectedNodeId) {
+          state.selectedNodeId = null;
+          renderDiagram();
+        }
+      }
     });
 
-    window.addEventListener('mouseup', () => {
-      state.panZoom.isPanning = false;
+    clearBtn?.addEventListener('click', () => {
+      searchInput.value = '';
+      state.explorerSearchQuery = '';
+      clearBtn.style.display = 'none';
+      if (dropdown) dropdown.style.display = 'none';
+      if (!state.selectedNodeId) {
+        renderExplorerHome();
+      }
     });
 
-    // Zoom with scroll wheel
-    viewport.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const delta = e.deltaY > 0 ? -0.1 : 0.1;
-      const newScale = Math.min(2.5, Math.max(0.3, state.panZoom.scale + delta));
-      
-      const rect = viewport.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      state.panZoom.x = mouseX - (mouseX - state.panZoom.x) * (newScale / state.panZoom.scale);
-      state.panZoom.y = mouseY - (mouseY - state.panZoom.y) * (newScale / state.panZoom.scale);
-      state.panZoom.scale = newScale;
-
-      applyPanZoomTransform();
-    }, { passive: false });
-
-    // Zoom buttons
-    $('btn-zoom-in')?.addEventListener('click', () => {
-      state.panZoom.scale = Math.min(2.5, state.panZoom.scale + 0.15);
-      applyPanZoomTransform();
-    });
-    $('btn-zoom-out')?.addEventListener('click', () => {
-      state.panZoom.scale = Math.max(0.3, state.panZoom.scale - 0.15);
-      applyPanZoomTransform();
-    });
-    $('btn-zoom-reset')?.addEventListener('click', () => {
-      state.panZoom.scale = 1.0;
-      state.panZoom.x = 40;
-      state.panZoom.y = 40;
-      applyPanZoomTransform();
-    });
-
-    // Fullscreen toggle
-    $('btn-fullscreen')?.addEventListener('click', () => {
-      viewport.classList.toggle('is-fullscreen');
-      const isFull = viewport.classList.contains('is-fullscreen');
-      $('btn-fullscreen').querySelector('span').textContent = isFull ? 'ออกเต็มจอ' : 'เต็มจอ';
-    });
-
-    // Tree root filter
-    $('filter-tree-root')?.addEventListener('change', (e) => {
-      state.treeRootFilter = e.target.value;
-      renderDiagram();
-    });
-
-    // Toggle show machines
-    $('toggle-show-machines')?.addEventListener('change', (e) => {
-      state.showMachines = e.target.checked;
-      renderDiagram();
+    document.addEventListener('click', (e) => {
+      if (dropdown && !e.target.closest('.el-explorer-search-wrap')) {
+        dropdown.style.display = 'none';
+      }
     });
   }
 
@@ -476,14 +884,16 @@
 
     let html = '';
     pagedItems.forEach(node => {
-      const thumbUrl = node.imageUrl || (node.driveFileId ? `https://drive.google.com/thumbnail?id=${node.driveFileId}&sz=w100` : '');
+      const thumbUrl = getNodePhotoUrl(node);
+      const fileId = getNodeDriveFileId(node);
+      const fallbackThumb = fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w200` : '';
       const parentLabel = node.parentCode ? `${escapeHtml(node.parentCode)} - ${escapeHtml(node.parentName)}` : '<span style="color:#94a3b8;">- เมนหลัก / ยังไม่ต่อ -</span>';
 
       html += `
         <tr data-id="${node.id}">
           <td>
             ${thumbUrl ? `
-              <img src="${escapeHtml(thumbUrl)}" class="el-table-thumbnail" alt="ตู้" data-large="${escapeHtml(node.imageUrl || thumbUrl)}">
+              <img src="${escapeHtml(thumbUrl)}" class="el-table-thumbnail" alt="ตู้" data-large="${escapeHtml(thumbUrl)}" data-fallback="${escapeHtml(fallbackThumb)}" onerror="if(this.dataset.fallback && this.src!==this.dataset.fallback){this.src=this.dataset.fallback;}else{this.style.display='none';}">
             ` : `
               <div class="el-table-thumb-empty">⚡</div>
             `}
@@ -571,8 +981,8 @@
       return;
     }
 
-    // 1. Filter nodes
-    let items = state.nodes.slice();
+    // 1. Filter nodes (Exclude MDB since MDB is a main root board)
+    let items = state.nodes.filter(n => n.nodeType !== 'MDB');
 
     if (state.wiringFilterType !== 'ALL') {
       items = items.filter(n => n.nodeType === state.wiringFilterType);
@@ -589,10 +999,8 @@
 
     if (state.wiringStatusFilter === 'UNLINKED') {
       items = items.filter(n => {
-        const effectiveParent = state.pendingWiring.has(n.id)
-          ? state.pendingWiring.get(n.id)
-          : n.parentId;
-        return !effectiveParent;
+        if (state.pendingWiring.has(n.id)) return true;
+        return !n.parentId;
       });
     } else if (state.wiringStatusFilter === 'LINKED') {
       items = items.filter(n => {
@@ -629,21 +1037,14 @@
       return;
     }
 
-    // Feeder candidates: Power feeds come exclusively from distribution panels (MDB, DB, LP)
-    const feederCandidates = state.nodes.filter(n => n.nodeType === 'MDB' || n.nodeType === 'DB' || n.nodeType === 'LP');
-
     let html = '';
     pagedItems.forEach(node => {
       const currentParentId = state.pendingWiring.has(node.id)
         ? state.pendingWiring.get(node.id)
         : (node.parentId || '');
 
-      let options = '<option value="">-- เป็นตู้ประธานหลัก (MDB) หรือยังไม่เชื่อมโยง --</option>';
-      feederCandidates.forEach(opt => {
-        if (opt.id === node.id) return; // Prevent picking self
-        const selected = opt.id === currentParentId ? ' selected' : '';
-        options += `<option value="${opt.id}"${selected}>${escapeHtml(opt.nodeCode)} - ${escapeHtml(opt.name)} (${opt.nodeType})</option>`;
-      });
+      const parentNode = currentParentId ? state.nodes.find(n => n.id === currentParentId) : null;
+      const selectedLabel = getParentOptionLabel(parentNode);
 
       const isChanged = state.pendingWiring.has(node.id) && state.pendingWiring.get(node.id) !== (node.parentId || '');
       const statusPill = getWiringStatusBadge(isChanged, currentParentId);
@@ -656,9 +1057,10 @@
           <td class="font-mono">${node.currentRating ? node.currentRating + ' A' : '-'}</td>
           <td>${escapeHtml(node.location || '-')}</td>
           <td>
-            <select class="el-select el-wiring-select" data-id="${node.id}" style="width:100%;">
-              ${options}
-            </select>
+            <button type="button" class="el-select el-custom-select-trigger el-wiring-select-trigger font-mono" data-id="${node.id}" data-value="${escapeHtml(currentParentId)}" aria-haspopup="listbox" aria-expanded="false">
+              <span class="el-custom-select-label">${escapeHtml(selectedLabel)}</span>
+              <svg class="el-custom-select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
           </td>
           <td class="wiring-status-cell">${statusPill}</td>
         </tr>
@@ -666,38 +1068,18 @@
     });
 
     tbody.innerHTML = html;
+    closeWiringDropdown();
 
-    // Attach wiring change listener: TARGETED ROW UPDATE (Instant 60fps)
-    tbody.querySelectorAll('.el-wiring-select').forEach(sel => {
-      sel.onchange = (e) => {
-        const nodeId = sel.dataset.id;
-        const newParentId = e.target.value;
-        const node = state.nodes.find(n => n.id === nodeId);
-        const origParentId = node?.parentId || '';
-
-        if (newParentId === origParentId) {
-          state.pendingWiring.delete(nodeId);
+    tbody.querySelectorAll('.el-wiring-select-trigger').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (state.wiringDropdownOpen && state.wiringDropdownNodeId === btn.dataset.id) {
+          closeWiringDropdown();
         } else {
-          state.pendingWiring.set(nodeId, newParentId);
+          openWiringDropdown(btn);
         }
-
-        const isChanged = state.pendingWiring.has(nodeId);
-        const row = sel.closest('tr');
-        if (row) {
-          row.classList.toggle('is-modified', isChanged);
-          const statusCell = row.querySelector('.wiring-status-cell');
-          if (statusCell) {
-            statusCell.innerHTML = getWiringStatusBadge(isChanged, newParentId);
-          }
-        }
-
-        if (saveBtn) {
-          saveBtn.disabled = state.pendingWiring.size === 0;
-          saveBtn.querySelector('span').textContent = state.pendingWiring.size > 0
-            ? `บันทึกการเชื่อมโยง (${state.pendingWiring.size})`
-            : 'บันทึกการเชื่อมโยง';
-        }
-      };
+      });
     });
 
     if (saveBtn) {
@@ -706,6 +1088,262 @@
         ? `บันทึกการเชื่อมโยง (${state.pendingWiring.size})`
         : 'บันทึกการเชื่อมโยง';
     }
+  }
+
+  function applyWiringSelection(nodeId, newParentId, newLabel) {
+    const trigger = state.wiringDropdownTrigger || document.querySelector(`.el-wiring-select-trigger[data-id="${nodeId}"]`);
+    const saveBtn = $('btn-save-all-wiring');
+    const node = state.nodes.find(n => n.id === nodeId);
+    const origParentId = node?.parentId || '';
+    const val = newParentId || '';
+
+    if (trigger) {
+      trigger.dataset.value = val;
+      const lblEl = trigger.querySelector('.el-custom-select-label');
+      if (lblEl) lblEl.textContent = newLabel || getParentOptionLabel(null);
+    }
+
+    if (val === origParentId) {
+      state.pendingWiring.delete(nodeId);
+    } else {
+      state.pendingWiring.set(nodeId, val);
+    }
+
+    const isChanged = state.pendingWiring.has(nodeId);
+    const row = trigger ? trigger.closest('tr') : document.querySelector(`#wiring-table-body tr[data-id="${nodeId}"]`);
+    if (row) {
+      row.classList.toggle('is-modified', isChanged);
+      const statusCell = row.querySelector('.wiring-status-cell');
+      if (statusCell) {
+        statusCell.innerHTML = getWiringStatusBadge(isChanged, val);
+      }
+    }
+
+    if (saveBtn) {
+      saveBtn.disabled = state.pendingWiring.size === 0;
+      saveBtn.querySelector('span').textContent = state.pendingWiring.size > 0
+        ? `บันทึกการเชื่อมโยง (${state.pendingWiring.size})`
+        : 'บันทึกการเชื่อมโยง';
+    }
+
+    closeWiringDropdown();
+  }
+
+  function positionWiringDropdown() {
+    const dropdown = $('wiring-select-dropdown');
+    const trigger = state.wiringDropdownTrigger;
+    if (!dropdown || !trigger || !state.wiringDropdownOpen) return;
+
+    const rect = trigger.getBoundingClientRect();
+    if (rect.bottom < 54 || rect.top > window.innerHeight) {
+      closeWiringDropdown();
+      return;
+    }
+
+    dropdown.style.width = `${rect.width}px`;
+    dropdown.style.left = `${rect.left}px`;
+
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top - 54;
+    if (spaceBelow < 280 && spaceAbove > spaceBelow) {
+      dropdown.style.top = 'auto';
+      dropdown.style.bottom = `${window.innerHeight - rect.top + 3}px`;
+    } else {
+      dropdown.style.bottom = 'auto';
+      dropdown.style.top = `${rect.bottom + 3}px`;
+    }
+  }
+
+  function renderWiringDropdownOptions(query = '') {
+    const listEl = $('wiring-select-options');
+    if (!listEl) return;
+
+    const nodeId = state.wiringDropdownNodeId;
+    const currentParentId = state.wiringDropdownTrigger?.dataset.value || '';
+    const q = (query || '').trim().toLowerCase();
+
+    const defaultLabel = getParentOptionLabel(null);
+    const items = [];
+
+    if (!q || defaultLabel.toLowerCase().includes(q)) {
+      items.push({ value: '', label: defaultLabel });
+    }
+
+    const feederCandidates = state.nodes.filter(
+      n => (n.nodeType === 'MDB' || n.nodeType === 'DB' || n.nodeType === 'LP') && n.id !== nodeId
+    );
+
+    feederCandidates.forEach(n => {
+      const label = getParentOptionLabel(n);
+      if (
+        !q ||
+        (n.nodeCode || '').toLowerCase().includes(q) ||
+        (n.name || '').toLowerCase().includes(q) ||
+        (n.nodeType || '').toLowerCase().includes(q) ||
+        (n.location || '').toLowerCase().includes(q) ||
+        label.toLowerCase().includes(q)
+      ) {
+        items.push({ value: n.id, label });
+      }
+    });
+
+    if (items.length === 0) {
+      listEl.innerHTML = `<div class="el-custom-select-empty">ไม่พบตู้ต้นทางที่ค้นหา "${escapeHtml(query)}"</div>`;
+      state.wiringHighlightIndex = -1;
+      return;
+    }
+
+    let html = '';
+    let selectedIdx = -1;
+    items.forEach((item, idx) => {
+      const isSelected = item.value === currentParentId;
+      if (isSelected) selectedIdx = idx;
+      html += `
+        <div class="el-custom-select-option${isSelected ? ' is-selected' : ''}" data-value="${escapeHtml(item.value)}" data-label="${escapeHtml(item.label)}" role="option" aria-selected="${isSelected}">
+          ${escapeHtml(item.label)}
+        </div>
+      `;
+    });
+
+    listEl.innerHTML = html;
+    state.wiringHighlightIndex = selectedIdx >= 0 ? selectedIdx : (q ? 0 : -1);
+    updateWiringOptionHighlight();
+
+    listEl.querySelectorAll('.el-custom-select-option').forEach(optEl => {
+      optEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        applyWiringSelection(nodeId, optEl.dataset.value, optEl.dataset.label);
+      });
+    });
+  }
+
+  function updateWiringOptionHighlight() {
+    const listEl = $('wiring-select-options');
+    if (!listEl) return;
+    const opts = listEl.querySelectorAll('.el-custom-select-option');
+    opts.forEach((el, idx) => {
+      el.classList.toggle('is-highlighted', idx === state.wiringHighlightIndex);
+    });
+    if (state.wiringHighlightIndex >= 0 && opts[state.wiringHighlightIndex]) {
+      opts[state.wiringHighlightIndex].scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function openWiringDropdown(trigger) {
+    const dropdown = $('wiring-select-dropdown');
+    const searchInput = $('wiring-select-search');
+    const clearBtn = $('wiring-select-search-clear');
+    if (!dropdown || !trigger) return;
+
+    if (state.wiringDropdownTrigger && state.wiringDropdownTrigger !== trigger) {
+      state.wiringDropdownTrigger.classList.remove('is-open');
+      state.wiringDropdownTrigger.setAttribute('aria-expanded', 'false');
+    }
+
+    state.wiringDropdownOpen = true;
+    state.wiringDropdownNodeId = trigger.dataset.id;
+    state.wiringDropdownTrigger = trigger;
+
+    trigger.classList.add('is-open');
+    trigger.setAttribute('aria-expanded', 'true');
+    dropdown.style.display = 'block';
+
+    if (searchInput) searchInput.value = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+
+    renderWiringDropdownOptions('');
+    positionWiringDropdown();
+
+    const selectedEl = dropdown.querySelector('.el-custom-select-option.is-selected');
+    if (selectedEl) {
+      selectedEl.scrollIntoView({ block: 'nearest' });
+    }
+
+    setTimeout(() => searchInput?.focus(), 10);
+  }
+
+  function closeWiringDropdown() {
+    const dropdown = $('wiring-select-dropdown');
+    if (state.wiringDropdownTrigger) {
+      state.wiringDropdownTrigger.classList.remove('is-open');
+      state.wiringDropdownTrigger.setAttribute('aria-expanded', 'false');
+    }
+    state.wiringDropdownOpen = false;
+    state.wiringDropdownNodeId = null;
+    state.wiringDropdownTrigger = null;
+    state.wiringHighlightIndex = -1;
+    if (dropdown) dropdown.style.display = 'none';
+  }
+
+  function initWiringSelectDropdown() {
+    const dropdown = $('wiring-select-dropdown');
+    const searchInput = $('wiring-select-search');
+    const clearBtn = $('wiring-select-search-clear');
+    const listEl = $('wiring-select-options');
+    if (!dropdown) return;
+
+    searchInput?.addEventListener('input', (e) => {
+      const val = e.target.value;
+      if (clearBtn) clearBtn.style.display = val ? 'inline-block' : 'none';
+      renderWiringDropdownOptions(val);
+    });
+
+    clearBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+      }
+      clearBtn.style.display = 'none';
+      renderWiringDropdownOptions('');
+    });
+
+    searchInput?.addEventListener('keydown', (e) => {
+      const opts = listEl ? listEl.querySelectorAll('.el-custom-select-option') : [];
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (opts.length > 0) {
+          state.wiringHighlightIndex = (state.wiringHighlightIndex + 1) % opts.length;
+          updateWiringOptionHighlight();
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (opts.length > 0) {
+          state.wiringHighlightIndex = (state.wiringHighlightIndex - 1 + opts.length) % opts.length;
+          updateWiringOptionHighlight();
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const targetOpt = opts[state.wiringHighlightIndex] || opts[0];
+        if (targetOpt && state.wiringDropdownNodeId) {
+          applyWiringSelection(state.wiringDropdownNodeId, targetOpt.dataset.value, targetOpt.dataset.label);
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        const prevTrigger = state.wiringDropdownTrigger;
+        closeWiringDropdown();
+        prevTrigger?.focus();
+      }
+    });
+
+    window.addEventListener('scroll', () => {
+      if (state.wiringDropdownOpen) positionWiringDropdown();
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+      if (state.wiringDropdownOpen) positionWiringDropdown();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (
+        state.wiringDropdownOpen &&
+        !dropdown.contains(e.target) &&
+        (!state.wiringDropdownTrigger || !state.wiringDropdownTrigger.contains(e.target))
+      ) {
+        closeWiringDropdown();
+      }
+    });
   }
 
   // Save all pending wiring changes in batch
@@ -735,119 +1373,7 @@
   // ==========================================================================
 
   async function openInspector(nodeId) {
-    state.selectedNodeId = nodeId;
-    const drawer = $('node-inspector');
-    const overlay = $('inspector-overlay');
-    if (!drawer || !overlay) return;
-
-    try {
-      const node = await rpc('getNode', nodeId);
-      if (!node) return;
-
-      $('inspect-code').textContent = node.nodeCode;
-      $('inspect-name').textContent = node.name;
-
-      const badge = $('inspect-badge');
-      badge.className = `kpi-badge badge-${node.nodeType.toLowerCase()}`;
-      badge.textContent = node.nodeType;
-
-      $('inspect-current').textContent = node.currentRating ? node.currentRating + ' A' : '-';
-      $('inspect-voltage').textContent = node.voltage || '-';
-      $('inspect-location').textContent = node.location || '-';
-
-      // Upstream Feeder Breadcrumb
-      if (node.parentCode) {
-        $('inspect-parent').innerHTML = `
-          <a href="#" class="btn-inspect-jump font-mono" data-id="${node.parentId}" style="color:var(--el-primary); text-decoration:none;">
-            ${escapeHtml(node.parentCode)} (${escapeHtml(node.parentName)}) &rarr;
-          </a>
-        `;
-        $('inspect-parent').querySelector('a').onclick = (e) => {
-          e.preventDefault();
-          openInspector(node.parentId);
-        };
-      } else {
-        $('inspect-parent').textContent = 'ตู้ประธาน (MDB) หรือยังไม่ได้เชื่อมโยง';
-      }
-
-      $('inspect-remark').textContent = node.remark || '-';
-
-      // Photos & Drive Link
-      const photoEl = $('inspect-photo');
-      const placeholder = $('inspect-photo-placeholder');
-      const driveLink = $('inspect-drive-link');
-
-      const photoUrl = node.imageUrl || (node.driveFileId ? `https://drive.google.com/thumbnail?id=${node.driveFileId}&sz=w600` : '');
-      if (photoUrl) {
-        photoEl.src = photoUrl;
-        photoEl.style.display = 'block';
-        placeholder.style.display = 'none';
-        photoEl.onclick = () => openLightbox(node.imageUrl || photoUrl);
-      } else {
-        photoEl.style.display = 'none';
-        placeholder.style.display = 'flex';
-      }
-
-      if (node.driveFileId || node.imageUrl) {
-        const fileId = node.driveFileId || (node.imageUrl.match(/\/d\/([\w-]+)/)?.[1]);
-        if (fileId) {
-          driveLink.href = `https://drive.google.com/file/d/${fileId}/view`;
-          driveLink.style.display = 'inline-flex';
-        } else {
-          driveLink.style.display = 'none';
-        }
-      } else {
-        driveLink.style.display = 'none';
-      }
-
-      // Children list
-      const childrenList = $('inspect-children-list');
-      const childrenCount = $('inspect-children-count');
-      childrenCount.textContent = node.children.length;
-
-      if (node.children.length === 0) {
-        childrenList.innerHTML = '<div class="el-empty-sub">ไม่มีสายย่อยแยกจากตู้นี้ (End Node)</div>';
-      } else {
-        let cHtml = '';
-        node.children.forEach(c => {
-          cHtml += `
-            <div class="el-child-item" data-id="${c.id}">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span class="kpi-badge badge-${c.nodeType.toLowerCase()}">${c.nodeType}</span>
-                <strong class="font-mono">${escapeHtml(c.nodeCode)}</strong>
-                <span style="font-size:12px; color:#475569;">${escapeHtml(c.name)}</span>
-              </div>
-              <span class="font-mono" style="font-size:12px; font-weight:600; color:#b45309;">${c.currentRating ? c.currentRating + 'A' : ''}</span>
-            </div>
-          `;
-        });
-        childrenList.innerHTML = cHtml;
-
-        childrenList.querySelectorAll('.el-child-item').forEach(item => {
-          item.onclick = () => openInspector(item.dataset.id);
-        });
-      }
-
-      // Action buttons
-      $('btn-inspect-edit').onclick = () => {
-        closeInspector();
-        openEditModal(node.id);
-      };
-      $('btn-inspect-delete').onclick = () => {
-        confirmDeleteNode(node.id);
-      };
-
-      drawer.classList.add('is-open');
-      overlay.classList.add('is-open');
-      drawer.setAttribute('aria-hidden', 'false');
-
-      // Highlight in diagram if active
-      if (state.currentTab === 'diagram') {
-        renderDiagram();
-      }
-    } catch (err) {
-      console.error('Error fetching node details:', err);
-    }
+    openNodeInExplorer(nodeId);
   }
 
   function closeInspector() {
@@ -865,31 +1391,160 @@
   }
 
   // ==========================================================================
+  // CIRCUIT BUILDER (OUTGOING BRANCH CIRCUITS TABLE)
+  // ==========================================================================
+
+  function resetCircuitTable() {
+    state.formRemovedChildIds = [];
+    const tbody = $('circuit-table-body');
+    if (tbody) tbody.innerHTML = '';
+    updateCircuitBadge();
+    const p1 = $('panel-auto-gen');
+    if (p1) p1.style.display = 'none';
+    const p2 = $('panel-excel-paste');
+    if (p2) p2.style.display = 'none';
+  }
+
+  function updateCircuitBadge() {
+    const tbody = $('circuit-table-body');
+    const rows = tbody ? tbody.querySelectorAll('tr') : [];
+    const badge = $('circuit-count-badge');
+    const emptyState = $('circuit-empty-state');
+    if (badge) badge.textContent = `${rows.length} รายการ`;
+    if (emptyState) emptyState.style.display = rows.length === 0 ? 'block' : 'none';
+
+    rows.forEach((tr, idx) => {
+      const idxCell = tr.querySelector('.row-idx');
+      if (idxCell) idxCell.textContent = idx + 1;
+    });
+  }
+
+  function addCircuitRow(data = {}) {
+    const tbody = $('circuit-table-body');
+    if (!tbody) return null;
+
+    const tr = document.createElement('tr');
+    if (data.id) tr.dataset.childId = data.id;
+
+    const rowNum = tbody.querySelectorAll('tr').length + 1;
+    const typeVal = (data.nodeType || 'DB').toUpperCase();
+
+    tr.innerHTML = `
+      <td class="row-idx" style="text-align:center; font-weight:600; color:#64748b;">${rowNum}</td>
+      <td>
+        <input type="text" class="el-input font-mono circuit-code" placeholder="เช่น Q10, LP-01" value="${escapeHtml(data.nodeCode || '')}" style="text-transform:uppercase;">
+      </td>
+      <td>
+        <input type="text" class="el-input circuit-name" placeholder="เช่น ตู้จ่ายไฟย่อย, ปั๊มน้ำ, โหลด 1" value="${escapeHtml(data.name || '')}">
+      </td>
+      <td>
+        <select class="el-select circuit-type">
+          <option value="DB"${typeVal === 'DB' ? ' selected' : ''}>DB (ตู้ย่อย)</option>
+          <option value="LP"${typeVal === 'LP' ? ' selected' : ''}>LP (โหลดพาเนล)</option>
+          <option value="MC"${typeVal === 'MC' ? ' selected' : ''}>MC (เครื่องจักร)</option>
+          <option value="DV"${typeVal === 'DV' ? ' selected' : ''}>DV (อุปกรณ์)</option>
+        </select>
+      </td>
+      <td>
+        <input type="number" class="el-input font-mono circuit-rating" placeholder="แอมป์" value="${data.currentRating ? data.currentRating : ''}" min="0" step="any">
+      </td>
+      <td>
+        <input type="text" class="el-input circuit-location" placeholder="ใช้ตามตู้หลัก" value="${escapeHtml(data.location || '')}">
+      </td>
+      <td style="text-align:center;">
+        <button type="button" class="btn btn-danger-ghost btn-sm btn-delete-row" title="ลบแถวนี้" style="padding:4px 6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+      </td>
+    `;
+
+    tr.querySelector('.btn-delete-row').onclick = () => {
+      if (tr.dataset.childId) {
+        state.formRemovedChildIds.push(tr.dataset.childId);
+      }
+      tr.remove();
+      updateCircuitBadge();
+    };
+
+    tr.querySelector('.circuit-location')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const nextTr = tr.nextElementSibling;
+        if (nextTr) {
+          nextTr.querySelector('.circuit-code')?.focus();
+        } else {
+          const newTr = addCircuitRow();
+          newTr?.querySelector('.circuit-code')?.focus();
+        }
+      }
+    });
+
+    tbody.appendChild(tr);
+    updateCircuitBadge();
+    return tr;
+  }
+
+  function collectCircuitRows() {
+    const tbody = $('circuit-table-body');
+    if (!tbody) return [];
+    const rows = tbody.querySelectorAll('tr');
+    const children = [];
+
+    rows.forEach(tr => {
+      const codeInput = tr.querySelector('.circuit-code');
+      const nameInput = tr.querySelector('.circuit-name');
+      const typeSelect = tr.querySelector('.circuit-type');
+      const ratingInput = tr.querySelector('.circuit-rating');
+      const locationInput = tr.querySelector('.circuit-location');
+
+      const nodeCode = codeInput?.value.trim().toUpperCase() || '';
+      const name = nameInput?.value.trim() || '';
+      const nodeType = typeSelect?.value || 'DB';
+      const currentRating = parseFloat(ratingInput?.value) || 0;
+      const location = locationInput?.value.trim() || '';
+      const id = tr.dataset.childId || undefined;
+
+      if (nodeCode || name) {
+        children.push({ id, nodeCode, name, nodeType, currentRating, location });
+      }
+    });
+
+    return children;
+  }
+
+  // ==========================================================================
   // NODE FORM MODAL (CREATE / EDIT)
   // ==========================================================================
 
-  function openCreateModal() {
-    $('modal-form-title').textContent = 'เพิ่มตู้ / อุปกรณ์ไฟฟ้าใหม่';
+  function openCreateModal(initialData = {}) {
+    $('modal-form-title').textContent = 'เพิ่มตู้ / อุปกรณ์ไฟฟ้าใหม่ (พร้อมรายการวงจรย่อย)';
     $('form-id').value = '';
-    $('form-node-code').value = '';
-    $('form-node-type').value = 'DB';
-    $('form-name').value = '';
-    $('form-current-rating').value = '';
-    $('form-voltage').value = '400V 3P4W';
-    $('form-location').value = '';
-    $('form-remark').value = '';
+    $('form-node-code').value = initialData.nodeCode || '';
+    $('form-node-type').value = initialData.nodeType || 'DB';
+    $('form-name').value = initialData.name || '';
+    $('form-current-rating').value = initialData.currentRating || '';
+    $('form-voltage').value = initialData.voltage || '400V 3P4W';
+    $('form-location').value = initialData.location || '';
+    $('form-remark').value = initialData.remark || '';
     $('form-error-msg').style.display = 'none';
 
     state.formImage = null;
     state.removeImageFlag = false;
     resetPhotoPreview();
-    updateParentSelector('');
-    toggleMachinePickerRow('DB');
+    updateParentSelector(initialData.parentId || '');
+    toggleMachinePickerRow(initialData.nodeType || 'DB');
+
+    // Reset circuits table and start with 3 blank rows for immediate entry
+    resetCircuitTable();
+    addCircuitRow();
+    addCircuitRow();
+    addCircuitRow();
 
     $('modal-node-form').showModal();
+    setTimeout(() => $('form-node-code')?.focus(), 50);
   }
 
-  function openEditModal(nodeId) {
+  async function openEditModal(nodeId) {
     const node = state.nodes.find(n => n.id === nodeId);
     if (!node) return;
 
@@ -908,28 +1563,239 @@
     state.removeImageFlag = false;
 
     // Photo preview
-    const photoUrl = node.imageUrl || (node.driveFileId ? `https://drive.google.com/thumbnail?id=${node.driveFileId}&sz=w300` : '');
+    const photoUrl = getNodePhotoUrl(node);
     setPhotoPreview(photoUrl);
 
     updateParentSelector(node.parentId, node.id);
     toggleMachinePickerRow(node.nodeType);
 
+    // Reset circuits table and load existing children
+    resetCircuitTable();
+    try {
+      const full = await rpc('getNode', node.id);
+      if (full?.children && full.children.length > 0) {
+        full.children.forEach(c => addCircuitRow(c));
+      } else {
+        addCircuitRow();
+      }
+    } catch {
+      addCircuitRow();
+    }
+
     $('modal-node-form').showModal();
   }
 
-  function updateParentSelector(currentParentId, excludeId) {
-    const sel = $('form-parent-id');
-    if (!sel) return;
+  function getParentOptionLabel(node) {
+    if (!node) return '-- ไม่มี (เป็นตู้ประธาน MDB หรือยังไม่เชื่อมโยง) --';
+    return `${node.nodeCode} - ${node.name} (${node.nodeType})`;
+  }
 
-    let html = '<option value="">-- ไม่มี (เป็นตู้ประธาน MDB หรือยังไม่เชื่อมโยง) --</option>';
-    // Prioritize distribution panels (MDB, DB, LP)
-    const feederCandidates = state.nodes.filter(n => n.nodeType === 'MDB' || n.nodeType === 'DB' || n.nodeType === 'LP');
+  function updateParentSelector(currentParentId, excludeId) {
+    const hiddenInput = $('form-parent-id');
+    const labelEl = $('parent-select-label');
+    state.parentExcludeId = excludeId || null;
+
+    const val = currentParentId || '';
+    if (hiddenInput) hiddenInput.value = val;
+
+    const selectedNode = val ? state.nodes.find(n => n.id === val) : null;
+    if (labelEl) {
+      labelEl.textContent = getParentOptionLabel(selectedNode);
+    }
+
+    closeParentDropdown();
+  }
+
+  function renderParentDropdownOptions(query = '') {
+    const listEl = $('parent-select-options');
+    if (!listEl) return;
+
+    const currentParentId = $('form-parent-id')?.value || '';
+    const excludeId = state.parentExcludeId;
+    const q = (query || '').trim().toLowerCase();
+
+    const defaultLabel = '-- ไม่มี (เป็นตู้ประธาน MDB หรือยังไม่เชื่อมโยง) --';
+    const items = [];
+
+    if (!q || defaultLabel.toLowerCase().includes(q)) {
+      items.push({ value: '', label: defaultLabel });
+    }
+
+    const feederCandidates = state.nodes.filter(
+      n => (n.nodeType === 'MDB' || n.nodeType === 'DB' || n.nodeType === 'LP') && n.id !== excludeId
+    );
+
     feederCandidates.forEach(n => {
-      if (n.id === excludeId) return; // Cannot be own parent
-      const selected = n.id === currentParentId ? ' selected' : '';
-      html += `<option value="${n.id}"${selected}>${escapeHtml(n.nodeCode)} - ${escapeHtml(n.name)} (${n.nodeType})</option>`;
+      const label = getParentOptionLabel(n);
+      if (
+        !q ||
+        (n.nodeCode || '').toLowerCase().includes(q) ||
+        (n.name || '').toLowerCase().includes(q) ||
+        (n.nodeType || '').toLowerCase().includes(q) ||
+        (n.location || '').toLowerCase().includes(q) ||
+        label.toLowerCase().includes(q)
+      ) {
+        items.push({ value: n.id, label });
+      }
     });
-    sel.innerHTML = html;
+
+    if (items.length === 0) {
+      listEl.innerHTML = `<div class="el-custom-select-empty">ไม่พบตู้ต้นทางที่ค้นหา "${escapeHtml(query)}"</div>`;
+      state.parentHighlightIndex = -1;
+      return;
+    }
+
+    let html = '';
+    let selectedIdx = -1;
+    items.forEach((item, idx) => {
+      const isSelected = item.value === currentParentId;
+      if (isSelected) selectedIdx = idx;
+      html += `
+        <div class="el-custom-select-option${isSelected ? ' is-selected' : ''}" data-value="${escapeHtml(item.value)}" data-label="${escapeHtml(item.label)}" role="option" aria-selected="${isSelected}">
+          ${escapeHtml(item.label)}
+        </div>
+      `;
+    });
+
+    listEl.innerHTML = html;
+    state.parentHighlightIndex = selectedIdx >= 0 ? selectedIdx : (q ? 0 : -1);
+    updateParentOptionHighlight();
+
+    listEl.querySelectorAll('.el-custom-select-option').forEach(optEl => {
+      optEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectParentOption(optEl.dataset.value, optEl.dataset.label);
+      });
+    });
+  }
+
+  function updateParentOptionHighlight() {
+    const listEl = $('parent-select-options');
+    if (!listEl) return;
+    const opts = listEl.querySelectorAll('.el-custom-select-option');
+    opts.forEach((el, idx) => {
+      el.classList.toggle('is-highlighted', idx === state.parentHighlightIndex);
+    });
+    if (state.parentHighlightIndex >= 0 && opts[state.parentHighlightIndex]) {
+      opts[state.parentHighlightIndex].scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function selectParentOption(value, label) {
+    const hiddenInput = $('form-parent-id');
+    const labelEl = $('parent-select-label');
+    if (hiddenInput) hiddenInput.value = value || '';
+    if (labelEl) labelEl.textContent = label || getParentOptionLabel(null);
+    closeParentDropdown();
+  }
+
+  function openParentDropdown() {
+    const container = $('parent-select-container');
+    const trigger = $('parent-select-trigger');
+    const dropdown = $('parent-select-dropdown');
+    const searchInput = $('parent-select-search');
+    const clearBtn = $('parent-select-search-clear');
+    if (!container || !dropdown) return;
+
+    state.parentDropdownOpen = true;
+    container.classList.add('is-open');
+    if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    dropdown.style.display = 'block';
+
+    if (searchInput) searchInput.value = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+
+    renderParentDropdownOptions('');
+
+    const selectedEl = dropdown.querySelector('.el-custom-select-option.is-selected');
+    if (selectedEl) {
+      selectedEl.scrollIntoView({ block: 'nearest' });
+    }
+
+    setTimeout(() => searchInput?.focus(), 10);
+  }
+
+  function closeParentDropdown() {
+    const container = $('parent-select-container');
+    const trigger = $('parent-select-trigger');
+    const dropdown = $('parent-select-dropdown');
+    state.parentDropdownOpen = false;
+    state.parentHighlightIndex = -1;
+    if (container) container.classList.remove('is-open');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    if (dropdown) dropdown.style.display = 'none';
+  }
+
+  function initParentSelectDropdown() {
+    const container = $('parent-select-container');
+    const trigger = $('parent-select-trigger');
+    const dropdown = $('parent-select-dropdown');
+    const searchInput = $('parent-select-search');
+    const clearBtn = $('parent-select-search-clear');
+    const listEl = $('parent-select-options');
+    if (!container || !trigger || !dropdown) return;
+
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (state.parentDropdownOpen) {
+        closeParentDropdown();
+      } else {
+        openParentDropdown();
+      }
+    });
+
+    searchInput?.addEventListener('input', (e) => {
+      const val = e.target.value;
+      if (clearBtn) clearBtn.style.display = val ? 'inline-block' : 'none';
+      renderParentDropdownOptions(val);
+    });
+
+    clearBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+      }
+      clearBtn.style.display = 'none';
+      renderParentDropdownOptions('');
+    });
+
+    searchInput?.addEventListener('keydown', (e) => {
+      const opts = listEl ? listEl.querySelectorAll('.el-custom-select-option') : [];
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (opts.length > 0) {
+          state.parentHighlightIndex = (state.parentHighlightIndex + 1) % opts.length;
+          updateParentOptionHighlight();
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (opts.length > 0) {
+          state.parentHighlightIndex = (state.parentHighlightIndex - 1 + opts.length) % opts.length;
+          updateParentOptionHighlight();
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const targetOpt = opts[state.parentHighlightIndex] || opts[0];
+        if (targetOpt) {
+          selectParentOption(targetOpt.dataset.value, targetOpt.dataset.label);
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        closeParentDropdown();
+        trigger.focus();
+      }
+    });
+
+    // Close when clicking outside inside modal or document
+    document.addEventListener('click', (e) => {
+      if (state.parentDropdownOpen && !container.contains(e.target)) {
+        closeParentDropdown();
+      }
+    });
   }
 
   function toggleMachinePickerRow(type) {
@@ -1005,8 +1871,24 @@
       return;
     }
 
+    // Collect child circuits
+    const children = collectCircuitRows();
+    for (let i = 0; i < children.length; i++) {
+      const c = children[i];
+      if (!c.nodeCode) {
+        errorEl.textContent = `กรุณาระบุรหัสตู้/อุปกรณ์สำหรับรายการย่อยลำดับที่ ${i + 1}`;
+        errorEl.style.display = 'block';
+        return;
+      }
+      if (!c.name) {
+        errorEl.textContent = `กรุณาระบุชื่อสำหรับรายการย่อย "${c.nodeCode}"`;
+        errorEl.style.display = 'block';
+        return;
+      }
+    }
+
     submitBtn.disabled = true;
-    submitBtn.querySelector('span').textContent = 'กำลังบันทึก...';
+    submitBtn.querySelector('span').textContent = 'กำลังบันทึกข้อมูล...';
 
     try {
       const payload = {
@@ -1020,22 +1902,54 @@
         parentId: parentId || null,
         remark,
         image: state.formImage,
-        removeImage: state.removeImageFlag
+        removeImage: state.removeImageFlag,
+        children,
+        removedChildIds: state.formRemovedChildIds
       };
 
-      await rpc('saveNode', payload);
-      $('modal-node-form').close();
+      const savedNode = await rpc('saveNode', payload);
       await loadData();
 
-      if (id && state.selectedNodeId === id) {
-        openInspector(id);
+      const isContinuous = $('form-continuous-add')?.checked && !id;
+
+      if (isContinuous) {
+        // Continuous Add mode: keep location, parentId, voltage; clear code, name, and children
+        $('form-node-code').value = '';
+        $('form-name').value = '';
+        $('form-current-rating').value = '';
+        $('form-remark').value = '';
+        state.formImage = null;
+        state.removeImageFlag = false;
+        resetPhotoPreview();
+        resetCircuitTable();
+        addCircuitRow();
+        addCircuitRow();
+        addCircuitRow();
+
+        errorEl.style.display = 'block';
+        errorEl.style.background = '#ecfdf5';
+        errorEl.style.borderColor = '#6ee7b7';
+        errorEl.style.color = '#065f46';
+        errorEl.textContent = `✓ บันทึก "${nodeCode}" สำเร็จแล้ว สามารถกรอกรายการถัดไปได้ทันที`;
+        $('form-node-code')?.focus();
+        setTimeout(() => {
+          if (errorEl.textContent.startsWith('✓')) errorEl.style.display = 'none';
+        }, 3500);
+      } else {
+        $('modal-node-form').close();
+        if (savedNode?.id) {
+          openInspector(savedNode.id);
+        }
       }
     } catch (err) {
-      errorEl.textContent = err.message || 'บันทึกข้อมูลไม่สำเร็จ';
       errorEl.style.display = 'block';
+      errorEl.style.background = '#fef2f2';
+      errorEl.style.borderColor = '#fca5a5';
+      errorEl.style.color = '#dc2626';
+      errorEl.textContent = err.message || 'บันทึกข้อมูลไม่สำเร็จ';
     } finally {
       submitBtn.disabled = false;
-      submitBtn.querySelector('span').textContent = 'บันทึกข้อมูล';
+      submitBtn.querySelector('span').textContent = 'บันทึกข้อมูลทั้งหมด';
     }
   }
 
@@ -1047,9 +1961,10 @@
     const msg = `ต้องการลบตู้/อุปกรณ์ "${node.nodeCode} - ${node.name}" ใช่หรือไม่?\n\n*หมายเหตุ: สายย่อยที่รับไฟจากตู้นี้จะถูกปลดสายออก (ตั้งค่าต้นทางเป็นว่าง) โดยไม่ถูกลบ`;
     if (!confirm(msg)) return;
 
+    const fallbackParentId = node.parentId || null;
     try {
       await rpc('deleteNode', id);
-      closeInspector();
+      state.selectedNodeId = fallbackParentId;
       await loadData();
     } catch (err) {
       alert('ลบข้อมูลไม่สำเร็จ: ' + err.message);
@@ -1085,8 +2000,8 @@
     $('btn-add-node')?.addEventListener('click', openCreateModal);
     $('btn-refresh')?.addEventListener('click', loadData);
 
-    // 3. KPI card filter clicks
-    document.querySelectorAll('.el-kpi-card').forEach(card => {
+    // 3. KPI card / chip filter clicks
+    document.querySelectorAll('.el-kpi-card, .el-kpi-chip').forEach(card => {
       card.addEventListener('click', () => {
         const type = card.dataset.filterType;
         if (type) {
@@ -1219,9 +2134,111 @@
     $('inspector-overlay')?.addEventListener('click', closeInspector);
 
     // 7. Modal form events
-    $('btn-modal-close')?.addEventListener('click', () => $('modal-node-form').close());
-    $('btn-modal-cancel')?.addEventListener('click', () => $('modal-node-form').close());
+    $('btn-modal-close')?.addEventListener('click', () => {
+      closeParentDropdown();
+      $('modal-node-form').close();
+    });
+    $('btn-modal-cancel')?.addEventListener('click', () => {
+      closeParentDropdown();
+      $('modal-node-form').close();
+    });
+    $('modal-node-form')?.addEventListener('cancel', (e) => {
+      if (state.parentDropdownOpen) {
+        e.preventDefault();
+        closeParentDropdown();
+      }
+    });
     $('form-node')?.addEventListener('submit', submitNodeForm);
+    initParentSelectDropdown();
+    initWiringSelectDropdown();
+
+    // Circuit Builder toolbar events
+    $('btn-add-circuit-row')?.addEventListener('click', () => {
+      const tr = addCircuitRow();
+      tr?.querySelector('.circuit-code')?.focus();
+    });
+    $('btn-add-circuit-5')?.addEventListener('click', () => {
+      for (let i = 0; i < 5; i++) addCircuitRow();
+    });
+    $('btn-circuit-auto-gen')?.addEventListener('click', () => {
+      const panel = $('panel-auto-gen');
+      if (panel) {
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        $('panel-excel-paste').style.display = 'none';
+      }
+    });
+    $('btn-close-auto-gen')?.addEventListener('click', () => {
+      $('panel-auto-gen').style.display = 'none';
+    });
+    $('btn-run-auto-gen')?.addEventListener('click', () => {
+      const prefix = ($('auto-gen-prefix').value || 'Q').trim().toUpperCase();
+      const start = parseInt($('auto-gen-start').value, 10) || 1;
+      const count = Math.min(50, Math.max(1, parseInt($('auto-gen-count').value, 10) || 10));
+      const nodeType = $('auto-gen-type').value || 'DV';
+      const amp = parseFloat($('auto-gen-amp').value) || 0;
+      const parentLoc = $('form-location').value.trim();
+
+      for (let i = 0; i < count; i++) {
+        const num = start + i;
+        const code = `${prefix}${num}`;
+        addCircuitRow({
+          nodeCode: code,
+          name: `${code} Load`,
+          nodeType,
+          currentRating: amp,
+          location: parentLoc
+        });
+      }
+      $('panel-auto-gen').style.display = 'none';
+    });
+
+    $('btn-circuit-excel-paste')?.addEventListener('click', () => {
+      const panel = $('panel-excel-paste');
+      if (panel) {
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        $('panel-auto-gen').style.display = 'none';
+        if (panel.style.display !== 'none') {
+          $('excel-paste-text')?.focus();
+        }
+      }
+    });
+    $('btn-close-excel-paste')?.addEventListener('click', () => {
+      $('panel-excel-paste').style.display = 'none';
+    });
+    $('btn-apply-excel-paste')?.addEventListener('click', () => {
+      const rawText = ($('excel-paste-text').value || '').trim();
+      if (!rawText) return;
+
+      const lines = rawText.split(/\r?\n/);
+      const parentLoc = $('form-location').value.trim();
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        const parts = trimmed.includes('\t') ? trimmed.split('\t') : trimmed.split(',');
+        const code = (parts[0] || '').trim().toUpperCase();
+        const name = (parts[1] || '').trim() || code;
+        let type = (parts[2] || '').trim().toUpperCase();
+        if (!['MDB', 'DB', 'LP', 'MC', 'DV'].includes(type)) {
+          type = 'DB';
+        }
+        const amp = parseFloat(parts[3]) || 0;
+        const loc = (parts[4] || '').trim() || parentLoc;
+
+        if (code) {
+          addCircuitRow({
+            nodeCode: code,
+            name,
+            nodeType: type,
+            currentRating: amp,
+            location: loc
+          });
+        }
+      });
+
+      $('excel-paste-text').value = '';
+      $('panel-excel-paste').style.display = 'none';
+    });
 
     // Machine Picker auto-populate
     $('form-node-type')?.addEventListener('change', (e) => {
@@ -1248,9 +2265,14 @@
 
     // Lightbox close
     $('btn-lightbox-close')?.addEventListener('click', () => $('modal-lightbox').close());
+    $('modal-lightbox')?.addEventListener('click', (e) => {
+      if (e.target === $('modal-lightbox')) {
+        $('modal-lightbox').close();
+      }
+    });
 
-    // 8. Pan & Zoom
-    initDiagramPanZoom();
+    // 8. Explorer Search & Navigation
+    initExplorerSearch();
 
     // 9. Load data
     loadData();

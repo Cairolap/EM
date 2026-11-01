@@ -46,7 +46,7 @@ async function getServiceAccountToken(email, privateKeyPem) {
  const header = b64url({ alg: 'RS256', typ: 'JWT' });
  const payload = b64url({
   iss: email,
-  scope: 'https://www.googleapis.com/auth/drive',
+  scope: 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets',
   aud: 'https://oauth2.googleapis.com/token',
   exp: now + 3600,
   iat: now
@@ -96,6 +96,13 @@ async function token(env){
   return data.access_token;
  }
  fail('DRIVE_CONFIG', 'ยังไม่ได้เชื่อมบัญชีรูปภาพ กรุณาติดต่อผู้ดูแล', 503);
+}
+export async function getGoogleAccessToken(env) {
+ try {
+  return await token(env);
+ } catch (err) {
+  return null;
+ }
 }
 async function call(env,path,options={},timeoutMs=25000){
  const access=await token(env);

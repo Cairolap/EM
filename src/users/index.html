@@ -3,19 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>จัดการผู้ใช้งาน - Electrical Maintenance</title>
+  <title>จัดการผู้ใช้งานและกำหนดสิทธิ์ - Electrical Maintenance</title>
   <link rel="icon" type="image/png" href="__APP_FAVICON__">
   <!-- APP_STYLE -->
 </head>
 <body>
   <div class="container">
+    <!-- Top Executive Header -->
     <header class="page-header">
       <div class="header-left">
+        <div class="header-badge">System Administration</div>
         <h1 class="page-title">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cc681c" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          จัดการผู้ใช้งาน (User Management)
+          <svg class="header-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          จัดการผู้ใช้งานและกำหนดสิทธิ์
+          <span class="page-title-sub">Granular Permissions</span>
         </h1>
-        <p class="page-subtitle">กำหนดสิทธิ์รายโมดูล บัญชีชั่วคราว และรีเซ็ตรหัสผ่าน</p>
+        <p class="page-subtitle">ควบคุมสิทธิ์การเข้าถึงรายโมดูล (Machines, Parts, BOM, PM, Expenses, PR Store, Announcements), บัญชีชั่วคราว และความปลอดภัย</p>
       </div>
       <div class="header-right">
         <button id="btn-create-user" class="btn btn-primary">
@@ -25,99 +33,153 @@
       </div>
     </header>
 
-    <!-- Stat Cards -->
+    <!-- Stat Cards Bar -->
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-label">ผู้ใช้งานทั้งหมด</div>
-        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-icon-wrapper stat-icon-blue">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+        </div>
+        <div class="stat-meta">
+          <div class="stat-label">ผู้ใช้งานทั้งหมด</div>
+          <div class="stat-value" id="stat-total">0</div>
+        </div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">ผู้ใช้งานถาวร</div>
-        <div class="stat-value" id="stat-perm">0</div>
+        <div class="stat-icon-wrapper stat-icon-green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <div class="stat-meta">
+          <div class="stat-label">เปิดใช้งานอยู่ (Active)</div>
+          <div class="stat-value" id="stat-active">0</div>
+        </div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">ผู้ใช้ชั่วคราว</div>
-        <div class="stat-value" id="stat-temp">0</div>
+        <div class="stat-icon-wrapper stat-icon-amber">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        </div>
+        <div class="stat-meta">
+          <div class="stat-label">ผู้ดูแลระบบ (Admin)</div>
+          <div class="stat-value" id="stat-admin">0</div>
+        </div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">ผู้ดูแลระบบ (Admin)</div>
-        <div class="stat-value" id="stat-admin">0</div>
+        <div class="stat-icon-wrapper stat-icon-purple">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </div>
+        <div class="stat-meta">
+          <div class="stat-label">ผู้ใช้งานถาวร</div>
+          <div class="stat-value" id="stat-perm">0</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-orange">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div class="stat-meta">
+          <div class="stat-label">ผู้ใช้ชั่วคราว</div>
+          <div class="stat-value" id="stat-temp">0</div>
+        </div>
       </div>
     </div>
 
     <!-- Search & Filter Rail -->
-    <div class="filter-bar">
+    <div class="filter-card">
       <div class="search-box">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="text" id="input-search" placeholder="ค้นหาชื่อผู้ใช้ หรือชื่อ-นามสกุล...">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="input-search" placeholder="ค้นหาชื่อผู้ใช้ (Username), ชื่อ-นามสกุล, ตำแหน่ง...">
+        <button type="button" id="btn-clear-search" class="search-clear" style="display:none">&times;</button>
       </div>
       <div class="filter-group">
-        <select id="select-type-filter">
+        <select id="select-type-filter" class="filter-select">
           <option value="">ทุกประเภทบัญชี</option>
           <option value="permanent">ถาวร</option>
           <option value="temporary">ชั่วคราว</option>
+          <option value="expired">หมดอายุแล้ว</option>
         </select>
-        <select id="select-status-filter">
+        <select id="select-status-filter" class="filter-select">
           <option value="">ทุกสถานะ</option>
-          <option value="active">ใช้งาน</option>
-          <option value="inactive">ระงับ</option>
+          <option value="active">ใช้งานปกติ (Active)</option>
+          <option value="inactive">ระงับการใช้งาน (Inactive)</option>
+        </select>
+        <select id="select-role-filter" class="filter-select">
+          <option value="">ทุกระดับสิทธิ์</option>
+          <option value="admin">⭐ ผู้ดูแลระบบ (Admin)</option>
+          <option value="editor">✏️ มีสิทธิ์แก้ไขข้อมูล</option>
+          <option value="viewer">👁️ ดูได้อย่างเดียว</option>
+          <option value="can_delete">🗑️ สิทธิ์ลบข้อมูลได้</option>
         </select>
       </div>
     </div>
 
     <!-- User Table -->
     <div class="table-card">
-      <table class="user-table" id="table-users">
-        <thead>
-          <tr>
-            <th>ชื่อผู้ใช้</th>
-            <th>ชื่อแสดงผล</th>
-            <th>ประเภทบัญชี</th>
-            <th>สิทธิ์การเข้าถึง</th>
-            <th>สิทธิ์ลบ</th>
-            <th>สถานะ</th>
-            <th style="text-align:right">การจัดการ</th>
-          </tr>
-        </thead>
-        <tbody id="user-table-body">
-          <tr><td colspan="7" class="loading-state">กำลังโหลดข้อมูลผู้ใช้...</td></tr>
-        </tbody>
-      </table>
+      <div class="table-meta-bar">
+        <span class="table-meta-count">แสดง <strong id="filter-count">0</strong> จาก <span id="total-count">0</span> บัญชี</span>
+      </div>
+      <div class="table-responsive">
+        <table class="user-table" id="table-users">
+          <thead>
+            <tr>
+              <th style="min-width: 220px;">ผู้ใช้งาน</th>
+              <th style="min-width: 130px;">ประเภทบัญชี</th>
+              <th style="min-width: 380px;">ผังสิทธิ์การใช้งานโมดูล (Granular Matrix)</th>
+              <th style="min-width: 100px; text-align: center;">สิทธิ์ลบ</th>
+              <th style="min-width: 100px; text-align: center;">สถานะ</th>
+              <th style="min-width: 200px; text-align: right;">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="user-table-body">
+            <tr><td colspan="6" class="loading-state">กำลังโหลดข้อมูลผู้ใช้และผังสิทธิ์...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- User Modal (Create / Edit) -->
+  <!-- User Modal (Create / Edit User & Granular Permissions) -->
   <div id="modal-user" class="modal-backdrop" style="display:none">
-    <div class="modal-card">
+    <div class="modal-card modal-lg">
       <div class="modal-header">
-        <h2 id="modal-user-title" class="modal-title">เพิ่มผู้ใช้งานใหม่</h2>
-        <button id="modal-user-close" class="modal-close-btn">&times;</button>
+        <div class="modal-header-meta">
+          <span class="modal-header-badge" id="modal-user-badge">ผู้ใช้งาน</span>
+          <h2 id="modal-user-title" class="modal-title">เพิ่มผู้ใช้งานใหม่</h2>
+        </div>
+        <button type="button" id="modal-user-close" class="modal-close-btn" title="ปิดหน้าต่าง">&times;</button>
       </div>
+      
       <form id="form-user">
         <input type="hidden" id="user-id">
+
+        <!-- Basic User Information Section -->
+        <div class="form-section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"></circle><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path></svg>
+          ข้อมูลทั่วไปผู้ใช้งาน
+        </div>
+
         <div class="form-row">
           <div class="form-group">
             <label for="u-username">ชื่อผู้ใช้ (Username) <span class="req">*</span></label>
-            <input type="text" id="u-username" required placeholder="เช่น somchai" pattern="[a-zA-Z0-9_.-]{3,30}">
-            <small class="field-hint">ภาษาอังกฤษหรือตัวเลข 3-30 ตัวอักษร</small>
+            <input type="text" id="u-username" required placeholder="เช่น somchai_p" pattern="[a-zA-Z0-9_.-]{3,30}">
+            <small class="field-hint">ภาษาอังกฤษ ตัวเลข ขีดล่าง หรือจุด 3-30 ตัวอักษร</small>
           </div>
           <div class="form-group" id="group-password">
             <label for="u-password">รหัสผ่านเริ่มต้น <span class="req">*</span></label>
             <input type="password" id="u-password" placeholder="อย่างน้อย 5 ตัวอักษร" minlength="5">
+            <small class="field-hint">ความยาวอย่างน้อย 5 ตัวอักษร</small>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="u-display-name">ชื่อ-นามสกุล / ตำแหน่งแสดงผล <span class="req">*</span></label>
-          <input type="text" id="u-display-name" required placeholder="เช่น สมชาย มีสุข (ช่างซ่อมบำรุง)">
+          <label for="u-display-name">ชื่อ-นามสกุล และตำแหน่งแสดงผล <span class="req">*</span></label>
+          <input type="text" id="u-display-name" required placeholder="เช่น สมชาย มีสุข (ช่างซ่อมบำรุงไฟฟ้า)">
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label for="u-type">ประเภทผู้ใช้งาน</label>
-            <select id="u-type">
+            <select id="u-type" class="filter-select">
               <option value="permanent">ถาวร (ไม่มีวันหมดอายุ)</option>
-              <option value="temporary">ชั่วคราว (มีกำหนดวันหมดอายุ)</option>
+              <option value="temporary">ชั่วคราว (กำหนดวันหมดอายุ)</option>
             </select>
           </div>
           <div class="form-group" id="group-expiry" style="display:none">
@@ -126,82 +188,207 @@
           </div>
         </div>
 
-        <!-- Permissions Matrix -->
-        <div class="perms-section">
-          <h3 class="perms-title">กำหนดสิทธิ์การใช้งาน (Granular Permissions)</h3>
-          
-          <div class="perm-row">
-            <div class="perm-name">
-              <strong>โมดูลเครื่องจักร (Machines)</strong>
-              <small>ทะเบียนเครื่องจักร แผนก ไลน์ผลิต</small>
+        <!-- Permissions Section -->
+        <div class="perms-container">
+          <div class="perms-header">
+            <div>
+              <h3 class="perms-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                กำหนดสิทธิ์การใช้งาน (Granular Permissions)
+              </h3>
+              <p class="perms-subtitle">ปรับสิทธิ์รายโมดูล หรือเลือกจากแม่แบบสิทธิ์ด่วน</p>
             </div>
-            <div class="perm-control">
-              <select id="perm-machines">
-                <option value="none">❌ เข้าไม่ได้</option>
-                <option value="read">👁️ ดูได้อย่างเดียว</option>
-                <option value="write" selected>✏️ บันทึก/แก้ไขได้</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="perm-row">
-            <div class="perm-name">
-              <strong>โมดูล Master อะไหล่ (Parts)</strong>
-              <small>แค็ตตาล็อกอะไหล่ ราคา และยี่ห้อ</small>
-            </div>
-            <div class="perm-control">
-              <select id="perm-parts">
-                <option value="none">❌ เข้าไม่ได้</option>
-                <option value="read">👁️ ดูได้อย่างเดียว</option>
-                <option value="write" selected>✏️ บันทึก/แก้ไขได้</option>
-              </select>
+            <!-- Batch Actions -->
+            <div class="batch-actions">
+              <button type="button" class="btn-batch" id="btn-batch-write" title="ตั้งค่าทุกโมดูลเป็นบันทึก/แก้ไข">✏️ แก้ไขทั้งหมด</button>
+              <button type="button" class="btn-batch" id="btn-batch-read" title="ตั้งค่าทุกโมดูลเป็นดูได้อย่างเดียว">👁️ ดูได้ทั้งหมด</button>
+              <button type="button" class="btn-batch" id="btn-batch-none" title="ปิดการเข้าถึงทุกโมดูล">🚫 ปิดทั้งหมด</button>
             </div>
           </div>
 
-          <div class="perm-row">
-            <div class="perm-name">
-              <strong>โมดูล Equipment BOM</strong>
-              <small>อะไหล่ประจำเครื่องจักร ประวัติการเปลี่ยน</small>
-            </div>
-            <div class="perm-control">
-              <select id="perm-bom">
-                <option value="none">❌ เข้าไม่ได้</option>
-                <option value="read">👁️ ดูได้อย่างเดียว</option>
-                <option value="write" selected>✏️ บันทึก/แก้ไขได้</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="perm-row">
-            <div class="perm-name">
-              <strong>จัดการผู้ใช้งาน (User Admin)</strong>
-              <small>เพิ่ม ลบ แก้ไขสิทธิ์ และรีเซ็ตรหัสผ่าน</small>
-            </div>
-            <div class="perm-control">
-              <select id="perm-users">
-                <option value="none" selected>❌ ไม่มีสิทธิ์</option>
-                <option value="admin">⭐ ผู้ดูแลระบบ (Admin)</option>
-              </select>
+          <!-- Quick Role Presets -->
+          <div class="presets-wrapper">
+            <span class="presets-label">⚡ แม่แบบสำเร็จรูป:</span>
+            <div class="presets-buttons">
+              <button type="button" class="preset-btn" data-preset="admin">👑 ผู้ดูแลระบบ (Admin)</button>
+              <button type="button" class="preset-btn" data-preset="tech">⚡ ช่างซ่อมบำรุง / วิศวกร</button>
+              <button type="button" class="preset-btn" data-preset="store">📦 เจ้าหน้าที่สโตร์ / จัดซื้อ</button>
+              <button type="button" class="preset-btn" data-preset="planner">📊 ผู้วางแผน / หัวหน้างาน</button>
+              <button type="button" class="preset-btn" data-preset="viewer">👁️ ผู้เข้าชม (ดูอย่างเดียว)</button>
+              <button type="button" class="preset-btn" data-preset="deny">🚫 ปิดทุกสิทธิ์</button>
             </div>
           </div>
 
-          <div class="perm-row" style="border-bottom:none">
-            <div class="perm-name">
-              <strong>สิทธิ์ลบข้อมูล (Can Delete)</strong>
-              <small>อนุญาตให้ลบเครื่องจักร อะไหล่ หรือถอด BOM</small>
+          <!-- Domain 1: Core Assets -->
+          <div class="perm-category-card">
+            <div class="perm-category-header">
+              <span class="perm-cat-icon">⚙️</span>
+              <span class="perm-cat-title">ทะเบียนเครื่องจักรและอะไหล่ (Core Assets & Inventory)</span>
             </div>
-            <div class="perm-control">
-              <label class="toggle-label">
-                <input type="checkbox" id="perm-can-delete">
-                <span>อนุญาตให้ลบได้</span>
-              </label>
+            <div class="perm-rows-list">
+              <!-- Machines -->
+              <div class="perm-row">
+                <div class="perm-meta">
+                  <div class="perm-name">โมดูลเครื่องจักร (Machines Registry)</div>
+                  <div class="perm-desc">ทะเบียนเครื่องจักร แผนก ไลน์ผลิต และชนิดเครื่องจักร</div>
+                </div>
+                <div class="perm-segmented" data-key="machines">
+                  <button type="button" class="seg-btn seg-none" data-val="none">🚫 ปิด</button>
+                  <button type="button" class="seg-btn seg-read" data-val="read">👁️ ดู</button>
+                  <button type="button" class="seg-btn seg-write active" data-val="write">✏️ แก้ไข</button>
+                </div>
+              </div>
+
+              <!-- Parts -->
+              <div class="perm-row">
+                <div class="perm-meta">
+                  <div class="perm-name">Master แค็ตตาล็อกอะไหล่ (Parts Catalog)</div>
+                  <div class="perm-desc">ทะเบียนอะไหล่ ราคา ยี่ห้อ และรูปภาพแค็ตตาล็อก</div>
+                </div>
+                <div class="perm-segmented" data-key="parts">
+                  <button type="button" class="seg-btn seg-none" data-val="none">🚫 ปิด</button>
+                  <button type="button" class="seg-btn seg-read" data-val="read">👁️ ดู</button>
+                  <button type="button" class="seg-btn seg-write active" data-val="write">✏️ แก้ไข</button>
+                </div>
+              </div>
+
+              <!-- BOM -->
+              <div class="perm-row">
+                <div class="perm-meta">
+                  <div class="perm-name">โมดูลโครงสร้าง BOM (Equipment BOM)</div>
+                  <div class="perm-desc">โครงสร้างอะไหล่ประจำเครื่องจักร สถิติ และประวัติการถอดเปลี่ยน</div>
+                </div>
+                <div class="perm-segmented" data-key="bom">
+                  <button type="button" class="seg-btn seg-none" data-val="none">🚫 ปิด</button>
+                  <button type="button" class="seg-btn seg-read" data-val="read">👁️ ดู</button>
+                  <button type="button" class="seg-btn seg-write active" data-val="write">✏️ แก้ไข</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Domain 2: Maintenance Operations & Finance -->
+          <div class="perm-category-card">
+            <div class="perm-category-header">
+              <span class="perm-cat-icon">📋</span>
+              <span class="perm-cat-title">งานบำรุงรักษาและงบประมาณ (PM Operations & Finance)</span>
+            </div>
+            <div class="perm-rows-list">
+              <!-- PM Orders -->
+              <div class="perm-row">
+                <div class="perm-meta">
+                  <div class="perm-name">งานซ่อมบำรุงตามรอบ (Order PM)</div>
+                  <div class="perm-desc">จัดการแผน Order No. 5 รอบ, ตาราง Matrix 5 รอบ, บันทึกการทำ PM</div>
+                </div>
+                <div class="perm-segmented" data-key="pm">
+                  <button type="button" class="seg-btn seg-none" data-val="none">🚫 ปิด</button>
+                  <button type="button" class="seg-btn seg-read" data-val="read">👁️ ดู</button>
+                  <button type="button" class="seg-btn seg-write active" data-val="write">✏️ แก้ไข</button>
+                </div>
+              </div>
+
+              <!-- PM Expenses -->
+              <div class="perm-row">
+                <div class="perm-meta">
+                  <div class="perm-name">งบประมาณและค่าใช้จ่าย (PM Expenses & Dashboard)</div>
+                  <div class="perm-desc">บันทึกค่าใช้จ่ายจริง, นำเข้า SAP XLS, กำหนดงบประมาณประจำไลน์, Dashboard</div>
+                </div>
+                <div class="perm-segmented" data-key="pm_expenses">
+                  <button type="button" class="seg-btn seg-none" data-val="none">🚫 ปิด</button>
+                  <button type="button" class="seg-btn seg-read" data-val="read">👁️ ดู</button>
+                  <button type="button" class="seg-btn seg-write active" data-val="write">✏️ แก้ไข</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Domain 3: Procurement & Store -->
+          <div class="perm-category-card">
+            <div class="perm-category-header">
+              <span class="perm-cat-icon">📦</span>
+              <span class="perm-cat-title">จัดซื้อและคลังพัสดุ (Procurement & Store)</span>
+            </div>
+            <div class="perm-rows-list">
+              <!-- PR Tracker -->
+              <div class="perm-row">
+                <div class="perm-meta">
+                  <div class="perm-name">ทะเบียนจัดซื้อและสโตร์ (PR & Store Tracker)</div>
+                  <div class="perm-desc">ติดตามสถานะ PR, ใบสั่งซื้อ, นำเข้า CSV, รับของเข้าคลัง และเบิกจ่าย</div>
+                </div>
+                <div class="perm-segmented" data-key="pr_tracker">
+                  <button type="button" class="seg-btn seg-none" data-val="none">🚫 ปิด</button>
+                  <button type="button" class="seg-btn seg-read" data-val="read">👁️ ดู</button>
+                  <button type="button" class="seg-btn seg-write active" data-val="write">✏️ แก้ไข</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Domain 4: Broadcast & Admin -->
+          <div class="perm-category-card">
+            <div class="perm-category-header">
+              <span class="perm-cat-icon">📢</span>
+              <span class="perm-cat-title">การสื่อสารและระบบ (Broadcast & Administration)</span>
+            </div>
+            <div class="perm-rows-list">
+              <!-- Announcements -->
+              <div class="perm-row">
+                <div class="perm-meta">
+                  <div class="perm-name">กระดานประชาสัมพันธ์ (Announcements & TV Display)</div>
+                  <div class="perm-desc">เพิ่ม/แก้ไขข่าวสาร, สไลด์รูปภาพ, จอ TV Display และการตั้งค่าหน้าจอ</div>
+                </div>
+                <div class="perm-segmented" data-key="announcements">
+                  <button type="button" class="seg-btn seg-none" data-val="none">🚫 ปิด</button>
+                  <button type="button" class="seg-btn seg-read" data-val="read">👁️ ดู</button>
+                  <button type="button" class="seg-btn seg-write active" data-val="write">✏️ แก้ไข</button>
+                </div>
+              </div>
+
+              <!-- Users Admin -->
+              <div class="perm-row">
+                <div class="perm-meta">
+                  <div class="perm-name">จัดการผู้ใช้งาน (User & System Administration)</div>
+                  <div class="perm-desc">เพิ่ม ลบ แก้ไขสิทธิ์ผู้ใช้งาน บัญชีชั่วคราว และรีเซ็ตรหัสผ่าน (Admin Only)</div>
+                </div>
+                <div class="perm-segmented" data-key="users">
+                  <button type="button" class="seg-btn seg-none active" data-val="none">🚫 ไม่มีสิทธิ์</button>
+                  <button type="button" class="seg-btn seg-admin" data-val="admin">⭐ Admin</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Domain 5: High Risk Critical Security -->
+          <div class="perm-category-card perm-category-danger">
+            <div class="perm-category-header perm-cat-header-danger">
+              <span class="perm-cat-icon">🛡️</span>
+              <span class="perm-cat-title">สิทธิ์ความปลอดภัยพิเศษ (Critical Authority)</span>
+            </div>
+            <div class="perm-rows-list">
+              <!-- Can Delete -->
+              <div class="perm-row perm-row-danger">
+                <div class="perm-meta">
+                  <div class="perm-name perm-name-danger">สิทธิ์ลบข้อมูลถาวร (Can Delete Master Permission)</div>
+                  <div class="perm-desc">อนุญาตให้ลบเครื่องจักร อะไหล่ ถอดถอน BOM หรือลบรายการจัดซื้อออกจากระบบ</div>
+                </div>
+                <div class="perm-toggle-wrapper">
+                  <label class="switch-toggle" for="perm-can-delete">
+                    <input type="checkbox" id="perm-can-delete">
+                    <span class="switch-slider"></span>
+                  </label>
+                  <span id="label-can-delete" class="switch-text">ไม่อนุญาต</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <div class="modal-footer">
           <button type="button" id="btn-cancel-user" class="btn btn-secondary">ยกเลิก</button>
-          <button type="submit" id="btn-save-user" class="btn btn-primary">บันทึกข้อมูล</button>
+          <button type="submit" id="btn-save-user" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            บันทึกข้อมูลและสิทธิ์
+          </button>
         </div>
       </form>
     </div>
@@ -211,13 +398,19 @@
   <div id="modal-reset" class="modal-backdrop" style="display:none">
     <div class="modal-card modal-sm">
       <div class="modal-header">
-        <h2 class="modal-title">ยืนยันรีเซ็ตรหัสผ่าน</h2>
-        <button id="modal-reset-close" class="modal-close-btn">&times;</button>
+        <div class="modal-header-meta">
+          <span class="modal-header-badge" style="background:#fef2f2;color:#b91c1c">ความปลอดภัย</span>
+          <h2 class="modal-title">ยืนยันรีเซ็ตรหัสผ่าน</h2>
+        </div>
+        <button type="button" id="modal-reset-close" class="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body" style="padding:16px 0">
-        <p>คุณต้องการรีเซ็ตรหัสผ่านของ <strong id="reset-target-user"></strong> เป็น:</p>
+        <p>คุณต้องการรีเซ็ตรหัสผ่านของ <strong id="reset-target-user" style="color:var(--primary)"></strong> เป็น:</p>
         <div class="reset-preview-code">1234</div>
-        <p class="reset-note">⚠️ เมื่อผู้ใช้เข้าสู่ระบบด้วยรหัส <strong>1234</strong> (ความยาวต่ำกว่า 5 ตัวอักษร) ระบบจะ <strong>บังคับให้ผู้ใช้ตั้งรหัสผ่านใหม่ทันที</strong> ก่อนเข้าใช้งาน</p>
+        <div class="reset-note">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <div>เมื่อผู้ใช้เข้าสู่ระบบด้วยรหัส <strong>1234</strong> ระบบจะ <strong>บังคับให้ตั้งรหัสผ่านใหม่ทันที</strong> ก่อนเข้าใช้งานโมดูลใดๆ</div>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" id="btn-cancel-reset" class="btn btn-secondary">ยกเลิก</button>
