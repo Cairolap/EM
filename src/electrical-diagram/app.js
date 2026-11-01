@@ -132,6 +132,7 @@
           populateDropdowns();
           renderCurrentTab();
           updateAuthPill();
+          syncNodeFromUrl({ scrollToTop: false });
           return;
         }
       }
@@ -148,6 +149,7 @@
       populateDropdowns();
       renderCurrentTab();
       updateAuthPill();
+      syncNodeFromUrl({ scrollToTop: false });
     } catch (err) {
       console.error('Failed to load electrical data:', err);
       alert('โหลดข้อมูลแผนผังระบบไฟฟ้าไม่สำเร็จ: ' + err.message);
@@ -302,6 +304,58 @@
     return '';
   }
 
+  // URL Linking Helpers for Deep-Linking & Sharing Panels
+  function getNodeShareUrl(node) {
+    if (!node) return window.location.origin + window.location.pathname;
+    const url = new URL(window.location.href);
+    url.searchParams.set('node', node.nodeCode || node.id);
+    return url.toString();
+  }
+
+  function updateBrowserUrl(nodeId, replace = false) {
+    if (typeof window === 'undefined' || !window.history) return;
+    const url = new URL(window.location.href);
+    if (nodeId) {
+      const node = getNodeById(nodeId);
+      const codeOrId = node?.nodeCode || nodeId;
+      url.searchParams.set('node', codeOrId);
+    } else {
+      url.searchParams.delete('node');
+      url.searchParams.delete('code');
+      url.searchParams.delete('id');
+    }
+    const newRelative = url.pathname + (url.searchParams.toString() ? '?' + url.searchParams.toString() : '') + url.hash;
+    const currentRelative = window.location.pathname + window.location.search + window.location.hash;
+    if (newRelative !== currentRelative) {
+      if (replace) {
+        window.history.replaceState({ nodeId }, '', newRelative);
+      } else {
+        window.history.pushState({ nodeId }, '', newRelative);
+      }
+    }
+  }
+
+  function syncNodeFromUrl(options = {}) {
+    if (!state.nodes || state.nodes.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const target = (params.get('node') || params.get('code') || params.get('id') || '').trim();
+    if (!target) {
+      if (state.selectedNodeId) {
+        openNodeInExplorer(null, { syncUrl: false, scrollToTop: false });
+      }
+      return;
+    }
+
+    const found = state.nodes.find(n => 
+      String(n.nodeCode || '').toLowerCase() === target.toLowerCase() ||
+      String(n.id || '').toLowerCase() === target.toLowerCase()
+    );
+
+    if (found) {
+      openNodeInExplorer(found.id, { syncUrl: false, scrollToTop: options.scrollToTop !== false });
+    }
+  }
+
   // ==========================================================================
   // TAB 1: PANEL EXPLORER (MDB HOME CARDS & DRILL-DOWN DETAIL VIEW)
   // ==========================================================================
@@ -311,6 +365,10 @@
     state.downstreamFilterQuery = '';
     const drop = $('explorer-search-dropdown');
     if (drop) drop.style.display = 'none';
+
+    if (options.syncUrl !== false) {
+      updateBrowserUrl(nodeId, options.replaceState === true);
+    }
 
     if (state.currentTab !== 'diagram') {
       switchTab('diagram');
@@ -556,7 +614,7 @@
               <span>🔌 วงจรย่อย:</span>
               <span class="el-sub-badge">${children.length}</span>
             </span>
-            <span class="el-mdb-open-cta">เปิดผัง &rarr;</span>
+            <a href="?node=${encodeURIComponent(node.nodeCode)}" class="el-mdb-open-cta font-mono" data-id="${node.id}">เปิดผัง &rarr;</a>
           </div>
         </article>
       `;
@@ -565,7 +623,10 @@
     mdbGrid.innerHTML = html;
 
     mdbGrid.querySelectorAll('.el-mdb-home-card').forEach(card => {
-      card.onclick = () => openNodeInExplorer(card.dataset.id);
+      card.onclick = (e) => {
+        if (e.target.closest('a')) e.preventDefault();
+        openNodeInExplorer(card.dataset.id);
+      };
     });
   }
 
@@ -614,7 +675,7 @@
         const subCount = getChildrenOf(c.id).length;
         const showLoc = c.location && c.location !== node.location;
         childrenHtml += `
-          <div class="el-downstream-item" data-child-id="${c.id}" title="${escapeHtml(c.nodeCode)} - ${escapeHtml(c.name)}">
+          <a href="?node=${encodeURIComponent(c.nodeCode)}" class="el-downstream-item" data-child-id="${c.id}" title="${escapeHtml(c.nodeCode)} - ${escapeHtml(c.name)}">
             <div class="el-downstream-item-left">
               <span class="kpi-badge badge-${c.nodeType.toLowerCase()}">${escapeHtml(c.nodeType)}</span>
               <div class="el-downstream-text-group">
@@ -630,7 +691,7 @@
               <span class="el-downstream-amp">${c.currentRating ? c.currentRating + 'A' : ''}</span>
               <span class="el-downstream-arrow">&rsaquo;</span>
             </div>
-          </div>
+          </a>
         `;
       });
     }
@@ -648,6 +709,13 @@
           </div>
 
           <div class="el-detail-header-actions">
+            <button type="button" class="el-detail-btn-link" id="btn-detail-copy-link" title="คัดลอกลิงก์ตรงสำหรับเปิดตู้ ${escapeHtml(node.nodeCode)}" aria-label="คัดลอกลิงก์">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+              <span class="el-detail-btn-link-text">คัดลอกลิงก์</span>
+            </button>
             <button type="button" class="el-detail-close-btn" id="btn-detail-close" title="ปิดและกลับไปหน้าหลัก MDB" aria-label="ปิด">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
@@ -751,6 +819,43 @@
       openNodeInExplorer(null);
     });
 
+    $('btn-detail-copy-link')?.addEventListener('click', async () => {
+      const shareUrl = getNodeShareUrl(node);
+      const btn = $('btn-detail-copy-link');
+      const textEl = btn?.querySelector('.el-detail-btn-link-text');
+      
+      let copied = false;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(shareUrl);
+          copied = true;
+        }
+      } catch (_) {}
+
+      if (!copied) {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = shareUrl;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          copied = true;
+        } catch (_) {}
+      }
+
+      if (btn) {
+        btn.classList.add('is-copied');
+        if (textEl) textEl.textContent = 'คัดลอกแล้ว!';
+        setTimeout(() => {
+          btn.classList.remove('is-copied');
+          if (textEl) textEl.textContent = 'คัดลอกลิงก์';
+        }, 2200);
+      }
+    });
+
     $('detail-photo-img')?.addEventListener('click', () => {
       openLightbox(photoUrl);
     });
@@ -791,7 +896,8 @@
     }
 
     detailContainer.querySelectorAll('.el-downstream-item').forEach(item => {
-      item.onclick = () => {
+      item.onclick = (e) => {
+        e.preventDefault();
         openNodeInExplorer(item.dataset.childId);
       };
     });
@@ -973,7 +1079,7 @@
             `}
           </td>
           <td>
-            <strong class="font-mono" style="color:var(--el-ink); font-size:13.5px;">${escapeHtml(node.nodeCode)}</strong>
+            <a href="?node=${encodeURIComponent(node.nodeCode)}" class="el-table-code-link font-mono" data-id="${node.id}" title="เปิดดูตู้ ${escapeHtml(node.nodeCode)}">${escapeHtml(node.nodeCode)}</a>
           </td>
           <td>
             <div style="font-weight:600; color:#0f172a;">${escapeHtml(node.name)}</div>
@@ -1002,6 +1108,9 @@
               <button type="button" class="btn btn-secondary btn-sm btn-action-view" data-id="${node.id}" title="เปิดดูข้อมูล">
                 ดูผัง
               </button>
+              <button type="button" class="btn btn-secondary btn-sm btn-action-copy-link" data-id="${node.id}" data-code="${escapeHtml(node.nodeCode)}" title="คัดลอกลิงก์ตรงสำหรับเปิดตู้ ${escapeHtml(node.nodeCode)}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+              </button>
               <button type="button" class="btn btn-secondary btn-sm btn-action-edit" data-id="${node.id}" title="แก้ไข">
                 แก้ไข
               </button>
@@ -1017,6 +1126,34 @@
     tbody.innerHTML = html;
 
     // Attach row events
+    tbody.querySelectorAll('.el-table-code-link').forEach(link => {
+      link.onclick = (e) => {
+        e.preventDefault();
+        openNodeInExplorer(link.dataset.id);
+      };
+    });
+    tbody.querySelectorAll('.btn-action-copy-link').forEach(btn => {
+      btn.onclick = async () => {
+        const node = getNodeById(btn.dataset.id);
+        const shareUrl = getNodeShareUrl(node);
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(shareUrl);
+          } else {
+            prompt('คัดลอกลิงก์:', shareUrl);
+            return;
+          }
+          btn.style.borderColor = '#10b981';
+          btn.style.color = '#10b981';
+          setTimeout(() => {
+            btn.style.borderColor = '';
+            btn.style.color = '';
+          }, 1800);
+        } catch (_) {
+          prompt('คัดลอกลิงก์:', shareUrl);
+        }
+      };
+    });
     tbody.querySelectorAll('.btn-action-view').forEach(btn => {
       btn.onclick = () => openInspector(btn.dataset.id);
     });
@@ -2561,7 +2698,12 @@
     // 8. Explorer Search & Navigation
     initExplorerSearch();
 
-    // 9. Load data
+    // 9. Popstate listener for browser back/forward buttons
+    window.addEventListener('popstate', () => {
+      syncNodeFromUrl({ scrollToTop: false });
+    });
+
+    // 10. Load data
     loadData();
   }
 

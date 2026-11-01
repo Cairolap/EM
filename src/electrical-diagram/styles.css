@@ -713,8 +713,36 @@ html, body {
 .el-detail-header-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
+}
+.el-detail-btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all var(--dur-fast);
+  white-space: nowrap;
+}
+.el-detail-btn-link:hover {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+.el-detail-btn-link.is-copied {
+  background: #10b981;
+  border-color: #34d399;
+  color: #ffffff;
 }
 .el-detail-close-btn {
   display: inline-flex;
@@ -735,6 +763,21 @@ html, body {
   border-color: rgba(255, 255, 255, 0.55);
   color: #ffffff;
   transform: scale(1.05);
+}
+
+a.el-downstream-item,
+a.el-table-code-link,
+a.el-mdb-open-cta {
+  text-decoration: none;
+}
+a.el-table-code-link {
+  color: var(--el-primary, #0284c7);
+  font-weight: 700;
+  font-size: 13.5px;
+}
+a.el-table-code-link:hover {
+  color: #0369a1;
+  text-decoration: underline;
 }
 
 /* Responsive 2-column on Desktop, 1-column on Mobile */
