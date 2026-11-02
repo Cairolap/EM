@@ -97,7 +97,12 @@
 
     // Table
     checkSelectAll: document.getElementById('check-select-all'),
-    bulkActionsGroup: document.getElementById('bulk-actions-group'),
+    stripSelectLabel: document.getElementById('strip-select-label'),
+    floatingBulkDock: document.getElementById('floating-bulk-dock'),
+    bulkActionsGroup: document.getElementById('floating-bulk-dock'),
+    dockSelectionMode: document.getElementById('dock-selection-mode'),
+    dockEditMode: document.getElementById('dock-edit-mode'),
+    dockEditStatusText: document.getElementById('dock-edit-status-text'),
     selectedCountBadge: document.getElementById('selected-count-badge'),
     btnBulkCopy: document.getElementById('btn-bulk-copy'),
     btnBulkInlineEdit: document.getElementById('btn-bulk-inline-edit'),
@@ -106,7 +111,7 @@
     btnBulkArchiveText: document.getElementById('btn-bulk-archive-text'),
     btnOpenBulkDeleteModal: document.getElementById('btn-open-bulk-delete-modal'),
     btnDeselectAll: document.getElementById('btn-deselect-all'),
-    tableEditBanner: document.getElementById('table-edit-banner'),
+    tableEditBanner: document.getElementById('floating-bulk-dock'),
     btnCancelTableEdit: document.getElementById('btn-cancel-table-edit'),
     btnSaveTableEdit: document.getElementById('btn-save-table-edit'),
     tbody: document.getElementById('pr-table-tbody'),
@@ -594,11 +599,39 @@
     el.checkSelectAll.checked = totalVisible > 0 && selectedCount === totalVisible;
     el.checkSelectAll.indeterminate = selectedCount > 0 && selectedCount < totalVisible;
 
-    if (selectedCount > 0) {
-      el.bulkActionsGroup.style.display = 'inline-flex';
-      el.selectedCountBadge.textContent = `เลือก ${selectedCount} รายการ`;
+    syncFloatingDock();
+  }
+
+  function syncFloatingDock() {
+    const selectedCount = state.selectedIds.size;
+    const isEditing = Boolean(state.isInlineEditing);
+
+    if (isEditing) {
+      if (el.floatingBulkDock) {
+        el.floatingBulkDock.classList.add('visible', 'is-editing');
+      }
+      if (el.dockSelectionMode) el.dockSelectionMode.style.display = 'none';
+      if (el.dockEditMode) el.dockEditMode.style.display = 'flex';
+      if (el.dockEditStatusText) {
+        const count = selectedCount > 0 ? selectedCount : state.items.length;
+        el.dockEditStatusText.textContent = `กำลังแก้ไขในตาราง (${count} รายการ)`;
+      }
+    } else if (selectedCount > 0) {
+      if (el.floatingBulkDock) {
+        el.floatingBulkDock.classList.remove('is-editing');
+        el.floatingBulkDock.classList.add('visible');
+      }
+      if (el.dockSelectionMode) el.dockSelectionMode.style.display = 'flex';
+      if (el.dockEditMode) el.dockEditMode.style.display = 'none';
+      if (el.selectedCountBadge) {
+        el.selectedCountBadge.textContent = `เลือก ${selectedCount} รายการ`;
+      }
     } else {
-      el.bulkActionsGroup.style.display = 'none';
+      if (el.floatingBulkDock) {
+        el.floatingBulkDock.classList.remove('visible', 'is-editing');
+      }
+      if (el.dockSelectionMode) el.dockSelectionMode.style.display = 'none';
+      if (el.dockEditMode) el.dockEditMode.style.display = 'none';
     }
   }
 
@@ -1007,7 +1040,6 @@
   // 12. Inline Table Edit
   function toggleInlineTableEdit() {
     state.isInlineEditing = !state.isInlineEditing;
-    el.tableEditBanner.style.display = state.isInlineEditing ? 'inline-flex' : 'none';
     renderTable();
   }
 
@@ -1043,10 +1075,57 @@
     }
 
     try {
+      if (el.btnSaveTableEdit) {
+        el.btnSaveTableEdit.disabled = true;
+        el.btnSaveTableEdit.innerHTML = '<span>กำลังบันทึก...</span>';
+      }
       await callRpc('bulkSaveItems', updateList);
       showToast(`บันทึกการแก้ไข ${updateList.length} รายการเรียบร้อยแล้ว`, 'success');
       state.isInlineEditing = false;
-      el.tableEditBanner.style.display = 'none';
+      await loadItems();
+    } catch (err) {
+      showToast('บันทึกล้มเหลว: ' + err.message, 'error');
+    } finally {
+      if (el.btnSaveTableEdit) {
+        el.btnSaveTableEdit.disabled = false;
+        el.btnSaveTableEdit.innerHTML = `
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>บันทึก</span>
+        `;
+      }
+    }
+  }
+
+  async function handleSaveSingleRow(id) {
+    const tr = document.querySelector(`.pr-table tbody tr.row-inline-editing[data-id="${id}"]`);
+    if (!tr) return;
+    const getVal = field => {
+      const input = tr.querySelector(`[data-field="${field}"]`);
+      return input ? input.value : '';
+    };
+
+    const item = {
+      id,
+      docType: getVal('docType'),
+      docNo: getVal('docNo'),
+      orderNo: getVal('orderNo'),
+      description: getVal('description'),
+      qty: parseFloat(getVal('qty')) || 1,
+      unit: getVal('unit'),
+      price: getVal('price') !== '' ? parseFloat(getVal('price')) : null,
+      poNo: getVal('poNo'),
+      deliveryDate: getVal('deliveryDate')
+    };
+
+    try {
+      const btnSave = tr.querySelector('.btn-row-save');
+      if (btnSave) btnSave.textContent = '⏳';
+      await callRpc('bulkSaveItems', [item]);
+      showToast(`บันทึกรายการ "${item.description || id}" เรียบร้อยแล้ว`, 'success');
+      state.selectedIds.delete(id);
+      if (state.selectedIds.size === 0) {
+        state.isInlineEditing = false;
+      }
       await loadItems();
     } catch (err) {
       showToast('บันทึกล้มเหลว: ' + err.message, 'error');
@@ -1250,6 +1329,12 @@
       renderTable();
     });
 
+    if (el.stripSelectLabel) {
+      el.stripSelectLabel.addEventListener('click', () => {
+        el.checkSelectAll.click();
+      });
+    }
+
     // Table Clicks
     el.tbody.addEventListener('click', e => {
       const checkbox = e.target.closest('.row-select-checkbox');
@@ -1260,6 +1345,12 @@
         const tr = checkbox.closest('tr');
         if (tr) tr.classList.toggle('row-selected', checkbox.checked);
         updateSelectionUI();
+        return;
+      }
+
+      const btnSaveRow = e.target.closest('.btn-row-save');
+      if (btnSaveRow) {
+        handleSaveSingleRow(btnSaveRow.dataset.id);
         return;
       }
 
@@ -1342,12 +1433,24 @@
       });
     });
 
-    // Escape Key
+    // Keyboard shortcuts (Save & Escape)
     document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        if (state.isInlineEditing) {
+          e.preventDefault();
+          handleSaveTableEdit();
+        }
+      }
       if (e.key === 'Escape') {
         el.modalBulkArea.style.display = 'none';
         el.modalAdminDelete.style.display = 'none';
         el.modalItemDetail.style.display = 'none';
+        if (state.isInlineEditing) {
+          toggleInlineTableEdit();
+        } else if (state.selectedIds.size > 0) {
+          state.selectedIds.clear();
+          renderTable();
+        }
       }
     });
 

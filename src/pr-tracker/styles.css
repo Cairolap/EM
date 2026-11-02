@@ -785,42 +785,267 @@ html, body {
   background: #ffffff;
 }
 
-/* Bulk Toolbar */
-.bulk-actions-group {
+.strip-select-label {
+  font-size: 12px;
+  color: var(--pr-ink-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  margin-left: 2px;
+}
+.strip-select-label:hover {
+  color: var(--pr-primary);
+}
+
+/* ==========================================================================
+   FLOATING ACTION DOCK (FLOATING BOTTOM CENTER TOOLBAR)
+   ========================================================================== */
+.floating-bulk-dock {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%) translateY(32px) scale(0.95);
+  z-index: 9995;
+  background: rgba(13, 30, 56, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 16px 40px rgba(10, 25, 47, 0.42), 0 2px 8px rgba(0, 0, 0, 0.2);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.22s ease,
+              visibility 0.22s;
+  max-width: min(94vw, 700px);
+}
+
+.floating-bulk-dock.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.floating-bulk-dock.is-editing {
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow: 0 16px 40px rgba(180, 83, 9, 0.32), 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dock-mode-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Badge Pill */
+.dock-badge-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #ffffff;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--pr-border);
-}
-.selected-count-badge {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--pr-primary);
-  margin-right: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
 }
 
-/* Table Edit Banner */
-.table-edit-banner {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: #fefce8;
-  border: 1px solid #fef08a;
-  padding: 3px 10px;
-  border-radius: var(--radius-sm);
+.dock-badge-pill.edit-pill {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.4);
 }
-.edit-mode-tag {
-  font-size: 12px;
+
+.dock-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+  animation: dockPulse 2s infinite;
+}
+
+.dock-dot.dock-dot-amber {
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+}
+
+@keyframes dockPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.dock-count-text {
+  font-size: 12.5px;
   font-weight: 600;
-  color: #854d0e;
+  color: #ffffff;
+  letter-spacing: -0.01em;
 }
-.edit-banner-actions {
+
+/* Divider */
+.dock-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.16);
+  flex-shrink: 0;
+}
+
+/* Icon Buttons Group */
+.dock-btn-group {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+}
+
+/* Icon Buttons (แสดงแค่ไอคอน) */
+.dock-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dock-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #38bdf8;
+  transform: translateY(-2px) scale(1.05);
+}
+
+.dock-icon-btn:active {
+  transform: translateY(1px) scale(0.96);
+}
+
+.dock-icon-btn:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+.dock-icon-btn.dock-btn-primary {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+.dock-icon-btn.dock-btn-primary:hover {
+  background: #0369a1;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+}
+
+.dock-icon-btn.dock-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #ef4444;
+  color: #fca5a5;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+.dock-icon-btn.dock-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+/* Tooltip for Icon Buttons */
+.dock-icon-btn .dock-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #091322;
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 4px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 10000;
+}
+
+.dock-icon-btn .dock-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px 4px 0 4px;
+  border-style: solid;
+  border-color: #091322 transparent transparent transparent;
+}
+
+.dock-icon-btn:hover .dock-tooltip,
+.dock-icon-btn:focus-visible .dock-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Action Pill Buttons (for Edit Mode) */
+.dock-action-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.dock-action-pill-btn:active {
+  transform: translateY(1px);
+}
+
+.dock-action-pill-btn:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+/* ปุ่มบันทึกเมื่อกรอกเสร็จ (Save Button) */
+.dock-btn-save {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border-color: #34d399;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
+}
+
+.dock-btn-save:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5);
+  transform: translateY(-1px);
+}
+
+.dock-btn-cancel-edit {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.dock-btn-cancel-edit:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
 /* Table Scroll and Formatting */
@@ -828,6 +1053,8 @@ html, body {
   flex: 1;
   overflow: auto;
   position: relative;
+  padding-bottom: 72px; /* Space so last rows aren't covered by floating dock */
+}
 }
 
 .pr-table {
@@ -1050,6 +1277,21 @@ html, body {
 .btn-row-action.action-delete:hover {
   background: #fee2e2;
   color: #dc2626;
+}
+.btn-row-action.btn-row-save {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 13px;
+  color: #059669;
+}
+.btn-row-action.btn-row-save:hover {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #059669;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
+  transform: scale(1.08);
 }
 
 /* Inline Edit Row Inputs */

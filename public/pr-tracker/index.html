@@ -796,42 +796,267 @@ html, body {
   background: #ffffff;
 }
 
-/* Bulk Toolbar */
-.bulk-actions-group {
+.strip-select-label {
+  font-size: 12px;
+  color: var(--pr-ink-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  margin-left: 2px;
+}
+.strip-select-label:hover {
+  color: var(--pr-primary);
+}
+
+/* ==========================================================================
+   FLOATING ACTION DOCK (FLOATING BOTTOM CENTER TOOLBAR)
+   ========================================================================== */
+.floating-bulk-dock {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%) translateY(32px) scale(0.95);
+  z-index: 9995;
+  background: rgba(13, 30, 56, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 16px 40px rgba(10, 25, 47, 0.42), 0 2px 8px rgba(0, 0, 0, 0.2);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.22s ease,
+              visibility 0.22s;
+  max-width: min(94vw, 700px);
+}
+
+.floating-bulk-dock.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.floating-bulk-dock.is-editing {
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow: 0 16px 40px rgba(180, 83, 9, 0.32), 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dock-mode-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Badge Pill */
+.dock-badge-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #ffffff;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--pr-border);
-}
-.selected-count-badge {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--pr-primary);
-  margin-right: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
 }
 
-/* Table Edit Banner */
-.table-edit-banner {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: #fefce8;
-  border: 1px solid #fef08a;
-  padding: 3px 10px;
-  border-radius: var(--radius-sm);
+.dock-badge-pill.edit-pill {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.4);
 }
-.edit-mode-tag {
-  font-size: 12px;
+
+.dock-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+  animation: dockPulse 2s infinite;
+}
+
+.dock-dot.dock-dot-amber {
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+}
+
+@keyframes dockPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.dock-count-text {
+  font-size: 12.5px;
   font-weight: 600;
-  color: #854d0e;
+  color: #ffffff;
+  letter-spacing: -0.01em;
 }
-.edit-banner-actions {
+
+/* Divider */
+.dock-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.16);
+  flex-shrink: 0;
+}
+
+/* Icon Buttons Group */
+.dock-btn-group {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+}
+
+/* Icon Buttons (แสดงแค่ไอคอน) */
+.dock-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dock-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #38bdf8;
+  transform: translateY(-2px) scale(1.05);
+}
+
+.dock-icon-btn:active {
+  transform: translateY(1px) scale(0.96);
+}
+
+.dock-icon-btn:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+.dock-icon-btn.dock-btn-primary {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+.dock-icon-btn.dock-btn-primary:hover {
+  background: #0369a1;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+}
+
+.dock-icon-btn.dock-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #ef4444;
+  color: #fca5a5;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+.dock-icon-btn.dock-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+/* Tooltip for Icon Buttons */
+.dock-icon-btn .dock-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #091322;
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 4px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 10000;
+}
+
+.dock-icon-btn .dock-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px 4px 0 4px;
+  border-style: solid;
+  border-color: #091322 transparent transparent transparent;
+}
+
+.dock-icon-btn:hover .dock-tooltip,
+.dock-icon-btn:focus-visible .dock-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Action Pill Buttons (for Edit Mode) */
+.dock-action-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.dock-action-pill-btn:active {
+  transform: translateY(1px);
+}
+
+.dock-action-pill-btn:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+/* ปุ่มบันทึกเมื่อกรอกเสร็จ (Save Button) */
+.dock-btn-save {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border-color: #34d399;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
+}
+
+.dock-btn-save:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5);
+  transform: translateY(-1px);
+}
+
+.dock-btn-cancel-edit {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.dock-btn-cancel-edit:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
 /* Table Scroll and Formatting */
@@ -839,6 +1064,8 @@ html, body {
   flex: 1;
   overflow: auto;
   position: relative;
+  padding-bottom: 72px; /* Space so last rows aren't covered by floating dock */
+}
 }
 
 .pr-table {
@@ -1061,6 +1288,21 @@ html, body {
 .btn-row-action.action-delete:hover {
   background: #fee2e2;
   color: #dc2626;
+}
+.btn-row-action.btn-row-save {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 13px;
+  color: #059669;
+}
+.btn-row-action.btn-row-save:hover {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #059669;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
+  transform: scale(1.08);
 }
 
 /* Inline Edit Row Inputs */
@@ -2504,47 +2746,7 @@ html, body {
                 <input type="checkbox" id="check-select-all" class="custom-checkbox">
                 <span class="checkbox-box"></span>
               </label>
-
-              <!-- Contextual Bulk Actions -->
-              <div class="bulk-actions-group" id="bulk-actions-group" style="display:none;">
-                <span class="selected-count-badge" id="selected-count-badge">เลือก 0 รายการ</span>
-                
-                <button type="button" id="btn-bulk-copy" class="btn btn-sm btn-primary" title="คัดลอกรายการที่เลือก เพื่อนำไปวางส่งอีเมลตามงาน (พื้นที่ | Order | รายละเอียด | จำนวน | ราคา | PR ถ้ามี)">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  <span>คัดลอกส่งอีเมล</span>
-                </button>
-
-                <button type="button" id="btn-bulk-inline-edit" class="btn btn-sm btn-secondary" title="แก้ไขแถวที่เลือกบนตารางโดยตรง">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                  <span>แก้ไขในตาราง</span>
-                </button>
-
-                <button type="button" id="btn-open-bulk-area-modal" class="btn btn-sm btn-secondary" title="ย้ายแผนก/ไลน์/เครื่องจักร">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  <span>เปลี่ยนพื้นที่</span>
-                </button>
-
-                <button type="button" id="btn-bulk-archive" class="btn btn-sm btn-secondary" title="ย้ายเข้ารายการจัดเก็บ">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
-                  <span id="btn-bulk-archive-text">จัดเก็บพร้อมกัน</span>
-                </button>
-
-                <button type="button" id="btn-open-bulk-delete-modal" class="btn btn-sm btn-danger" title="ลบถาวร (ต้องใส่รหัสแอดมิน)">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  <span>ลบถาวร</span>
-                </button>
-
-                <button type="button" id="btn-deselect-all" class="btn-link-sm" title="ยกเลิกการเลือก">ยกเลิก</button>
-              </div>
-
-              <!-- Table Edit Mode Banner -->
-              <div class="table-edit-banner" id="table-edit-banner" style="display:none;">
-                <span class="edit-mode-tag">✏️ โหมดแก้ไขข้อมูลในตาราง</span>
-                <div class="edit-banner-actions">
-                  <button type="button" id="btn-cancel-table-edit" class="btn btn-sm btn-secondary">ยกเลิก</button>
-                  <button type="button" id="btn-save-table-edit" class="btn btn-sm btn-primary">บันทึกทั้งหมด</button>
-                </div>
-              </div>
+              <span class="strip-select-label" id="strip-select-label" title="คลิกเพื่อเลือกทั้งหมด">เลือกทั้งหมด</span>
             </div>
 
             <div class="strip-right">
@@ -2863,6 +3065,77 @@ html, body {
       </div>
     </div>
   </div>
+
+  <!-- Floating Bottom Selection & Edit Toolbar -->
+  <aside id="floating-bulk-dock" class="floating-bulk-dock" aria-label="แถบจัดการรายการที่เลือก" aria-live="polite">
+    <!-- 1. Selection Mode (แสดงแค่ไอคอนพร้อม Tooltip และตัวเลขนับจำนวน) -->
+    <div id="dock-selection-mode" class="dock-mode-wrap">
+      <div class="dock-badge-pill">
+        <span class="dock-dot"></span>
+        <span id="selected-count-badge" class="dock-count-text">เลือก 0 รายการ</span>
+      </div>
+
+      <div class="dock-divider" aria-hidden="true"></div>
+
+      <div class="dock-btn-group">
+        <button type="button" id="btn-bulk-copy" class="dock-icon-btn dock-btn-primary" title="คัดลอกส่งอีเมล (Ctrl+C)" aria-label="คัดลอกส่งอีเมล">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          <span class="dock-tooltip">คัดลอกส่งอีเมล</span>
+        </button>
+
+        <button type="button" id="btn-bulk-inline-edit" class="dock-icon-btn" title="แก้ไขในตาราง" aria-label="แก้ไขในตาราง">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          <span class="dock-tooltip">แก้ไขในตาราง</span>
+        </button>
+
+        <button type="button" id="btn-open-bulk-area-modal" class="dock-icon-btn" title="เปลี่ยนพื้นที่ (แผนก/ไลน์/เครื่องจักร)" aria-label="เปลี่ยนพื้นที่">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          <span class="dock-tooltip">เปลี่ยนพื้นที่</span>
+        </button>
+
+        <button type="button" id="btn-bulk-archive" class="dock-icon-btn" title="ย้ายเข้ารายการจัดเก็บ" aria-label="ย้ายเข้ารายการจัดเก็บ">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+          <span class="dock-tooltip" id="btn-bulk-archive-text">จัดเก็บพร้อมกัน</span>
+        </button>
+
+        <button type="button" id="btn-open-bulk-delete-modal" class="dock-icon-btn dock-btn-danger" title="ลบถาวร (ต้องใส่รหัสแอดมิน)" aria-label="ลบถาวร">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          <span class="dock-tooltip">ลบถาวร</span>
+        </button>
+      </div>
+
+      <div class="dock-divider" aria-hidden="true"></div>
+
+      <button type="button" id="btn-deselect-all" class="dock-icon-btn dock-btn-cancel" title="ยกเลิกการเลือก (Esc)" aria-label="ยกเลิกการเลือก">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <span class="dock-tooltip">ยกเลิก</span>
+      </button>
+    </div>
+
+    <!-- 2. Table Edit Mode (มีปุ่มบันทึกเมื่อกรอกเสร็จ) -->
+    <div id="dock-edit-mode" class="dock-mode-wrap" style="display: none;">
+      <div class="dock-badge-pill edit-pill">
+        <span class="dock-dot dock-dot-amber"></span>
+        <span id="dock-edit-status-text" class="dock-count-text">✏️ กำลังแก้ไขในตาราง</span>
+      </div>
+
+      <div class="dock-divider" aria-hidden="true"></div>
+
+      <div class="dock-btn-group">
+        <!-- ปุ่มบันทึกเมื่อกรอกเสร็จ -->
+        <button type="button" id="btn-save-table-edit" class="dock-action-pill-btn dock-btn-save" title="บันทึกการแก้ไขทั้งหมด (Ctrl+S)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>บันทึก</span>
+        </button>
+
+        <!-- ปุ่มยกเลิก -->
+        <button type="button" id="btn-cancel-table-edit" class="dock-action-pill-btn dock-btn-cancel-edit" title="ยกเลิกการแก้ไข (Esc)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <span>ยกเลิก</span>
+        </button>
+      </div>
+    </div>
+  </aside>
 
   <!-- Global Toast Notification -->
   <div id="toast" class="pr-toast" role="alert" aria-live="polite"></div>
@@ -3502,7 +3775,12 @@ html, body {
 
     // Table
     checkSelectAll: document.getElementById('check-select-all'),
-    bulkActionsGroup: document.getElementById('bulk-actions-group'),
+    stripSelectLabel: document.getElementById('strip-select-label'),
+    floatingBulkDock: document.getElementById('floating-bulk-dock'),
+    bulkActionsGroup: document.getElementById('floating-bulk-dock'),
+    dockSelectionMode: document.getElementById('dock-selection-mode'),
+    dockEditMode: document.getElementById('dock-edit-mode'),
+    dockEditStatusText: document.getElementById('dock-edit-status-text'),
     selectedCountBadge: document.getElementById('selected-count-badge'),
     btnBulkCopy: document.getElementById('btn-bulk-copy'),
     btnBulkInlineEdit: document.getElementById('btn-bulk-inline-edit'),
@@ -3511,7 +3789,7 @@ html, body {
     btnBulkArchiveText: document.getElementById('btn-bulk-archive-text'),
     btnOpenBulkDeleteModal: document.getElementById('btn-open-bulk-delete-modal'),
     btnDeselectAll: document.getElementById('btn-deselect-all'),
-    tableEditBanner: document.getElementById('table-edit-banner'),
+    tableEditBanner: document.getElementById('floating-bulk-dock'),
     btnCancelTableEdit: document.getElementById('btn-cancel-table-edit'),
     btnSaveTableEdit: document.getElementById('btn-save-table-edit'),
     tbody: document.getElementById('pr-table-tbody'),
@@ -3999,11 +4277,39 @@ html, body {
     el.checkSelectAll.checked = totalVisible > 0 && selectedCount === totalVisible;
     el.checkSelectAll.indeterminate = selectedCount > 0 && selectedCount < totalVisible;
 
-    if (selectedCount > 0) {
-      el.bulkActionsGroup.style.display = 'inline-flex';
-      el.selectedCountBadge.textContent = `เลือก ${selectedCount} รายการ`;
+    syncFloatingDock();
+  }
+
+  function syncFloatingDock() {
+    const selectedCount = state.selectedIds.size;
+    const isEditing = Boolean(state.isInlineEditing);
+
+    if (isEditing) {
+      if (el.floatingBulkDock) {
+        el.floatingBulkDock.classList.add('visible', 'is-editing');
+      }
+      if (el.dockSelectionMode) el.dockSelectionMode.style.display = 'none';
+      if (el.dockEditMode) el.dockEditMode.style.display = 'flex';
+      if (el.dockEditStatusText) {
+        const count = selectedCount > 0 ? selectedCount : state.items.length;
+        el.dockEditStatusText.textContent = `กำลังแก้ไขในตาราง (${count} รายการ)`;
+      }
+    } else if (selectedCount > 0) {
+      if (el.floatingBulkDock) {
+        el.floatingBulkDock.classList.remove('is-editing');
+        el.floatingBulkDock.classList.add('visible');
+      }
+      if (el.dockSelectionMode) el.dockSelectionMode.style.display = 'flex';
+      if (el.dockEditMode) el.dockEditMode.style.display = 'none';
+      if (el.selectedCountBadge) {
+        el.selectedCountBadge.textContent = `เลือก ${selectedCount} รายการ`;
+      }
     } else {
-      el.bulkActionsGroup.style.display = 'none';
+      if (el.floatingBulkDock) {
+        el.floatingBulkDock.classList.remove('visible', 'is-editing');
+      }
+      if (el.dockSelectionMode) el.dockSelectionMode.style.display = 'none';
+      if (el.dockEditMode) el.dockEditMode.style.display = 'none';
     }
   }
 
@@ -4412,7 +4718,6 @@ html, body {
   // 12. Inline Table Edit
   function toggleInlineTableEdit() {
     state.isInlineEditing = !state.isInlineEditing;
-    el.tableEditBanner.style.display = state.isInlineEditing ? 'inline-flex' : 'none';
     renderTable();
   }
 
@@ -4448,10 +4753,57 @@ html, body {
     }
 
     try {
+      if (el.btnSaveTableEdit) {
+        el.btnSaveTableEdit.disabled = true;
+        el.btnSaveTableEdit.innerHTML = '<span>กำลังบันทึก...</span>';
+      }
       await callRpc('bulkSaveItems', updateList);
       showToast(`บันทึกการแก้ไข ${updateList.length} รายการเรียบร้อยแล้ว`, 'success');
       state.isInlineEditing = false;
-      el.tableEditBanner.style.display = 'none';
+      await loadItems();
+    } catch (err) {
+      showToast('บันทึกล้มเหลว: ' + err.message, 'error');
+    } finally {
+      if (el.btnSaveTableEdit) {
+        el.btnSaveTableEdit.disabled = false;
+        el.btnSaveTableEdit.innerHTML = `
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>บันทึก</span>
+        `;
+      }
+    }
+  }
+
+  async function handleSaveSingleRow(id) {
+    const tr = document.querySelector(`.pr-table tbody tr.row-inline-editing[data-id="${id}"]`);
+    if (!tr) return;
+    const getVal = field => {
+      const input = tr.querySelector(`[data-field="${field}"]`);
+      return input ? input.value : '';
+    };
+
+    const item = {
+      id,
+      docType: getVal('docType'),
+      docNo: getVal('docNo'),
+      orderNo: getVal('orderNo'),
+      description: getVal('description'),
+      qty: parseFloat(getVal('qty')) || 1,
+      unit: getVal('unit'),
+      price: getVal('price') !== '' ? parseFloat(getVal('price')) : null,
+      poNo: getVal('poNo'),
+      deliveryDate: getVal('deliveryDate')
+    };
+
+    try {
+      const btnSave = tr.querySelector('.btn-row-save');
+      if (btnSave) btnSave.textContent = '⏳';
+      await callRpc('bulkSaveItems', [item]);
+      showToast(`บันทึกรายการ "${item.description || id}" เรียบร้อยแล้ว`, 'success');
+      state.selectedIds.delete(id);
+      if (state.selectedIds.size === 0) {
+        state.isInlineEditing = false;
+      }
       await loadItems();
     } catch (err) {
       showToast('บันทึกล้มเหลว: ' + err.message, 'error');
@@ -4655,6 +5007,12 @@ html, body {
       renderTable();
     });
 
+    if (el.stripSelectLabel) {
+      el.stripSelectLabel.addEventListener('click', () => {
+        el.checkSelectAll.click();
+      });
+    }
+
     // Table Clicks
     el.tbody.addEventListener('click', e => {
       const checkbox = e.target.closest('.row-select-checkbox');
@@ -4665,6 +5023,12 @@ html, body {
         const tr = checkbox.closest('tr');
         if (tr) tr.classList.toggle('row-selected', checkbox.checked);
         updateSelectionUI();
+        return;
+      }
+
+      const btnSaveRow = e.target.closest('.btn-row-save');
+      if (btnSaveRow) {
+        handleSaveSingleRow(btnSaveRow.dataset.id);
         return;
       }
 
@@ -4747,12 +5111,24 @@ html, body {
       });
     });
 
-    // Escape Key
+    // Keyboard shortcuts (Save & Escape)
     document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        if (state.isInlineEditing) {
+          e.preventDefault();
+          handleSaveTableEdit();
+        }
+      }
       if (e.key === 'Escape') {
         el.modalBulkArea.style.display = 'none';
         el.modalAdminDelete.style.display = 'none';
         el.modalItemDetail.style.display = 'none';
+        if (state.isInlineEditing) {
+          toggleInlineTableEdit();
+        } else if (state.selectedIds.size > 0) {
+          state.selectedIds.clear();
+          renderTable();
+        }
       }
     });
 

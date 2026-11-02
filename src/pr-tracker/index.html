@@ -221,47 +221,7 @@
                 <input type="checkbox" id="check-select-all" class="custom-checkbox">
                 <span class="checkbox-box"></span>
               </label>
-
-              <!-- Contextual Bulk Actions -->
-              <div class="bulk-actions-group" id="bulk-actions-group" style="display:none;">
-                <span class="selected-count-badge" id="selected-count-badge">เลือก 0 รายการ</span>
-                
-                <button type="button" id="btn-bulk-copy" class="btn btn-sm btn-primary" title="คัดลอกรายการที่เลือก เพื่อนำไปวางส่งอีเมลตามงาน (พื้นที่ | Order | รายละเอียด | จำนวน | ราคา | PR ถ้ามี)">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  <span>คัดลอกส่งอีเมล</span>
-                </button>
-
-                <button type="button" id="btn-bulk-inline-edit" class="btn btn-sm btn-secondary" title="แก้ไขแถวที่เลือกบนตารางโดยตรง">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                  <span>แก้ไขในตาราง</span>
-                </button>
-
-                <button type="button" id="btn-open-bulk-area-modal" class="btn btn-sm btn-secondary" title="ย้ายแผนก/ไลน์/เครื่องจักร">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  <span>เปลี่ยนพื้นที่</span>
-                </button>
-
-                <button type="button" id="btn-bulk-archive" class="btn btn-sm btn-secondary" title="ย้ายเข้ารายการจัดเก็บ">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
-                  <span id="btn-bulk-archive-text">จัดเก็บพร้อมกัน</span>
-                </button>
-
-                <button type="button" id="btn-open-bulk-delete-modal" class="btn btn-sm btn-danger" title="ลบถาวร (ต้องใส่รหัสแอดมิน)">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  <span>ลบถาวร</span>
-                </button>
-
-                <button type="button" id="btn-deselect-all" class="btn-link-sm" title="ยกเลิกการเลือก">ยกเลิก</button>
-              </div>
-
-              <!-- Table Edit Mode Banner -->
-              <div class="table-edit-banner" id="table-edit-banner" style="display:none;">
-                <span class="edit-mode-tag">✏️ โหมดแก้ไขข้อมูลในตาราง</span>
-                <div class="edit-banner-actions">
-                  <button type="button" id="btn-cancel-table-edit" class="btn btn-sm btn-secondary">ยกเลิก</button>
-                  <button type="button" id="btn-save-table-edit" class="btn btn-sm btn-primary">บันทึกทั้งหมด</button>
-                </div>
-              </div>
+              <span class="strip-select-label" id="strip-select-label" title="คลิกเพื่อเลือกทั้งหมด">เลือกทั้งหมด</span>
             </div>
 
             <div class="strip-right">
@@ -580,6 +540,77 @@
       </div>
     </div>
   </div>
+
+  <!-- Floating Bottom Selection & Edit Toolbar -->
+  <aside id="floating-bulk-dock" class="floating-bulk-dock" aria-label="แถบจัดการรายการที่เลือก" aria-live="polite">
+    <!-- 1. Selection Mode (แสดงแค่ไอคอนพร้อม Tooltip และตัวเลขนับจำนวน) -->
+    <div id="dock-selection-mode" class="dock-mode-wrap">
+      <div class="dock-badge-pill">
+        <span class="dock-dot"></span>
+        <span id="selected-count-badge" class="dock-count-text">เลือก 0 รายการ</span>
+      </div>
+
+      <div class="dock-divider" aria-hidden="true"></div>
+
+      <div class="dock-btn-group">
+        <button type="button" id="btn-bulk-copy" class="dock-icon-btn dock-btn-primary" title="คัดลอกส่งอีเมล (Ctrl+C)" aria-label="คัดลอกส่งอีเมล">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          <span class="dock-tooltip">คัดลอกส่งอีเมล</span>
+        </button>
+
+        <button type="button" id="btn-bulk-inline-edit" class="dock-icon-btn" title="แก้ไขในตาราง" aria-label="แก้ไขในตาราง">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          <span class="dock-tooltip">แก้ไขในตาราง</span>
+        </button>
+
+        <button type="button" id="btn-open-bulk-area-modal" class="dock-icon-btn" title="เปลี่ยนพื้นที่ (แผนก/ไลน์/เครื่องจักร)" aria-label="เปลี่ยนพื้นที่">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          <span class="dock-tooltip">เปลี่ยนพื้นที่</span>
+        </button>
+
+        <button type="button" id="btn-bulk-archive" class="dock-icon-btn" title="ย้ายเข้ารายการจัดเก็บ" aria-label="ย้ายเข้ารายการจัดเก็บ">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+          <span class="dock-tooltip" id="btn-bulk-archive-text">จัดเก็บพร้อมกัน</span>
+        </button>
+
+        <button type="button" id="btn-open-bulk-delete-modal" class="dock-icon-btn dock-btn-danger" title="ลบถาวร (ต้องใส่รหัสแอดมิน)" aria-label="ลบถาวร">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          <span class="dock-tooltip">ลบถาวร</span>
+        </button>
+      </div>
+
+      <div class="dock-divider" aria-hidden="true"></div>
+
+      <button type="button" id="btn-deselect-all" class="dock-icon-btn dock-btn-cancel" title="ยกเลิกการเลือก (Esc)" aria-label="ยกเลิกการเลือก">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <span class="dock-tooltip">ยกเลิก</span>
+      </button>
+    </div>
+
+    <!-- 2. Table Edit Mode (มีปุ่มบันทึกเมื่อกรอกเสร็จ) -->
+    <div id="dock-edit-mode" class="dock-mode-wrap" style="display: none;">
+      <div class="dock-badge-pill edit-pill">
+        <span class="dock-dot dock-dot-amber"></span>
+        <span id="dock-edit-status-text" class="dock-count-text">✏️ กำลังแก้ไขในตาราง</span>
+      </div>
+
+      <div class="dock-divider" aria-hidden="true"></div>
+
+      <div class="dock-btn-group">
+        <!-- ปุ่มบันทึกเมื่อกรอกเสร็จ -->
+        <button type="button" id="btn-save-table-edit" class="dock-action-pill-btn dock-btn-save" title="บันทึกการแก้ไขทั้งหมด (Ctrl+S)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>บันทึก</span>
+        </button>
+
+        <!-- ปุ่มยกเลิก -->
+        <button type="button" id="btn-cancel-table-edit" class="dock-action-pill-btn dock-btn-cancel-edit" title="ยกเลิกการแก้ไข (Esc)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <span>ยกเลิก</span>
+        </button>
+      </div>
+    </div>
+  </aside>
 
   <!-- Global Toast Notification -->
   <div id="toast" class="pr-toast" role="alert" aria-live="polite"></div>
