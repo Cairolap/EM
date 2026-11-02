@@ -329,7 +329,7 @@
       const isFiltered = Boolean(state.search || state.pipelineStep || state.docType || state.deptId || state.startDate);
       el.tbody.innerHTML = `
         <tr>
-          <td colspan="14">
+          <td colspan="13">
             <div class="empty-state-box">
               <div class="empty-icon">📦</div>
               <h3 class="empty-title">${isFiltered ? 'ไม่พบรายการที่ตรงกับเงื่อนไข' : 'ไม่มีรายการในกล่องนี้'}</h3>
@@ -350,19 +350,6 @@
     const html = state.items.map(item => {
       const isSelected = state.selectedIds.has(item.id);
       const isEditingThisRow = state.isInlineEditing && (state.selectedIds.size === 0 || isSelected);
-
-      let stageClass = 'pending-pr';
-      let stageText = 'รอออก PR';
-      if (item.pipelineStatus === 'ARCHIVED') {
-        stageClass = 'archived';
-        stageText = 'จัดเก็บแล้ว';
-      } else if (item.pipelineStatus === 'PENDING_PO') {
-        stageClass = 'pending-po';
-        stageText = 'รอออก PO';
-      } else if (item.pipelineStatus === 'PENDING_RECEIPT') {
-        stageClass = 'pending-receipt';
-        stageText = 'รอรับของ';
-      }
 
       const isStore = item.docType === 'STORE';
       const docBadgeClass = isStore ? 'type-store' : 'type-pr';
@@ -416,21 +403,11 @@
                 <span class="checkbox-box"></span>
               </label>
             </td>
-            <td class="td-stage"><span class="badge-stage ${stageClass}">${stageText}</span></td>
-            <td class="td-doc">
-              <div style="display:flex; gap:3px;">
-                <select class="table-input inline-edit-field" data-field="docType" style="width:60px;">
-                  <option value="PR" ${item.docType === 'PR' ? 'selected' : ''}>ซื้อ</option>
-                  <option value="STORE" ${item.docType === 'STORE' ? 'selected' : ''}>เบิก</option>
-                </select>
-                <input type="text" class="table-input inline-edit-field" data-field="docNo" value="${escapeHtml(item.docNo)}" placeholder="เลขที่เอกสาร">
-              </div>
-            </td>
-            <td class="td-date">${escapeHtml(item.createdDate)}</td>
-            <td class="td-area">${areaHtml}</td>
             <td class="td-order">
               <input type="text" class="table-input inline-edit-field font-mono" data-field="orderNo" value="${escapeHtml(item.orderNo)}" placeholder="Order PM">
             </td>
+            <td class="td-date">${escapeHtml(item.createdDate)}</td>
+            <td class="td-area">${areaHtml}</td>
             <td class="td-desc">
               <input type="text" class="table-input inline-edit-field" data-field="description" value="${escapeHtml(item.description)}" required>
             </td>
@@ -444,6 +421,15 @@
               <input type="number" step="any" class="table-input inline-edit-field font-mono text-right" data-field="price" value="${item.price !== null ? item.price : ''}" placeholder="0">
             </td>
             <td class="td-total text-right">${totalText}</td>
+            <td class="td-doc">
+              <div style="display:flex; gap:3px;">
+                <select class="table-input inline-edit-field" data-field="docType" style="width:60px;">
+                  <option value="PR" ${item.docType === 'PR' ? 'selected' : ''}>ซื้อ</option>
+                  <option value="STORE" ${item.docType === 'STORE' ? 'selected' : ''}>เบิก</option>
+                </select>
+                <input type="text" class="table-input inline-edit-field" data-field="docNo" value="${escapeHtml(item.docNo)}" placeholder="เลขที่เอกสาร">
+              </div>
+            </td>
             <td class="td-po">
               <input type="text" class="table-input inline-edit-field font-mono" data-field="poNo" value="${escapeHtml(item.poNo)}" placeholder="PO No.">
             </td>
@@ -466,18 +452,9 @@
               <span class="checkbox-box"></span>
             </label>
           </td>
-          <td class="td-stage">
-            <span class="badge-stage ${stageClass}">${stageText}</span>
-          </td>
-          <td class="td-doc">
-            <div class="doc-badge-wrap" title="${item.docNo ? escapeHtml(item.docNo) : 'ยังไม่ออกเลข'}">
-              <span class="badge-doc-type ${docBadgeClass}">${docLabel}</span>
-              <span class="doc-no-text">${cleanDocNo ? escapeHtml(cleanDocNo) : '<span class="text-muted" style="font-weight:normal; font-size:11px;">ยังไม่ออกเลข</span>'}</span>
-            </div>
-          </td>
+          <td class="td-order">${orderHtml}</td>
           <td class="td-date">${escapeHtml(item.createdDate)}</td>
           <td class="td-area">${areaHtml}</td>
-          <td class="td-order">${orderHtml}</td>
           <td class="td-desc">
             <div class="desc-text" data-action="detail" data-id="${escapeHtml(item.id)}" title="คลิกเพื่อดูรายละเอียด: ${escapeHtml(item.description)}">
               ${escapeHtml(item.description)}
@@ -488,6 +465,12 @@
           </td>
           <td class="td-price text-right font-mono">${priceText}</td>
           <td class="td-total text-right font-mono text-primary">${totalText}</td>
+          <td class="td-doc">
+            <div class="doc-badge-wrap" title="${item.docNo ? escapeHtml(item.docNo) : 'ยังไม่ออกเลข'}">
+              <span class="badge-doc-type ${docBadgeClass}">${docLabel}</span>
+              <span class="doc-no-text">${cleanDocNo ? escapeHtml(cleanDocNo) : '<span class="text-muted" style="font-weight:normal; font-size:11px;">ยังไม่ออกเลข</span>'}</span>
+            </div>
+          </td>
           <td class="td-po">
             ${item.poNo ? `<span class="font-mono" style="font-weight:600; color:#1e293b;">${escapeHtml(item.poNo)}</span>` : '<span class="text-muted">-</span>'}
           </td>
